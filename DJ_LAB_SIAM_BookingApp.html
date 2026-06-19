@@ -76,14 +76,15 @@
     flex: 1;
     background: none; border: none;
     color: #888888;
-    padding: 10px 4px 8px;
+    padding: 8px 2px 6px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 17px;
     display: flex; flex-direction: column;
-    align-items: center; gap: 3px;
+    align-items: center; gap: 2px;
     transition: color 0.2s;
+    min-width: 0;
   }
-  .nav-btn span { font-size: 10px; }
+  .nav-btn span { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .nav-btn.active { color: var(--accent); }
 
   /* Page */
@@ -586,13 +587,88 @@
   </div>
 </div>
 
+<div id="pageSettings" class="page">
+  <div class="card">
+    <div class="card-title">ราคาและค่าบริการ</div>
+    <div class="form-group">
+      <label class="form-label">ราคาต่อชั่วโมง (บาท)</label>
+      <input type="number" id="setPricePerHour" class="form-input" min="0" step="50" placeholder="800">
+    </div>
+    <div class="alert alert-gold" id="pricePreviewBox" style="margin-top:4px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">โปรแกรมสะสมแต้ม</div>
+    <div class="form-group">
+      <label class="form-label">ชั่วโมงสะสมเพื่อรับสิทธิ์ฟรี</label>
+      <input type="number" id="setThreshold" class="form-input" min="1" step="1" placeholder="10">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชั่วโมงฟรีที่ได้รับ</label>
+      <input type="number" id="setFreeHours" class="form-input" min="1" step="1" placeholder="1">
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">ข้อมูลสถานที่</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อห้อง / ร้าน</label>
+      <input type="text" id="setRoomName" class="form-input" placeholder="DJ LAB SIAM">
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+  <div style="margin-top:12px;"></div>
+  <div class="card" style="border-color:var(--accent);">
+    <div class="card-title" style="color:var(--accent);">โซนอันตราย</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">ล้างข้อมูลการจองและแต้มทั้งหมด ไม่สามารถกู้คืนได้</div>
+    <button class="btn btn-secondary" onclick="clearAllData()" style="border-color:var(--accent);color:var(--accent);">🗑 ล้างข้อมูลทั้งหมด</button>
+  </div>
+</div>
+
+<!-- Page: History -->
+<div id="pageHistory" class="page">
+  <div class="card">
+    <div class="card-title">ประวัติการจอง</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <select id="historyFilterStatus" class="form-input" style="flex:1;min-width:120px;" onchange="renderHistory()">
+        <option value="all">ทุกสถานะ</option>
+        <option value="done">เสร็จสิ้น</option>
+        <option value="upcoming">กำลังจะมา</option>
+      </select>
+      <select id="historyFilterMonth" class="form-input" style="flex:1;min-width:140px;" onchange="renderHistory()">
+        <option value="all">ทุกเดือน</option>
+      </select>
+    </div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- Page: Report -->
+<div id="pageReport" class="page">
+  <div class="card">
+    <div class="card-title">รายงานรายเดือน</div>
+    <select id="reportMonth" class="form-input" style="margin-bottom:12px;" onchange="renderReport()">
+    </select>
+    <div id="reportSummary"></div>
+  </div>
+  <div class="card" id="reportChartCard" style="display:none;">
+    <div class="card-title" style="margin-bottom:10px;">สรุปรายวัน</div>
+    <div id="reportDailyBreakdown"></div>
+  </div>
+  <div class="card" id="reportCustomerCard" style="display:none;">
+    <div class="card-title" style="margin-bottom:10px;">ลูกค้าเดือนนี้</div>
+    <div id="reportCustomerList"></div>
+  </div>
+</div>
+
 <!-- Bottom Nav -->
 <nav class="nav">
-  <button class="nav-btn active" onclick="showPage('Dashboard')">🏠<span>หน้าหลัก</span></button>
+  <button class="nav-btn active" onclick="showPage('Dashboard')">🏠<span>หลัก</span></button>
   <button class="nav-btn" onclick="showPage('Booking')">📝<span>จอง</span></button>
   <button class="nav-btn" onclick="showPage('Calendar')">📅<span>ปฏิทิน</span></button>
-  <button class="nav-btn" onclick="showPage('Timer')">⏱️<span>ตั้งเวลา</span></button>
+  <button class="nav-btn" onclick="showPage('Timer')">⏱️<span>เวลา</span></button>
   <button class="nav-btn" onclick="showPage('Points')">⭐<span>แต้ม</span></button>
+  <button class="nav-btn" onclick="showPage('History')">📋<span>ประวัติ</span></button>
+  <button class="nav-btn" onclick="showPage('Report')">📊<span>รายงาน</span></button>
+  <button class="nav-btn" onclick="showPage('Settings')">⚙️<span>ตั้งค่า</span></button>
 </nav>
 
 <!-- Booking Detail Modal -->
@@ -617,7 +693,7 @@
 // ============================
 let bookings = JSON.parse(localStorage.getItem('djlab_bookings') || '[]');
 let settings = JSON.parse(localStorage.getItem('djlab_settings') || JSON.stringify({
-  pricePerHour: 300,
+  pricePerHour: 800,
   pointsPerHour: 1,
   freeHourThreshold: 10,
   freeHoursReward: 1,
@@ -637,12 +713,15 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page' + name).classList.add('active');
-  const idx = ['Dashboard','Booking','Calendar','Timer','Points'].indexOf(name);
+  const idx = ['Dashboard','Booking','Calendar','Timer','Points','History','Report','Settings'].indexOf(name);
   document.querySelectorAll('.nav-btn')[idx].classList.add('active');
   currentPage = name;
   if (name === 'Dashboard') renderDashboard();
   if (name === 'Calendar') renderCalendar();
   if (name === 'Points') renderPoints();
+  if (name === 'History') renderHistory();
+  if (name === 'Report') renderReport();
+  if (name === 'Settings') renderSettings();
 }
 
 // ============================
@@ -1132,6 +1211,237 @@ function requestNotificationPermission() {
 document.getElementById('bookingModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+// ============================
+// HISTORY
+// ============================
+function renderHistory() {
+  // Build month options
+  const monthSel = document.getElementById('historyFilterMonth');
+  const months = [...new Set(bookings.map(b => b.date.slice(0,7)))].sort().reverse();
+  const curMonth = monthSel.value;
+  monthSel.innerHTML = '<option value="all">ทุกเดือน</option>' +
+    months.map(m => {
+      const [y, mo] = m.split('-');
+      const thaiMonths = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      return `<option value="${m}" ${m === curMonth ? 'selected' : ''}>${thaiMonths[parseInt(mo)]} ${parseInt(y)+543}</option>`;
+    }).join('');
+
+  const statusF = document.getElementById('historyFilterStatus').value;
+  const monthF = monthSel.value;
+
+  let filtered = [...bookings];
+  if (statusF !== 'all') filtered = filtered.filter(b => b.status === statusF);
+  if (monthF !== 'all') filtered = filtered.filter(b => b.date.startsWith(monthF));
+  filtered.sort((a,b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+
+  const el = document.getElementById('historyList');
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="alert alert-gold">ไม่มีข้อมูลการจองในช่วงที่เลือก</div>';
+    return;
+  }
+
+  const totalCost = filtered.filter(b => b.status === 'done').reduce((s,b) => s + b.cost, 0);
+  const totalHrs = filtered.filter(b => b.status === 'done').reduce((s,b) => s + b.hours, 0);
+
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div class="card" style="flex:1;padding:10px;margin:0;text-align:center;background:var(--surface2);">
+        <div style="font-size:11px;color:var(--text2);">รายได้รวม</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent);">${totalCost.toLocaleString()} ฿</div>
+      </div>
+      <div class="card" style="flex:1;padding:10px;margin:0;text-align:center;background:var(--surface2);">
+        <div style="font-size:11px;color:var(--text2);">ชั่วโมงรวม</div>
+        <div style="font-size:16px;font-weight:900;color:var(--green);">${totalHrs} ชม.</div>
+      </div>
+      <div class="card" style="flex:1;padding:10px;margin:0;text-align:center;background:var(--surface2);">
+        <div style="font-size:11px;color:var(--text2);">จำนวนการจอง</div>
+        <div style="font-size:16px;font-weight:900;">${filtered.length} ครั้ง</div>
+      </div>
+    </div>
+    ${filtered.map(b => `
+    <div onclick="showBookingDetail(${b.id})" style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;background:var(--surface);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-weight:700;font-size:15px;">${b.name}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${formatDate(b.date)} · ${b.time} · ${b.hours} ชม.</div>
+          <div style="font-size:12px;color:var(--text2);">${b.room}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:900;color:var(--accent);">${b.cost.toLocaleString()} ฿</div>
+          <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:${b.status==='done'?'#d4edda':'#fff3cd'};color:${b.status==='done'?'var(--green)':'var(--orange)'};">
+            ${b.status === 'done' ? 'เสร็จสิ้น' : 'กำลังจะมา'}
+          </span>
+        </div>
+      </div>
+    </div>`).join('')}`;
+}
+
+// ============================
+// REPORT
+// ============================
+function renderReport() {
+  const sel = document.getElementById('reportMonth');
+  const months = [...new Set(bookings.map(b => b.date.slice(0,7)))].sort().reverse();
+
+  if (months.length === 0) {
+    document.getElementById('reportSummary').innerHTML =
+      '<div class="alert alert-gold">ยังไม่มีข้อมูลการจอง</div>';
+    document.getElementById('reportChartCard').style.display = 'none';
+    document.getElementById('reportCustomerCard').style.display = 'none';
+    return;
+  }
+
+  const thaiMonths = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const curVal = sel.value || months[0];
+  sel.innerHTML = months.map(m => {
+    const [y, mo] = m.split('-');
+    return `<option value="${m}" ${m === curVal ? 'selected' : ''}>${thaiMonths[parseInt(mo)]} ${parseInt(y)+543}</option>`;
+  }).join('');
+
+  const selected = sel.value || months[0];
+  const inMonth = bookings.filter(b => b.date.startsWith(selected));
+  const doneInMonth = inMonth.filter(b => b.status === 'done');
+
+  const totalRevenue = doneInMonth.reduce((s,b) => s + b.cost, 0);
+  const totalHrs = doneInMonth.reduce((s,b) => s + b.hours, 0);
+  const totalSessions = doneInMonth.length;
+  const avgPerSession = totalSessions > 0 ? Math.round(totalRevenue / totalSessions) : 0;
+  const upcoming = inMonth.filter(b => b.status === 'upcoming').length;
+
+  document.getElementById('reportSummary').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--text2);">รายได้รวม (เสร็จสิ้น)</div>
+        <div style="font-size:20px;font-weight:900;color:var(--accent);">${totalRevenue.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);">บาท</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--text2);">ชั่วโมงรวม</div>
+        <div style="font-size:20px;font-weight:900;color:var(--green);">${totalHrs}</div>
+        <div style="font-size:11px;color:var(--text2);">ชั่วโมง</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--text2);">จำนวน Session</div>
+        <div style="font-size:20px;font-weight:900;">${totalSessions}</div>
+        <div style="font-size:11px;color:var(--text2);">ครั้ง</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--text2);">เฉลี่ย / ครั้ง</div>
+        <div style="font-size:20px;font-weight:900;color:var(--gold);">${avgPerSession.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);">บาท</div>
+      </div>
+    </div>
+    ${upcoming > 0 ? `<div class="alert alert-gold">มีการจองที่ยังไม่เสร็จสิ้น ${upcoming} รายการ (ไม่รวมในรายได้)</div>` : ''}`;
+
+  // Daily breakdown
+  const dayMap = {};
+  doneInMonth.forEach(b => {
+    if (!dayMap[b.date]) dayMap[b.date] = { hrs: 0, cost: 0, count: 0 };
+    dayMap[b.date].hrs += b.hours;
+    dayMap[b.date].cost += b.cost;
+    dayMap[b.date].count++;
+  });
+
+  const days = Object.keys(dayMap).sort();
+  const maxCost = days.length > 0 ? Math.max(...days.map(d => dayMap[d].cost)) : 1;
+
+  if (days.length > 0) {
+    document.getElementById('reportChartCard').style.display = '';
+    document.getElementById('reportDailyBreakdown').innerHTML = days.map(d => {
+      const w = Math.round((dayMap[d].cost / maxCost) * 100);
+      return `
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+            <span>${formatDate(d)}</span>
+            <span style="font-weight:700;">${dayMap[d].cost.toLocaleString()} ฿ · ${dayMap[d].hrs} ชม.</span>
+          </div>
+          <div style="background:var(--surface2);border-radius:4px;height:10px;">
+            <div style="background:var(--accent);height:10px;border-radius:4px;width:${w}%;transition:width .4s;"></div>
+          </div>
+        </div>`;
+    }).join('');
+  } else {
+    document.getElementById('reportChartCard').style.display = 'none';
+  }
+
+  // Customer ranking
+  const custMap = {};
+  doneInMonth.forEach(b => {
+    if (!custMap[b.name]) custMap[b.name] = { hrs: 0, cost: 0, sessions: 0, contact: b.contact };
+    custMap[b.name].hrs += b.hours;
+    custMap[b.name].cost += b.cost;
+    custMap[b.name].sessions++;
+  });
+
+  const customers = Object.entries(custMap).sort((a,b) => b[1].cost - a[1].cost);
+
+  if (customers.length > 0) {
+    document.getElementById('reportCustomerCard').style.display = '';
+    document.getElementById('reportCustomerList').innerHTML = customers.map(([name, d], i) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="background:${i===0?'var(--gold)':i===1?'var(--text2)':'var(--border)'};color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">
+            ${i+1}
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:14px;">${name}</div>
+            <div style="font-size:11px;color:var(--text2);">${d.sessions} ครั้ง · ${d.hrs} ชม.</div>
+          </div>
+        </div>
+        <div style="font-weight:900;color:var(--accent);">${d.cost.toLocaleString()} ฿</div>
+      </div>`).join('');
+  } else {
+    document.getElementById('reportCustomerCard').style.display = 'none';
+  }
+}
+
+// ============================
+// SETTINGS
+// ============================
+function renderSettings() {
+  document.getElementById('setPricePerHour').value = settings.pricePerHour;
+  document.getElementById('setThreshold').value = settings.freeHourThreshold;
+  document.getElementById('setFreeHours').value = settings.freeHoursReward;
+  document.getElementById('setRoomName').value = settings.roomName || 'DJ LAB SIAM';
+  updatePricePreview();
+}
+
+function updatePricePreview() {
+  const p = parseInt(document.getElementById('setPricePerHour').value) || 0;
+  document.getElementById('pricePreviewBox').innerHTML =
+    `1 ชม. = <strong>${p.toLocaleString()} บาท</strong> &nbsp;·&nbsp; 2 ชม. = <strong>${(p*2).toLocaleString()} บาท</strong> &nbsp;·&nbsp; 3 ชม. = <strong>${(p*3).toLocaleString()} บาท</strong>`;
+}
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'setPricePerHour') updatePricePreview();
+});
+
+function saveSettings() {
+  const price = parseInt(document.getElementById('setPricePerHour').value);
+  const threshold = parseInt(document.getElementById('setThreshold').value);
+  const freeHours = parseInt(document.getElementById('setFreeHours').value);
+  const roomName = document.getElementById('setRoomName').value.trim();
+
+  if (!price || price < 0) { showToast('⚠️ กรุณากรอกราคาที่ถูกต้อง'); return; }
+  if (!threshold || threshold < 1) { showToast('⚠️ กรุณากรอกชั่วโมงสะสมที่ถูกต้อง'); return; }
+
+  settings.pricePerHour = price;
+  settings.freeHourThreshold = threshold;
+  settings.freeHoursReward = freeHours || 1;
+  settings.roomName = roomName || 'DJ LAB SIAM';
+  saveData();
+  showToast('✅ บันทึกการตั้งค่าแล้ว');
+  updateCostPreview();
+}
+
+function clearAllData() {
+  if (!confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?\n(การจอง, แต้ม ทั้งหมดจะถูกลบ)')) return;
+  bookings = [];
+  saveData();
+  showToast('🗑 ล้างข้อมูลแล้ว');
+  renderDashboard();
+}
 
 // ============================
 // PWA — SERVICE WORKER
