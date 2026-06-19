@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#e63946">
+<meta name="apple-mobile-web-app-title" content="DJ LAB จอง">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="DJ LAB จอง">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>DJ LAB SIAM — ระบบจองห้องซ้อม</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --surface2: #16213e;
+    --accent: #e63946;
+    --accent2: #ff6b6b;
+    --gold: #ffd60a;
+    --text: #f1faee;
+    --text2: #a8dadc;
+    --border: #2a2a4a;
+    --green: #2ecc71;
+    --orange: #f39c12;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--surface) 0%, #0d1117 100%);
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+  .header-right { color: var(--text2); font-size: 13px; }
+
+  /* Nav */
+  .nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 200;
+  }
+  .nav-btn {
+    flex: 1;
+    background: none; border: none;
+    color: var(--text2);
+    padding: 10px 4px 8px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    transition: color 0.2s;
+  }
+  .nav-btn span { font-size: 10px; }
+  .nav-btn.active { color: var(--accent); }
+
+  /* Page */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+
+  /* Form */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input option { background: var(--bg); }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  /* Buttons */
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-green { background: var(--green); color: #0a1a0a; }
+  .btn-sm {
+    display: inline-block; width: auto;
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  /* Timer */
+  .timer-display {
+    text-align: center;
+    padding: 30px 0;
+  }
+  .timer-ring {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto 20px;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+  .timer-ring .ring-progress { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-time {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 38px; font-weight: 900;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+  .timer-label { font-size: 13px; color: var(--text2); margin-top: -8px; }
+  .timer-controls { display: flex; gap: 10px; }
+
+  /* Booking List */
+  .booking-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .booking-item:hover { border-color: var(--accent); }
+  .booking-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .booking-name { font-weight: 700; font-size: 15px; }
+  .booking-date { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-upcoming { background: rgba(230,57,70,0.2); color: var(--accent); }
+  .badge-active { background: rgba(46,204,113,0.2); color: var(--green); }
+  .badge-done { background: rgba(168,218,220,0.15); color: var(--text2); }
+  .booking-details { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+  .booking-detail { font-size: 12px; color: var(--text2); }
+  .booking-detail strong { color: var(--text); }
+
+  /* Calendar */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .cal-day-header { text-align: center; font-size: 11px; color: var(--text2); padding: 4px 0; }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .cal-day:hover { background: var(--border); }
+  .cal-day.today { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .cal-day.has-booking::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-day.other-month { color: var(--border); }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .cal-nav-btn { background: none; border: none; color: var(--text2); font-size: 20px; cursor: pointer; padding: 4px 10px; }
+
+  /* Points */
+  .points-hero {
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #1a1a2e, #0d1117);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .points-value { font-size: 56px; font-weight: 900; color: var(--gold); }
+  .points-unit { font-size: 14px; color: var(--text2); margin-top: -8px; }
+  .progress-bar {
+    background: var(--border);
+    border-radius: 10px;
+    height: 10px;
+    margin: 12px 0 6px;
+    overflow: hidden;
+  }
+  .progress-fill { height: 100%; background: var(--gold); border-radius: 10px; transition: width 0.5s; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+
+  /* Settings */
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 14px; }
+  .setting-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .setting-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 110px;
+    text-align: right;
+    outline: none;
+  }
+  .setting-input:focus { border-color: var(--accent); }
+
+  /* Dashboard */
+  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .stat-card {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-value { font-size: 26px; font-weight: 900; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 24px; cursor: pointer; margin-top: -4px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Alert box */
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+  }
+  .alert-red { background: rgba(230,57,70,0.1); border-color: var(--accent); color: var(--accent2); }
+  .alert-gold { background: rgba(255,214,10,0.1); border-color: var(--gold); color: var(--gold); }
+  .alert-green { background: rgba(46,204,113,0.1); border-color: var(--green); color: var(--green); }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text2);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    background: rgba(168,218,220,0.1);
+    color: var(--text2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    margin-right: 4px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 380px) {
+    .timer-time { font-size: 30px; }
+    .timer-ring { width: 170px; height: 170px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <div class="logo-text">ระบบจองห้องซ้อม</div>
+  </div>
+  <div class="header-right" id="headerDate"></div>
+</div>
+
+<!-- Pages -->
+<div id="pageDashboard" class="page active">
+  <div class="card">
+    <div class="card-title">ภาพรวมวันนี้</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statToday">0</div>
+        <div class="stat-label">การจองวันนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">จองทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statRevenue">0</div>
+        <div class="stat-label">รายได้ (บาท)</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">การจองถัดไป</div>
+    <div id="nextBookingContainer"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">การจองวันนี้</div>
+    <div id="todayBookingsList"></div>
+  </div>
+</div>
+
+<div id="pageBooking" class="page">
+  <div class="card">
+    <div class="card-title">จองห้องซ้อม</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อผู้จอง *</label>
+      <input type="text" id="bookName" class="form-input" placeholder="ชื่อ - นามสกุล">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ข้อมูลติดต่อ *</label>
+      <input type="text" id="bookContact" class="form-input" placeholder="เบอร์โทร / Line ID">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">วันที่ *</label>
+        <input type="date" id="bookDate" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เวลาเริ่ม *</label>
+        <input type="time" id="bookTime" class="form-input" value="10:00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">จำนวนชั่วโมง *</label>
+        <select id="bookHours" class="form-input">
+          <option value="1">1 ชั่วโมง</option>
+          <option value="2">2 ชั่วโมง</option>
+          <option value="3">3 ชั่วโมง</option>
+          <option value="4">4 ชั่วโมง</option>
+          <option value="5">5 ชั่วโมง</option>
+          <option value="6">6 ชั่วโมง</option>
+          <option value="8">8 ชั่วโมง</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ห้อง / Setup</label>
+        <select id="bookRoom" class="form-input">
+          <option value="Standard (CDJ-3000)">Standard (CDJ-3000)</option>
+          <option value="Turntable Setup">Turntable Setup</option>
+          <option value="Full Setup (CDJ+TT)">Full Setup (CDJ+TT)</option>
+          <option value="Controller Setup">Controller Setup</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">อุปกรณ์เพิ่มเติม</label>
+      <input type="text" id="bookEquip" class="form-input" placeholder="เช่น Headphone, Laptop Stand...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <input type="text" id="bookNote" class="form-input" placeholder="รายละเอียดเพิ่มเติม">
+    </div>
+    <div class="alert alert-gold" id="costPreview">
+      💰 ค่าใช้จ่ายโดยประมาณ: <strong id="costAmount">—</strong>
+    </div>
+    <button class="btn btn-primary" onclick="submitBooking()">ยืนยันการจอง</button>
+  </div>
+</div>
+
+<div id="pageCalendar" class="page">
+  <div class="card">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+      <div style="font-weight:700;font-size:15px;" id="calTitle"></div>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="calendar-grid" id="calHeader">
+      <div class="cal-day-header">อา</div>
+      <div class="cal-day-header">จ</div>
+      <div class="cal-day-header">อ</div>
+      <div class="cal-day-header">พ</div>
+      <div class="cal-day-header">พฤ</div>
+      <div class="cal-day-header">ศ</div>
+      <div class="cal-day-header">ส</div>
+    </div>
+    <div class="calendar-grid" id="calGrid"></div>
+  </div>
+  <div id="calDayBookings"></div>
+</div>
+
+<div id="pageTimer" class="page">
+  <div class="card">
+    <div class="card-title">Countdown Timer</div>
+    <div class="timer-display">
+      <div class="timer-ring">
+        <svg viewBox="0 0 200 200" width="200" height="200">
+          <circle class="ring-bg" cx="100" cy="100" r="88"/>
+          <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="88"
+            stroke-dasharray="553" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-time" id="timerDisplay">00:00</div>
+      </div>
+      <div class="timer-label" id="timerLabel">ตั้งเวลาเพื่อเริ่ม</div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px;">
+      <div class="form-group">
+        <label class="form-label">ชั่วโมง</label>
+        <select id="timerHours" class="form-input">
+          <option value="0">0</option>
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">นาที</label>
+        <select id="timerMins" class="form-input">
+          <option value="0" selected>0</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+        </select>
+      </div>
+    </div>
+    <div class="timer-controls">
+      <button class="btn btn-primary" id="timerStartBtn" onclick="timerAction()">▶ เริ่ม</button>
+      <button class="btn btn-secondary" style="max-width:100px;" onclick="timerReset()">↺ Reset</button>
+    </div>
+    <hr>
+    <div style="margin-top:4px;">
+      <div class="card-title">Quick Preset</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="setTimer(0,30)">30 นาที</button>
+        <button class="btn btn-secondary btn-sm" onclick="setTimer(1,0)">1 ชม.</button>
+        <button class="btn btn-secondary btn-sm" onclick="setTimer(2,0)">2 ชม.</button>
+        <button class="btn btn-secondary btn-sm" onclick="setTimer(3,0)">3 ชม.</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pagePoints" class="page">
+  <div class="card-title" style="padding:0 0 8px;font-size:13px;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;">โปรแกรมสะสมแต้ม</div>
+  <div class="points-hero">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">แต้มสะสมรวม</div>
+    <div class="points-value" id="totalPoints">0</div>
+    <div class="points-unit">ชั่วโมง</div>
+    <div class="progress-bar" style="margin-top:20px;">
+      <div class="progress-fill" id="pointsProgress" style="width:0%"></div>
+    </div>
+    <div class="progress-label">
+      <span>0</span>
+      <span id="pointsTarget">เป้าหมาย: 10 ชม. = ซ้อมฟรี 1 ชม.</span>
+      <span id="pointsMax">10</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">สิทธิ์ที่ได้รับ</div>
+    <div id="rewardsContainer"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">ค้นหาแต้มลูกค้า</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="searchCustomer" class="form-input" placeholder="ชื่อ หรือ เบอร์โทร">
+      <button class="btn btn-primary btn-sm" onclick="searchCustomerPoints()">ค้นหา</button>
+    </div>
+    <div id="customerPointsResult" style="margin-top:12px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">ประวัติแต้ม (ทั้งหมด)</div>
+    <div id="pointsHistory"></div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('Dashboard')">🏠<span>หน้าหลัก</span></button>
+  <button class="nav-btn" onclick="showPage('Booking')">📝<span>จอง</span></button>
+  <button class="nav-btn" onclick="showPage('Calendar')">📅<span>ปฏิทิน</span></button>
+  <button class="nav-btn" onclick="showPage('Timer')">⏱️<span>ตั้งเวลา</span></button>
+  <button class="nav-btn" onclick="showPage('Points')">⭐<span>แต้ม</span></button>
+</nav>
+
+<!-- Booking Detail Modal -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title" id="modalTitle">รายละเอียดการจอง</div>
+    <div id="modalContent"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-green" id="modalTimerBtn" onclick="startTimerFromBooking()">▶ เริ่ม Timer</button>
+      <button class="btn btn-secondary" style="max-width:100px;" onclick="deleteBookingModal()">🗑 ลบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================
+// DATA
+// ============================
+let bookings = JSON.parse(localStorage.getItem('djlab_bookings') || '[]');
+let settings = JSON.parse(localStorage.getItem('djlab_settings') || JSON.stringify({
+  pricePerHour: 300,
+  pointsPerHour: 1,
+  freeHourThreshold: 10,
+  freeHoursReward: 1,
+  roomName: 'DJ LAB SIAM'
+}));
+
+function saveData() {
+  localStorage.setItem('djlab_bookings', JSON.stringify(bookings));
+  localStorage.setItem('djlab_settings', JSON.stringify(settings));
+}
+
+// ============================
+// NAVIGATION
+// ============================
+let currentPage = 'Dashboard';
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page' + name).classList.add('active');
+  const idx = ['Dashboard','Booking','Calendar','Timer','Points'].indexOf(name);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  currentPage = name;
+  if (name === 'Dashboard') renderDashboard();
+  if (name === 'Calendar') renderCalendar();
+  if (name === 'Points') renderPoints();
+}
+
+// ============================
+// HEADER DATE
+// ============================
+function updateHeaderDate() {
+  const now = new Date();
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  document.getElementById('headerDate').textContent =
+    days[now.getDay()] + ' ' + now.getDate() + '/' + (now.getMonth()+1) + '/' + (now.getFullYear()+543);
+}
+updateHeaderDate();
+setInterval(updateHeaderDate, 60000);
+
+// ============================
+// BOOKING FORM
+// ============================
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('bookDate').value = today;
+document.getElementById('bookDate').min = today;
+
+document.getElementById('bookHours').addEventListener('change', updateCostPreview);
+updateCostPreview();
+
+function updateCostPreview() {
+  const hrs = parseInt(document.getElementById('bookHours').value);
+  const cost = hrs * settings.pricePerHour;
+  document.getElementById('costAmount').textContent = cost.toLocaleString() + ' บาท (' + hrs + ' ชม.)';
+}
+
+function submitBooking() {
+  const name = document.getElementById('bookName').value.trim();
+  const contact = document.getElementById('bookContact').value.trim();
+  const date = document.getElementById('bookDate').value;
+  const time = document.getElementById('bookTime').value;
+  const hours = parseInt(document.getElementById('bookHours').value);
+  const room = document.getElementById('bookRoom').value;
+  const equip = document.getElementById('bookEquip').value.trim();
+  const note = document.getElementById('bookNote').value.trim();
+
+  if (!name || !contact || !date || !time) {
+    showToast('⚠️ กรุณากรอกข้อมูลที่จำเป็นให้ครบ');
+    return;
+  }
+
+  const cost = hours * settings.pricePerHour;
+  const pts = hours * settings.pointsPerHour;
+
+  const booking = {
+    id: Date.now(),
+    name, contact, date, time, hours, room, equip, note,
+    cost, pts, status: 'upcoming',
+    createdAt: new Date().toISOString()
+  };
+
+  bookings.push(booking);
+  saveData();
+
+  // Reset form
+  document.getElementById('bookName').value = '';
+  document.getElementById('bookContact').value = '';
+  document.getElementById('bookDate').value = today;
+  document.getElementById('bookTime').value = '10:00';
+  document.getElementById('bookHours').value = '1';
+  document.getElementById('bookEquip').value = '';
+  document.getElementById('bookNote').value = '';
+  updateCostPreview();
+
+  showToast('✅ จองสำเร็จ! ' + name + ' — ' + formatDate(date) + ' ' + time);
+  showPage('Dashboard');
+  requestNotificationPermission();
+}
+
+// ============================
+// DASHBOARD
+// ============================
+function renderDashboard() {
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const todayBookings = bookings.filter(b => b.date === todayStr);
+  const totalRevenue = bookings.filter(b => b.status === 'done').reduce((s,b) => s + b.cost, 0);
+
+  document.getElementById('statToday').textContent = todayBookings.length;
+  document.getElementById('statTotal').textContent = bookings.length;
+  document.getElementById('statRevenue').textContent = (totalRevenue/1000).toFixed(1) + 'k';
+
+  // Next booking
+  const upcoming = bookings
+    .filter(b => b.status !== 'done' && (b.date > todayStr || (b.date === todayStr)))
+    .sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+  const nextEl = document.getElementById('nextBookingContainer');
+  if (upcoming.length > 0) {
+    const b = upcoming[0];
+    nextEl.innerHTML = `
+      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+        <div class="booking-header">
+          <div>
+            <div class="booking-name">${b.name}</div>
+            <div class="booking-date">${formatDate(b.date)} · ${b.time} · ${b.hours} ชม.</div>
+          </div>
+          <span class="badge badge-upcoming">รอ</span>
+        </div>
+        <div class="booking-details">
+          <div class="booking-detail"><strong>${b.room}</strong></div>
+          <div class="booking-detail">💰 <strong>${b.cost.toLocaleString()} บาท</strong></div>
+        </div>
+      </div>`;
+  } else {
+    nextEl.innerHTML = '<div class="empty"><div class="empty-text">ไม่มีการจองที่รอดำเนินการ</div></div>';
+  }
+
+  // Today's bookings
+  const todayEl = document.getElementById('todayBookingsList');
+  if (todayBookings.length === 0) {
+    todayEl.innerHTML = '<div class="empty"><div class="empty-text">ไม่มีการจองวันนี้</div></div>';
+  } else {
+    todayEl.innerHTML = todayBookings.map(b => `
+      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+        <div class="booking-header">
+          <div>
+            <div class="booking-name">${b.name}</div>
+            <div class="booking-date">${b.time} — ${addHours(b.time, b.hours)} · ${b.room}</div>
+          </div>
+          <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ============================
+// CALENDAR
+// ============================
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+const thMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = thMonths[calMonth] + ' ' + (calYear + 543);
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) {
+    const prevDay = new Date(calYear, calMonth, -firstDay + i + 1);
+    html += `<div class="cal-day other-month">${prevDay.getDate()}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasBook = bookings.some(b => b.date === dateStr);
+    const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${hasBook ? 'has-booking' : ''}"
+      onclick="showDayBookings('${dateStr}')">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+  document.getElementById('calDayBookings').innerHTML = '';
+}
+
+function showDayBookings(dateStr) {
+  const day = bookings.filter(b => b.date === dateStr).sort((a,b) => a.time.localeCompare(b.time));
+  const el = document.getElementById('calDayBookings');
+  if (day.length === 0) {
+    el.innerHTML = `<div class="card"><div style="color:var(--text2);font-size:14px;text-align:center;padding:16px 0;">ไม่มีการจอง ${formatDate(dateStr)}</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card-title" style="padding:0 0 8px;font-size:13px;color:var(--text2);">การจอง ${formatDate(dateStr)}</div>` +
+    day.map(b => `
+      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+        <div class="booking-header">
+          <div>
+            <div class="booking-name">${b.name}</div>
+            <div class="booking-date">${b.time} · ${b.hours} ชม. · ${b.room}</div>
+          </div>
+          <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
+        </div>
+        <div class="booking-details">
+          <div class="booking-detail">📞 ${b.contact}</div>
+          <div class="booking-detail">💰 ${b.cost.toLocaleString()} บาท</div>
+        </div>
+      </div>`).join('');
+}
+
+// ============================
+// TIMER
+// ============================
+let timerInterval = null;
+let timerRemaining = 0;
+let timerTotal = 0;
+let timerRunning = false;
+let currentModalBookingId = null;
+
+function setTimer(h, m) {
+  document.getElementById('timerHours').value = h;
+  document.getElementById('timerMins').value = m;
+  timerReset();
+  updateTimerDisplay();
+}
+
+function timerAction() {
+  if (!timerRunning) {
+    const h = parseInt(document.getElementById('timerHours').value);
+    const m = parseInt(document.getElementById('timerMins').value);
+    if (h === 0 && m === 0) { showToast('⚠️ กรุณาตั้งเวลา'); return; }
+    if (timerRemaining === 0) {
+      timerTotal = (h * 3600) + (m * 60);
+      timerRemaining = timerTotal;
+    }
+    startTimer();
+  } else {
+    pauseTimer();
+  }
+}
+
+function startTimer() {
+  timerRunning = true;
+  document.getElementById('timerStartBtn').textContent = '⏸ หยุดชั่วคราว';
+  document.getElementById('timerLabel').textContent = 'กำลังนับถอยหลัง...';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerRemaining = 0;
+      document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
+      document.getElementById('timerLabel').textContent = '⏰ หมดเวลาแล้ว!';
+      document.getElementById('ringProgress').style.stroke = 'var(--gold)';
+      triggerTimerAlert();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timerStartBtn').textContent = '▶ ต่อ';
+  document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
+}
+
+function timerReset() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = 0;
+  timerTotal = 0;
+  document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
+  document.getElementById('timerLabel').textContent = 'ตั้งเวลาเพื่อเริ่ม';
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('ringProgress').style.strokeDashoffset = '0';
+  document.getElementById('ringProgress').style.stroke = 'var(--accent)';
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(timerRemaining / 3600);
+  const m = Math.floor((timerRemaining % 3600) / 60);
+  const s = timerRemaining % 60;
+  if (h > 0) {
+    document.getElementById('timerDisplay').textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else {
+    document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  const circumference = 553;
+  const progress = timerTotal > 0 ? timerRemaining / timerTotal : 1;
+  document.getElementById('ringProgress').style.strokeDashoffset = circumference * (1 - progress);
+  // Warning color
+  if (progress < 0.1) document.getElementById('ringProgress').style.stroke = 'var(--gold)';
+  else if (progress < 0.25) document.getElementById('ringProgress').style.stroke = 'var(--orange)';
+  else document.getElementById('ringProgress').style.stroke = 'var(--accent)';
+}
+
+function triggerTimerAlert() {
+  if (Notification.permission === 'granted') {
+    new Notification('⏰ DJ LAB SIAM — หมดเวลาซ้อม!', {
+      body: 'เวลาซ้อมของท่านสิ้นสุดแล้ว กรุณาตรวจสอบห้องซ้อม',
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23e63946" width="100" height="100" rx="20"/><text y=".9em" font-size="90" x="5">🎧</text></svg>'
+    });
+  }
+  // Play audio alert
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = i % 2 === 0 ? 880 : 660;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.4 + 0.3);
+      osc.start(ctx.currentTime + i * 0.4);
+      osc.stop(ctx.currentTime + i * 0.4 + 0.4);
+    }
+  } catch(e) {}
+  showToast('⏰ หมดเวลาซ้อมแล้ว!');
+}
+
+function startTimerFromBooking() {
+  const b = bookings.find(b => b.id === currentModalBookingId);
+  if (!b) return;
+  closeModal();
+  setTimer(b.hours, 0);
+  showPage('Timer');
+  setTimeout(() => timerAction(), 300);
+  // Mark as active
+  b.status = 'active';
+  saveData();
+}
+
+// ============================
+// POINTS
+// ============================
+function getTotalHours() {
+  return bookings.filter(b => b.status === 'done').reduce((s, b) => s + b.hours, 0);
+}
+
+function renderPoints() {
+  const totalHrs = getTotalHours();
+  const threshold = settings.freeHourThreshold;
+  const freeEarned = Math.floor(totalHrs / threshold);
+  const progress = (totalHrs % threshold) / threshold * 100;
+
+  document.getElementById('totalPoints').textContent = totalHrs;
+  document.getElementById('pointsProgress').style.width = Math.min(progress, 100) + '%';
+  document.getElementById('pointsMax').textContent = threshold;
+  document.getElementById('pointsTarget').textContent = `${threshold} ชม. = ซ้อมฟรี ${settings.freeHoursReward} ชม.`;
+
+  // Rewards
+  const rewardsEl = document.getElementById('rewardsContainer');
+  if (freeEarned === 0) {
+    const remaining = threshold - (totalHrs % threshold);
+    rewardsEl.innerHTML = `<div style="color:var(--text2);font-size:13px;">ต้องการอีก <strong style="color:var(--gold)">${remaining} ชม.</strong> เพื่อรับสิทธิ์ซ้อมฟรี</div>`;
+  } else {
+    rewardsEl.innerHTML = `
+      <div class="alert alert-gold">🎉 ท่านได้รับสิทธิ์ซ้อมฟรี <strong>${freeEarned} ครั้ง</strong> (${freeEarned * settings.freeHoursReward} ชม.)</div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="showToast('กรุณาติดต่อเจ้าหน้าที่เพื่อใช้สิทธิ์')">ใช้สิทธิ์</button>`;
+  }
+
+  // History
+  const histEl = document.getElementById('pointsHistory');
+  const done = bookings.filter(b => b.status === 'done').sort((a,b) => b.date.localeCompare(a.date));
+  if (done.length === 0) {
+    histEl.innerHTML = '<div style="color:var(--text2);font-size:13px;">ยังไม่มีประวัติการใช้งาน</div>';
+  } else {
+    histEl.innerHTML = done.map(b => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${b.name}</div>
+          <div style="font-size:12px;color:var(--text2);">${formatDate(b.date)} · ${b.hours} ชม.</div>
+        </div>
+        <div style="color:var(--gold);font-weight:700;">+${b.hrs || b.hours} ชม.</div>
+      </div>`).join('');
+  }
+}
+
+function searchCustomerPoints() {
+  const query = document.getElementById('searchCustomer').value.trim().toLowerCase();
+  if (!query) { showToast('กรุณาพิมพ์ชื่อหรือเบอร์โทร'); return; }
+  const found = bookings.filter(b =>
+    b.name.toLowerCase().includes(query) || b.contact.toLowerCase().includes(query)
+  );
+  const el = document.getElementById('customerPointsResult');
+  if (found.length === 0) {
+    el.innerHTML = '<div class="alert alert-red">ไม่พบข้อมูลลูกค้า</div>';
+    return;
+  }
+  const name = found[0].name;
+  const totalHrs = found.filter(b => b.status === 'done').reduce((s,b) => s + b.hours, 0);
+  const freeEarned = Math.floor(totalHrs / settings.freeHourThreshold);
+  el.innerHTML = `
+    <div class="alert alert-green">
+      <strong>${name}</strong><br>
+      ชั่วโมงสะสม: <strong>${totalHrs} ชม.</strong><br>
+      สิทธิ์ซ้อมฟรี: <strong>${freeEarned} ครั้ง</strong>
+    </div>`;
+}
+
+// ============================
+// MODAL
+// ============================
+function showBookingDetail(id) {
+  const b = bookings.find(b => b.id === id);
+  if (!b) return;
+  currentModalBookingId = id;
+  document.getElementById('modalTitle').textContent = 'รายละเอียดการจอง';
+  document.getElementById('modalContent').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div style="font-size:19px;font-weight:800;">${b.name}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:2px;">📞 ${b.contact}</div>
+    </div>
+    <div class="booking-details" style="flex-direction:column;gap:8px;">
+      <div><span class="tag">📅 วันที่</span> <strong>${formatDate(b.date)}</strong></div>
+      <div><span class="tag">⏰ เวลา</span> <strong>${b.time} — ${addHours(b.time, b.hours)}</strong></div>
+      <div><span class="tag">⏱ ระยะเวลา</span> <strong>${b.hours} ชั่วโมง</strong></div>
+      <div><span class="tag">🎛 Setup</span> <strong>${b.room}</strong></div>
+      ${b.equip ? `<div><span class="tag">🎧 อุปกรณ์</span> <strong>${b.equip}</strong></div>` : ''}
+      ${b.note ? `<div><span class="tag">📝 หมายเหตุ</span> <strong>${b.note}</strong></div>` : ''}
+    </div>
+    <hr>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:12px;color:var(--text2);">ค่าใช้จ่าย</div>
+        <div style="font-size:22px;font-weight:900;color:var(--accent);">${b.cost.toLocaleString()} บาท</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:var(--text2);">แต้มที่จะได้</div>
+        <div style="font-size:22px;font-weight:900;color:var(--gold);">+${b.hours} ชม.</div>
+      </div>
+    </div>
+    <hr>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-secondary btn-sm" onclick="markBookingDone(${id})">✅ เสร็จสิ้น</button>
+      <button class="btn btn-secondary btn-sm" onclick="markBookingUpcoming(${id})">🔄 รีเซ็ต</button>
+    </div>`;
+  document.getElementById('bookingModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('bookingModal').classList.remove('open');
+  currentModalBookingId = null;
+}
+
+function deleteBookingModal() {
+  if (!currentModalBookingId) return;
+  if (!confirm('ต้องการลบการจองนี้หรือไม่?')) return;
+  bookings = bookings.filter(b => b.id !== currentModalBookingId);
+  saveData();
+  closeModal();
+  showToast('ลบการจองแล้ว');
+  renderDashboard();
+  renderCalendar();
+}
+
+function markBookingDone(id) {
+  const b = bookings.find(b => b.id === id);
+  if (b) { b.status = 'done'; saveData(); }
+  closeModal();
+  showToast('✅ บันทึกเสร็จสิ้นแล้ว');
+  renderDashboard();
+}
+
+function markBookingUpcoming(id) {
+  const b = bookings.find(b => b.id === id);
+  if (b) { b.status = 'upcoming'; saveData(); }
+  closeModal();
+  showToast('🔄 รีเซ็ตสถานะแล้ว');
+}
+
+// ============================
+// UTILS
+// ============================
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+
+function addHours(timeStr, hours) {
+  const [h, m] = timeStr.split(':').map(Number);
+  const end = new Date(2000, 0, 1, h + hours, m);
+  return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+// ============================
+// CLOSE MODAL ON OVERLAY CLICK
+// ============================
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ============================
+// PWA — SERVICE WORKER
+// ============================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[SW] Registered:', reg.scope))
+      .catch(err => console.log('[SW] Error:', err));
+  });
+}
+
+// Generate PNG icons via canvas (for PWA install requirement)
+function generateIcons() {
+  [192, 512].forEach(size => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const s = size / 512;
+
+    // Background
+    ctx.fillStyle = '#0f0f1a';
+    const r = 80 * s;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, size, size, [r]);
+    ctx.fill();
+
+    // Vinyl record
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath(); ctx.arc(256*s, 270*s, 150*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0d0d1a';
+    ctx.beginPath(); ctx.arc(256*s, 270*s, 110*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath(); ctx.arc(256*s, 270*s, 70*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#e63946';
+    ctx.beginPath(); ctx.arc(256*s, 270*s, 30*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0f0f1a';
+    ctx.beginPath(); ctx.arc(256*s, 270*s, 12*s, 0, Math.PI*2); ctx.fill();
+
+    // Groove lines
+    [50,90,130].forEach(gr => {
+      ctx.strokeStyle = '#2a2a4a'; ctx.lineWidth = 2*s;
+      ctx.beginPath(); ctx.arc(256*s, 270*s, gr*s, 0, Math.PI*2); ctx.stroke();
+    });
+
+    // Red box
+    ctx.fillStyle = '#e63946';
+    ctx.beginPath(); ctx.roundRect(60*s, 60*s, 200*s, 70*s, [12*s]); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.font = `900 ${32*s}px "Arial Black", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('DJ LAB', 160*s, 107*s);
+
+    // SIAM
+    ctx.fillStyle = '#f1faee';
+    ctx.font = `700 ${24*s}px Arial, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('SIAM', 290*s, 110*s);
+
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      // Auto-fetch and cache into SW
+      fetch(link.href); // warm up
+    }, 'image/png');
+  });
+}
+generateIcons();
+
+// ============================
+// INIT
+// ============================
+renderDashboard();
+renderCalendar();
+requestNotificationPermission();
+
+// Demo data if empty
+if (bookings.length === 0) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  bookings = [
+    {
+      id: 1,
+      name: 'ศักดิ์ชัย ดนตรีไทย',
+      contact: '081-234-5678',
+      date: todayStr,
+      time: '14:00',
+      hours: 2,
+      room: 'Standard (CDJ-3000)',
+      equip: '',
+      note: '',
+      cost: 600,
+      pts: 2,
+      status: 'upcoming',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: 'ปริญญา ฟังก์ซาวด์',
+      contact: '089-876-5432',
+      date: todayStr,
+      time: '17:00',
+      hours: 3,
+      room: 'Turntable Setup',
+      equip: 'Headphone',
+      note: '',
+      cost: 900,
+      pts: 3,
+      status: 'upcoming',
+      createdAt: new Date().toISOString()
+    }
+  ];
+  saveData();
+  renderDashboard();
+  renderCalendar();
+}
+</script>
+</body>
+</html>
