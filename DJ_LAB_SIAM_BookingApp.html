@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#e63946">
+<meta name="theme-color" content="#c8232c">
 <meta name="apple-mobile-web-app-title" content="DJ LAB จอง">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="DJ LAB จอง">
@@ -14,17 +14,17 @@
 <title>DJ LAB SIAM — ระบบจองห้องซ้อม</title>
 <style>
   :root {
-    --bg: #0f0f1a;
-    --surface: #1a1a2e;
-    --surface2: #16213e;
-    --accent: #e63946;
-    --accent2: #ff6b6b;
-    --gold: #ffd60a;
-    --text: #f1faee;
-    --text2: #a8dadc;
-    --border: #2a2a4a;
-    --green: #2ecc71;
-    --orange: #f39c12;
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -38,12 +38,12 @@
   }
   /* Header */
   .header {
-    background: linear-gradient(135deg, var(--surface) 0%, #0d1117 100%);
+    background: #111111;
     padding: 16px 20px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 3px solid var(--accent);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -58,8 +58,8 @@
     border-radius: 4px;
     letter-spacing: 0.5px;
   }
-  .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
-  .header-right { color: var(--text2); font-size: 13px; }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .header-right { color: #aaaaaa; font-size: 13px; }
 
   /* Nav */
   .nav {
@@ -67,15 +67,15 @@
     bottom: 0; left: 50%;
     transform: translateX(-50%);
     width: 100%; max-width: 480px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    background: #111111;
+    border-top: 2px solid var(--accent);
     display: flex;
     z-index: 200;
   }
   .nav-btn {
     flex: 1;
     background: none; border: none;
-    color: var(--text2);
+    color: #888888;
     padding: 10px 4px 8px;
     cursor: pointer;
     font-size: 20px;
@@ -97,6 +97,7 @@
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
   .card-title {
     font-size: 13px;
@@ -112,17 +113,17 @@
   .form-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
   .form-input {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: #ffffff;
+    border: 1.5px solid var(--border);
     color: var(--text);
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .form-input:focus { border-color: var(--accent); }
-  .form-input option { background: var(--bg); }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-input option { background: #ffffff; }
   .form-row { display: flex; gap: 10px; }
   .form-row .form-group { flex: 1; }
 
@@ -140,7 +141,7 @@
   }
   .btn:active { transform: scale(0.98); }
   .btn-primary { background: var(--accent); color: white; }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
   .btn-green { background: var(--green); color: #0a1a0a; }
   .btn-sm {
     display: inline-block; width: auto;
@@ -166,7 +167,7 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-size: 38px; font-weight: 900;
-    color: var(--text);
+    color: #111111;
     letter-spacing: 2px;
   }
   .timer-label { font-size: 13px; color: var(--text2); margin-top: -8px; }
@@ -174,15 +175,16 @@
 
   /* Booking List */
   .booking-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: #ffffff;
+    border: 1.5px solid var(--border);
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 10px;
     cursor: pointer;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
-  .booking-item:hover { border-color: var(--accent); }
+  .booking-item:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(200,35,44,0.1); }
   .booking-header { display: flex; justify-content: space-between; align-items: flex-start; }
   .booking-name { font-weight: 700; font-size: 15px; }
   .booking-date { font-size: 12px; color: var(--text2); margin-top: 3px; }
@@ -192,9 +194,9 @@
     font-size: 11px;
     font-weight: 700;
   }
-  .badge-upcoming { background: rgba(230,57,70,0.2); color: var(--accent); }
-  .badge-active { background: rgba(46,204,113,0.2); color: var(--green); }
-  .badge-done { background: rgba(168,218,220,0.15); color: var(--text2); }
+  .badge-upcoming { background: rgba(200,35,44,0.1); color: var(--accent); border: 1px solid rgba(200,35,44,0.25); }
+  .badge-active { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-done { background: #f0f0f0; color: #888; border: 1px solid #ddd; }
   .booking-details { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
   .booking-detail { font-size: 12px; color: var(--text2); }
   .booking-detail strong { color: var(--text); }
@@ -235,12 +237,14 @@
   .points-hero {
     text-align: center;
     padding: 24px;
-    background: linear-gradient(135deg, #1a1a2e, #0d1117);
+    background: #111111;
     border-radius: 16px;
     margin-bottom: 12px;
-    border: 1px solid var(--border);
+    border: 2px solid var(--accent);
   }
-  .points-value { font-size: 56px; font-weight: 900; color: var(--gold); }
+  .points-hero .points-unit { color: #aaaaaa; }
+  .points-hero > div:first-child { color: #aaaaaa; }
+  .points-value { font-size: 56px; font-weight: 900; color: #ffffff; }
   .points-unit { font-size: 14px; color: var(--text2); margin-top: -8px; }
   .progress-bar {
     background: var(--border);
@@ -262,8 +266,8 @@
   .setting-label { font-size: 14px; }
   .setting-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
   .setting-input {
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: #ffffff;
+    border: 1.5px solid var(--border);
     color: var(--text);
     padding: 8px 10px;
     border-radius: 8px;
@@ -278,12 +282,13 @@
   .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
   .stat-card {
     flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: #111111;
+    border: 1px solid #222222;
     border-radius: 12px;
     padding: 14px 12px;
     text-align: center;
   }
+  .stat-label { color: #aaaaaa !important; }
   .stat-value { font-size: 26px; font-weight: 900; color: var(--accent); }
   .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
@@ -298,13 +303,14 @@
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--surface);
+    background: #ffffff;
     border-radius: 20px 20px 0 0;
     width: 100%; max-width: 480px;
     padding: 20px;
     max-height: 90vh;
     overflow-y: auto;
-    border-top: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
   }
   .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
   .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 24px; cursor: pointer; margin-top: -4px; }
@@ -313,17 +319,18 @@
   .toast {
     position: fixed; bottom: 90px; left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--surface2);
-    color: var(--text);
+    background: #111111;
+    color: #ffffff;
     padding: 12px 20px;
     border-radius: 10px;
     font-size: 14px;
-    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
     z-index: 999;
     opacity: 0;
     transition: all 0.3s;
     white-space: nowrap;
     pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -335,9 +342,9 @@
     margin-bottom: 12px;
     border-left: 3px solid;
   }
-  .alert-red { background: rgba(230,57,70,0.1); border-color: var(--accent); color: var(--accent2); }
-  .alert-gold { background: rgba(255,214,10,0.1); border-color: var(--gold); color: var(--gold); }
-  .alert-green { background: rgba(46,204,113,0.1); border-color: var(--green); color: var(--green); }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: var(--gold); }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
 
   /* Divider */
   hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
