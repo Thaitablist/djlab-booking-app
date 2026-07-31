@@ -379,6 +379,23 @@
 </head>
 <body>
 
+<!-- Staff Login Gate -->
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
 <!-- Header -->
 <div class="header">
   <div class="logo">
@@ -616,6 +633,11 @@
   </div>
   <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
   <div style="margin-top:12px;"></div>
+  <div class="card">
+    <div class="card-title">บัญชีผู้ใช้</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;" id="currentUserEmail"></div>
+    <button class="btn btn-secondary" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
   <div class="card" style="border-color:var(--accent);">
     <div class="card-title" style="color:var(--accent);">โซนอันตราย</div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">ล้างข้อมูลการจองและแต้มทั้งหมด ไม่สามารถกู้คืนได้</div>
@@ -729,14 +751,39 @@ function refreshCurrentPage() {
   if (currentPage === 'Report') renderReport();
 }
 
-function initFirebaseSync() {
-  auth.signInAnonymously().catch(err => {
-    console.error('[Auth]', err);
-    showToast('⚠️ เชื่อมต่อฐานข้อมูลไม่สำเร็จ ตรวจสอบการตั้งค่า Firebase');
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  auth.signInWithEmailAndPassword(email, password).catch(err => {
+    console.error('[Login]', err);
+    errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมล/รหัสผ่าน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
   });
+}
 
+function doLogout() {
+  auth.signOut();
+}
+
+function initFirebaseSync() {
   auth.onAuthStateChanged(user => {
-    if (!user) return;
+    if (!user) {
+      document.getElementById('loginOverlay').style.display = 'flex';
+      return;
+    }
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loginBtn').disabled = false;
+    const emailEl = document.getElementById('currentUserEmail');
+    if (emailEl) emailEl.textContent = 'เข้าสู่ระบบเป็น: ' + (user.email || '');
 
     bookingsRef.onSnapshot(snap => {
       bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));

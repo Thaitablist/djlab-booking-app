@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>จองห้องซ้อม — DJ LAB SIAM</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --accent: #c8232c;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+  }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .page { padding: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+  }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: var(--gold); }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: #1a8f4a; color: #1a8f4a; }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">DJ LAB</div>
+  <div class="logo-text">จองห้องซ้อม</div>
+</div>
+
+<div class="page">
+  <div class="card" id="formCard">
+    <div class="card-title">จองห้องซ้อม — DJ LAB SIAM</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อผู้จอง *</label>
+      <input type="text" id="bookName" class="form-input" placeholder="ชื่อ - นามสกุล">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ข้อมูลติดต่อ *</label>
+      <input type="text" id="bookContact" class="form-input" placeholder="เบอร์โทร / Line ID">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">วันที่ *</label>
+        <input type="date" id="bookDate" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เวลาเริ่ม *</label>
+        <input type="time" id="bookTime" class="form-input" value="10:00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">จำนวนชั่วโมง *</label>
+        <select id="bookHours" class="form-input">
+          <option value="1">1 ชั่วโมง</option>
+          <option value="2">2 ชั่วโมง</option>
+          <option value="3">3 ชั่วโมง</option>
+          <option value="4">4 ชั่วโมง</option>
+          <option value="5">5 ชั่วโมง</option>
+          <option value="6">6 ชั่วโมง</option>
+          <option value="8">8 ชั่วโมง</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ห้อง / Setup</label>
+        <select id="bookRoom" class="form-input">
+          <option value="Standard (CDJ-3000)">Standard (CDJ-3000)</option>
+          <option value="Turntable Setup">Turntable Setup</option>
+          <option value="Full Setup (CDJ+TT)">Full Setup (CDJ+TT)</option>
+          <option value="Controller Setup">Controller Setup</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">อุปกรณ์เพิ่มเติม</label>
+      <input type="text" id="bookEquip" class="form-input" placeholder="เช่น Headphone, Laptop Stand...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <input type="text" id="bookNote" class="form-input" placeholder="รายละเอียดเพิ่มเติม">
+    </div>
+    <div class="alert alert-gold" id="costPreview">
+      💰 ค่าใช้จ่ายโดยประมาณ: <strong id="costAmount">—</strong>
+    </div>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitBooking()">ยืนยันการจอง</button>
+  </div>
+  <div class="alert alert-green" id="successBox" style="display:none;">
+    ✅ ส่งคำขอจองแล้ว ทางร้านจะติดต่อกลับเพื่อยืนยันอีกครั้ง
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAEs9u1H9-JolrOAcqFYGBUbWn9mEHSf3U",
+  authDomain: "dj-lab-booking.firebaseapp.com",
+  projectId: "dj-lab-booking",
+  storageBucket: "dj-lab-booking.firebasestorage.app",
+  messagingSenderId: "601615158618",
+  appId: "1:601615158618:web:3a6721b0bc4d7e6680b763"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+const bookingsRef = db.collection('bookings');
+const settingsRef = db.collection('settings').doc('config');
+
+let settings = { pricePerHour: 800, pointsPerHour: 1 };
+let ready = false;
+
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('bookDate').value = today;
+document.getElementById('bookDate').min = today;
+document.getElementById('bookHours').addEventListener('change', updateCostPreview);
+
+function updateCostPreview() {
+  const hrs = parseInt(document.getElementById('bookHours').value);
+  const cost = hrs * settings.pricePerHour;
+  document.getElementById('costAmount').textContent = cost.toLocaleString() + ' บาท (' + hrs + ' ชม.)';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function submitBooking() {
+  if (!ready) { showToast('⚠️ กำลังเชื่อมต่อ กรุณารอสักครู่'); return; }
+
+  const name = document.getElementById('bookName').value.trim();
+  const contact = document.getElementById('bookContact').value.trim();
+  const date = document.getElementById('bookDate').value;
+  const time = document.getElementById('bookTime').value;
+  const hours = parseInt(document.getElementById('bookHours').value);
+  const room = document.getElementById('bookRoom').value;
+  const equip = document.getElementById('bookEquip').value.trim();
+  const note = document.getElementById('bookNote').value.trim();
+
+  if (!name || !contact || !date || !time) {
+    showToast('⚠️ กรุณากรอกข้อมูลที่จำเป็นให้ครบ');
+    return;
+  }
+
+  const cost = hours * settings.pricePerHour;
+  const pts = hours * settings.pointsPerHour;
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+
+  bookingsRef.add({
+    name, contact, date, time, hours, room, equip, note,
+    cost, pts, status: 'upcoming',
+    source: 'online',
+    createdAt: new Date().toISOString()
+  }).then(() => {
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('successBox').style.display = '';
+  }).catch(err => {
+    console.error('[Add booking]', err);
+    showToast('⚠️ ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง');
+    submitBtn.disabled = false;
+  });
+}
+
+auth.signInAnonymously().catch(err => {
+  console.error('[Auth]', err);
+  showToast('⚠️ เชื่อมต่อระบบไม่สำเร็จ');
+});
+
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+  settingsRef.get().then(snap => {
+    if (snap.exists) settings = { ...settings, ...snap.data() };
+    ready = true;
+    updateCostPreview();
+  }).catch(err => console.error('[Settings]', err));
+});
+</script>
+</body>
+</html>
