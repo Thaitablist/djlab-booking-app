@@ -1191,8 +1191,9 @@ function searchCustomerPoints() {
   const queryDigits = normalizePhone(rawQuery);
   const found = bookings.filter(b => {
     const nameMatch = b.name.toLowerCase().includes(queryLower);
+    const contactTextMatch = b.contact.toLowerCase().includes(queryLower);
     const phoneMatch = queryDigits.length >= 4 && normalizePhone(b.contact).includes(queryDigits);
-    return nameMatch || phoneMatch;
+    return nameMatch || contactTextMatch || phoneMatch;
   });
   const el = document.getElementById('customerPointsResult');
   if (found.length === 0) {
