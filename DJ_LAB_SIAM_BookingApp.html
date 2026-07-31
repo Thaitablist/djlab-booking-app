@@ -1180,12 +1180,20 @@ function renderPoints() {
   }
 }
 
+function normalizePhone(str) {
+  return (str || '').replace(/\D/g, '');
+}
+
 function searchCustomerPoints() {
-  const query = document.getElementById('searchCustomer').value.trim().toLowerCase();
-  if (!query) { showToast('กรุณาพิมพ์ชื่อหรือเบอร์โทร'); return; }
-  const found = bookings.filter(b =>
-    b.name.toLowerCase().includes(query) || b.contact.toLowerCase().includes(query)
-  );
+  const rawQuery = document.getElementById('searchCustomer').value.trim();
+  if (!rawQuery) { showToast('กรุณาพิมพ์ชื่อหรือเบอร์โทร'); return; }
+  const queryLower = rawQuery.toLowerCase();
+  const queryDigits = normalizePhone(rawQuery);
+  const found = bookings.filter(b => {
+    const nameMatch = b.name.toLowerCase().includes(queryLower);
+    const phoneMatch = queryDigits.length >= 4 && normalizePhone(b.contact).includes(queryDigits);
+    return nameMatch || phoneMatch;
+  });
   const el = document.getElementById('customerPointsResult');
   if (found.length === 0) {
     el.innerHTML = '<div class="alert alert-red">ไม่พบข้อมูลลูกค้า</div>';
