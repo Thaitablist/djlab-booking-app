@@ -1,9 +1,10 @@
 // DJ LAB SIAM — Service Worker
-// Version: 1.0.0
+// Version: 2.0.0
 
-const CACHE_NAME = 'djlab-booking-v1';
+const CACHE_NAME = 'djlab-booking-v2';
 const ASSETS = [
   './DJ_LAB_SIAM_BookingApp.html',
+  './book.html',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
