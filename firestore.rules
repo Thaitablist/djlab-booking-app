@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Staff are listed explicitly by uid. Checking "not anonymous" is NOT
+    // enough: the web API key is public, so anyone can self-register an
+    // email/password account and would otherwise be treated as staff.
+    // To add a staff member: add their uid here, then
+    //   firebase deploy --only firestore:rules --project dj-lab-booking
+    // (uid is shown in Firebase Console > Authentication > Users)
+    function isStaff() {
+      return request.auth != null
+        && request.auth.uid in [
+          'vek7l5p9yrhXMpsHwOeMedGEbr43'
+        ];
+    }
+
+    function isOwner() {
+      return request.auth != null
+        && resource.data.customerUid == request.auth.uid;
+    }
+
+    match /bookings/{bookingId} {
+      allow create: if request.auth != null;
+      allow read:   if isStaff();
+      allow read:   if isOwner();
+      allow update: if isStaff();
+      allow delete: if isStaff();
+    }
+
+    match /settings/{docId} {
+      allow read:  if request.auth != null;
+      allow write: if isStaff();
+    }
+  }
+}

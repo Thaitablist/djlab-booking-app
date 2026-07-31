@@ -1,7 +1,7 @@
 // DJ LAB SIAM — Service Worker
-// Version: 2.0.0
+// Version: 3.0.0
 
-const CACHE_NAME = 'djlab-booking-v2';
+const CACHE_NAME = 'djlab-booking-v3';
 const ASSETS = [
   './DJ_LAB_SIAM_BookingApp.html',
   './book.html',
@@ -14,12 +14,9 @@ const ASSETS = [
 // ---- Install: cache all assets ----
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS.filter(async url => {
-        try { await fetch(url, { method: 'HEAD' }); return true; }
-        catch { return false; }
-      }));
-    }).catch(() => {})
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.all(ASSETS.map(url => cache.add(url).catch(() => {})))
+    ).catch(() => {})
   );
   self.skipWaiting();
 });
@@ -36,27 +33,42 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// ---- Fetch: cache-first strategy ----
 self.addEventListener('fetch', event => {
   // Skip non-GET and cross-origin
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith(self.location.origin)) return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        // Cache successful responses
+  const isDocument = event.request.mode === 'navigate' ||
+                     event.request.destination === 'document';
+
+  // ---- HTML: network-first so app updates always land ----
+  if (isDocument) {
+    event.respondWith(
+      fetch(event.request).then(response => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline fallback: return the main app
-        if (event.request.destination === 'document') {
-          return caches.match('./DJ_LAB_SIAM_BookingApp.html');
+      }).catch(() =>
+        caches.match(event.request).then(cached =>
+          cached || caches.match('./DJ_LAB_SIAM_BookingApp.html')
+        )
+      )
+    );
+    return;
+  }
+
+  // ---- Other assets: cache-first ----
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
+        return response;
       });
     })
   );
