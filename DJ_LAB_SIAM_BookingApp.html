@@ -687,22 +687,72 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
 <script>
+// ============================
+// FIREBASE — SHARED DATABASE
+// ============================
+const firebaseConfig = {
+  apiKey: "AIzaSyAEs9u1H9-JolrOAcqFYGBUbWn9mEHSf3U",
+  authDomain: "dj-lab-booking.firebaseapp.com",
+  projectId: "dj-lab-booking",
+  storageBucket: "dj-lab-booking.firebasestorage.app",
+  messagingSenderId: "601615158618",
+  appId: "1:601615158618:web:3a6721b0bc4d7e6680b763"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+const bookingsRef = db.collection('bookings');
+const settingsRef = db.collection('settings').doc('config');
+
 // ============================
 // DATA
 // ============================
-let bookings = JSON.parse(localStorage.getItem('djlab_bookings') || '[]');
-let settings = JSON.parse(localStorage.getItem('djlab_settings') || JSON.stringify({
+let bookings = [];
+let settings = {
   pricePerHour: 800,
   pointsPerHour: 1,
   freeHourThreshold: 10,
   freeHoursReward: 1,
   roomName: 'DJ LAB SIAM'
-}));
+};
 
-function saveData() {
-  localStorage.setItem('djlab_bookings', JSON.stringify(bookings));
-  localStorage.setItem('djlab_settings', JSON.stringify(settings));
+function refreshCurrentPage() {
+  if (currentPage === 'Dashboard') renderDashboard();
+  if (currentPage === 'Calendar') renderCalendar();
+  if (currentPage === 'Points') renderPoints();
+  if (currentPage === 'History') renderHistory();
+  if (currentPage === 'Report') renderReport();
+}
+
+function initFirebaseSync() {
+  auth.signInAnonymously().catch(err => {
+    console.error('[Auth]', err);
+    showToast('⚠️ เชื่อมต่อฐานข้อมูลไม่สำเร็จ ตรวจสอบการตั้งค่า Firebase');
+  });
+
+  auth.onAuthStateChanged(user => {
+    if (!user) return;
+
+    bookingsRef.onSnapshot(snap => {
+      bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      refreshCurrentPage();
+    }, err => console.error('[Firestore bookings]', err));
+
+    settingsRef.onSnapshot(snap => {
+      if (snap.exists) {
+        settings = { ...settings, ...snap.data() };
+      } else {
+        settingsRef.set(settings);
+      }
+      updateCostPreview();
+      if (currentPage === 'Settings') renderSettings();
+    }, err => console.error('[Firestore settings]', err));
+  });
 }
 
 // ============================
@@ -771,14 +821,15 @@ function submitBooking() {
   const pts = hours * settings.pointsPerHour;
 
   const booking = {
-    id: Date.now(),
     name, contact, date, time, hours, room, equip, note,
     cost, pts, status: 'upcoming',
     createdAt: new Date().toISOString()
   };
 
-  bookings.push(booking);
-  saveData();
+  bookingsRef.add(booking).catch(err => {
+    console.error('[Add booking]', err);
+    showToast('⚠️ บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+  });
 
   // Reset form
   document.getElementById('bookName').value = '';
@@ -817,7 +868,7 @@ function renderDashboard() {
   if (upcoming.length > 0) {
     const b = upcoming[0];
     nextEl.innerHTML = `
-      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+      <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
             <div class="booking-name">${b.name}</div>
@@ -840,7 +891,7 @@ function renderDashboard() {
     todayEl.innerHTML = '<div class="empty"><div class="empty-text">ไม่มีการจองวันนี้</div></div>';
   } else {
     todayEl.innerHTML = todayBookings.map(b => `
-      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+      <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
             <div class="booking-name">${b.name}</div>
@@ -899,7 +950,7 @@ function showDayBookings(dateStr) {
   }
   el.innerHTML = `<div class="card-title" style="padding:0 0 8px;font-size:13px;color:var(--text2);">การจอง ${formatDate(dateStr)}</div>` +
     day.map(b => `
-      <div class="booking-item" onclick="showBookingDetail(${b.id})">
+      <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
             <div class="booking-name">${b.name}</div>
@@ -1033,8 +1084,7 @@ function startTimerFromBooking() {
   showPage('Timer');
   setTimeout(() => timerAction(), 300);
   // Mark as active
-  b.status = 'active';
-  saveData();
+  bookingsRef.doc(b.id).update({ status: 'active' }).catch(err => console.error('[Update booking]', err));
 }
 
 // ============================
@@ -1139,8 +1189,8 @@ function showBookingDetail(id) {
     </div>
     <hr>
     <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-secondary btn-sm" onclick="markBookingDone(${id})">✅ เสร็จสิ้น</button>
-      <button class="btn btn-secondary btn-sm" onclick="markBookingUpcoming(${id})">🔄 รีเซ็ต</button>
+      <button class="btn btn-secondary btn-sm" onclick="markBookingDone('${id}')">✅ เสร็จสิ้น</button>
+      <button class="btn btn-secondary btn-sm" onclick="markBookingUpcoming('${id}')">🔄 รีเซ็ต</button>
     </div>`;
   document.getElementById('bookingModal').classList.add('open');
 }
@@ -1153,25 +1203,19 @@ function closeModal() {
 function deleteBookingModal() {
   if (!currentModalBookingId) return;
   if (!confirm('ต้องการลบการจองนี้หรือไม่?')) return;
-  bookings = bookings.filter(b => b.id !== currentModalBookingId);
-  saveData();
+  bookingsRef.doc(currentModalBookingId).delete().catch(err => console.error('[Delete booking]', err));
   closeModal();
   showToast('ลบการจองแล้ว');
-  renderDashboard();
-  renderCalendar();
 }
 
 function markBookingDone(id) {
-  const b = bookings.find(b => b.id === id);
-  if (b) { b.status = 'done'; saveData(); }
+  bookingsRef.doc(id).update({ status: 'done' }).catch(err => console.error('[Update booking]', err));
   closeModal();
   showToast('✅ บันทึกเสร็จสิ้นแล้ว');
-  renderDashboard();
 }
 
 function markBookingUpcoming(id) {
-  const b = bookings.find(b => b.id === id);
-  if (b) { b.status = 'upcoming'; saveData(); }
+  bookingsRef.doc(id).update({ status: 'upcoming' }).catch(err => console.error('[Update booking]', err));
   closeModal();
   showToast('🔄 รีเซ็ตสถานะแล้ว');
 }
@@ -1260,7 +1304,7 @@ function renderHistory() {
       </div>
     </div>
     ${filtered.map(b => `
-    <div onclick="showBookingDetail(${b.id})" style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;background:var(--surface);">
+    <div onclick="showBookingDetail('${b.id}')" style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;background:var(--surface);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
           <div style="font-weight:700;font-size:15px;">${b.name}</div>
@@ -1430,17 +1474,16 @@ function saveSettings() {
   settings.freeHourThreshold = threshold;
   settings.freeHoursReward = freeHours || 1;
   settings.roomName = roomName || 'DJ LAB SIAM';
-  saveData();
+  settingsRef.set(settings, { merge: true }).catch(err => console.error('[Save settings]', err));
   showToast('✅ บันทึกการตั้งค่าแล้ว');
   updateCostPreview();
 }
 
 function clearAllData() {
   if (!confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?\n(การจอง, แต้ม ทั้งหมดจะถูกลบ)')) return;
-  bookings = [];
-  saveData();
-  showToast('🗑 ล้างข้อมูลแล้ว');
-  renderDashboard();
+  Promise.all(bookings.map(b => bookingsRef.doc(b.id).delete()))
+    .then(() => showToast('🗑 ล้างข้อมูลแล้ว'))
+    .catch(err => { console.error('[Clear data]', err); showToast('⚠️ ล้างข้อมูลไม่สำเร็จบางส่วน'); });
 }
 
 // ============================
@@ -1518,46 +1561,7 @@ generateIcons();
 renderDashboard();
 renderCalendar();
 requestNotificationPermission();
-
-// Demo data if empty
-if (bookings.length === 0) {
-  const todayStr = new Date().toISOString().split('T')[0];
-  bookings = [
-    {
-      id: 1,
-      name: 'ศักดิ์ชัย ดนตรีไทย',
-      contact: '081-234-5678',
-      date: todayStr,
-      time: '14:00',
-      hours: 2,
-      room: 'Standard (CDJ-3000)',
-      equip: '',
-      note: '',
-      cost: 600,
-      pts: 2,
-      status: 'upcoming',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 2,
-      name: 'ปริญญา ฟังก์ซาวด์',
-      contact: '089-876-5432',
-      date: todayStr,
-      time: '17:00',
-      hours: 3,
-      room: 'Turntable Setup',
-      equip: 'Headphone',
-      note: '',
-      cost: 900,
-      pts: 3,
-      status: 'upcoming',
-      createdAt: new Date().toISOString()
-    }
-  ];
-  saveData();
-  renderDashboard();
-  renderCalendar();
-}
+initFirebaseSync();
 </script>
 </body>
 </html>
