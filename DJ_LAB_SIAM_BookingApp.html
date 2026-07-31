@@ -471,12 +471,15 @@
       <div class="form-group">
         <label class="form-label">ห้อง / Setup</label>
         <select id="bookRoom" class="form-input">
-          <option value="Standard (CDJ-3000)">Standard (CDJ-3000)</option>
-          <option value="Turntable Setup">Turntable Setup</option>
-          <option value="Full Setup (CDJ+TT)">Full Setup (CDJ+TT)</option>
+          <option value="Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)">Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)</option>
+          <option value="Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)">Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)</option>
           <option value="Controller Setup">Controller Setup</option>
         </select>
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ระบุรุ่นที่ต้องการ</label>
+      <input type="text" id="bookRoomModel" class="form-input" placeholder="เช่น DJM-S11, DJM-A9...">
     </div>
     <div class="form-group">
       <label class="form-label">อุปกรณ์เพิ่มเติม</label>
@@ -856,6 +859,7 @@ function submitBooking() {
   const time = document.getElementById('bookTime').value;
   const hours = parseInt(document.getElementById('bookHours').value);
   const room = document.getElementById('bookRoom').value;
+  const roomModel = document.getElementById('bookRoomModel').value.trim();
   const equip = document.getElementById('bookEquip').value.trim();
   const note = document.getElementById('bookNote').value.trim();
 
@@ -868,8 +872,10 @@ function submitBooking() {
   const pts = hours * settings.pointsPerHour;
 
   const booking = {
-    name, contact, date, time, hours, room, equip, note,
+    name, contact, date, time, hours, room, roomModel, equip, note,
     cost, pts, status: 'upcoming',
+    confirmed: true,
+    source: 'staff',
     createdAt: new Date().toISOString()
   };
 
@@ -884,6 +890,7 @@ function submitBooking() {
   document.getElementById('bookDate').value = today;
   document.getElementById('bookTime').value = '10:00';
   document.getElementById('bookHours').value = '1';
+  document.getElementById('bookRoomModel').value = '';
   document.getElementById('bookEquip').value = '';
   document.getElementById('bookNote').value = '';
   updateCostPreview();
@@ -920,6 +927,7 @@ function renderDashboard() {
           <div>
             <div class="booking-name">${b.name}</div>
             <div class="booking-date">${formatDate(b.date)} · ${b.time} · ${b.hours} ชม.</div>
+            ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-upcoming">รอ</span>
         </div>
@@ -943,6 +951,7 @@ function renderDashboard() {
           <div>
             <div class="booking-name">${b.name}</div>
             <div class="booking-date">${b.time} — ${addHours(b.time, b.hours)} · ${b.room}</div>
+            ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
         </div>
@@ -1002,6 +1011,7 @@ function showDayBookings(dateStr) {
           <div>
             <div class="booking-name">${b.name}</div>
             <div class="booking-date">${b.time} · ${b.hours} ชม. · ${b.room}</div>
+            ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
         </div>
@@ -1223,12 +1233,14 @@ function showBookingDetail(id) {
     <div style="margin-bottom:12px;">
       <div style="font-size:19px;font-weight:800;">${b.name}</div>
       <div style="font-size:13px;color:var(--text2);margin-top:2px;">📞 ${b.contact}</div>
+      ${b.confirmed ? '<span class="badge badge-active" style="margin-top:6px;display:inline-block;">✅ ยืนยันแล้ว</span>' : '<span class="badge badge-upcoming" style="margin-top:6px;display:inline-block;">🕓 รอยืนยัน</span>'}
     </div>
     <div class="booking-details" style="flex-direction:column;gap:8px;">
       <div><span class="tag">📅 วันที่</span> <strong>${formatDate(b.date)}</strong></div>
       <div><span class="tag">⏰ เวลา</span> <strong>${b.time} — ${addHours(b.time, b.hours)}</strong></div>
       <div><span class="tag">⏱ ระยะเวลา</span> <strong>${b.hours} ชั่วโมง</strong></div>
       <div><span class="tag">🎛 Setup</span> <strong>${b.room}</strong></div>
+      ${b.roomModel ? `<div><span class="tag">🎚 รุ่นที่ระบุ</span> <strong>${b.roomModel}</strong></div>` : ''}
       ${b.equip ? `<div><span class="tag">🎧 อุปกรณ์</span> <strong>${b.equip}</strong></div>` : ''}
       ${b.note ? `<div><span class="tag">📝 หมายเหตุ</span> <strong>${b.note}</strong></div>` : ''}
     </div>
@@ -1244,6 +1256,7 @@ function showBookingDetail(id) {
       </div>
     </div>
     <hr>
+    ${!b.confirmed ? `<button class="btn btn-primary" style="margin-bottom:8px;" onclick="confirmBooking('${id}')">✅ ยืนยันการจอง</button>` : ''}
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="btn btn-secondary btn-sm" onclick="markBookingDone('${id}')">✅ เสร็จสิ้น</button>
       <button class="btn btn-secondary btn-sm" onclick="markBookingUpcoming('${id}')">🔄 รีเซ็ต</button>
@@ -1262,6 +1275,12 @@ function deleteBookingModal() {
   bookingsRef.doc(currentModalBookingId).delete().catch(err => console.error('[Delete booking]', err));
   closeModal();
   showToast('ลบการจองแล้ว');
+}
+
+function confirmBooking(id) {
+  bookingsRef.doc(id).update({ confirmed: true }).catch(err => console.error('[Confirm booking]', err));
+  closeModal();
+  showToast('✅ ยืนยันการจองแล้ว');
 }
 
 function markBookingDone(id) {

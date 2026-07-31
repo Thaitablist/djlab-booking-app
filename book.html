@@ -164,12 +164,15 @@
       <div class="form-group">
         <label class="form-label">ห้อง / Setup</label>
         <select id="bookRoom" class="form-input">
-          <option value="Standard (CDJ-3000)">Standard (CDJ-3000)</option>
-          <option value="Turntable Setup">Turntable Setup</option>
-          <option value="Full Setup (CDJ+TT)">Full Setup (CDJ+TT)</option>
+          <option value="Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)">Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)</option>
+          <option value="Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)">Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)</option>
           <option value="Controller Setup">Controller Setup</option>
         </select>
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ระบุรุ่นที่ต้องการ</label>
+      <input type="text" id="bookRoomModel" class="form-input" placeholder="เช่น DJM-S11, DJM-A9...">
     </div>
     <div class="form-group">
       <label class="form-label">อุปกรณ์เพิ่มเติม</label>
@@ -184,8 +187,8 @@
     </div>
     <button class="btn btn-primary" id="submitBtn" onclick="submitBooking()">ยืนยันการจอง</button>
   </div>
-  <div class="alert alert-green" id="successBox" style="display:none;">
-    ✅ ส่งคำขอจองแล้ว ทางร้านจะติดต่อกลับเพื่อยืนยันอีกครั้ง
+  <div class="alert alert-gold" id="successBox" style="display:none;">
+    ⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...
   </div>
 </div>
 
@@ -230,6 +233,28 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+
+function watchBookingStatus(docRef) {
+  const box = document.getElementById('successBox');
+  docRef.onSnapshot(snap => {
+    const data = snap.data();
+    if (!data) return;
+    if (data.confirmed) {
+      box.className = 'alert alert-green';
+      box.innerHTML = `✅ ร้านยืนยันการจองแล้ว! พบกันวันที่ <strong>${formatDate(data.date)}</strong> เวลา <strong>${data.time}</strong>`;
+    } else {
+      box.className = 'alert alert-gold';
+      box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...';
+    }
+  }, err => console.error('[Status listen]', err));
+}
+
 function submitBooking() {
   if (!ready) { showToast('⚠️ กำลังเชื่อมต่อ กรุณารอสักครู่'); return; }
 
@@ -239,6 +264,7 @@ function submitBooking() {
   const time = document.getElementById('bookTime').value;
   const hours = parseInt(document.getElementById('bookHours').value);
   const room = document.getElementById('bookRoom').value;
+  const roomModel = document.getElementById('bookRoomModel').value.trim();
   const equip = document.getElementById('bookEquip').value.trim();
   const note = document.getElementById('bookNote').value.trim();
 
@@ -254,13 +280,16 @@ function submitBooking() {
   submitBtn.disabled = true;
 
   bookingsRef.add({
-    name, contact, date, time, hours, room, equip, note,
+    name, contact, date, time, hours, room, roomModel, equip, note,
     cost, pts, status: 'upcoming',
+    confirmed: false,
     source: 'online',
+    customerUid: auth.currentUser.uid,
     createdAt: new Date().toISOString()
-  }).then(() => {
+  }).then(docRef => {
     document.getElementById('formCard').style.display = 'none';
     document.getElementById('successBox').style.display = '';
+    watchBookingStatus(docRef);
   }).catch(err => {
     console.error('[Add booking]', err);
     showToast('⚠️ ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง');
