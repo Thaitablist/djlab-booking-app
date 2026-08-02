@@ -194,26 +194,18 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAEs9u1H9-JolrOAcqFYGBUbWn9mEHSf3U",
-  authDomain: "dj-lab-booking.firebaseapp.com",
-  projectId: "dj-lab-booking",
-  storageBucket: "dj-lab-booking.firebasestorage.app",
-  messagingSenderId: "601615158618",
-  appId: "1:601615158618:web:3a6721b0bc4d7e6680b763"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-const bookingsRef = db.collection('bookings');
-const settingsRef = db.collection('settings').doc('config');
+const LIFF_ID = '2010938781-6oxlp5KL';
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let settings = { pricePerHour: 800, pointsPerHour: 1 };
 let ready = false;
+let lineUserId = null;
 
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('bookDate').value = today;
@@ -240,22 +232,24 @@ function formatDate(dateStr) {
   return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
 }
 
-function watchBookingStatus(docRef) {
+function watchBookingStatus(bookingId) {
   const box = document.getElementById('successBox');
-  docRef.onSnapshot(snap => {
-    const data = snap.data();
-    if (!data) return;
-    if (data.confirmed) {
-      box.className = 'alert alert-green';
-      box.innerHTML = `✅ ร้านยืนยันการจองแล้ว! พบกันวันที่ <strong>${formatDate(data.date)}</strong> เวลา <strong>${data.time}</strong>`;
-    } else {
-      box.className = 'alert alert-gold';
-      box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...';
-    }
-  }, err => console.error('[Status listen]', err));
+  supabase.channel(`booking-${bookingId}`)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'room_bookings', filter: `id=eq.${bookingId}` }, payload => {
+      const data = payload.new;
+      if (!data) return;
+      if (data.confirmed) {
+        box.className = 'alert alert-green';
+        box.innerHTML = `✅ ร้านยืนยันการจองแล้ว! พบกันวันที่ <strong>${formatDate(data.date)}</strong> เวลา <strong>${data.start_time}</strong>`;
+      } else {
+        box.className = 'alert alert-gold';
+        box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...';
+      }
+    })
+    .subscribe();
 }
 
-function submitBooking() {
+async function submitBooking() {
   if (!ready) { showToast('⚠️ กำลังเชื่อมต่อ กรุณารอสักครู่'); return; }
 
   const name = document.getElementById('bookName').value.trim();
@@ -279,37 +273,70 @@ function submitBooking() {
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
 
-  bookingsRef.add({
-    name, contact, date, time, hours, room, roomModel, equip, note,
-    cost, pts, status: 'upcoming',
-    confirmed: false,
-    source: 'online',
-    customerUid: auth.currentUser.uid,
-    createdAt: new Date().toISOString()
-  }).then(docRef => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: inserted, error } = await supabase.from('room_bookings').insert({
+      customer_name: name,
+      contact: contact,
+      date, start_time: time, hours,
+      room, room_model: roomModel, equip, note,
+      cost, points_earned: pts,
+      status: 'upcoming',
+      confirmed: false,
+      source: 'online_line',
+      customer_uid: user.id,
+      line_user_id: lineUserId || null,
+    }).select().single();
+
+    if (error) throw error;
+
     document.getElementById('formCard').style.display = 'none';
     document.getElementById('successBox').style.display = '';
-    watchBookingStatus(docRef);
-  }).catch(err => {
+    watchBookingStatus(inserted.id);
+  } catch (err) {
     console.error('[Add booking]', err);
     showToast('⚠️ ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง');
     submitBtn.disabled = false;
-  });
+  }
 }
 
-auth.signInAnonymously().catch(err => {
-  console.error('[Auth]', err);
-  showToast('⚠️ เชื่อมต่อระบบไม่สำเร็จ');
-});
+async function initApp() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) {
+      try {
+        const profile = await liff.getProfile();
+        lineUserId = profile.userId;
+      } catch (err) {
+        console.error('[LIFF getProfile]', err);
+      }
+    }
+  } catch (err) {
+    // เปิดนอกแอป LINE หรือ LIFF ID ยังไม่ถูกตั้งค่า — ปล่อยผ่าน ให้ฟอร์มใช้งานได้ต่อแบบไม่มี LINE userId
+    console.error('[LIFF init]', err);
+  }
 
-auth.onAuthStateChanged(user => {
-  if (!user) return;
-  settingsRef.get().then(snap => {
-    if (snap.exists) settings = { ...settings, ...snap.data() };
-    ready = true;
-    updateCostPreview();
-  }).catch(err => console.error('[Settings]', err));
-});
+  const { error: authError } = await supabase.auth.signInAnonymously();
+  if (authError) {
+    console.error('[Auth]', authError);
+    showToast('⚠️ เชื่อมต่อระบบไม่สำเร็จ');
+    return;
+  }
+
+  try {
+    const { data } = await supabase.from('booking_settings').select('price_per_hour, points_per_hour').single();
+    if (data) {
+      settings = { pricePerHour: data.price_per_hour, pointsPerHour: data.points_per_hour };
+    }
+  } catch (err) {
+    console.error('[Settings]', err);
+  }
+
+  ready = true;
+  updateCostPreview();
+}
+
+initApp();
 </script>
 </body>
 </html>
