@@ -728,10 +728,23 @@ function showFatalError(msg) {
     box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
       'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
       'word-break:break-word;max-height:45vh;overflow:auto;';
-    box.addEventListener('click', () => box.remove());
+    // ปุ่มปิดแยกต่างหาก — เดิมแตะที่ไหนก็ปิด ทำให้ข้อความหายก่อนอ่านทัน
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
     document.body.appendChild(box);
   }
-  box.textContent = '⚠️ ' + msg + '\n\n(แตะเพื่อปิด)';
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
 }
 window.addEventListener('error', e => {
   showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
@@ -846,7 +859,7 @@ async function handleAuthState(session) {
 
   // เข้าระบบได้ไม่ได้แปลว่ามีสิทธิ์ — ถ้าไม่มีแถวใน admins ทุก query จะถูกกฎความปลอดภัย
   // กรองออกจนหมด แล้วแอปจะดูเหมือนว่างเปล่าเฉยๆ โดยไม่บอกสาเหตุ
-  const { data: adminRow } = await supabase
+  const { data: adminRow } = await db
     .from('admins').select('id').eq('id', session.user.id).maybeSingle();
 
   if (!adminRow) {
