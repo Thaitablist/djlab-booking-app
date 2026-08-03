@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>ทดสอบสแกนบาร์โค้ด — DJ LAB SIAM</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --accent: #c8232c;
+    --green: #1a8f4a;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 16px; font-weight: 700; color: #ffffff; }
+  .page { padding: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+  #videoWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  #video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #reticle {
+    position: absolute;
+    left: 8%; right: 8%; top: 32%; bottom: 32%;
+    border: 3px solid rgba(200,35,44,0.9);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  .btn {
+    display: block; width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 10px;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.45; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-dark { background: #333; color: #fff; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row .btn { margin-bottom: 0; }
+  .result {
+    background: #fff;
+    border: 2px solid var(--green);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .result .fmt {
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .result .val {
+    font-size: 22px;
+    font-weight: 900;
+    word-break: break-all;
+    margin: 4px 0;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .result .meta { font-size: 14px; color: var(--text2); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat .label { font-size: 12px; color: var(--text2); }
+  .stat .value { font-size: 20px; font-weight: 900; margin-top: 2px; }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .k { color: var(--text2); flex-shrink: 0; }
+  .info-row .v { font-weight: 600; text-align: right; word-break: break-all; }
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-red { background: rgba(200,35,44,0.08); border-color: var(--accent); color: var(--accent); }
+  .log-item {
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item .code { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
+  .log-item .t { color: var(--text2); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">DJ LAB</div>
+  <div class="logo-text">ทดสอบสแกนบาร์โค้ด</div>
+</div>
+
+<div class="page">
+  <div class="alert alert-gold">
+    หน้านี้ใช้ทดสอบว่ากล้องมือถือสแกนบาร์โค้ดบนกล่องสินค้าได้เร็วพอไหม —
+    ลองสแกนกล่องจริงหลายๆ กล่อง ทั้งที่แสงสว่างและแสงน้อย แล้วดูตัวเลข "เวลาที่ใช้"
+  </div>
+
+  <div id="errBox" class="alert alert-red" style="display:none;"></div>
+
+  <div id="videoWrap">
+    <video id="video" playsinline muted></video>
+    <div id="reticle"></div>
+  </div>
+
+  <button class="btn btn-primary" id="startBtn">เริ่มสแกน</button>
+  <div class="btn-row">
+    <button class="btn btn-dark" id="torchBtn" disabled>เปิดไฟฉาย</button>
+    <button class="btn btn-dark" id="resetBtn">ล้างผลทดสอบ</button>
+  </div>
+
+  <div id="lastResult"></div>
+
+  <div class="card">
+    <div class="card-title">สรุปผลทดสอบ</div>
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="label">สแกนสำเร็จ</div>
+        <div class="value" id="statCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">เร็วสุด</div>
+        <div class="value" id="statBest">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">เฉลี่ย</div>
+        <div class="value" id="statAvg">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">ช้าสุด</div>
+        <div class="value" id="statWorst">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ข้อมูลเครื่อง</div>
+    <div class="info-row"><span class="k">วิธีถอดรหัส</span><span class="v" id="infoEngine">—</span></div>
+    <div class="info-row"><span class="k">ความละเอียดกล้อง</span><span class="v" id="infoRes">—</span></div>
+    <div class="info-row"><span class="k">ไฟฉาย</span><span class="v" id="infoTorch">—</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ประวัติการสแกน</div>
+    <div id="logList" style="font-size:14px;color:var(--text2);">ยังไม่มีการสแกน</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+// รูปแบบบาร์โค้ดที่ร้านใช้จริง: Code128/Code39 = เลข SER. NO. บนกล่อง, EAN-13 = รหัสสินค้า
+const NATIVE_FORMATS = ['code_128', 'code_39', 'ean_13', 'qr_code'];
+
+const videoEl = document.getElementById('video');
+const startBtn = document.getElementById('startBtn');
+const torchBtn = document.getElementById('torchBtn');
+const resetBtn = document.getElementById('resetBtn');
+const errBox = document.getElementById('errBox');
+
+let stream = null;
+let track = null;
+let running = false;
+let torchOn = false;
+let zxingReader = null;
+let scanStartedAt = 0;
+let lastCode = '';
+let lastCodeAt = 0;
+let times = [];
+
+function showError(msg) {
+  errBox.textContent = msg;
+  errBox.style.display = '';
+}
+
+function fmtMs(ms) {
+  return ms < 1000 ? Math.round(ms) + ' มิลลิวินาที' : (ms / 1000).toFixed(1) + ' วิ';
+}
+
+function fmtShort(ms) {
+  return ms < 1000 ? Math.round(ms) + 'ms' : (ms / 1000).toFixed(1) + 's';
+}
+
+function renderStats() {
+  document.getElementById('statCount').textContent = times.length;
+  if (!times.length) {
+    ['statBest', 'statAvg', 'statWorst'].forEach(id => document.getElementById(id).textContent = '—');
+    return;
+  }
+  const best = Math.min(...times);
+  const worst = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  document.getElementById('statBest').textContent = fmtShort(best);
+  document.getElementById('statAvg').textContent = fmtShort(avg);
+  document.getElementById('statWorst').textContent = fmtShort(worst);
+}
+
+function onDecoded(text, format) {
+  const now = performance.now();
+  // กันนับซ้ำจากบาร์โค้ดใบเดิมที่ยังอยู่หน้ากล้อง
+  if (text === lastCode && now - lastCodeAt < 2500) return;
+
+  const elapsed = now - scanStartedAt;
+  lastCode = text;
+  lastCodeAt = now;
+  times.push(elapsed);
+  scanStartedAt = now; // จับเวลาใบถัดไปต่อทันที
+
+  if (navigator.vibrate) navigator.vibrate(120);
+
+  document.getElementById('lastResult').innerHTML =
+    '<div class="result">' +
+      '<div class="fmt">' + format + '</div>' +
+      '<div class="val">' + text.replace(/</g, '&lt;') + '</div>' +
+      '<div class="meta">ใช้เวลา ' + fmtMs(elapsed) + '</div>' +
+    '</div>';
+
+  const list = document.getElementById('logList');
+  if (times.length === 1) list.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'log-item';
+  row.innerHTML = '<span class="code">' + text.replace(/</g, '&lt;') + '</span>' +
+                  '<span class="t">' + fmtShort(elapsed) + '</span>';
+  list.prepend(row);
+
+  renderStats();
+}
+
+async function startCamera() {
+  const constraints = {
+    video: {
+      facingMode: { ideal: 'environment' },
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      // โฟกัสต่อเนื่องช่วยมากกับบาร์โค้ดบนกล่องที่ระยะไม่นิ่ง
+      focusMode: { ideal: 'continuous' },
+    },
+    audio: false,
+  };
+  stream = await navigator.mediaDevices.getUserMedia(constraints);
+  videoEl.srcObject = stream;
+  await videoEl.play();
+
+  track = stream.getVideoTracks()[0];
+  const s = track.getSettings();
+  document.getElementById('infoRes').textContent = (s.width || '?') + ' × ' + (s.height || '?');
+
+  const caps = track.getCapabilities ? track.getCapabilities() : {};
+  if (caps && 'torch' in caps) {
+    torchBtn.disabled = false;
+    document.getElementById('infoTorch').textContent = 'รองรับ';
+  } else {
+    document.getElementById('infoTorch').textContent = 'ไม่รองรับบนเครื่องนี้';
+  }
+}
+
+async function runNativeDetector() {
+  const detector = new BarcodeDetector({ formats: NATIVE_FORMATS });
+  document.getElementById('infoEngine').textContent = 'ระบบในตัวของเครื่อง (เร็วที่สุด)';
+  const tick = async () => {
+    if (!running) return;
+    try {
+      const codes = await detector.detect(videoEl);
+      if (codes.length) onDecoded(codes[0].rawValue, codes[0].format);
+    } catch (e) {
+      // เฟรมที่อ่านไม่ได้เป็นเรื่องปกติ ปล่อยผ่านแล้วลองเฟรมถัดไป
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function runZXing() {
+  const hints = new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+    ZXing.BarcodeFormat.CODE_128,
+    ZXing.BarcodeFormat.CODE_39,
+    ZXing.BarcodeFormat.EAN_13,
+    ZXing.BarcodeFormat.QR_CODE,
+  ]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+  document.getElementById('infoEngine').textContent = 'ไลบรารี ZXing (สำรอง)';
+
+  zxingReader = new ZXing.BrowserMultiFormatReader(hints, 150);
+  zxingReader.decodeFromVideoElement(videoEl, (result) => {
+    if (result) onDecoded(result.getText(), String(result.getBarcodeFormat()));
+  }).catch(err => showError('ถอดรหัสไม่สำเร็จ: ' + err.message));
+}
+
+async function start() {
+  errBox.style.display = 'none';
+  startBtn.disabled = true;
+  startBtn.textContent = 'กำลังเปิดกล้อง...';
+  try {
+    await startCamera();
+    running = true;
+    scanStartedAt = performance.now();
+
+    if ('BarcodeDetector' in window) {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      if (NATIVE_FORMATS.some(f => supported.includes(f))) {
+        await runNativeDetector();
+      } else {
+        runZXing();
+      }
+    } else {
+      runZXing();
+    }
+    startBtn.textContent = 'กำลังสแกน — เล็งบาร์โค้ดเข้ากรอบแดง';
+  } catch (err) {
+    startBtn.disabled = false;
+    startBtn.textContent = 'เริ่มสแกน';
+    showError('เปิดกล้องไม่สำเร็จ: ' + err.message +
+      ' — บน iPhone ต้องเปิดหน้านี้ด้วย Safari และกดอนุญาตให้ใช้กล้อง');
+  }
+}
+
+torchBtn.addEventListener('click', async () => {
+  if (!track) return;
+  torchOn = !torchOn;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+    torchBtn.textContent = torchOn ? 'ปิดไฟฉาย' : 'เปิดไฟฉาย';
+  } catch (err) {
+    showError('เปิดไฟฉายไม่สำเร็จบนเครื่องนี้');
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  times = [];
+  lastCode = '';
+  scanStartedAt = performance.now();
+  document.getElementById('lastResult').innerHTML = '';
+  document.getElementById('logList').textContent = 'ยังไม่มีการสแกน';
+  renderStats();
+});
+
+startBtn.addEventListener('click', start);
+</script>
+</body>
+</html>
