@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — จัดการสต็อกสินค้า</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link, .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link:hover, .header-link-btn:hover { color: #ffffff; }
+
+  .nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: #111111;
+    border-top: 2px solid var(--accent);
+    display: flex;
+    z-index: 200;
+  }
+  .nav-btn {
+    flex: 1;
+    background: none; border: none;
+    color: #888888;
+    padding: 8px 2px 6px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    transition: color 0.2s;
+    min-width: 0;
+    font-family: inherit;
+  }
+  .nav-btn span { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .nav-btn.active { color: var(--accent); }
+
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-input:disabled { background: var(--surface2); color: var(--text2); }
+  .form-input option { background: #ffffff; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+  .checkbox-row input { width: 18px; height: 18px; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .btn-sm { display: inline-block; width: auto; padding: 8px 16px; font-size: 14px; border-radius: 8px; }
+
+  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .stat-card {
+    flex: 1;
+    background: #111111;
+    border: 1px solid #222222;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-value { font-size: 22px; font-weight: 900; color: var(--accent); }
+  .stat-label { font-size: 12px; color: #aaaaaa; margin-top: 4px; }
+  .stat-card.warn .stat-value { color: var(--orange); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+
+  .toast {
+    position: fixed; bottom: 90px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .empty { text-align: center; padding: 36px 20px; color: var(--text2); }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .badge-lowstock { background: rgba(200,35,44,0.1); color: var(--accent); border: 1px solid rgba(200,35,44,0.3); }
+  .badge-in { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-out { background: rgba(200,35,44,0.1); color: var(--accent); border: 1px solid rgba(200,35,44,0.25); }
+  .badge-adjustment { background: rgba(184,134,11,0.1); color: var(--gold); border: 1px solid rgba(184,134,11,0.3); }
+  .badge-inactive { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  .product-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .product-item:hover { border-color: var(--accent); }
+  .product-item.low-stock { border-color: var(--accent); background: rgba(200,35,44,0.03); }
+  .product-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .product-name { font-weight: 700; font-size: 15px; }
+  .product-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  .product-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .product-details { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .product-qty { font-size: 14px; }
+  .product-qty strong { font-size: 17px; }
+  .product-price { font-size: 15px; font-weight: 800; color: var(--accent); text-align: right; }
+
+  .history-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .history-product { font-weight: 700; font-size: 14.5px; }
+  .history-meta { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .history-qty { font-size: 16px; font-weight: 900; white-space: nowrap; }
+  .qty-pos { color: var(--green); }
+  .qty-neg { color: var(--accent); }
+  .history-reason { font-size: 14px; color: var(--text2); margin-top: 4px; }
+
+  .search-wrap { position: relative; margin-bottom: 12px; }
+  .search-wrap .form-input { padding-left: 14px; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <div class="logo-text">จัดการสต็อก</div>
+  </div>
+  <div class="header-right">
+    <a class="header-link" href="DJ_LAB_SIAM_BookingApp.html">← หน้าจองห้องซ้อม</a>
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div id="pageDashboard" class="page active">
+  <div class="card">
+    <div class="card-title">ภาพรวมสต็อก</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotalProducts">0</div>
+        <div class="stat-label">สินค้าทั้งหมด</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-value" id="statLowStock">0</div>
+        <div class="stat-label">ใกล้หมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTotalValue">0</div>
+        <div class="stat-label">มูลค่าสต็อก (บาท)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);" id="currentUserInfo"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">สินค้าใกล้หมด</div>
+    <div id="lowStockList"></div>
+  </div>
+</div>
+
+<div id="pageProducts" class="page">
+  <div class="card">
+    <div class="card-title">รายการสินค้า</div>
+    <div class="search-wrap">
+      <input type="text" id="productSearch" class="form-input" placeholder="ค้นหาด้วยชื่อ / SKU / บาร์โค้ด">
+    </div>
+    <button class="btn btn-primary" id="addProductBtn" onclick="openProductModal(null)" style="margin-bottom:8px;">+ เพิ่มสินค้าใหม่</button>
+    <div class="alert alert-gold" id="staffNotice" style="display:none;">เฉพาะเจ้าของร้านหรือผู้ดูแลระบบเท่านั้นที่สามารถเพิ่ม/แก้ไขสินค้าได้ กรุณาติดต่อผู้ดูแลระบบหากต้องการแก้ไขข้อมูลสินค้า</div>
+    <div id="productList"></div>
+  </div>
+</div>
+
+<div id="pageMovement" class="page">
+  <div class="card">
+    <div class="card-title">บันทึกการเคลื่อนไหวสต็อก</div>
+    <div class="form-group">
+      <label class="form-label">สินค้า *</label>
+      <select id="movProduct" class="form-input"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ประเภทรายการ *</label>
+      <select id="movType" class="form-input" onchange="onMovTypeChange()">
+        <option value="in">รับเข้า (In)</option>
+        <option value="out">ตัดออก (Out)</option>
+        <option value="adjustment">ปรับยอด (Adjustment)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="movQtyLabel">จำนวน (ต้องเป็นจำนวนบวก) *</label>
+      <input type="number" id="movQty" class="form-input" step="1" min="1" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">เหตุผล / หมายเหตุ</label>
+      <input type="text" id="movReason" class="form-input" placeholder="เช่น รับของจากซัพพลายเออร์, ขายหน้าร้าน, นับสต็อกไม่ตรง...">
+    </div>
+    <button class="btn btn-primary" onclick="submitMovement()">บันทึกรายการ</button>
+  </div>
+</div>
+
+<div id="pageHistory" class="page">
+  <div class="card">
+    <div class="card-title">ประวัติการเคลื่อนไหว</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('Dashboard')">🏠<span>ภาพรวม</span></button>
+  <button class="nav-btn" onclick="showPage('Products')">📦<span>สินค้า</span></button>
+  <button class="nav-btn" onclick="showPage('Movement')">🔄<span>เคลื่อนไหว</span></button>
+  <button class="nav-btn" onclick="showPage('History')">📋<span>ประวัติ</span></button>
+</nav>
+
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProductModal()">×</button>
+    <div class="modal-title" id="productModalTitle">เพิ่มสินค้าใหม่</div>
+    <div class="alert alert-gold" id="productModalReadonlyNotice" style="display:none;">คุณมีสิทธิ์ดูข้อมูลเท่านั้น เฉพาะเจ้าของร้าน/ผู้ดูแลระบบเท่านั้นที่แก้ไขได้</div>
+    <div class="form-group">
+      <label class="form-label">SKU *</label>
+      <input type="text" id="pfSku" class="form-input" placeholder="เช่น PIO-CDJ3000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อสินค้า *</label>
+      <input type="text" id="pfName" class="form-input" placeholder="เช่น Pioneer DJ CDJ-3000">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">แบรนด์ *</label>
+        <select id="pfBrand" class="form-input">
+          <option value="Pioneer DJ">Pioneer DJ</option>
+          <option value="AlphaTheta">AlphaTheta</option>
+          <option value="NEO by OYAIDE">NEO by OYAIDE</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมวดหมู่</label>
+        <input type="text" id="pfCategory" class="form-input" placeholder="เช่น เครื่องเล่น, มิกเซอร์">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">บาร์โค้ด EAN-13</label>
+      <input type="text" id="pfBarcode" class="form-input" placeholder="ไม่บังคับ">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ราคาต้นทุน (บาท) *</label>
+        <input type="number" id="pfCost" class="form-input" min="0" step="0.01" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคาขาย (บาท) *</label>
+        <input type="number" id="pfSell" class="form-input" min="0" step="0.01" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">จุดสั่งซื้อซ้ำ (Reorder Point) *</label>
+      <input type="number" id="pfReorder" class="form-input" min="0" step="1" placeholder="0">
+    </div>
+    <div class="form-group checkbox-row">
+      <input type="checkbox" id="pfActive" checked>
+      <label for="pfActive">เปิดใช้งานสินค้านี้</label>
+    </div>
+    <button class="btn btn-primary" id="productSaveBtn" onclick="saveProduct()">บันทึกสินค้า</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const BRAND_OPTIONS = ['Pioneer DJ', 'AlphaTheta', 'NEO by OYAIDE', 'Other'];
+
+let products = [];
+let stockLevelMap = {};
+let movements = [];
+let currentAdmin = null;
+let currentUserId = null;
+let editingProductId = null;
+let currentPage = 'Dashboard';
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page' + name).classList.add('active');
+  const idx = ['Dashboard','Products','Movement','History'].indexOf(name);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  currentPage = name;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() {
+  db.auth.signOut();
+}
+
+function isWriter() {
+  return !!currentAdmin && (currentAdmin.role === 'owner' || currentAdmin.role === 'admin');
+}
+
+function updateRoleUI() {
+  const addBtn = document.getElementById('addProductBtn');
+  const notice = document.getElementById('staffNotice');
+  if (isWriter()) {
+    addBtn.style.display = '';
+    addBtn.disabled = false;
+    notice.style.display = 'none';
+  } else {
+    addBtn.style.display = 'none';
+    notice.style.display = '';
+  }
+}
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    currentAdmin = null;
+    currentUserId = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  currentUserId = session.user.id;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  const roleLabel = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' }[adminRow.role] || adminRow.role;
+  document.getElementById('currentUserInfo').textContent =
+    'เข้าสู่ระบบเป็น: ' + adminRow.full_name + ' (' + roleLabel + ')';
+
+  updateRoleUI();
+  loadAll();
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await db.auth.getSession();
+  handleAuthState(session);
+
+  db.auth.onAuthStateChange((_event, session) => {
+    handleAuthState(session);
+  });
+
+  db.channel('stock-products')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => loadAll())
+    .subscribe();
+
+  db.channel('stock-movements')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_movements' }, () => loadAll())
+    .subscribe();
+}
+
+async function loadAll() {
+  await Promise.all([loadProducts(), loadStockLevels(), loadMovements()]);
+  renderAll();
+}
+
+async function loadProducts() {
+  const { data, error } = await db.from('products').select('*').order('name');
+  if (error) {
+    console.error('[Load products]', error);
+    showToast('⚠️ โหลดรายการสินค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  products = data || [];
+}
+
+async function loadStockLevels() {
+  const { data, error } = await db.from('product_stock_levels').select('product_id, current_qty');
+  if (error) {
+    console.error('[Load stock levels]', error);
+    showToast('⚠️ โหลดยอดคงเหลือไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  stockLevelMap = {};
+  (data || []).forEach(row => { stockLevelMap[row.product_id] = row.current_qty; });
+}
+
+async function loadMovements() {
+  const { data, error } = await db.from('stock_movements')
+    .select('id, type, qty, reason, created_at, product_id, admin_id, products:product_id(name, sku), admins:admin_id(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  if (error) {
+    console.error('[Load movements]', error);
+    showToast('⚠️ โหลดประวัติการเคลื่อนไหวไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  movements = data || [];
+}
+
+function getMergedProducts() {
+  return products.map(p => {
+    const current_qty = stockLevelMap.hasOwnProperty(p.id) ? stockLevelMap[p.id] : 0;
+    return Object.assign({}, p, {
+      current_qty,
+      low_stock: current_qty <= p.reorder_point,
+    });
+  });
+}
+
+function renderAll() {
+  renderDashboard();
+  renderProducts();
+  renderMovementProductOptions();
+  renderHistory();
+}
+
+function renderDashboard() {
+  const merged = getMergedProducts();
+  const lowStock = merged.filter(p => p.low_stock);
+  const totalValue = merged.reduce((s, p) => s + (p.current_qty * (parseFloat(p.cost_price) || 0)), 0);
+
+  document.getElementById('statTotalProducts').textContent = merged.length;
+  document.getElementById('statLowStock').textContent = lowStock.length;
+  document.getElementById('statTotalValue').textContent = Math.round(totalValue).toLocaleString();
+
+  const el = document.getElementById('lowStockList');
+  if (lowStock.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">ไม่มีสินค้าใกล้หมด</div></div>';
+  } else {
+    el.innerHTML = lowStock
+      .sort((a, b) => a.current_qty - b.current_qty)
+      .map(renderProductItem).join('');
+  }
+}
+
+function renderProductItem(p) {
+  const lowBadge = p.low_stock ? '<span class="badge badge-lowstock">⚠️ ใกล้หมด</span>' : '';
+  const inactiveBadge = !p.is_active ? '<span class="badge badge-inactive">ปิดใช้งาน</span>' : '';
+  return `
+    <div class="product-item ${p.low_stock ? 'low-stock' : ''}" onclick="openProductModal(${JSON.stringify(p.id)})">
+      <div class="product-header">
+        <div>
+          <div class="product-name">${escapeHtml(p.name)}</div>
+          <div class="product-sub">${escapeHtml(p.sku)} · ${escapeHtml(p.brand)}</div>
+          <div class="product-tags">${lowBadge}${inactiveBadge}</div>
+        </div>
+      </div>
+      <div class="product-details">
+        <div class="product-qty">คงเหลือ <strong>${p.current_qty}</strong> ชิ้น</div>
+        <div class="product-price">${(parseFloat(p.sell_price) || 0).toLocaleString()} บาท</div>
+      </div>
+    </div>`;
+}
+
+function renderProducts() {
+  updateRoleUI();
+  const query = (document.getElementById('productSearch').value || '').trim().toLowerCase();
+  let merged = getMergedProducts();
+  if (query) {
+    merged = merged.filter(p =>
+      (p.name || '').toLowerCase().includes(query) ||
+      (p.sku || '').toLowerCase().includes(query) ||
+      (p.barcode_ean13 || '').toLowerCase().includes(query)
+    );
+  }
+  merged.sort((a, b) => {
+    if (a.low_stock !== b.low_stock) return a.low_stock ? -1 : 1;
+    return a.name.localeCompare(b.name, 'th');
+  });
+
+  const el = document.getElementById('productList');
+  if (merged.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">ไม่พบสินค้า</div></div>';
+  } else {
+    el.innerHTML = merged.map(renderProductItem).join('');
+  }
+}
+
+document.getElementById('productSearch').addEventListener('input', renderProducts);
+
+function renderMovementProductOptions() {
+  const sel = document.getElementById('movProduct');
+  const prevValue = sel.value;
+  const sorted = [...products].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+  sel.innerHTML = sorted.map(p =>
+    `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.sku)})${!p.is_active ? ' — ปิดใช้งาน' : ''}</option>`
+  ).join('');
+  if (sorted.some(p => p.id === prevValue)) sel.value = prevValue;
+}
+
+function onMovTypeChange() {
+  const type = document.getElementById('movType').value;
+  const qtyInput = document.getElementById('movQty');
+  const label = document.getElementById('movQtyLabel');
+  if (type === 'adjustment') {
+    qtyInput.removeAttribute('min');
+    label.textContent = 'จำนวนที่ปรับ (ใส่ค่าติดลบได้ถ้าต้องการลดยอด) *';
+  } else {
+    qtyInput.setAttribute('min', '1');
+    label.textContent = 'จำนวน (ต้องเป็นจำนวนบวก) *';
+  }
+}
+
+async function submitMovement() {
+  const productId = document.getElementById('movProduct').value;
+  const type = document.getElementById('movType').value;
+  const qtyRaw = document.getElementById('movQty').value;
+  const reason = document.getElementById('movReason').value.trim();
+
+  if (!productId) { showToast('⚠️ กรุณาเลือกสินค้า'); return; }
+  const qty = parseInt(qtyRaw, 10);
+  if (isNaN(qty) || qty === 0) { showToast('⚠️ กรุณาระบุจำนวนที่ไม่เป็นศูนย์'); return; }
+  if ((type === 'in' || type === 'out') && qty <= 0) { showToast('⚠️ จำนวนต้องเป็นค่าบวกสำหรับรับเข้า/ตัดออก'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+
+  const { error } = await db.from('stock_movements').insert({
+    product_id: productId,
+    type,
+    qty,
+    reason: reason || null,
+    admin_id: currentUserId,
+  });
+
+  if (error) {
+    console.error('[Add movement]', error);
+    showToast('⚠️ บันทึกรายการไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  document.getElementById('movQty').value = '';
+  document.getElementById('movReason').value = '';
+  showToast('✅ บันทึกรายการเรียบร้อยแล้ว');
+}
+
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543} ${hh}:${mm}`;
+}
+
+const TYPE_LABEL = { in: 'รับเข้า', out: 'ตัดออก', adjustment: 'ปรับยอด' };
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (movements.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มีประวัติการเคลื่อนไหว</div></div>';
+    return;
+  }
+  el.innerHTML = movements.map(m => {
+    const productName = m.products ? m.products.name : '(ไม่พบสินค้า)';
+    const productSku = m.products ? m.products.sku : '';
+    const adminName = m.admins ? m.admins.full_name : 'ไม่ทราบผู้ทำรายการ';
+    let sign, cls;
+    if (m.type === 'out') { sign = '-'; cls = 'qty-neg'; }
+    else if (m.qty < 0) { sign = ''; cls = 'qty-neg'; }
+    else { sign = '+'; cls = 'qty-pos'; }
+    return `
+      <div class="history-item">
+        <div class="history-top">
+          <div>
+            <div class="history-product">${escapeHtml(productName)}${productSku ? ' (' + escapeHtml(productSku) + ')' : ''}</div>
+            <div class="history-meta">${formatDateTime(m.created_at)} · <span class="badge badge-${m.type}">${TYPE_LABEL[m.type] || m.type}</span></div>
+            <div class="history-meta">โดย ${escapeHtml(adminName)}</div>
+          </div>
+          <div class="history-qty ${cls}">${sign}${Math.abs(m.qty)}</div>
+        </div>
+        ${m.reason ? `<div class="history-reason">📝 ${escapeHtml(m.reason)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function openProductModal(productId) {
+  editingProductId = productId;
+  const modal = document.getElementById('productModal');
+  const title = document.getElementById('productModalTitle');
+  const saveBtn = document.getElementById('productSaveBtn');
+  const notice = document.getElementById('productModalReadonlyNotice');
+
+  const fields = ['pfSku', 'pfName', 'pfBrand', 'pfCategory', 'pfBarcode', 'pfCost', 'pfSell', 'pfReorder', 'pfActive'];
+
+  if (productId) {
+    const p = products.find(x => x.id === productId);
+    if (!p) { showToast('⚠️ ไม่พบข้อมูลสินค้านี้'); return; }
+    title.textContent = 'แก้ไขสินค้า';
+    document.getElementById('pfSku').value = p.sku;
+    document.getElementById('pfName').value = p.name;
+    document.getElementById('pfBrand').value = p.brand;
+    document.getElementById('pfCategory').value = p.category || '';
+    document.getElementById('pfBarcode').value = p.barcode_ean13 || '';
+    document.getElementById('pfCost').value = p.cost_price;
+    document.getElementById('pfSell').value = p.sell_price;
+    document.getElementById('pfReorder').value = p.reorder_point;
+    document.getElementById('pfActive').checked = p.is_active;
+  } else {
+    title.textContent = 'เพิ่มสินค้าใหม่';
+    document.getElementById('pfSku').value = '';
+    document.getElementById('pfName').value = '';
+    document.getElementById('pfBrand').value = BRAND_OPTIONS[0];
+    document.getElementById('pfCategory').value = '';
+    document.getElementById('pfBarcode').value = '';
+    document.getElementById('pfCost').value = '';
+    document.getElementById('pfSell').value = '';
+    document.getElementById('pfReorder').value = '';
+    document.getElementById('pfActive').checked = true;
+  }
+
+  const writer = isWriter();
+  fields.forEach(id => { document.getElementById(id).disabled = !writer; });
+  saveBtn.style.display = writer ? '' : 'none';
+  notice.style.display = writer ? 'none' : '';
+
+  modal.classList.add('open');
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+  editingProductId = null;
+}
+
+document.getElementById('productModal').addEventListener('click', function(e) {
+  if (e.target === this) closeProductModal();
+});
+
+async function saveProduct() {
+  if (!isWriter()) { showToast('⚠️ คุณไม่มีสิทธิ์แก้ไขสินค้า'); return; }
+
+  const sku = document.getElementById('pfSku').value.trim();
+  const name = document.getElementById('pfName').value.trim();
+  const brand = document.getElementById('pfBrand').value;
+  const category = document.getElementById('pfCategory').value.trim() || null;
+  const barcode_ean13 = document.getElementById('pfBarcode').value.trim() || null;
+  const cost_price = parseFloat(document.getElementById('pfCost').value);
+  const sell_price = parseFloat(document.getElementById('pfSell').value);
+  const reorder_point = parseInt(document.getElementById('pfReorder').value, 10);
+  const is_active = document.getElementById('pfActive').checked;
+
+  if (!sku) { showToast('⚠️ กรุณากรอก SKU'); return; }
+  if (!name) { showToast('⚠️ กรุณากรอกชื่อสินค้า'); return; }
+  if (!BRAND_OPTIONS.includes(brand)) { showToast('⚠️ กรุณาเลือกแบรนด์ให้ถูกต้อง'); return; }
+  if (isNaN(cost_price) || cost_price < 0) { showToast('⚠️ กรุณากรอกราคาต้นทุนให้ถูกต้อง'); return; }
+  if (isNaN(sell_price) || sell_price < 0) { showToast('⚠️ กรุณากรอกราคาขายให้ถูกต้อง'); return; }
+  if (isNaN(reorder_point) || reorder_point < 0) { showToast('⚠️ กรุณากรอกจุดสั่งซื้อซ้ำให้ถูกต้อง'); return; }
+
+  const payload = { sku, name, brand, category, barcode_ean13, cost_price, sell_price, reorder_point, is_active };
+
+  let error;
+  if (editingProductId) {
+    payload.updated_at = new Date().toISOString();
+    ({ error } = await db.from('products').update(payload).eq('id', editingProductId));
+  } else {
+    ({ error } = await db.from('products').insert(payload));
+  }
+
+  if (error) {
+    console.error('[Save product]', error);
+    if (error.code === '23505') {
+      showToast('⚠️ SKU หรือบาร์โค้ดนี้มีอยู่ในระบบแล้ว');
+    } else {
+      showToast('⚠️ บันทึกสินค้าไม่สำเร็จ: ' + error.message);
+    }
+    return;
+  }
+
+  showToast(editingProductId ? '✅ แก้ไขสินค้าเรียบร้อยแล้ว' : '✅ เพิ่มสินค้าใหม่เรียบร้อยแล้ว');
+  closeProductModal();
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+initSupabaseSync();
+</script>
+</body>
+</html>
