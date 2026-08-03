@@ -1,7 +1,8 @@
 // DJ LAB SIAM — Service Worker
-// Version: 3.0.0
+// Version: 4.0.0 — bumped for the Supabase migration so every device drops its
+// Firebase-era cache on next load rather than serving a stale app shell.
 
-const CACHE_NAME = 'djlab-booking-v3';
+const CACHE_NAME = 'djlab-booking-v4';
 const ASSETS = [
   './DJ_LAB_SIAM_BookingApp.html',
   './book.html',

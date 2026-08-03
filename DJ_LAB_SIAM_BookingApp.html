@@ -393,6 +393,10 @@
     </div>
     <div class="alert alert-red" id="loginError" style="display:none;"></div>
     <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <!-- ป้ายเวอร์ชัน: ถ้าไม่ขึ้น "JS: ทำงาน" แปลว่าเครื่องยังโหลดไฟล์เก่าค้างอยู่ -->
+    <div style="text-align:center;font-size:12px;color:#888;margin-top:10px;">
+      v2026-08-03-b · <span id="jsAlive">JS: ไม่ทำงาน</span>
+    </div>
   </div>
 </div>
 
@@ -732,6 +736,10 @@ function showFatalError(msg) {
 window.addEventListener('error', e => {
   showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
 });
+(function () {
+  const el = document.getElementById('jsAlive');
+  if (el) { el.textContent = 'JS: ทำงาน'; el.style.color = '#1a8f4a'; }
+})();
 window.addEventListener('unhandledrejection', e => {
   const r = e.reason;
   showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
