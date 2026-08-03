@@ -715,12 +715,37 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+// บนมือถือเปิด console ดูไม่ได้ ถ้าไม่ดักไว้ error ทุกอย่างจะกลายเป็น "กดแล้วไม่มีอะไรเกิดขึ้น"
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    box.addEventListener('click', () => box.remove());
+    document.body.appendChild(box);
+  }
+  box.textContent = '⚠️ ' + msg + '\n\n(แตะเพื่อปิด)';
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
 // ============================
 // SUPABASE — SHARED DATABASE
 // ============================
 const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
 
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================
@@ -754,7 +779,15 @@ async function doLogin() {
     return;
   }
   document.getElementById('loginBtn').disabled = true;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  let error;
+  try {
+    ({ error } = await supabase.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    // ต่อ Supabase ไม่ติดเลย (เน็ตล่ม/โดนบล็อก) — ต่างจากกรณีรหัสผ่านผิดที่ได้ error กลับมาปกติ
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
   if (error) {
     console.error('[Login]', error);
     // แยกสาเหตุให้ชัด ไม่งั้น "อีเมลยังไม่ยืนยัน" กับ "รหัสผ่านผิด" จะดูเหมือนกันหมด
