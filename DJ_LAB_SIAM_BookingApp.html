@@ -757,7 +757,15 @@ async function doLogin() {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     console.error('[Login]', error);
-    errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมล/รหัสผ่าน';
+    // แยกสาเหตุให้ชัด ไม่งั้น "อีเมลยังไม่ยืนยัน" กับ "รหัสผ่านผิด" จะดูเหมือนกันหมด
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
     errBox.style.display = '';
     document.getElementById('loginBtn').disabled = false;
   }
@@ -789,11 +797,27 @@ async function loadBookingSettings() {
   if (currentPage === 'Settings') renderSettings();
 }
 
-function handleAuthState(session) {
+async function handleAuthState(session) {
   if (!session) {
     document.getElementById('loginOverlay').style.display = 'flex';
     return;
   }
+
+  // เข้าระบบได้ไม่ได้แปลว่ามีสิทธิ์ — ถ้าไม่มีแถวใน admins ทุก query จะถูกกฎความปลอดภัย
+  // กรองออกจนหมด แล้วแอปจะดูเหมือนว่างเปล่าเฉยๆ โดยไม่บอกสาเหตุ
+  const { data: adminRow } = await supabase
+    .from('admins').select('id').eq('id', session.user.id).maybeSingle();
+
+  if (!adminRow) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await supabase.auth.signOut();
+    return;
+  }
+
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('loginBtn').disabled = false;
   const emailEl = document.getElementById('currentUserEmail');
