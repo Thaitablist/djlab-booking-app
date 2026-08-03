@@ -712,27 +712,16 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 // ============================
-// FIREBASE — SHARED DATABASE
+// SUPABASE — SHARED DATABASE
 // ============================
-const firebaseConfig = {
-  apiKey: "AIzaSyAEs9u1H9-JolrOAcqFYGBUbWn9mEHSf3U",
-  authDomain: "dj-lab-booking.firebaseapp.com",
-  projectId: "dj-lab-booking",
-  storageBucket: "dj-lab-booking.firebasestorage.app",
-  messagingSenderId: "601615158618",
-  appId: "1:601615158618:web:3a6721b0bc4d7e6680b763"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-const bookingsRef = db.collection('bookings');
-const settingsRef = db.collection('settings').doc('config');
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================
 // DATA
@@ -754,7 +743,7 @@ function refreshCurrentPage() {
   if (currentPage === 'Report') renderReport();
 }
 
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   const errBox = document.getElementById('loginError');
@@ -765,44 +754,74 @@ function doLogin() {
     return;
   }
   document.getElementById('loginBtn').disabled = true;
-  auth.signInWithEmailAndPassword(email, password).catch(err => {
-    console.error('[Login]', err);
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    console.error('[Login]', error);
     errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมล/รหัสผ่าน';
     errBox.style.display = '';
     document.getElementById('loginBtn').disabled = false;
-  });
+  }
 }
 
 function doLogout() {
-  auth.signOut();
+  supabase.auth.signOut();
 }
 
-function initFirebaseSync() {
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      document.getElementById('loginOverlay').style.display = 'flex';
-      return;
-    }
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('loginBtn').disabled = false;
-    const emailEl = document.getElementById('currentUserEmail');
-    if (emailEl) emailEl.textContent = 'เข้าสู่ระบบเป็น: ' + (user.email || '');
+async function loadBookings() {
+  const { data, error } = await supabase.from('room_bookings').select('*').order('date').order('start_time');
+  if (error) { console.error('[Load bookings]', error); return; }
+  bookings = data || [];
+  refreshCurrentPage();
+}
 
-    bookingsRef.onSnapshot(snap => {
-      bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      refreshCurrentPage();
-    }, err => console.error('[Firestore bookings]', err));
+async function loadBookingSettings() {
+  const { data, error } = await supabase.from('booking_settings')
+    .select('price_per_hour, points_per_hour, free_hour_threshold, free_hours_reward, room_name').single();
+  if (error) { console.error('[Load settings]', error); return; }
+  if (data) {
+    settings.pricePerHour = data.price_per_hour;
+    settings.pointsPerHour = data.points_per_hour;
+    settings.freeHourThreshold = data.free_hour_threshold;
+    settings.freeHoursReward = data.free_hours_reward;
+    settings.roomName = data.room_name;
+  }
+  updateCostPreview();
+  if (currentPage === 'Settings') renderSettings();
+}
 
-    settingsRef.onSnapshot(snap => {
-      if (snap.exists) {
-        settings = { ...settings, ...snap.data() };
-      } else {
-        settingsRef.set(settings);
-      }
-      updateCostPreview();
-      if (currentPage === 'Settings') renderSettings();
-    }, err => console.error('[Firestore settings]', err));
+function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    return;
+  }
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+  const emailEl = document.getElementById('currentUserEmail');
+  if (emailEl) emailEl.textContent = 'เข้าสู่ระบบเป็น: ' + (session.user.email || '');
+
+  loadBookings();
+  loadBookingSettings();
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await supabase.auth.getSession();
+  handleAuthState(session);
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    handleAuthState(session);
   });
+
+  supabase.channel('staff-bookings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_bookings' }, () => {
+      loadBookings();
+    })
+    .subscribe();
+
+  supabase.channel('staff-booking-settings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'booking_settings' }, () => {
+      loadBookingSettings();
+    })
+    .subscribe();
 }
 
 // ============================
@@ -852,7 +871,7 @@ function updateCostPreview() {
   document.getElementById('costAmount').textContent = cost.toLocaleString() + ' บาท (' + hrs + ' ชม.)';
 }
 
-function submitBooking() {
+async function submitBooking() {
   const name = document.getElementById('bookName').value.trim();
   const contact = document.getElementById('bookContact').value.trim();
   const date = document.getElementById('bookDate').value;
@@ -871,18 +890,22 @@ function submitBooking() {
   const cost = hours * settings.pricePerHour;
   const pts = hours * settings.pointsPerHour;
 
-  const booking = {
-    name, contact, date, time, hours, room, roomModel, equip, note,
-    cost, pts, status: 'upcoming',
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase.from('room_bookings').insert({
+    customer_name: name, contact, date, start_time: time, hours,
+    room, room_model: roomModel, equip, note,
+    cost, points_earned: pts,
+    status: 'upcoming',
     confirmed: true,
     source: 'staff',
-    createdAt: new Date().toISOString()
-  };
-
-  bookingsRef.add(booking).catch(err => {
-    console.error('[Add booking]', err);
-    showToast('⚠️ บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+    created_by: user.id,
   });
+
+  if (error) {
+    console.error('[Add booking]', error);
+    showToast('⚠️ บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+    return;
+  }
 
   // Reset form
   document.getElementById('bookName').value = '';
@@ -916,7 +939,7 @@ function renderDashboard() {
   // Next booking
   const upcoming = bookings
     .filter(b => b.status !== 'done' && (b.date > todayStr || (b.date === todayStr)))
-    .sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+    .sort((a,b) => (a.date + a.start_time).localeCompare(b.date + b.start_time));
 
   const nextEl = document.getElementById('nextBookingContainer');
   if (upcoming.length > 0) {
@@ -925,8 +948,8 @@ function renderDashboard() {
       <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
-            <div class="booking-name">${b.name}</div>
-            <div class="booking-date">${formatDate(b.date)} · ${b.time} · ${b.hours} ชม.</div>
+            <div class="booking-name">${b.customer_name}</div>
+            <div class="booking-date">${formatDate(b.date)} · ${shortTime(b.start_time)} · ${b.hours} ชม.</div>
             ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-upcoming">รอ</span>
@@ -949,8 +972,8 @@ function renderDashboard() {
       <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
-            <div class="booking-name">${b.name}</div>
-            <div class="booking-date">${b.time} — ${addHours(b.time, b.hours)} · ${b.room}</div>
+            <div class="booking-name">${b.customer_name}</div>
+            <div class="booking-date">${shortTime(b.start_time)} — ${addHours(b.start_time, b.hours)} · ${b.room}</div>
             ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
@@ -998,7 +1021,7 @@ function renderCalendar() {
 }
 
 function showDayBookings(dateStr) {
-  const day = bookings.filter(b => b.date === dateStr).sort((a,b) => a.time.localeCompare(b.time));
+  const day = bookings.filter(b => b.date === dateStr).sort((a,b) => a.start_time.localeCompare(b.start_time));
   const el = document.getElementById('calDayBookings');
   if (day.length === 0) {
     el.innerHTML = `<div class="card"><div style="color:var(--text2);font-size:14px;text-align:center;padding:16px 0;">ไม่มีการจอง ${formatDate(dateStr)}</div></div>`;
@@ -1009,8 +1032,8 @@ function showDayBookings(dateStr) {
       <div class="booking-item" onclick="showBookingDetail('${b.id}')">
         <div class="booking-header">
           <div>
-            <div class="booking-name">${b.name}</div>
-            <div class="booking-date">${b.time} · ${b.hours} ชม. · ${b.room}</div>
+            <div class="booking-name">${b.customer_name}</div>
+            <div class="booking-date">${shortTime(b.start_time)} · ${b.hours} ชม. · ${b.room}</div>
             ${!b.confirmed ? '<div style="font-size:11px;color:var(--orange);margin-top:2px;">🕓 รอการยืนยัน</div>' : ''}
           </div>
           <span class="badge badge-${b.status === 'done' ? 'done' : 'upcoming'}">${b.status === 'done' ? 'เสร็จ' : 'รอ'}</span>
@@ -1133,15 +1156,15 @@ function triggerTimerAlert() {
   showToast('⏰ หมดเวลาซ้อมแล้ว!');
 }
 
-function startTimerFromBooking() {
+async function startTimerFromBooking() {
   const b = bookings.find(b => b.id === currentModalBookingId);
   if (!b) return;
   closeModal();
   setTimer(b.hours, 0);
   showPage('Timer');
   setTimeout(() => timerAction(), 300);
-  // Mark as active
-  bookingsRef.doc(b.id).update({ status: 'active' }).catch(err => console.error('[Update booking]', err));
+  const { error } = await supabase.from('room_bookings').update({ status: 'active' }).eq('id', b.id);
+  if (error) console.error('[Update booking]', error);
 }
 
 // ============================
@@ -1182,7 +1205,7 @@ function renderPoints() {
     histEl.innerHTML = done.map(b => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
         <div>
-          <div style="font-size:14px;font-weight:600;">${b.name}</div>
+          <div style="font-size:14px;font-weight:600;">${b.customer_name}</div>
           <div style="font-size:12px;color:var(--text2);">${formatDate(b.date)} · ${b.hours} ชม.</div>
         </div>
         <div style="color:var(--gold);font-weight:700;">+${b.hours} ชม.</div>
@@ -1200,7 +1223,7 @@ function searchCustomerPoints() {
   const queryLower = rawQuery.toLowerCase();
   const queryDigits = normalizePhone(rawQuery);
   const found = bookings.filter(b => {
-    const nameMatch = b.name.toLowerCase().includes(queryLower);
+    const nameMatch = b.customer_name.toLowerCase().includes(queryLower);
     const contactTextMatch = b.contact.toLowerCase().includes(queryLower);
     const phoneMatch = queryDigits.length >= 4 && normalizePhone(b.contact).includes(queryDigits);
     return nameMatch || contactTextMatch || phoneMatch;
@@ -1210,7 +1233,7 @@ function searchCustomerPoints() {
     el.innerHTML = '<div class="alert alert-red">ไม่พบข้อมูลลูกค้า</div>';
     return;
   }
-  const name = found[0].name;
+  const name = found[0].customer_name;
   const totalHrs = found.filter(b => b.status === 'done').reduce((s,b) => s + b.hours, 0);
   const freeEarned = Math.floor(totalHrs / settings.freeHourThreshold);
   el.innerHTML = `
@@ -1231,16 +1254,16 @@ function showBookingDetail(id) {
   document.getElementById('modalTitle').textContent = 'รายละเอียดการจอง';
   document.getElementById('modalContent').innerHTML = `
     <div style="margin-bottom:12px;">
-      <div style="font-size:19px;font-weight:800;">${b.name}</div>
+      <div style="font-size:19px;font-weight:800;">${b.customer_name}</div>
       <div style="font-size:13px;color:var(--text2);margin-top:2px;">📞 ${b.contact}</div>
       ${b.confirmed ? '<span class="badge badge-active" style="margin-top:6px;display:inline-block;">✅ ยืนยันแล้ว</span>' : '<span class="badge badge-upcoming" style="margin-top:6px;display:inline-block;">🕓 รอยืนยัน</span>'}
     </div>
     <div class="booking-details" style="flex-direction:column;gap:8px;">
       <div><span class="tag">📅 วันที่</span> <strong>${formatDate(b.date)}</strong></div>
-      <div><span class="tag">⏰ เวลา</span> <strong>${b.time} — ${addHours(b.time, b.hours)}</strong></div>
+      <div><span class="tag">⏰ เวลา</span> <strong>${shortTime(b.start_time)} — ${addHours(b.start_time, b.hours)}</strong></div>
       <div><span class="tag">⏱ ระยะเวลา</span> <strong>${b.hours} ชั่วโมง</strong></div>
       <div><span class="tag">🎛 Setup</span> <strong>${b.room}</strong></div>
-      ${b.roomModel ? `<div><span class="tag">🎚 รุ่นที่ระบุ</span> <strong>${b.roomModel}</strong></div>` : ''}
+      ${b.room_model ? `<div><span class="tag">🎚 รุ่นที่ระบุ</span> <strong>${b.room_model}</strong></div>` : ''}
       ${b.equip ? `<div><span class="tag">🎧 อุปกรณ์</span> <strong>${b.equip}</strong></div>` : ''}
       ${b.note ? `<div><span class="tag">📝 หมายเหตุ</span> <strong>${b.note}</strong></div>` : ''}
     </div>
@@ -1269,28 +1292,37 @@ function closeModal() {
   currentModalBookingId = null;
 }
 
-function deleteBookingModal() {
+async function deleteBookingModal() {
   if (!currentModalBookingId) return;
   if (!confirm('ต้องการลบการจองนี้หรือไม่?')) return;
-  bookingsRef.doc(currentModalBookingId).delete().catch(err => console.error('[Delete booking]', err));
+  const { error } = await supabase.from('room_bookings').delete().eq('id', currentModalBookingId);
+  if (error) console.error('[Delete booking]', error);
   closeModal();
   showToast('ลบการจองแล้ว');
 }
 
-function confirmBooking(id) {
-  bookingsRef.doc(id).update({ confirmed: true }).catch(err => console.error('[Confirm booking]', err));
+async function confirmBooking(id) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase.from('room_bookings').update({
+    confirmed: true,
+    confirmed_by: user.id,
+    confirmed_at: new Date().toISOString(),
+  }).eq('id', id);
+  if (error) console.error('[Confirm booking]', error);
   closeModal();
   showToast('✅ ยืนยันการจองแล้ว');
 }
 
-function markBookingDone(id) {
-  bookingsRef.doc(id).update({ status: 'done' }).catch(err => console.error('[Update booking]', err));
+async function markBookingDone(id) {
+  const { error } = await supabase.from('room_bookings').update({ status: 'done' }).eq('id', id);
+  if (error) console.error('[Update booking]', error);
   closeModal();
   showToast('✅ บันทึกเสร็จสิ้นแล้ว');
 }
 
-function markBookingUpcoming(id) {
-  bookingsRef.doc(id).update({ status: 'upcoming' }).catch(err => console.error('[Update booking]', err));
+async function markBookingUpcoming(id) {
+  const { error } = await supabase.from('room_bookings').update({ status: 'upcoming' }).eq('id', id);
+  if (error) console.error('[Update booking]', error);
   closeModal();
   showToast('🔄 รีเซ็ตสถานะแล้ว');
 }
@@ -1305,8 +1337,12 @@ function formatDate(dateStr) {
   return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
 }
 
+function shortTime(timeStr) {
+  return (timeStr || '').slice(0, 5);
+}
+
 function addHours(timeStr, hours) {
-  const [h, m] = timeStr.split(':').map(Number);
+  const [h, m] = shortTime(timeStr).split(':').map(Number);
   const end = new Date(2000, 0, 1, h + hours, m);
   return `${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
 }
@@ -1352,7 +1388,7 @@ function renderHistory() {
   let filtered = [...bookings];
   if (statusF !== 'all') filtered = filtered.filter(b => b.status === statusF);
   if (monthF !== 'all') filtered = filtered.filter(b => b.date.startsWith(monthF));
-  filtered.sort((a,b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+  filtered.sort((a,b) => b.date.localeCompare(a.date) || b.start_time.localeCompare(a.start_time));
 
   const el = document.getElementById('historyList');
   if (filtered.length === 0) {
@@ -1382,8 +1418,8 @@ function renderHistory() {
     <div onclick="showBookingDetail('${b.id}')" style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;background:var(--surface);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
-          <div style="font-weight:700;font-size:15px;">${b.name}</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${formatDate(b.date)} · ${b.time} · ${b.hours} ชม.</div>
+          <div style="font-weight:700;font-size:15px;">${b.customer_name}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${formatDate(b.date)} · ${shortTime(b.start_time)} · ${b.hours} ชม.</div>
           <div style="font-size:12px;color:var(--text2);">${b.room}</div>
         </div>
         <div style="text-align:right;">
@@ -1487,10 +1523,10 @@ function renderReport() {
   // Customer ranking
   const custMap = {};
   doneInMonth.forEach(b => {
-    if (!custMap[b.name]) custMap[b.name] = { hrs: 0, cost: 0, sessions: 0, contact: b.contact };
-    custMap[b.name].hrs += b.hours;
-    custMap[b.name].cost += b.cost;
-    custMap[b.name].sessions++;
+    if (!custMap[b.customer_name]) custMap[b.customer_name] = { hrs: 0, cost: 0, sessions: 0, contact: b.contact };
+    custMap[b.customer_name].hrs += b.hours;
+    custMap[b.customer_name].cost += b.cost;
+    custMap[b.customer_name].sessions++;
   });
 
   const customers = Object.entries(custMap).sort((a,b) => b[1].cost - a[1].cost);
@@ -1536,7 +1572,7 @@ document.addEventListener('input', e => {
   if (e.target.id === 'setPricePerHour') updatePricePreview();
 });
 
-function saveSettings() {
+async function saveSettings() {
   const price = parseInt(document.getElementById('setPricePerHour').value);
   const threshold = parseInt(document.getElementById('setThreshold').value);
   const freeHours = parseInt(document.getElementById('setFreeHours').value);
@@ -1549,16 +1585,26 @@ function saveSettings() {
   settings.freeHourThreshold = threshold;
   settings.freeHoursReward = freeHours || 1;
   settings.roomName = roomName || 'DJ LAB SIAM';
-  settingsRef.set(settings, { merge: true }).catch(err => console.error('[Save settings]', err));
+
+  const { error } = await supabase.from('booking_settings').update({
+    price_per_hour: price,
+    points_per_hour: settings.pointsPerHour,
+    free_hour_threshold: settings.freeHourThreshold,
+    free_hours_reward: settings.freeHoursReward,
+    room_name: settings.roomName,
+  }).eq('id', true);
+  if (error) { console.error('[Save settings]', error); showToast('⚠️ บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); return; }
   showToast('✅ บันทึกการตั้งค่าแล้ว');
   updateCostPreview();
 }
 
-function clearAllData() {
+async function clearAllData() {
   if (!confirm('ต้องการล้างข้อมูลทั้งหมดหรือไม่?\n(การจอง, แต้ม ทั้งหมดจะถูกลบ)')) return;
-  Promise.all(bookings.map(b => bookingsRef.doc(b.id).delete()))
-    .then(() => showToast('🗑 ล้างข้อมูลแล้ว'))
-    .catch(err => { console.error('[Clear data]', err); showToast('⚠️ ล้างข้อมูลไม่สำเร็จบางส่วน'); });
+  const ids = bookings.map(b => b.id);
+  if (ids.length === 0) { showToast('🗑 ล้างข้อมูลแล้ว'); return; }
+  const { error } = await supabase.from('room_bookings').delete().in('id', ids);
+  if (error) { console.error('[Clear data]', error); showToast('⚠️ ล้างข้อมูลไม่สำเร็จบางส่วน'); return; }
+  showToast('🗑 ล้างข้อมูลแล้ว');
 }
 
 // ============================
@@ -1636,7 +1682,7 @@ generateIcons();
 renderDashboard();
 renderCalendar();
 requestNotificationPermission();
-initFirebaseSync();
+initSupabaseSync();
 </script>
 </body>
 </html>
