@@ -201,7 +201,7 @@ const LIFF_ID = '2010938781-6oxlp5KL';
 const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let settings = { pricePerHour: 800, pointsPerHour: 1 };
 let ready = false;
@@ -234,7 +234,7 @@ function formatDate(dateStr) {
 
 function watchBookingStatus(bookingId) {
   const box = document.getElementById('successBox');
-  supabase.channel(`booking-${bookingId}`)
+  db.channel(`booking-${bookingId}`)
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'room_bookings', filter: `id=eq.${bookingId}` }, payload => {
       const data = payload.new;
       if (!data) return;
@@ -274,8 +274,8 @@ async function submitBooking() {
   submitBtn.disabled = true;
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: inserted, error } = await supabase.from('room_bookings').insert({
+    const { data: { user } } = await db.auth.getUser();
+    const { data: inserted, error } = await db.from('room_bookings').insert({
       customer_name: name,
       contact: contact,
       date, start_time: time, hours,
@@ -316,7 +316,7 @@ async function initApp() {
     console.error('[LIFF init]', err);
   }
 
-  const { error: authError } = await supabase.auth.signInAnonymously();
+  const { error: authError } = await db.auth.signInAnonymously();
   if (authError) {
     console.error('[Auth]', authError);
     showToast('⚠️ เชื่อมต่อระบบไม่สำเร็จ');
@@ -324,7 +324,7 @@ async function initApp() {
   }
 
   try {
-    const { data } = await supabase.from('booking_settings').select('price_per_hour, points_per_hour').single();
+    const { data } = await db.from('booking_settings').select('price_per_hour, points_per_hour').single();
     if (data) {
       settings = { pricePerHour: data.price_per_hour, pointsPerHour: data.points_per_hour };
     }
