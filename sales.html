@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — บันทึกการขาย</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link, .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link:hover, .header-link-btn:hover { color: #ffffff; }
+
+  .nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: #111111;
+    border-top: 2px solid var(--accent);
+    display: flex;
+    z-index: 200;
+  }
+  .nav-btn {
+    flex: 1;
+    background: none; border: none;
+    color: #888888;
+    padding: 8px 2px 6px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    transition: color 0.2s;
+    min-width: 0;
+    font-family: inherit;
+  }
+  .nav-btn span { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .nav-btn.active { color: var(--accent); }
+
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  textarea.form-input { resize: vertical; }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-input:disabled { background: var(--surface2); color: var(--text2); }
+  .form-input option { background: #ffffff; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .btn-danger { background: var(--accent); color: white; }
+  .btn-sm { display: inline-block; width: auto; padding: 8px 16px; font-size: 14px; border-radius: 8px; }
+
+  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .stat-card {
+    flex: 1;
+    background: #111111;
+    border: 1px solid #222222;
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .stat-value { font-size: 19px; font-weight: 900; color: var(--accent); word-break: break-word; }
+  .stat-label { font-size: 14px; color: #aaaaaa; margin-top: 4px; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+
+  .toast {
+    position: fixed; bottom: 90px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .empty { text-align: center; padding: 30px 20px; color: var(--text2); }
+  .empty-icon { font-size: 34px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .badge-completed { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-void { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .badge-inactive { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  .search-wrap { position: relative; margin-bottom: 10px; }
+
+  .product-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .product-item:hover { border-color: var(--accent); }
+  .product-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .product-name { font-weight: 700; font-size: 15px; }
+  .product-sub { font-size: 14px; color: var(--text2); margin-top: 3px; }
+  .product-details { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .product-qty { font-size: 14px; color: var(--text2); }
+  .product-price { font-size: 15px; font-weight: 800; color: var(--accent); text-align: right; }
+
+  .cart-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .cart-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .cart-item-name { font-weight: 700; font-size: 15px; }
+  .cart-remove-btn { background: none; border: none; color: var(--accent); font-size: 24px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+  .cart-item-sub { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .cart-item-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; flex-wrap: wrap; }
+  .qty-stepper { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; height: 38px; }
+  .qty-stepper button {
+    background: var(--surface2); border: none; width: 36px; height: 38px;
+    font-size: 18px; cursor: pointer; color: var(--text); font-family: inherit;
+  }
+  .qty-stepper input {
+    width: 50px; text-align: center; border: none; height: 38px;
+    border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+    font-size: 15px; font-family: inherit;
+  }
+  .cart-item-price { flex: 1; min-width: 130px; }
+  .cart-item-price label { font-size: 14px; color: var(--text2); display: block; margin-bottom: 4px; }
+  .cart-item-price input { height: 38px; }
+  .cart-item-linetotal { text-align: right; font-weight: 800; font-size: 15px; color: var(--accent); margin-top: 10px; }
+
+  .customer-chip {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .customer-chip-name { font-weight: 700; font-size: 15px; }
+  .customer-chip-phone { font-size: 14px; color: var(--text2); margin-top: 2px; }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; padding: 5px 0; }
+  .summary-net { font-size: 21px; font-weight: 900; color: var(--accent); padding-top: 10px; margin-top: 4px; border-top: 1px solid var(--border); }
+
+  .sale-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .sale-item.sale-void { opacity: 0.72; }
+  .sale-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .sale-no { font-weight: 800; font-size: 15px; }
+  .sale-void .sale-no { text-decoration: line-through; color: var(--text2); }
+  .sale-meta { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .sale-total { font-weight: 900; font-size: 16px; color: var(--accent); white-space: nowrap; }
+  .sale-void .sale-total { color: var(--text2); }
+
+  .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .history-item:last-child { border-bottom: none; }
+  .history-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .history-product { font-weight: 700; font-size: 15px; }
+  .history-meta { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .history-qty { font-size: 15px; font-weight: 800; white-space: nowrap; }
+
+  .success-icon { font-size: 46px; text-align: center; margin-bottom: 6px; }
+  .success-title { font-size: 18px; font-weight: 800; text-align: center; }
+  .success-sub { font-size: 15px; text-align: center; color: var(--text2); margin-top: 4px; }
+  .success-total { font-size: 26px; font-weight: 900; color: var(--accent); text-align: center; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <div class="logo-text">บันทึกการขาย</div>
+  </div>
+  <div class="header-right">
+    <a class="header-link" href="DJ_LAB_SIAM_BookingApp.html">← หน้าจองห้องซ้อม</a>
+    <a class="header-link" href="stock.html">📦 หน้าสต็อก</a>
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div id="pageSales" class="page active">
+  <div class="card">
+    <div class="card-title">สรุปยอดขาย</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statTodaySales">0</div>
+        <div class="stat-label">ยอดขายวันนี้ (บาท)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTodayCount">0</div>
+        <div class="stat-label">บิลวันนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMonthSales">0</div>
+        <div class="stat-label">ยอดขายเดือนนี้ (บาท)</div>
+      </div>
+    </div>
+    <div style="font-size:14px;color:var(--text2);" id="currentUserInfo"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ค้นหาสินค้า</div>
+    <div class="search-wrap">
+      <input type="text" id="productSearch" class="form-input" placeholder="ค้นหาด้วยชื่อ / SKU / บาร์โค้ด" autocomplete="off">
+    </div>
+    <div id="productSearchResults"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ตะกร้าสินค้า</div>
+    <div id="cartList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ลูกค้า (ไม่บังคับ)</div>
+    <div id="selectedCustomerBox" style="display:none;"></div>
+    <div id="customerSearchWrap">
+      <div class="search-wrap">
+        <input type="text" id="customerSearch" class="form-input" placeholder="ค้นหาชื่อ / เบอร์โทร" autocomplete="off">
+      </div>
+      <div id="customerSearchResults"></div>
+      <button class="btn btn-secondary" onclick="openCustomerModal()">+ เพิ่มลูกค้าใหม่</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">การชำระเงิน</div>
+    <div class="form-group">
+      <label class="form-label">ส่วนลด (บาท)</label>
+      <input type="number" id="discountInput" class="form-input" min="0" step="0.01" placeholder="0" oninput="renderCartSummary()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">วิธีชำระเงิน *</label>
+      <select id="paymentMethod" class="form-input">
+        <option value="เงินสด">เงินสด</option>
+        <option value="โอน">โอน</option>
+        <option value="บัตรเครดิต">บัตรเครดิต</option>
+        <option value="อื่นๆ">อื่นๆ</option>
+      </select>
+    </div>
+    <hr>
+    <div id="cartSummary"></div>
+    <button class="btn btn-primary" id="saveSaleBtn" onclick="submitSale()" style="margin-top:14px;">บันทึกการขาย</button>
+  </div>
+</div>
+
+<div id="pageHistory" class="page">
+  <div class="card">
+    <div class="card-title">ประวัติการขาย</div>
+    <div id="salesHistoryList"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('Sales')">🛒<span>ขายสินค้า</span></button>
+  <button class="nav-btn" onclick="showPage('History')">📋<span>ประวัติ</span></button>
+</nav>
+
+<div class="modal-overlay" id="customerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCustomerModal()">×</button>
+    <div class="modal-title">เพิ่มลูกค้าใหม่</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อลูกค้า *</label>
+      <input type="text" id="cfName" class="form-input" placeholder="ชื่อ-นามสกุล">
+    </div>
+    <div class="form-group">
+      <label class="form-label">เบอร์โทร</label>
+      <input type="text" id="cfPhone" class="form-input" placeholder="0812345678">
+    </div>
+    <button class="btn btn-primary" id="saveCustomerBtn" onclick="saveNewCustomer()">บันทึกลูกค้าใหม่</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="saleDetailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSaleDetailModal()">×</button>
+    <div class="modal-title">รายละเอียดบิล</div>
+    <div id="saleDetailBody"></div>
+    <button class="btn btn-danger" id="voidSaleBtn" onclick="openVoidModal()" style="display:none;margin-top:16px;">ยกเลิกบิล</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="voidModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeVoidModal()">×</button>
+    <div class="modal-title">ยืนยันการยกเลิกบิล</div>
+    <div class="alert alert-red">การยกเลิกบิลจะคืนสินค้ากลับเข้าสต็อกทั้งหมด และไม่สามารถย้อนกลับได้</div>
+    <div class="form-group">
+      <label class="form-label">เหตุผลการยกเลิก *</label>
+      <textarea id="voidReason" class="form-input" rows="3" placeholder="เช่น ลูกค้าขอยกเลิก, กรอกรายการผิด..."></textarea>
+    </div>
+    <button class="btn btn-danger" id="confirmVoidBtn" onclick="confirmVoid()">ยืนยันยกเลิกบิล</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="saleSuccessModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSaleSuccessModal()">×</button>
+    <div class="success-icon">✅</div>
+    <div class="success-title">บันทึกการขายสำเร็จ</div>
+    <div class="success-sub" id="successSaleNo"></div>
+    <div class="success-total" id="successSaleTotal"></div>
+    <button class="btn btn-primary" onclick="closeSaleSuccessModal()" style="margin-top:18px;">เสร็จสิ้น</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let products = [];
+let stockLevelMap = {};
+let customers = [];
+let sales = [];
+let currentAdmin = null;
+let currentUserId = null;
+let cart = [];
+let selectedCustomer = null;
+let submittingSale = false;
+let currentPage = 'Sales';
+let currentSaleDetailId = null;
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page' + name).classList.add('active');
+  const idx = ['Sales', 'History'].indexOf(name);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  currentPage = name;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() {
+  db.auth.signOut();
+}
+
+function isManager() {
+  return !!currentAdmin && (currentAdmin.role === 'owner' || currentAdmin.role === 'admin');
+}
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    currentAdmin = null;
+    currentUserId = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  currentUserId = session.user.id;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  const roleLabel = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' }[adminRow.role] || adminRow.role;
+  document.getElementById('currentUserInfo').textContent =
+    'เข้าสู่ระบบเป็น: ' + adminRow.full_name + ' (' + roleLabel + ')';
+
+  loadAll();
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await db.auth.getSession();
+  handleAuthState(session);
+
+  db.auth.onAuthStateChange((_event, session) => {
+    handleAuthState(session);
+  });
+
+  db.channel('sales-sales')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => loadAll())
+    .subscribe();
+
+  db.channel('sales-products')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => { loadProducts().then(renderProductSearch); })
+    .subscribe();
+
+  db.channel('sales-stock-movements')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_movements' }, () => { loadStockLevels().then(() => { renderProductSearch(); renderCart(); }); })
+    .subscribe();
+}
+
+async function loadAll() {
+  await Promise.all([loadProducts(), loadStockLevels(), loadCustomers(), loadSalesHistory(), loadStats()]);
+  renderAll();
+}
+
+async function loadProducts() {
+  const { data, error } = await db.from('products').select('*').order('name');
+  if (error) {
+    console.error('[Load products]', error);
+    showToast('⚠️ โหลดรายการสินค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  products = data || [];
+}
+
+async function loadStockLevels() {
+  const { data, error } = await db.from('product_stock_levels').select('product_id, current_qty');
+  if (error) {
+    console.error('[Load stock levels]', error);
+    showToast('⚠️ โหลดยอดคงเหลือไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  stockLevelMap = {};
+  (data || []).forEach(row => { stockLevelMap[row.product_id] = row.current_qty; });
+}
+
+async function loadCustomers() {
+  const { data, error } = await db.from('customers').select('id, full_name, phone').order('full_name');
+  if (error) {
+    console.error('[Load customers]', error);
+    showToast('⚠️ โหลดรายชื่อลูกค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  customers = data || [];
+}
+
+async function loadSalesHistory() {
+  const { data, error } = await db.from('sales')
+    .select('id, sale_no, customer_id, admin_id, subtotal, discount, total, payment_method, status, voided_reason, voided_at, created_at, customers:customer_id(full_name, phone), admins:admin_id(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  if (error) {
+    console.error('[Load sales history]', error);
+    showToast('⚠️ โหลดประวัติการขายไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  sales = data || [];
+}
+
+let statsData = [];
+async function loadStats() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  const { data, error } = await db.from('sales')
+    .select('id, total, status, created_at')
+    .gte('created_at', startOfMonth.toISOString());
+  if (error) {
+    console.error('[Load sales stats]', error);
+    showToast('⚠️ โหลดสรุปยอดขายไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  statsData = data || [];
+}
+
+function renderAll() {
+  renderStats();
+  renderProductSearch();
+  renderCart();
+  renderSelectedCustomer();
+  renderCustomerSearch();
+  renderSalesHistory();
+}
+
+function renderStats() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const monthCompleted = statsData.filter(s => s.status === 'completed');
+  const todayCompleted = monthCompleted.filter(s => new Date(s.created_at) >= todayStart);
+  const todayTotal = todayCompleted.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+  const monthTotal = monthCompleted.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+
+  document.getElementById('statTodaySales').textContent = formatMoney(todayTotal);
+  document.getElementById('statTodayCount').textContent = todayCompleted.length;
+  document.getElementById('statMonthSales').textContent = formatMoney(monthTotal);
+}
+
+function renderProductSearch() {
+  const q = (document.getElementById('productSearch').value || '').trim().toLowerCase();
+  const el = document.getElementById('productSearchResults');
+  if (!q) { el.innerHTML = ''; return; }
+  const matches = products.filter(p =>
+    (p.name || '').toLowerCase().includes(q) ||
+    (p.sku || '').toLowerCase().includes(q) ||
+    (p.barcode_ean13 || '').toLowerCase().includes(q)
+  ).slice(0, 20);
+  if (matches.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔎</div><div class="empty-text">ไม่พบสินค้าที่ตรงกับคำค้นหา</div></div>';
+    return;
+  }
+  el.innerHTML = matches.map(p => {
+    const stock = stockLevelMap.hasOwnProperty(p.id) ? stockLevelMap[p.id] : 0;
+    const inactiveBadge = !p.is_active ? '<span class="badge badge-inactive">ปิดใช้งาน</span>' : '';
+    return `
+    <div class="product-item" onclick="addToCart(${JSON.stringify(p.id)})">
+      <div class="product-header">
+        <div>
+          <div class="product-name">${escapeHtml(p.name)}</div>
+          <div class="product-sub">${escapeHtml(p.sku)} · คงเหลือ ${stock} ชิ้น ${inactiveBadge}</div>
+        </div>
+      </div>
+      <div class="product-details">
+        <div class="product-qty">แตะเพื่อเพิ่มลงตะกร้า</div>
+        <div class="product-price">${formatMoney(p.sell_price)} บาท</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('productSearch').addEventListener('input', renderProductSearch);
+document.getElementById('productSearch').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const q = (document.getElementById('productSearch').value || '').trim().toLowerCase();
+  if (!q) return;
+  const matches = products.filter(p =>
+    (p.name || '').toLowerCase().includes(q) ||
+    (p.sku || '').toLowerCase().includes(q) ||
+    (p.barcode_ean13 || '').toLowerCase().includes(q)
+  );
+  if (matches.length === 1) addToCart(matches[0].id);
+});
+
+function addToCart(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) { showToast('⚠️ ไม่พบสินค้านี้'); return; }
+  const existing = cart.find(c => c.product_id === productId);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ product_id: productId, name: p.name, sku: p.sku, unit_price: parseFloat(p.sell_price) || 0, qty: 1 });
+  }
+  document.getElementById('productSearch').value = '';
+  renderProductSearch();
+  renderCart();
+  showToast('✅ เพิ่ม "' + p.name + '" ลงตะกร้าแล้ว');
+}
+
+function renderCart() {
+  const el = document.getElementById('cartList');
+  if (cart.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🛒</div><div class="empty-text">ยังไม่มีสินค้าในตะกร้า</div></div>';
+    renderCartSummary();
+    return;
+  }
+  el.innerHTML = cart.map((item, idx) => {
+    const stock = stockLevelMap.hasOwnProperty(item.product_id) ? stockLevelMap[item.product_id] : 0;
+    const overStock = item.qty > stock;
+    const lineTotal = item.qty * item.unit_price;
+    return `
+    <div class="cart-item">
+      <div class="cart-item-top">
+        <div class="cart-item-name">${escapeHtml(item.name)}</div>
+        <button class="cart-remove-btn" onclick="removeFromCart(${idx})" aria-label="ลบออกจากตะกร้า">×</button>
+      </div>
+      <div class="cart-item-sub">${escapeHtml(item.sku)} · คงเหลือในสต็อก ${stock} ชิ้น</div>
+      ${overStock ? `<div class="alert alert-gold" style="margin:8px 0 0;padding:8px 10px;">⚠️ จำนวนที่ขาย (${item.qty}) มากกว่ายอดคงเหลือในสต็อก (${stock}) — ยังบันทึกได้ แต่โปรดตรวจสอบสต็อกจริงก่อนส่งมอบสินค้า</div>` : ''}
+      <div class="cart-item-row">
+        <div class="qty-stepper">
+          <button type="button" onclick="changeQty(${idx}, -1)" aria-label="ลดจำนวน">−</button>
+          <input type="number" min="1" step="1" value="${item.qty}" onchange="setQty(${idx}, this.value)">
+          <button type="button" onclick="changeQty(${idx}, 1)" aria-label="เพิ่มจำนวน">+</button>
+        </div>
+        <div class="cart-item-price">
+          <label>ราคาต่อหน่วย (บาท)</label>
+          <input type="number" min="0" step="0.01" class="form-input" value="${item.unit_price}" onchange="setPrice(${idx}, this.value)">
+        </div>
+      </div>
+      <div class="cart-item-linetotal">รวม ${formatMoney(lineTotal)} บาท</div>
+    </div>`;
+  }).join('');
+  renderCartSummary();
+}
+
+function changeQty(idx, delta) {
+  const item = cart[idx];
+  if (!item) return;
+  const newQty = item.qty + delta;
+  if (newQty <= 0) { removeFromCart(idx); return; }
+  item.qty = newQty;
+  renderCart();
+}
+
+function setQty(idx, val) {
+  const n = parseInt(val, 10);
+  if (isNaN(n) || n <= 0) {
+    showToast('⚠️ จำนวนต้องเป็นเลขจำนวนเต็มมากกว่า 0');
+    renderCart();
+    return;
+  }
+  cart[idx].qty = n;
+  renderCart();
+}
+
+function setPrice(idx, val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n < 0) {
+    showToast('⚠️ ราคาต่อหน่วยต้องไม่ติดลบ');
+    renderCart();
+    return;
+  }
+  cart[idx].unit_price = n;
+  renderCart();
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCartSummary() {
+  const subtotal = cart.reduce((s, c) => s + c.qty * c.unit_price, 0);
+  let discount = parseFloat(document.getElementById('discountInput').value);
+  if (isNaN(discount) || discount < 0) discount = 0;
+  let net = subtotal - discount;
+  if (net < 0) net = 0;
+  document.getElementById('cartSummary').innerHTML = `
+    <div class="summary-row"><span>ยอดรวม</span><span>${formatMoney(subtotal)} บาท</span></div>
+    <div class="summary-row"><span>ส่วนลด</span><span>${formatMoney(discount)} บาท</span></div>
+    <div class="summary-row summary-net"><span>ยอดสุทธิ</span><span>${formatMoney(net)} บาท</span></div>
+  `;
+}
+
+function renderCustomerSearch() {
+  const q = (document.getElementById('customerSearch').value || '').trim().toLowerCase();
+  const el = document.getElementById('customerSearchResults');
+  if (!q) { el.innerHTML = ''; return; }
+  const matches = customers.filter(c =>
+    (c.full_name || '').toLowerCase().includes(q) ||
+    (c.phone || '').toLowerCase().includes(q)
+  ).slice(0, 20);
+  if (matches.length === 0) {
+    el.innerHTML = '<div class="empty" style="padding:16px;"><div class="empty-text">ไม่พบลูกค้าที่ตรงกับคำค้นหา</div></div>';
+    return;
+  }
+  el.innerHTML = matches.map(c => `
+    <div class="product-item" style="padding:10px 14px;margin-bottom:6px;" onclick="selectCustomer(${JSON.stringify(c.id)})">
+      <div class="product-name">${escapeHtml(c.full_name)}</div>
+      <div class="product-sub">${escapeHtml(c.phone || 'ไม่มีเบอร์โทร')}</div>
+    </div>`).join('');
+}
+document.getElementById('customerSearch').addEventListener('input', renderCustomerSearch);
+
+function selectCustomer(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) { showToast('⚠️ ไม่พบข้อมูลลูกค้านี้'); return; }
+  selectedCustomer = c;
+  document.getElementById('customerSearch').value = '';
+  renderCustomerSearch();
+  renderSelectedCustomer();
+}
+
+function clearSelectedCustomer() {
+  selectedCustomer = null;
+  renderSelectedCustomer();
+}
+
+function renderSelectedCustomer() {
+  const box = document.getElementById('selectedCustomerBox');
+  const wrap = document.getElementById('customerSearchWrap');
+  if (selectedCustomer) {
+    box.style.display = '';
+    wrap.style.display = 'none';
+    box.innerHTML = `
+      <div class="customer-chip">
+        <div>
+          <div class="customer-chip-name">${escapeHtml(selectedCustomer.full_name)}</div>
+          <div class="customer-chip-phone">${escapeHtml(selectedCustomer.phone || 'ไม่มีเบอร์โทร')}</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="clearSelectedCustomer()">เปลี่ยน</button>
+      </div>`;
+  } else {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    wrap.style.display = '';
+  }
+}
+
+function openCustomerModal() {
+  document.getElementById('cfName').value = '';
+  document.getElementById('cfPhone').value = '';
+  document.getElementById('customerModal').classList.add('open');
+}
+function closeCustomerModal() {
+  document.getElementById('customerModal').classList.remove('open');
+}
+document.getElementById('customerModal').addEventListener('click', function (e) {
+  if (e.target === this) closeCustomerModal();
+});
+
+async function saveNewCustomer() {
+  const full_name = document.getElementById('cfName').value.trim();
+  const phone = document.getElementById('cfPhone').value.trim() || null;
+  if (!full_name) { showToast('⚠️ กรุณากรอกชื่อลูกค้า'); return; }
+
+  const btn = document.getElementById('saveCustomerBtn');
+  btn.disabled = true;
+  const { data, error } = await db.from('customers').insert({ full_name, phone }).select().single();
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Add customer]', error);
+    showToast('⚠️ เพิ่มลูกค้าใหม่ไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  customers.push(data);
+  selectedCustomer = data;
+  renderSelectedCustomer();
+  closeCustomerModal();
+  showToast('✅ เพิ่มลูกค้าใหม่เรียบร้อยแล้ว');
+}
+
+async function submitSale() {
+  if (submittingSale) return;
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  if (cart.length === 0) { showToast('⚠️ กรุณาเพิ่มสินค้าลงตะกร้าก่อนบันทึกการขาย'); return; }
+  for (const item of cart) {
+    if (!item.qty || item.qty <= 0) { showToast('⚠️ จำนวนสินค้าในตะกร้าต้องมากกว่า 0'); return; }
+    if (item.unit_price === null || item.unit_price === undefined || isNaN(item.unit_price) || item.unit_price < 0) {
+      showToast('⚠️ ราคาต่อหน่วยในตะกร้าไม่ถูกต้อง');
+      return;
+    }
+  }
+
+  const subtotal = cart.reduce((s, c) => s + c.qty * c.unit_price, 0);
+  let discount = parseFloat(document.getElementById('discountInput').value);
+  if (isNaN(discount) || discount < 0) discount = 0;
+  if (discount > subtotal) { showToast('⚠️ ส่วนลดต้องไม่มากกว่ายอดรวม'); return; }
+  const paymentMethod = document.getElementById('paymentMethod').value;
+  const items = cart.map(c => ({ product_id: c.product_id, qty: c.qty, unit_price: c.unit_price }));
+
+  submittingSale = true;
+  const btn = document.getElementById('saveSaleBtn');
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'กำลังบันทึก...';
+
+  let saleId, error;
+  try {
+    ({ data: saleId, error } = await db.rpc('create_sale', {
+      p_customer_id: selectedCustomer ? selectedCustomer.id : null,
+      p_discount: discount,
+      p_payment_method: paymentMethod,
+      p_items: items,
+    }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    submittingSale = false;
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+    return;
+  }
+
+  if (error) {
+    console.error('[create_sale]', error);
+    showToast('⚠️ บันทึกการขายไม่สำเร็จ: ' + error.message);
+    submittingSale = false;
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+    return;
+  }
+
+  const { data: saleRow, error: fetchErr } = await db.from('sales').select('sale_no, total').eq('id', saleId).maybeSingle();
+
+  submittingSale = false;
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+
+  if (fetchErr || !saleRow) {
+    console.error('[Fetch sale after create]', fetchErr);
+    showToast('✅ บันทึกการขายสำเร็จ แต่โหลดยอดบิลไม่สำเร็จ — ตรวจสอบยอดได้ที่หน้าประวัติการขาย');
+  } else {
+    openSaleSuccessModal(saleRow.sale_no, saleRow.total);
+  }
+
+  cart = [];
+  document.getElementById('discountInput').value = '';
+  selectedCustomer = null;
+  renderSelectedCustomer();
+  renderCart();
+  loadAll();
+}
+
+function openSaleSuccessModal(saleNo, total) {
+  document.getElementById('successSaleNo').textContent = 'เลขที่บิล ' + saleNo;
+  document.getElementById('successSaleTotal').textContent = formatMoney(total) + ' บาท';
+  document.getElementById('saleSuccessModal').classList.add('open');
+}
+function closeSaleSuccessModal() {
+  document.getElementById('saleSuccessModal').classList.remove('open');
+}
+document.getElementById('saleSuccessModal').addEventListener('click', function (e) {
+  if (e.target === this) closeSaleSuccessModal();
+});
+
+function renderSalesHistory() {
+  const el = document.getElementById('salesHistoryList');
+  if (sales.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มีประวัติการขาย</div></div>';
+    return;
+  }
+  el.innerHTML = sales.map(s => {
+    const isVoid = s.status === 'void';
+    const customerName = s.customers ? s.customers.full_name : 'ลูกค้าทั่วไป';
+    const staffName = s.admins ? s.admins.full_name : 'ไม่ทราบผู้ขาย';
+    return `
+    <div class="sale-item ${isVoid ? 'sale-void' : ''}" onclick="openSaleDetail(${JSON.stringify(s.id)})">
+      <div class="sale-item-top">
+        <div>
+          <div class="sale-no">${escapeHtml(s.sale_no)}</div>
+          <div class="sale-meta">${formatDateTime(s.created_at)}</div>
+        </div>
+        <div class="sale-total">${formatMoney(s.total)} บาท</div>
+      </div>
+      <div class="sale-meta">${escapeHtml(s.payment_method || '-')} · ${escapeHtml(customerName)} · โดย ${escapeHtml(staffName)}</div>
+      ${isVoid
+        ? `<div class="badge badge-void" style="margin-top:6px;">ยกเลิกแล้ว${s.voided_reason ? ' — ' + escapeHtml(s.voided_reason) : ''}</div>`
+        : `<div class="badge badge-completed" style="margin-top:6px;">สำเร็จ</div>`}
+    </div>`;
+  }).join('');
+}
+
+async function openSaleDetail(saleId) {
+  const sale = sales.find(s => s.id === saleId);
+  if (!sale) { showToast('⚠️ ไม่พบข้อมูลบิลนี้'); return; }
+
+  const { data, error } = await db.from('sale_items')
+    .select('id, qty, unit_price, line_total, products:product_id(name, sku)')
+    .eq('sale_id', saleId);
+
+  if (error) {
+    console.error('[Load sale items]', error);
+    showToast('⚠️ โหลดรายการสินค้าในบิลไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  currentSaleDetailId = saleId;
+  const isVoid = sale.status === 'void';
+  const customerName = sale.customers ? sale.customers.full_name : 'ลูกค้าทั่วไป';
+  const staffName = sale.admins ? sale.admins.full_name : 'ไม่ทราบผู้ขาย';
+
+  const itemsHtml = (data || []).map(it => `
+    <div class="history-item">
+      <div class="history-top">
+        <div>
+          <div class="history-product">${escapeHtml(it.products ? it.products.name : '(ไม่พบสินค้า)')}${it.products && it.products.sku ? ' (' + escapeHtml(it.products.sku) + ')' : ''}</div>
+          <div class="history-meta">จำนวน ${it.qty} × ${formatMoney(it.unit_price)} บาท</div>
+        </div>
+        <div class="history-qty">${formatMoney(it.line_total)}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('saleDetailBody').innerHTML = `
+    <div style="margin-bottom:8px;">
+      <div class="sale-no" style="font-size:18px;">${escapeHtml(sale.sale_no)}</div>
+      <div class="sale-meta">${formatDateTime(sale.created_at)}</div>
+      <div class="sale-meta">ลูกค้า: ${escapeHtml(customerName)}</div>
+      <div class="sale-meta">พนักงานขาย: ${escapeHtml(staffName)}</div>
+      <div class="sale-meta">ชำระโดย: ${escapeHtml(sale.payment_method || '-')}</div>
+      ${isVoid ? `<div class="alert alert-red" style="margin-top:10px;">บิลนี้ถูกยกเลิกแล้ว${sale.voided_reason ? ' — เหตุผล: ' + escapeHtml(sale.voided_reason) : ''}</div>` : ''}
+    </div>
+    <hr>
+    ${itemsHtml || '<div class="empty"><div class="empty-text">ไม่พบรายการสินค้าในบิลนี้</div></div>'}
+    <hr>
+    <div class="summary-row"><span>ยอดรวม</span><span>${formatMoney(sale.subtotal)} บาท</span></div>
+    <div class="summary-row"><span>ส่วนลด</span><span>${formatMoney(sale.discount)} บาท</span></div>
+    <div class="summary-row summary-net"><span>ยอดสุทธิ</span><span>${formatMoney(sale.total)} บาท</span></div>
+  `;
+
+  const voidBtn = document.getElementById('voidSaleBtn');
+  voidBtn.style.display = (isManager() && !isVoid) ? '' : 'none';
+
+  document.getElementById('saleDetailModal').classList.add('open');
+}
+
+function closeSaleDetailModal() {
+  document.getElementById('saleDetailModal').classList.remove('open');
+}
+document.getElementById('saleDetailModal').addEventListener('click', function (e) {
+  if (e.target === this) closeSaleDetailModal();
+});
+
+function openVoidModal() {
+  document.getElementById('voidReason').value = '';
+  document.getElementById('voidModal').classList.add('open');
+}
+function closeVoidModal() {
+  document.getElementById('voidModal').classList.remove('open');
+}
+document.getElementById('voidModal').addEventListener('click', function (e) {
+  if (e.target === this) closeVoidModal();
+});
+
+async function confirmVoid() {
+  const reason = document.getElementById('voidReason').value.trim();
+  if (!reason) { showToast('⚠️ กรุณากรอกเหตุผลการยกเลิกบิล'); return; }
+  if (!currentSaleDetailId) { showToast('⚠️ ไม่พบบิลที่ต้องการยกเลิก'); return; }
+
+  const btn = document.getElementById('confirmVoidBtn');
+  btn.disabled = true;
+
+  let error;
+  try {
+    ({ error } = await db.rpc('void_sale', { p_sale_id: currentSaleDetailId, p_reason: reason }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    btn.disabled = false;
+    return;
+  }
+
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[void_sale]', error);
+    showToast('⚠️ ยกเลิกบิลไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  showToast('✅ ยกเลิกบิลเรียบร้อยแล้ว');
+  closeVoidModal();
+  closeSaleDetailModal();
+  loadAll();
+}
+
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  const days = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543} ${hh}:${mm}`;
+}
+
+function formatMoney(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '0.00';
+  return v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+initSupabaseSync();
+</script>
+</body>
+</html>
