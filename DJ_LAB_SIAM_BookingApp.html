@@ -59,6 +59,20 @@
     letter-spacing: 0.5px;
   }
   .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
   .header-right { color: #aaaaaa; font-size: 13px; }
 
   /* Nav */
@@ -404,7 +418,11 @@
 <div class="header">
   <div class="logo">
     <div class="logo-box">DJ LAB</div>
-    <div class="logo-text">ระบบจองห้องซ้อม</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html" selected>จองห้องซ้อม</option>
+      <option value="stock.html">สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+    </select>
   </div>
   <div class="header-right" id="headerDate"></div>
 </div>
@@ -1761,6 +1779,10 @@ renderDashboard();
 renderCalendar();
 requestNotificationPermission();
 initSupabaseSync();
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
 </script>
 </body>
 </html>

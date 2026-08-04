@@ -53,6 +53,20 @@
     letter-spacing: 0.5px;
   }
   .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
   .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
   .header-link, .header-link-btn {
     font-size: 14px;
@@ -296,10 +310,13 @@
 <div class="header">
   <div class="logo">
     <div class="logo-box">DJ LAB</div>
-    <div class="logo-text">จัดการสต็อก</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
+      <option value="stock.html" selected>สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+    </select>
   </div>
   <div class="header-right">
-    <a class="header-link" href="DJ_LAB_SIAM_BookingApp.html">← หน้าจองห้องซ้อม</a>
     <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
   </div>
 </div>
@@ -941,6 +958,10 @@ function escapeHtml(str) {
 }
 
 initSupabaseSync();
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
 </script>
 </body>
 </html>
