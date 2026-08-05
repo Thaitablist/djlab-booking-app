@@ -336,7 +336,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-value" id="statTotalValue">0</div>
-        <div class="stat-label">มูลค่าสต็อก (บาท)</div>
+        <div class="stat-label">มูลค่าสต็อกตามราคาขาย (บาท)</div>
       </div>
     </div>
     <div style="font-size:13px;color:var(--text2);" id="currentUserInfo"></div>
@@ -432,15 +432,9 @@
       <label class="form-label">บาร์โค้ด EAN-13</label>
       <input type="text" id="pfBarcode" class="form-input" placeholder="ไม่บังคับ">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">ราคาต้นทุน (บาท) *</label>
-        <input type="number" id="pfCost" class="form-input" min="0" step="0.01" placeholder="0">
-      </div>
-      <div class="form-group">
-        <label class="form-label">ราคาขาย (บาท) *</label>
-        <input type="number" id="pfSell" class="form-input" min="0" step="0.01" placeholder="0">
-      </div>
+    <div class="form-group">
+      <label class="form-label">ราคาขาย (บาท) *</label>
+      <input type="number" id="pfSell" class="form-input" min="0" step="0.01" placeholder="0">
     </div>
     <div class="form-group">
       <label class="form-label">จุดสั่งซื้อซ้ำ (Reorder Point) *</label>
@@ -697,7 +691,7 @@ function renderAll() {
 function renderDashboard() {
   const merged = getMergedProducts();
   const lowStock = merged.filter(p => p.low_stock);
-  const totalValue = merged.reduce((s, p) => s + (p.current_qty * (parseFloat(p.cost_price) || 0)), 0);
+  const totalValue = merged.reduce((s, p) => s + (p.current_qty * (parseFloat(p.sell_price) || 0)), 0);
 
   document.getElementById('statTotalProducts').textContent = merged.length;
   document.getElementById('statLowStock').textContent = lowStock.length;
@@ -859,7 +853,7 @@ function openProductModal(productId) {
   const saveBtn = document.getElementById('productSaveBtn');
   const notice = document.getElementById('productModalReadonlyNotice');
 
-  const fields = ['pfSku', 'pfName', 'pfBrand', 'pfCategory', 'pfBarcode', 'pfCost', 'pfSell', 'pfReorder', 'pfActive'];
+  const fields = ['pfSku', 'pfName', 'pfBrand', 'pfCategory', 'pfBarcode', 'pfSell', 'pfReorder', 'pfActive'];
 
   if (productId) {
     const p = products.find(x => x.id === productId);
@@ -870,7 +864,6 @@ function openProductModal(productId) {
     document.getElementById('pfBrand').value = p.brand;
     document.getElementById('pfCategory').value = p.category || '';
     document.getElementById('pfBarcode').value = p.barcode_ean13 || '';
-    document.getElementById('pfCost').value = p.cost_price;
     document.getElementById('pfSell').value = p.sell_price;
     document.getElementById('pfReorder').value = p.reorder_point;
     document.getElementById('pfActive').checked = p.is_active;
@@ -881,7 +874,6 @@ function openProductModal(productId) {
     document.getElementById('pfBrand').value = BRAND_OPTIONS[0];
     document.getElementById('pfCategory').value = '';
     document.getElementById('pfBarcode').value = '';
-    document.getElementById('pfCost').value = '';
     document.getElementById('pfSell').value = '';
     document.getElementById('pfReorder').value = '';
     document.getElementById('pfActive').checked = true;
@@ -912,7 +904,6 @@ async function saveProduct() {
   const brand = document.getElementById('pfBrand').value;
   const category = document.getElementById('pfCategory').value.trim() || null;
   const barcode_ean13 = document.getElementById('pfBarcode').value.trim() || null;
-  const cost_price = parseFloat(document.getElementById('pfCost').value);
   const sell_price = parseFloat(document.getElementById('pfSell').value);
   const reorder_point = parseInt(document.getElementById('pfReorder').value, 10);
   const is_active = document.getElementById('pfActive').checked;
@@ -920,11 +911,10 @@ async function saveProduct() {
   if (!sku) { showToast('⚠️ กรุณากรอก SKU'); return; }
   if (!name) { showToast('⚠️ กรุณากรอกชื่อสินค้า'); return; }
   if (!BRAND_OPTIONS.includes(brand)) { showToast('⚠️ กรุณาเลือกแบรนด์ให้ถูกต้อง'); return; }
-  if (isNaN(cost_price) || cost_price < 0) { showToast('⚠️ กรุณากรอกราคาต้นทุนให้ถูกต้อง'); return; }
   if (isNaN(sell_price) || sell_price < 0) { showToast('⚠️ กรุณากรอกราคาขายให้ถูกต้อง'); return; }
   if (isNaN(reorder_point) || reorder_point < 0) { showToast('⚠️ กรุณากรอกจุดสั่งซื้อซ้ำให้ถูกต้อง'); return; }
 
-  const payload = { sku, name, brand, category, barcode_ean13, cost_price, sell_price, reorder_point, is_active };
+  const payload = { sku, name, brand, category, barcode_ean13, sell_price, reorder_point, is_active };
 
   let error;
   if (editingProductId) {
