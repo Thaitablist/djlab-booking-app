@@ -62,19 +62,23 @@ migration รันด้วยการวางใน Supabase SQL Editor เ�
 
 ## งานที่ยังไม่เสร็จ
 
-- **ยังไม่เคยทดสอบเส้นทางแจ้งเตือน LINE จริงสักครั้ง** — ตรวจโค้ดทุกทอดแล้วต่อกันถูก และ endpoint
-  `/webhooks/booking-confirmed` บน Railway ตอบ 401 เมื่อไม่มี secret (แปลว่า deploy อยู่จริงและกันของปลอมได้)
-  แต่ทอดที่พิสูจน์จากเครื่องไม่ได้คือ **trigger ในฐานข้อมูล**: ไฟล์ `004_booking_notify_trigger.sql`
-  ยังเป็น `__BOOKING_WEBHOOK_SECRET__` (placeholder) ถ้าตอนรันไม่ได้แทนที่ด้วย secret จริง หรือแทนที่แล้ว
-  ไม่ตรงกับ `BOOKING_WEBHOOK_SECRET` ใน Railway → บอทจะตอบ 401 ทิ้งเงียบๆ ไม่มีใครรู้
-  วิธีตรวจว่าพังตรงไหน ดูหัวข้อ "ตรวจเส้นทาง LINE" ด้านล่าง
+- **โค้ด endpoint ของบอทอยู่บน branch `worktree-room-booking-line-notify` ยังไม่ได้ merge เข้า `main`**
+  (repo `Claude/Projects/Discord build/LINE OA build/bot`) ตัวที่รันบน Railway มี endpoint นี้แล้วและใช้งานได้จริง
+  แต่ถ้าวันหลัง deploy จาก `main` **ระบบแจ้งเตือนจะหายไปทั้งดุ้น** และจะไม่มีอะไรฟ้อง — ควร merge ให้เรียบร้อย
 - ยังไม่มีหน้าดู/แก้ activity log (ตอนนี้ audit trail เขียนลงฐานข้อมูลอย่างเดียว ไม่มี UI อ่าน)
 - ระบบสแกนบาร์โค้ดด้วยกล้องยังไม่ได้ทดสอบกับกล่องสินค้าจริงหลังแก้รอบล่าสุด
 - การจองห้อง (`room_bookings`) ยังไม่ผูกกับตาราง `customers` — คอลัมน์ `customer_id` มีอยู่แต่ไม่มีโค้ดไหนเขียนค่าลง
   หน้า `customers.html` จึงต้องจับคู่ประวัติการจองด้วยชื่อ/เบอร์โทรแทน ถ้าจะทำให้แม่นต้องให้พนักงานเลือกลูกค้า
   ตอนยืนยันการจอง แล้วเขียน `customer_id` ลงไป
 
-## ตรวจเส้นทาง LINE (ทำตามลำดับ หยุดที่ข้อแรกที่ไม่ผ่าน)
+## เส้นทางแจ้งเตือน LINE — ทดสอบผ่านแล้ว 6 ส.ค. 2569
+
+ลูกค้าจองผ่าน rich menu → พนักงานกดยืนยัน → ข้อความเด้งเข้า LINE ลูกค้า **ครบทั้งเส้น ใช้งานได้จริง**
+แปลว่า trigger `trg_notify_booking_confirmed` ติดตั้งอยู่ในฐานข้อมูลแล้ว และ secret ในนั้นตรงกับ
+`BOOKING_WEBHOOK_SECRET` บน Railway (ไฟล์ `004` ในรีโปยังเป็น placeholder อยู่ตามตั้งใจ — secret ตัวจริง
+ไม่เก็บในรีโป ถ้าต้องรัน `004` ใหม่ต้องไปเอาค่าจริงจาก Railway มาแทนที่ก่อน)
+
+### ถ้าวันหลังข้อความไม่เด้ง — ไล่ตามลำดับ หยุดที่ข้อแรกที่ไม่ผ่าน
 
 1. **จองจากมือถือจริง** เปิด `book.html` **จากในแอป LINE** (ผ่าน rich menu) เท่านั้น — เปิดจาก Safari/Chrome
    จะไม่มี LINE userId และระบบจะบันทึกเป็น `source: 'online_web'` ซึ่งไม่มีทางส่งข้อความได้
@@ -90,6 +94,5 @@ migration รันด้วยการวางใน Supabase SQL Editor เ�
      ```
    - แก้ secret ให้ตรงกัน: รัน `004_booking_notify_trigger.sql` ใหม่โดยแทนที่ `__BOOKING_WEBHOOK_SECRET__`
      ด้วยค่าเดียวกับ `BOOKING_WEBHOOK_SECRET` ใน Railway
-5. **โค้ด endpoint ของบอทอยู่บน branch `worktree-room-booking-line-notify` ยังไม่ได้ merge เข้า `main`**
-   (`Claude/Projects/Discord build/LINE OA build/bot`) ตัวที่รันอยู่บน Railway มี endpoint นี้แล้ว แต่ถ้าวันหลัง
-   deploy จาก `main` ระบบแจ้งเตือนจะหายไปทั้งดุ้น — ควร merge ให้เรียบร้อย
+5. **ผู้รับต้องแอด LINE OA ของร้านเป็นเพื่อนก่อน** ไม่งั้น LINE ตอบ 403 บอทส่งไม่ได้
+   (ทอดนี้ไม่มีอะไรในระบบฟ้อง เพราะบอทตอบ 200 ให้ฐานข้อมูลไปแล้วก่อนจะยิงหา LINE)
