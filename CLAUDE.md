@@ -23,7 +23,9 @@ Supabase (Postgres + Auth + Realtime + RLS) — ไม่มี server ของ
 
 migration รันด้วยการวางใน Supabase SQL Editor เท่านั้น (เครื่องนี้ไม่มี Supabase CLI และโปรเจกต์ไม่ได้ `supabase init`) ทุกไฟล์เขียนให้รันซ้ำได้โดยไม่ error
 
-การยืนยันการจองจะไปกระตุ้นให้บอท LINE ส่งข้อความแจ้งลูกค้าอัตโนมัติ (บอทอยู่คนละ repo เป็น private)
+การยืนยันการจองจะไปกระตุ้นให้บอท LINE ส่งข้อความแจ้งลูกค้าอัตโนมัติ
+บอทอยู่คนละ repo: github.com/Thaitablist/djlabsiam-line-bot (private) deploy อัตโนมัติจาก `main` ขึ้น Railway
+endpoint ที่รับสัญญาณคือ `/webhooks/booking-confirmed` ใน `index.js`
 
 ## กฎที่ห้ามพลาด
 
@@ -62,9 +64,6 @@ migration รันด้วยการวางใน Supabase SQL Editor เ�
 
 ## งานที่ยังไม่เสร็จ
 
-- **โค้ด endpoint ของบอทอยู่บน branch `worktree-room-booking-line-notify` ยังไม่ได้ merge เข้า `main`**
-  (repo `Claude/Projects/Discord build/LINE OA build/bot`) ตัวที่รันบน Railway มี endpoint นี้แล้วและใช้งานได้จริง
-  แต่ถ้าวันหลัง deploy จาก `main` **ระบบแจ้งเตือนจะหายไปทั้งดุ้น** และจะไม่มีอะไรฟ้อง — ควร merge ให้เรียบร้อย
 - ยังไม่มีหน้าดู/แก้ activity log (ตอนนี้ audit trail เขียนลงฐานข้อมูลอย่างเดียว ไม่มี UI อ่าน)
 - ระบบสแกนบาร์โค้ดด้วยกล้องยังไม่ได้ทดสอบกับกล่องสินค้าจริงหลังแก้รอบล่าสุด
 - การจองห้อง (`room_bookings`) ยังไม่ผูกกับตาราง `customers` — คอลัมน์ `customer_id` มีอยู่แต่ไม่มีโค้ดไหนเขียนค่าลง
