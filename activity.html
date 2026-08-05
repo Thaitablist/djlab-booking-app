@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — บันทึกการใช้งาน</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+    --blue: #1f5fa8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link-btn:hover { color: #ffffff; }
+
+  .page { padding: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 12px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+  .btn-primary { background: var(--accent); color: white; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert:last-child { margin-bottom: 0; }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-plain { background: var(--surface2); border-color: var(--border); color: var(--text2); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .empty { text-align: center; padding: 30px 20px; color: var(--text2); }
+  .empty-icon { font-size: 34px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .badge-insert { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-update { background: rgba(31,95,168,0.1); color: var(--blue); border: 1px solid rgba(31,95,168,0.25); }
+  .badge-delete { background: rgba(200,35,44,0.08); color: var(--accent); border: 1px solid rgba(200,35,44,0.25); }
+
+  .list-count { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+
+  .log-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .log-item:hover { border-color: var(--accent); }
+  .log-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .log-what { font-weight: 700; font-size: 15px; }
+  .log-meta { font-size: 14px; color: var(--text2); margin-top: 3px; }
+
+  .diff-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .diff-row:last-child { border-bottom: none; }
+  .diff-field { font-size: 14px; color: var(--text2); margin-bottom: 4px; }
+  .diff-values { font-size: 15px; word-break: break-word; }
+  .diff-old { color: var(--text2); text-decoration: line-through; }
+  .diff-arrow { color: var(--text2); margin: 0 6px; }
+  .diff-new { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
+      <option value="stock.html">สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+      <option value="customers.html">ข้อมูลลูกค้า</option>
+      <option value="activity.html" selected>บันทึกการใช้งาน</option>
+    </select>
+  </div>
+  <div class="header-right">
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="page">
+  <div id="noAccessBox" style="display:none;">
+    <div class="card">
+      <div class="alert alert-gold">🔒 หน้านี้เปิดให้เฉพาะเจ้าของร้านและผู้ดูแลระบบเท่านั้น</div>
+      <div class="alert alert-plain">บันทึกการใช้งานเก็บว่าใครแก้ข้อมูลอะไรบ้าง จึงจำกัดสิทธิ์การเข้าถึงไว้ หากต้องการดูข้อมูลนี้ กรุณาติดต่อเจ้าของร้าน</div>
+    </div>
+  </div>
+
+  <div id="mainBox" style="display:none;">
+    <div class="card">
+      <div class="card-title">ตัวกรอง</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ระบบ</label>
+          <select id="filterTable" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ประเภท</label>
+          <select id="filterAction" class="form-input">
+            <option value="">ทั้งหมด</option>
+            <option value="INSERT">เพิ่มใหม่</option>
+            <option value="UPDATE">แก้ไข</option>
+            <option value="DELETE">ลบ</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ผู้ทำรายการ</label>
+          <select id="filterActor" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ช่วงเวลา</label>
+          <select id="filterRange" class="form-input">
+            <option value="7">7 วันล่าสุด</option>
+            <option value="1">วันนี้</option>
+            <option value="30">30 วันล่าสุด</option>
+            <option value="0">ทั้งหมด</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">บันทึกการใช้งาน</div>
+      <div class="alert alert-plain">บันทึกนี้แก้ไขและลบไม่ได้ทั้งระบบ แม้แต่เจ้าของร้าน — ทุกแถวเขียนโดยฐานข้อมูลเองทุกครั้งที่มีการเปลี่ยนแปลงข้อมูล</div>
+      <div class="list-count" id="listCount"></div>
+      <div id="logList"></div>
+      <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMore()" style="display:none;margin-top:10px;">โหลดเพิ่มอีก 200 รายการ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetailModal()">×</button>
+    <div class="modal-title">รายละเอียดการเปลี่ยนแปลง</div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PAGE_SIZE = 200;
+
+// Every table carrying a log_activity() trigger, in the order staff think about
+// them. Anything logged from a table not listed here still shows, using the raw
+// table name — better a rough label than a hidden row.
+const TABLE_LABELS = {
+  room_bookings: 'การจองห้องซ้อม',
+  booking_settings: 'ตั้งค่าห้องซ้อม',
+  loyalty_points_ledger: 'แต้มสะสม',
+  products: 'สินค้า',
+  product_units: 'สินค้าแบบมีซีเรียล',
+  stock_movements: 'การเคลื่อนไหวสต็อก',
+  sales: 'บิลขาย',
+  sale_items: 'รายการในบิล',
+  customers: 'ข้อมูลลูกค้า',
+};
+
+const ACTION_LABELS = { INSERT: 'เพิ่มใหม่', UPDATE: 'แก้ไข', DELETE: 'ลบ' };
+const ACTION_CLASS = { INSERT: 'badge-insert', UPDATE: 'badge-update', DELETE: 'badge-delete' };
+
+const FIELD_LABELS = {
+  full_name: 'ชื่อ', phone: 'เบอร์โทร', line_id: 'LINE ID', email: 'อีเมล',
+  note: 'หมายเหตุ', tags: 'แท็ก', name: 'ชื่อสินค้า', sku: 'SKU', brand: 'แบรนด์',
+  category: 'หมวดหมู่', barcode_ean13: 'บาร์โค้ด', cost_price: 'ราคาต้นทุน',
+  sell_price: 'ราคาขาย', reorder_point: 'จุดสั่งซื้อซ้ำ', is_active: 'เปิดใช้งาน',
+  qty: 'จำนวน', type: 'ประเภท', reason: 'เหตุผล', serial_no: 'ซีเรียล',
+  status: 'สถานะ', sale_no: 'เลขที่บิล', subtotal: 'ยอดรวม', discount: 'ส่วนลด',
+  total: 'ยอดสุทธิ', payment_method: 'วิธีชำระเงิน', voided_reason: 'เหตุผลที่ยกเลิก',
+  unit_price: 'ราคาต่อหน่วย', line_total: 'รวมรายการ',
+  customer_name: 'ชื่อผู้จอง', contact: 'ข้อมูลติดต่อ', room: 'ห้อง / Setup',
+  room_model: 'รุ่นที่ระบุ', equip: 'อุปกรณ์เพิ่มเติม', date: 'วันที่', start_time: 'เวลาเริ่ม',
+  hours: 'จำนวนชั่วโมง', cost: 'ค่าใช้จ่าย', points_earned: 'แต้มที่ได้',
+  confirmed: 'ยืนยันแล้ว', source: 'ช่องทาง', line_user_id: 'LINE userId',
+  price_per_hour: 'ราคาต่อชั่วโมง', points_per_hour: 'แต้มต่อชั่วโมง',
+  free_hour_threshold: 'ชั่วโมงที่ต้องสะสม', free_hours_reward: 'ชั่วโมงฟรีที่ได้',
+  room_name: 'ชื่อห้อง', delta: 'แต้มที่เปลี่ยน',
+};
+
+// Noise: surrogate keys and timestamps the database maintains itself. Showing
+// them would bury the one field a person actually changed.
+const HIDDEN_FIELDS = new Set([
+  'id', 'created_at', 'updated_at', 'admin_id', 'created_by', 'updated_by',
+  'customer_uid', 'confirmed_at', 'confirmed_by', 'voided_at', 'voided_by',
+  'sale_id', 'product_id', 'product_unit_id', 'customer_id', 'ref_sale_id',
+  'ref_booking_id', 'received_at', 'sold_at',
+]);
+
+let currentAdmin = null;
+let admins = [];
+let logs = [];
+let reachedEnd = false;
+let loading = false;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============================
+// AUTH
+// ============================
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() {
+  db.auth.signOut();
+}
+
+function isManager() {
+  return !!currentAdmin && (currentAdmin.role === 'owner' || currentAdmin.role === 'admin');
+}
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('mainBox').style.display = 'none';
+    document.getElementById('noAccessBox').style.display = 'none';
+    currentAdmin = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  // Staff are blocked by RLS anyway, which would just return an empty list.
+  // Say why instead of showing an empty page that looks broken.
+  if (!isManager()) {
+    document.getElementById('noAccessBox').style.display = '';
+    document.getElementById('mainBox').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('noAccessBox').style.display = 'none';
+  document.getElementById('mainBox').style.display = '';
+  buildFilters();
+  loadAdmins().then(() => { buildActorFilter(); reload(); });
+}
+
+function initSupabaseSync() {
+  db.auth.getSession().then(({ data: { session } }) => handleAuthState(session));
+  db.auth.onAuthStateChange((_event, session) => handleAuthState(session));
+}
+
+// ============================
+// FILTERS
+// ============================
+function buildFilters() {
+  const sel = document.getElementById('filterTable');
+  if (sel.options.length) return;
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    Object.keys(TABLE_LABELS).map(t => `<option value="${t}">${escapeHtml(TABLE_LABELS[t])}</option>`).join('');
+  ['filterTable', 'filterAction', 'filterActor', 'filterRange'].forEach(id => {
+    document.getElementById(id).addEventListener('change', reload);
+  });
+}
+
+async function loadAdmins() {
+  const { data, error } = await db.from('admins').select('id, full_name').order('full_name');
+  if (error) {
+    console.error('[Load admins]', error);
+    showToast('⚠️ โหลดรายชื่อทีมงานไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  admins = data || [];
+}
+
+function buildActorFilter() {
+  const sel = document.getElementById('filterActor');
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    admins.map(a => `<option value="${a.id}">${escapeHtml(a.full_name)}</option>`).join('') +
+    '<option value="__none__">ลูกค้า / ระบบ</option>';
+}
+
+function buildQuery() {
+  let q = db.from('activity_log')
+    .select('id, action, table_name, record_id, old_data, new_data, created_at, admin_id, actor_uid, admins:admin_id(full_name)')
+    .order('created_at', { ascending: false });
+
+  const table = document.getElementById('filterTable').value;
+  if (table) q = q.eq('table_name', table);
+
+  const action = document.getElementById('filterAction').value;
+  if (action) q = q.eq('action', action);
+
+  const actor = document.getElementById('filterActor').value;
+  if (actor === '__none__') q = q.is('admin_id', null);
+  else if (actor) q = q.eq('admin_id', actor);
+
+  const days = parseInt(document.getElementById('filterRange').value, 10);
+  if (days > 0) {
+    const since = new Date();
+    if (days === 1) since.setHours(0, 0, 0, 0);
+    else since.setDate(since.getDate() - days);
+    q = q.gte('created_at', since.toISOString());
+  }
+  return q;
+}
+
+async function reload() {
+  logs = [];
+  reachedEnd = false;
+  document.getElementById('logList').innerHTML =
+    '<div class="empty"><div class="empty-text">กำลังโหลด...</div></div>';
+  await fetchPage();
+}
+
+async function fetchPage() {
+  if (loading || reachedEnd) return;
+  loading = true;
+  const btn = document.getElementById('loadMoreBtn');
+  btn.disabled = true;
+
+  const from = logs.length;
+  const { data, error } = await buildQuery().range(from, from + PAGE_SIZE - 1);
+
+  loading = false;
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Load activity log]', error);
+    showFatalError('โหลดบันทึกการใช้งานไม่สำเร็จ: ' + error.message);
+    document.getElementById('logList').innerHTML =
+      '<div class="empty"><div class="empty-text">โหลดข้อมูลไม่สำเร็จ</div></div>';
+    return;
+  }
+
+  const rows = data || [];
+  logs = logs.concat(rows);
+  if (rows.length < PAGE_SIZE) reachedEnd = true;
+  render();
+}
+
+function loadMore() { fetchPage(); }
+
+// ============================
+// RENDER
+// ============================
+function render() {
+  const el = document.getElementById('logList');
+  const countEl = document.getElementById('listCount');
+  const btn = document.getElementById('loadMoreBtn');
+
+  if (logs.length === 0) {
+    countEl.textContent = '';
+    btn.style.display = 'none';
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📜</div><div class="empty-text">ไม่พบรายการในช่วงเวลาและตัวกรองที่เลือก</div></div>';
+    return;
+  }
+
+  countEl.textContent = reachedEnd
+    ? 'ทั้งหมด ' + logs.length + ' รายการ'
+    : 'แสดง ' + logs.length + ' รายการล่าสุด';
+  btn.style.display = reachedEnd ? 'none' : '';
+
+  el.innerHTML = logs.map((row, i) => {
+    const actionLabel = ACTION_LABELS[row.action] || row.action;
+    const actionClass = ACTION_CLASS[row.action] || 'badge-update';
+    const who = row.admins ? row.admins.full_name : (row.admin_id ? 'ทีมงาน' : 'ลูกค้า / ระบบ');
+    return `
+    <div class="log-item" onclick="openDetail(${i})">
+      <div class="log-top">
+        <div style="min-width:0;">
+          <div class="log-what">${escapeHtml(tableLabel(row.table_name))} — ${escapeHtml(entityLabel(row))}</div>
+          <div class="log-meta">โดย ${escapeHtml(who)} · ${formatDateTime(row.created_at)}</div>
+        </div>
+        <span class="badge ${actionClass}">${escapeHtml(actionLabel)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tableLabel(t) {
+  return TABLE_LABELS[t] || t;
+}
+
+// A short human name for the row that changed, taken from whichever snapshot
+// exists — new_data for inserts/updates, old_data for deletes.
+function entityLabel(row) {
+  const d = row.new_data || row.old_data || {};
+  const pick = [
+    d.sale_no, d.full_name, d.customer_name, d.name, d.sku, d.serial_no, d.room_name,
+  ].find(v => v !== undefined && v !== null && String(v).trim() !== '');
+  if (pick) return String(pick);
+  if (row.table_name === 'stock_movements' && d.qty !== undefined) {
+    return (d.type === 'in' ? 'รับเข้า ' : d.type === 'out' ? 'ตัดออก ' : 'ปรับยอด ') + d.qty + ' ชิ้น';
+  }
+  if (row.table_name === 'booking_settings') return 'ตั้งค่าราคาและแต้ม';
+  if (row.table_name === 'loyalty_points_ledger' && d.delta !== undefined) return 'แต้ม ' + d.delta;
+  return '(ไม่มีชื่อกำกับ)';
+}
+
+function fieldLabel(k) {
+  return FIELD_LABELS[k] || k;
+}
+
+function formatValue(k, v) {
+  if (v === null || v === undefined || v === '') return '(ว่าง)';
+  if (typeof v === 'boolean') return v ? 'ใช่' : 'ไม่ใช่';
+  if (Array.isArray(v)) return v.length ? v.join(', ') : '(ว่าง)';
+  if (typeof v === 'object') return JSON.stringify(v);
+  const moneyFields = ['cost_price', 'sell_price', 'total', 'subtotal', 'discount', 'cost', 'unit_price', 'line_total', 'price_per_hour'];
+  if (moneyFields.includes(k) && !isNaN(parseFloat(v))) return formatMoney(v) + ' บาท';
+  if (k === 'start_time') return String(v).slice(0, 5) + ' น.';
+  if (k === 'date') return formatDate(v);
+  return String(v);
+}
+
+function diffRows(row) {
+  const oldD = row.old_data || {};
+  const newD = row.new_data || {};
+  const keys = [...new Set([...Object.keys(oldD), ...Object.keys(newD)])]
+    .filter(k => !HIDDEN_FIELDS.has(k));
+
+  if (row.action === 'UPDATE') {
+    return keys
+      .filter(k => JSON.stringify(oldD[k]) !== JSON.stringify(newD[k]))
+      .map(k => ({ field: k, from: oldD[k], to: newD[k] }));
+  }
+  const src = row.action === 'DELETE' ? oldD : newD;
+  return keys
+    .filter(k => src[k] !== null && src[k] !== undefined && String(src[k]) !== '')
+    .map(k => ({ field: k, from: undefined, to: src[k] }));
+}
+
+function openDetail(index) {
+  const row = logs[index];
+  if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
+
+  const who = row.admins ? row.admins.full_name : (row.admin_id ? 'ทีมงาน (ไม่พบชื่อ)' : 'ลูกค้า / ระบบ');
+  const changes = diffRows(row);
+  const isUpdate = row.action === 'UPDATE';
+
+  const changesHtml = changes.length === 0
+    ? '<div class="empty" style="padding:16px;"><div class="empty-text">ไม่มีฟิลด์ที่เปลี่ยนแปลง (อาจเป็นการบันทึกซ้ำค่าเดิม)</div></div>'
+    : changes.map(c => `
+      <div class="diff-row">
+        <div class="diff-field">${escapeHtml(fieldLabel(c.field))}</div>
+        <div class="diff-values">
+          ${isUpdate
+            ? `<span class="diff-old">${escapeHtml(formatValue(c.field, c.from))}</span><span class="diff-arrow">→</span><span class="diff-new">${escapeHtml(formatValue(c.field, c.to))}</span>`
+            : `<span class="diff-new">${escapeHtml(formatValue(c.field, c.to))}</span>`}
+        </div>
+      </div>`).join('');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div style="margin-bottom:10px;">
+      <div style="font-size:18px;font-weight:800;">${escapeHtml(tableLabel(row.table_name))} — ${escapeHtml(entityLabel(row))}</div>
+      <div class="log-meta">${escapeHtml(ACTION_LABELS[row.action] || row.action)} · ${formatDateTime(row.created_at)}</div>
+      <div class="log-meta">โดย ${escapeHtml(who)}</div>
+    </div>
+    ${row.action === 'DELETE' ? '<div class="alert alert-red">รายการนี้ถูกลบออกจากระบบแล้ว ด้านล่างคือข้อมูลก่อนถูกลบ</div>' : ''}
+    <hr>
+    ${changesHtml}
+  `;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('open');
+}
+document.getElementById('detailModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDetailModal();
+});
+
+// ============================
+// HELPERS
+// ============================
+const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const THAI_DAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
+function formatDateTime(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  if (isNaN(d)) return '-';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${THAI_DAYS[d.getDay()]} ${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543} ${hh}:${mm}`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const parts = String(dateStr).split('-');
+  if (parts.length !== 3) return String(dateStr);
+  const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), day = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(day)) return String(dateStr);
+  return `${day} ${THAI_MONTHS[m - 1] || ''} ${y + 543}`;
+}
+
+function formatMoney(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '0.00';
+  return v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+initSupabaseSync();
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
+</script>
+</body>
+</html>
