@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — ข้อมูลลูกค้า</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link-btn:hover { color: #ffffff; }
+
+  .page { padding: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-hint { font-size: 14px; color: var(--text2); margin-top: 5px; line-height: 1.4; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  textarea.form-input { resize: vertical; }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .btn-danger { background: var(--accent); color: white; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-row .btn { margin-top: 0; }
+
+  .stat-row { display: flex; gap: 10px; }
+  .stat-card {
+    flex: 1;
+    background: #111111;
+    border: 1px solid #222222;
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .stat-value { font-size: 19px; font-weight: 900; color: var(--accent); word-break: break-word; }
+  .stat-label { font-size: 14px; color: #aaaaaa; margin-top: 4px; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert:last-child { margin-bottom: 0; }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+  .alert-plain { background: var(--surface2); border-color: var(--border); color: var(--text2); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .empty { text-align: center; padding: 30px 20px; color: var(--text2); }
+  .empty-icon { font-size: 34px; margin-bottom: 10px; }
+  .empty-text { font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  .badge-tag { background: rgba(200,35,44,0.08); color: var(--accent); border: 1px solid rgba(200,35,44,0.2); }
+  .badge-completed { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-void { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .badge-done { background: rgba(26,143,74,0.1); color: var(--green); border: 1px solid rgba(26,143,74,0.25); }
+  .badge-upcoming { background: rgba(196,122,0,0.1); color: var(--orange); border: 1px solid rgba(196,122,0,0.25); }
+  .badge-cancelled { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  .search-wrap { margin-bottom: 10px; }
+  .list-count { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+
+  .cust-item {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .cust-item:hover { border-color: var(--accent); }
+  .cust-name { font-weight: 700; font-size: 15px; }
+  .cust-sub { font-size: 14px; color: var(--text2); margin-top: 3px; }
+  .cust-tags { margin-top: 8px; }
+
+  .detail-name { font-size: 20px; font-weight: 900; }
+  .detail-row { display: flex; gap: 10px; font-size: 15px; padding: 6px 0; }
+  .detail-key { color: var(--text2); min-width: 96px; flex-shrink: 0; }
+  .detail-val { font-weight: 600; word-break: break-word; }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+
+  .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .history-item:last-child { border-bottom: none; }
+  .history-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .history-title { font-weight: 700; font-size: 15px; }
+  .history-meta { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .history-amount { font-weight: 800; font-size: 15px; color: var(--accent); white-space: nowrap; }
+  .history-amount.muted { color: var(--text2); text-decoration: line-through; }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; padding: 5px 0; }
+  .summary-strong { font-weight: 800; }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
+      <option value="stock.html">สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+      <option value="customers.html" selected>ข้อมูลลูกค้า</option>
+    </select>
+  </div>
+  <div class="header-right">
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="card">
+    <div class="card-title">ภาพรวมลูกค้า</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">ลูกค้าทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statNewMonth">0</div>
+        <div class="stat-label">เพิ่มเดือนนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statNoContact">0</div>
+        <div class="stat-label">ไม่มีช่องทางติดต่อ</div>
+      </div>
+    </div>
+    <div style="font-size:14px;color:var(--text2);margin-top:12px;" id="currentUserInfo"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ค้นหาลูกค้า</div>
+    <div class="search-wrap">
+      <input type="text" id="customerSearch" class="form-input" placeholder="ชื่อ / เบอร์โทร / LINE ID / อีเมล / แท็ก" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="openFormModal(null)">+ เพิ่มลูกค้าใหม่</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">รายชื่อลูกค้า</div>
+    <div class="list-count" id="listCount"></div>
+    <div id="customerList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeFormModal()">×</button>
+    <div class="modal-title" id="formModalTitle">เพิ่มลูกค้าใหม่</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อลูกค้า *</label>
+      <input type="text" id="cfName" class="form-input" placeholder="ชื่อ-นามสกุล">
+    </div>
+    <div class="form-group">
+      <label class="form-label">เบอร์โทร</label>
+      <input type="text" id="cfPhone" class="form-input" placeholder="0812345678" inputmode="tel">
+      <div id="cfPhoneWarn"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">LINE ID</label>
+      <input type="text" id="cfLineId" class="form-input" placeholder="@djlabsiam">
+    </div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="cfEmail" class="form-input" placeholder="customer@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">แท็ก</label>
+      <input type="text" id="cfTags" class="form-input" placeholder="ลูกค้าประจำ, นักเรียน">
+      <div class="form-hint">คั่นแต่ละแท็กด้วยเครื่องหมายจุลภาค ( , )</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <textarea id="cfNote" class="form-input" rows="3" placeholder="เช่น สนใจ CDJ-3000, เรียนคอร์ส Scratch"></textarea>
+    </div>
+    <button class="btn btn-primary" id="saveCustomerBtn" onclick="saveCustomer()" style="margin-top:16px;">บันทึก</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetailModal()">×</button>
+    <div class="modal-title">ข้อมูลลูกค้า</div>
+    <div id="detailBody"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="editCurrentCustomer()">แก้ไขข้อมูล</button>
+      <button class="btn btn-danger" id="deleteCustomerBtn" onclick="openDeleteModal()" style="display:none;">ลบลูกค้า</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDeleteModal()">×</button>
+    <div class="modal-title">ยืนยันการลบลูกค้า</div>
+    <div id="deleteBody"></div>
+    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()" style="margin-top:16px;">ยืนยันลบลูกค้ารายนี้</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let customers = [];
+let bookings = [];
+let bookingSettings = { free_hour_threshold: 10, free_hours_reward: 1 };
+let currentAdmin = null;
+let currentUserId = null;
+let editingCustomerId = null;
+let detailCustomerId = null;
+let savingCustomer = false;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============================
+// AUTH
+// ============================
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() {
+  db.auth.signOut();
+}
+
+function isManager() {
+  return !!currentAdmin && (currentAdmin.role === 'owner' || currentAdmin.role === 'admin');
+}
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    currentAdmin = null;
+    currentUserId = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  currentUserId = session.user.id;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  const roleLabel = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' }[adminRow.role] || adminRow.role;
+  document.getElementById('currentUserInfo').textContent =
+    'เข้าสู่ระบบเป็น: ' + adminRow.full_name + ' (' + roleLabel + ')';
+
+  loadAll();
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await db.auth.getSession();
+  handleAuthState(session);
+
+  db.auth.onAuthStateChange((_event, session) => {
+    handleAuthState(session);
+  });
+
+  // Realtime keeps a second staff phone in sync. If the customers table has not
+  // been added to the supabase_realtime publication yet this simply delivers
+  // nothing — the page still refreshes itself after its own writes.
+  db.channel('customers-customers')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => { loadCustomers().then(renderAll); })
+    .subscribe();
+
+  db.channel('customers-bookings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_bookings' }, () => { loadBookings(); })
+    .subscribe();
+}
+
+// ============================
+// LOAD
+// ============================
+async function loadAll() {
+  await Promise.all([loadCustomers(), loadBookings(), loadBookingSettings()]);
+  renderAll();
+}
+
+async function loadCustomers() {
+  const { data, error } = await db.from('customers')
+    .select('id, full_name, phone, line_id, email, note, tags, created_at, created_by, admins:created_by(full_name)')
+    .order('full_name');
+  if (error) {
+    console.error('[Load customers]', error);
+    showToast('⚠️ โหลดรายชื่อลูกค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  customers = data || [];
+}
+
+async function loadBookings() {
+  const { data, error } = await db.from('room_bookings')
+    .select('id, customer_name, contact, date, start_time, hours, cost, room, status, confirmed')
+    .order('date', { ascending: false })
+    .limit(2000);
+  if (error) {
+    console.error('[Load bookings]', error);
+    showToast('⚠️ โหลดประวัติการจองไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  bookings = data || [];
+}
+
+async function loadBookingSettings() {
+  const { data, error } = await db.from('booking_settings')
+    .select('free_hour_threshold, free_hours_reward').maybeSingle();
+  if (error) {
+    console.error('[Load booking settings]', error);
+    return;
+  }
+  if (data) bookingSettings = data;
+}
+
+// ============================
+// MATCHING
+// ============================
+function normalizePhone(str) {
+  return (str || '').replace(/\D/g, '');
+}
+
+// room_bookings has a customer_id column but nothing writes to it — bookings
+// only ever carry the typed customer_name/contact. So a customer's booking
+// history is matched on text: same name, or the same last 9 phone digits
+// (which makes 08x, +668x and 66-8x forms of one number match each other).
+function bookingsForCustomer(c) {
+  const nameKey = (c.full_name || '').trim().toLowerCase();
+  const phoneKey = normalizePhone(c.phone);
+  return bookings.filter(b => {
+    if (nameKey && (b.customer_name || '').trim().toLowerCase() === nameKey) return true;
+    if (phoneKey.length >= 9) {
+      const bp = normalizePhone(b.contact);
+      if (bp.length >= 9 && bp.slice(-9) === phoneKey.slice(-9)) return true;
+    }
+    return false;
+  });
+}
+
+function findPhoneTwin(phone, exceptId) {
+  const digits = normalizePhone(phone);
+  if (digits.length < 9) return null;
+  return customers.find(c =>
+    c.id !== exceptId &&
+    normalizePhone(c.phone).length >= 9 &&
+    normalizePhone(c.phone).slice(-9) === digits.slice(-9)
+  ) || null;
+}
+
+// ============================
+// RENDER
+// ============================
+function renderAll() {
+  renderStats();
+  renderList();
+}
+
+function renderStats() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  const newThisMonth = customers.filter(c => new Date(c.created_at) >= startOfMonth).length;
+  const noContact = customers.filter(c => !c.phone && !c.line_id && !c.email).length;
+
+  document.getElementById('statTotal').textContent = customers.length;
+  document.getElementById('statNewMonth').textContent = newThisMonth;
+  document.getElementById('statNoContact').textContent = noContact;
+}
+
+function matchesQuery(c, q, digits) {
+  if ((c.full_name || '').toLowerCase().includes(q)) return true;
+  if ((c.line_id || '').toLowerCase().includes(q)) return true;
+  if ((c.email || '').toLowerCase().includes(q)) return true;
+  if ((c.note || '').toLowerCase().includes(q)) return true;
+  if ((c.tags || []).some(t => (t || '').toLowerCase().includes(q))) return true;
+  if ((c.phone || '').toLowerCase().includes(q)) return true;
+  if (digits.length >= 4 && normalizePhone(c.phone).includes(digits)) return true;
+  return false;
+}
+
+function renderList() {
+  const raw = (document.getElementById('customerSearch').value || '').trim();
+  const q = raw.toLowerCase();
+  const digits = normalizePhone(raw);
+  const el = document.getElementById('customerList');
+  const countEl = document.getElementById('listCount');
+
+  const matches = q ? customers.filter(c => matchesQuery(c, q, digits)) : customers;
+
+  if (customers.length === 0) {
+    countEl.textContent = '';
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">ยังไม่มีข้อมูลลูกค้าในระบบ</div></div>';
+    return;
+  }
+  if (matches.length === 0) {
+    countEl.textContent = '';
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔎</div><div class="empty-text">ไม่พบลูกค้าที่ตรงกับคำค้นหา</div></div>';
+    return;
+  }
+
+  countEl.textContent = q
+    ? 'พบ ' + matches.length + ' รายจากทั้งหมด ' + customers.length + ' ราย'
+    : 'ทั้งหมด ' + customers.length + ' ราย';
+
+  el.innerHTML = matches.map(c => {
+    const contactBits = [];
+    if (c.phone) contactBits.push('📞 ' + escapeHtml(c.phone));
+    if (c.line_id) contactBits.push('LINE ' + escapeHtml(c.line_id));
+    if (c.email) contactBits.push('✉️ ' + escapeHtml(c.email));
+    const sub = contactBits.length ? contactBits.join(' · ') : 'ยังไม่มีช่องทางติดต่อ';
+    const tags = (c.tags || []).map(t => '<span class="badge badge-tag">' + escapeHtml(t) + '</span>').join('');
+    return `
+    <div class="cust-item" onclick="openDetail('${c.id}')">
+      <div class="cust-name">${escapeHtml(c.full_name)}</div>
+      <div class="cust-sub">${sub}</div>
+      ${tags ? `<div class="cust-tags">${tags}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+document.getElementById('customerSearch').addEventListener('input', renderList);
+
+// ============================
+// ADD / EDIT
+// ============================
+function openFormModal(id) {
+  editingCustomerId = id;
+  const c = id ? customers.find(x => x.id === id) : null;
+  if (id && !c) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+
+  document.getElementById('formModalTitle').textContent = c ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่';
+  document.getElementById('cfName').value = c ? (c.full_name || '') : '';
+  document.getElementById('cfPhone').value = c ? (c.phone || '') : '';
+  document.getElementById('cfLineId').value = c ? (c.line_id || '') : '';
+  document.getElementById('cfEmail').value = c ? (c.email || '') : '';
+  document.getElementById('cfTags').value = c ? (c.tags || []).join(', ') : '';
+  document.getElementById('cfNote').value = c ? (c.note || '') : '';
+  document.getElementById('saveCustomerBtn').textContent = c ? 'บันทึกการแก้ไข' : 'บันทึกลูกค้าใหม่';
+  renderPhoneWarning();
+  document.getElementById('formModal').classList.add('open');
+}
+
+function closeFormModal() {
+  document.getElementById('formModal').classList.remove('open');
+}
+document.getElementById('formModal').addEventListener('click', function (e) {
+  if (e.target === this) closeFormModal();
+});
+
+function renderPhoneWarning() {
+  const el = document.getElementById('cfPhoneWarn');
+  const twin = findPhoneTwin(document.getElementById('cfPhone').value, editingCustomerId);
+  el.innerHTML = twin
+    ? `<div class="alert alert-gold" style="margin:8px 0 0;">⚠️ เบอร์นี้ตรงกับลูกค้า "${escapeHtml(twin.full_name)}" ที่มีอยู่แล้ว — ตรวจสอบก่อนบันทึกเพื่อไม่ให้มีรายชื่อซ้ำ</div>`
+    : '';
+}
+document.getElementById('cfPhone').addEventListener('input', renderPhoneWarning);
+
+function parseTags(str) {
+  return (str || '').split(',').map(t => t.trim()).filter(t => t.length > 0);
+}
+
+async function saveCustomer() {
+  if (savingCustomer) return;
+  const full_name = document.getElementById('cfName').value.trim();
+  if (!full_name) { showToast('⚠️ กรุณากรอกชื่อลูกค้า'); return; }
+
+  const email = document.getElementById('cfEmail').value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('⚠️ รูปแบบอีเมลไม่ถูกต้อง');
+    return;
+  }
+
+  const payload = {
+    full_name,
+    phone: document.getElementById('cfPhone').value.trim() || null,
+    line_id: document.getElementById('cfLineId').value.trim() || null,
+    email: email || null,
+    note: document.getElementById('cfNote').value.trim() || null,
+    tags: parseTags(document.getElementById('cfTags').value),
+  };
+
+  savingCustomer = true;
+  const btn = document.getElementById('saveCustomerBtn');
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'กำลังบันทึก...';
+
+  let error;
+  try {
+    if (editingCustomerId) {
+      ({ error } = await db.from('customers').update(payload).eq('id', editingCustomerId));
+    } else {
+      ({ error } = await db.from('customers').insert({ ...payload, created_by: currentUserId }));
+    }
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    savingCustomer = false;
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+    return;
+  }
+
+  savingCustomer = false;
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+
+  if (error) {
+    console.error('[Save customer]', error);
+    showToast('⚠️ บันทึกข้อมูลลูกค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  const wasEditing = !!editingCustomerId;
+  closeFormModal();
+  await loadCustomers();
+  renderAll();
+  showToast(wasEditing ? '✅ บันทึกการแก้ไขเรียบร้อยแล้ว' : '✅ เพิ่มลูกค้าใหม่เรียบร้อยแล้ว');
+
+  // Keep the detail sheet in step with what was just edited.
+  if (wasEditing && detailCustomerId === editingCustomerId &&
+      document.getElementById('detailModal').classList.contains('open')) {
+    openDetail(detailCustomerId);
+  }
+  editingCustomerId = null;
+}
+
+// ============================
+// DETAIL
+// ============================
+async function openDetail(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+
+  detailCustomerId = id;
+  document.getElementById('detailBody').innerHTML =
+    '<div class="empty"><div class="empty-text">กำลังโหลดประวัติของลูกค้า...</div></div>';
+  document.getElementById('deleteCustomerBtn').style.display = isManager() ? '' : 'none';
+  document.getElementById('detailModal').classList.add('open');
+
+  const { data: sales, error } = await db.from('sales')
+    .select('id, sale_no, total, status, payment_method, created_at')
+    .eq('customer_id', id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('[Load customer sales]', error);
+    showToast('⚠️ โหลดประวัติการซื้อไม่สำเร็จ: ' + error.message);
+  }
+
+  // A newer edit may have landed while the history was loading.
+  if (detailCustomerId !== id) return;
+  renderDetail(customers.find(x => x.id === id) || c, sales || [], !!error);
+}
+
+function renderDetail(c, sales, salesFailed) {
+  const custBookings = bookingsForCustomer(c);
+  const doneBookings = custBookings.filter(b => b.status === 'done');
+  const totalHours = doneBookings.reduce((s, b) => s + (b.hours || 0), 0);
+  const threshold = bookingSettings.free_hour_threshold || 10;
+  const freeEarned = Math.floor(totalHours / threshold);
+  const remaining = threshold - (totalHours % threshold);
+
+  const paidSales = sales.filter(s => s.status === 'completed');
+  const totalSpend = paidSales.reduce((s, x) => s + (parseFloat(x.total) || 0), 0);
+  const totalBookingSpend = doneBookings.reduce((s, b) => s + (parseFloat(b.cost) || 0), 0);
+
+  const contactRows = [
+    ['เบอร์โทร', c.phone],
+    ['LINE ID', c.line_id],
+    ['อีเมล', c.email],
+  ].filter(r => r[1]).map(r => `
+    <div class="detail-row"><div class="detail-key">${r[0]}</div><div class="detail-val">${escapeHtml(r[1])}</div></div>`).join('');
+
+  const tags = (c.tags || []).map(t => '<span class="badge badge-tag">' + escapeHtml(t) + '</span>').join('');
+  const addedBy = c.admins ? c.admins.full_name : null;
+
+  const salesHtml = salesFailed
+    ? '<div class="alert alert-red">โหลดประวัติการซื้อไม่สำเร็จ ลองปิดแล้วเปิดใหม่อีกครั้ง</div>'
+    : (sales.length === 0
+      ? '<div class="empty" style="padding:16px;"><div class="empty-text">ยังไม่มีประวัติการซื้อสินค้า</div></div>'
+      : sales.map(s => {
+          const isVoid = s.status === 'void';
+          return `
+          <div class="history-item">
+            <div class="history-top">
+              <div>
+                <div class="history-title">${escapeHtml(s.sale_no)}</div>
+                <div class="history-meta">${formatDateTime(s.created_at)} · ${escapeHtml(s.payment_method || '-')}</div>
+                <div style="margin-top:6px;">${isVoid ? '<span class="badge badge-void">ยกเลิกแล้ว</span>' : '<span class="badge badge-completed">สำเร็จ</span>'}</div>
+              </div>
+              <div class="history-amount ${isVoid ? 'muted' : ''}">${formatMoney(s.total)} บาท</div>
+            </div>
+          </div>`;
+        }).join(''));
+
+  const bookingStatusLabel = { upcoming: 'รอเข้าใช้', active: 'กำลังใช้งาน', done: 'ใช้บริการแล้ว', cancelled: 'ยกเลิก' };
+  const bookingStatusClass = { upcoming: 'badge-upcoming', active: 'badge-upcoming', done: 'badge-done', cancelled: 'badge-cancelled' };
+
+  const bookingsHtml = custBookings.length === 0
+    ? '<div class="empty" style="padding:16px;"><div class="empty-text">ยังไม่มีประวัติการจองห้องซ้อม</div></div>'
+    : custBookings.slice(0, 50).map(b => `
+      <div class="history-item">
+        <div class="history-top">
+          <div>
+            <div class="history-title">${formatDate(b.date)} · ${shortTime(b.start_time)}</div>
+            <div class="history-meta">${b.hours} ชม. · ${escapeHtml(b.room || '-')}</div>
+            <div style="margin-top:6px;"><span class="badge ${bookingStatusClass[b.status] || 'badge-upcoming'}">${bookingStatusLabel[b.status] || escapeHtml(b.status)}</span>${b.confirmed ? '' : '<span class="badge badge-upcoming">รอยืนยัน</span>'}</div>
+          </div>
+          <div class="history-amount">${formatMoney(b.cost)} บาท</div>
+        </div>
+      </div>`).join('');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-name">${escapeHtml(c.full_name)}</div>
+    ${tags ? `<div style="margin-top:8px;">${tags}</div>` : ''}
+    <div style="margin-top:10px;">
+      ${contactRows || '<div class="alert alert-gold">ลูกค้ารายนี้ยังไม่มีช่องทางติดต่อ — แนะนำให้เพิ่มเบอร์โทรหรือ LINE ID</div>'}
+      ${c.note ? `<div class="detail-row"><div class="detail-key">หมายเหตุ</div><div class="detail-val">${escapeHtml(c.note)}</div></div>` : ''}
+      <div class="detail-row"><div class="detail-key">เพิ่มเมื่อ</div><div class="detail-val">${formatDateTime(c.created_at)}${addedBy ? ' · โดย ' + escapeHtml(addedBy) : ''}</div></div>
+    </div>
+
+    <hr>
+    <div class="section-title">สรุปยอดสะสม</div>
+    <div class="summary-row"><span>ยอดซื้อสินค้ารวม</span><span class="summary-strong">${formatMoney(totalSpend)} บาท</span></div>
+    <div class="summary-row"><span>จำนวนบิลที่สำเร็จ</span><span class="summary-strong">${paidSales.length} บิล</span></div>
+    <div class="summary-row"><span>ค่าห้องซ้อมรวม</span><span class="summary-strong">${formatMoney(totalBookingSpend)} บาท</span></div>
+    <div class="summary-row"><span>ชั่วโมงซ้อมสะสม</span><span class="summary-strong">${totalHours} ชม.</span></div>
+    ${freeEarned > 0
+      ? `<div class="alert alert-gold" style="margin-top:10px;">🎉 ได้รับสิทธิ์ซ้อมฟรี <strong>${freeEarned} ครั้ง</strong> (${freeEarned * (bookingSettings.free_hours_reward || 1)} ชม.)</div>`
+      : `<div class="alert alert-plain" style="margin-top:10px;">อีก <strong>${remaining} ชม.</strong> จะได้รับสิทธิ์ซ้อมฟรี</div>`}
+
+    <hr>
+    <div class="section-title">ประวัติการซื้อสินค้า</div>
+    ${salesHtml}
+
+    <hr>
+    <div class="section-title">ประวัติการจองห้องซ้อม</div>
+    <div class="alert alert-plain">การจองยังไม่ได้ผูกกับข้อมูลลูกค้าโดยตรง รายการด้านล่างจึงจับคู่จาก "ชื่อที่ตรงกัน" หรือ "เบอร์โทรที่ตรงกัน" เท่านั้น หากลูกค้าจองด้วยชื่อเล่นคนละชื่อ รายการนั้นจะไม่ปรากฏที่นี่</div>
+    ${bookingsHtml}
+    ${custBookings.length > 50 ? `<div class="form-hint">แสดง 50 รายการล่าสุดจากทั้งหมด ${custBookings.length} รายการ</div>` : ''}
+  `;
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('open');
+  detailCustomerId = null;
+}
+document.getElementById('detailModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDetailModal();
+});
+
+function editCurrentCustomer() {
+  if (!detailCustomerId) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+  openFormModal(detailCustomerId);
+}
+
+// ============================
+// DELETE
+// ============================
+async function openDeleteModal() {
+  if (!detailCustomerId) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+  if (!isManager()) { showToast('⚠️ ลบข้อมูลลูกค้าได้เฉพาะผู้จัดการหรือเจ้าของร้าน'); return; }
+
+  const c = customers.find(x => x.id === detailCustomerId);
+  if (!c) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+
+  const body = document.getElementById('deleteBody');
+  const btn = document.getElementById('confirmDeleteBtn');
+  body.innerHTML = '<div class="empty" style="padding:16px;"><div class="empty-text">กำลังตรวจสอบข้อมูลที่ผูกอยู่...</div></div>';
+  btn.style.display = 'none';
+  document.getElementById('deleteModal').classList.add('open');
+
+  // A customer referenced by a sale, a points entry or a linked booking cannot
+  // be removed — the database refuses it, and deleting one would orphan sales
+  // history anyway. Check first so the reason is stated instead of surfacing a
+  // raw foreign-key error.
+  const [salesRes, ledgerRes, bookingRes] = await Promise.all([
+    db.from('sales').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+    db.from('loyalty_points_ledger').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+    db.from('room_bookings').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+  ]);
+
+  const failed = salesRes.error || ledgerRes.error || bookingRes.error;
+  if (failed) {
+    console.error('[Check customer references]', salesRes.error, ledgerRes.error, bookingRes.error);
+    body.innerHTML = '<div class="alert alert-red">ตรวจสอบข้อมูลที่ผูกกับลูกค้ารายนี้ไม่สำเร็จ: ' +
+      escapeHtml(failed.message) + '<br>ยังไม่ได้ลบข้อมูลใด ๆ ลองใหม่อีกครั้ง</div>';
+    return;
+  }
+
+  const blockers = [];
+  if (salesRes.count) blockers.push('บิลขาย ' + salesRes.count + ' บิล');
+  if (ledgerRes.count) blockers.push('รายการแต้มสะสม ' + ledgerRes.count + ' รายการ');
+  if (bookingRes.count) blockers.push('การจองห้อง ' + bookingRes.count + ' รายการ');
+
+  if (blockers.length > 0) {
+    body.innerHTML = `
+      <div class="alert alert-red">ลบลูกค้า "${escapeHtml(c.full_name)}" ไม่ได้ เพราะมี${blockers.join(' และ ')}ผูกอยู่ — การลบจะทำให้ประวัติการขายหาย ตรวจสอบย้อนหลังไม่ได้</div>
+      <div class="alert alert-plain">หากต้องการเลิกใช้ลูกค้ารายนี้ ให้แก้ไขชื่อโดยเติมคำว่า "(เลิกใช้)" หรือใส่แท็กไว้แทน เพื่อให้ประวัติเดิมยังอยู่ครบ</div>`;
+    return;
+  }
+
+  const bookingHint = bookingsForCustomer(c).length;
+  body.innerHTML = `
+    <div class="alert alert-red">กำลังจะลบ "${escapeHtml(c.full_name)}" ออกจากระบบถาวร ไม่สามารถย้อนกลับได้</div>
+    ${bookingHint ? `<div class="alert alert-gold">ลูกค้ารายนี้มีประวัติการจองห้อง ${bookingHint} รายการที่จับคู่ด้วยชื่อ/เบอร์โทร รายการจองเหล่านั้นจะยังอยู่ในระบบจองห้องซ้อม แต่จะไม่ปรากฏในหน้าลูกค้าอีก</div>` : ''}`;
+  btn.style.display = '';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+async function confirmDelete() {
+  if (!detailCustomerId) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+
+  let error;
+  try {
+    ({ error } = await db.from('customers').delete().eq('id', detailCustomerId));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    btn.disabled = false;
+    return;
+  }
+
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Delete customer]', error);
+    showToast('⚠️ ลบข้อมูลลูกค้าไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeDeleteModal();
+  closeDetailModal();
+  await loadCustomers();
+  renderAll();
+  showToast('✅ ลบข้อมูลลูกค้าเรียบร้อยแล้ว');
+}
+
+// ============================
+// HELPERS
+// ============================
+const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const THAI_DAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
+function formatDateTime(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  if (isNaN(d)) return '-';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${THAI_DAYS[d.getDay()]} ${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543} ${hh}:${mm}`;
+}
+
+// Booking dates are plain 'YYYY-MM-DD' — split them rather than letting Date
+// parse them as UTC, which shifts the day backwards in Bangkok time.
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const parts = String(dateStr).split('-');
+  if (parts.length !== 3) return escapeHtml(dateStr);
+  const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), day = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(day)) return escapeHtml(dateStr);
+  return `${day} ${THAI_MONTHS[m - 1] || ''} ${y + 543}`;
+}
+
+function shortTime(t) {
+  if (!t) return '-';
+  return String(t).slice(0, 5) + ' น.';
+}
+
+function formatMoney(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '0.00';
+  return v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+initSupabaseSync();
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
+</script>
+</body>
+</html>
