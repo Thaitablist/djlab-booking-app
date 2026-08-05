@@ -19,7 +19,9 @@
 ## Backend
 
 Supabase (Postgres + Auth + Realtime + RLS) — ไม่มี server ของตัวเอง หน้าเว็บคุยกับ Supabase ตรงๆ
-**SQL ทั้งหมด (ตาราง, สิทธิ์, ฟังก์ชัน) ไม่ได้อยู่ใน repo นี้** อยู่ในโฟลเดอร์โปรเจกต์แยกชื่อ `DJ LAB SIAM Stock App` → `supabase/migrations/` ซึ่งเป็นแหล่งอ้างอิงจริงของ schema — **ต้องเปิดอ่านก่อนเขียนโค้ดที่แตะฐานข้อมูลทุกครั้ง ห้ามเดาชื่อคอลัมน์**
+**SQL ทั้งหมด (ตาราง, สิทธิ์, ฟังก์ชัน) ไม่ได้อยู่ใน repo นี้** อยู่ที่ github.com/Thaitablist/djlab-siam-stock-app (private) → `supabase/migrations/` ในเครื่องคือโฟลเดอร์ `DJ LAB SIAM Stock App` ที่นั่นคือแหล่งอ้างอิงจริงของ schema — **ต้องเปิดอ่านก่อนเขียนโค้ดที่แตะฐานข้อมูลทุกครั้ง ห้ามเดาชื่อคอลัมน์**
+
+migration รันด้วยการวางใน Supabase SQL Editor เท่านั้น (เครื่องนี้ไม่มี Supabase CLI และโปรเจกต์ไม่ได้ `supabase init`) ทุกไฟล์เขียนให้รันซ้ำได้โดยไม่ error
 
 การยืนยันการจองจะไปกระตุ้นให้บอท LINE ส่งข้อความแจ้งลูกค้าอัตโนมัติ (บอทอยู่คนละ repo เป็น private)
 
