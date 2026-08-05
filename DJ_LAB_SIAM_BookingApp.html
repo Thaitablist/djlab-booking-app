@@ -1261,7 +1261,10 @@ async function startTimerFromBooking() {
   showPage('Timer');
   setTimeout(() => timerAction(), 300);
   const { error } = await db.from('room_bookings').update({ status: 'active' }).eq('id', b.id);
-  if (error) console.error('[Update booking]', error);
+  if (error) {
+    console.error('[Update booking]', error);
+    showFatalError('เริ่มจับเวลาแล้ว แต่บันทึกสถานะ "กำลังใช้งาน" ไม่สำเร็จ: ' + error.message);
+  }
 }
 
 // ============================
@@ -1376,6 +1379,9 @@ function showBookingDetail(id) {
       </div>
     </div>
     <hr>
+    ${!b.confirmed && b.source !== 'staff' ? (b.line_user_id
+      ? '<div class="alert alert-green" style="margin-bottom:8px;">💬 เมื่อกดยืนยัน ระบบจะส่งข้อความแจ้งลูกค้าทาง LINE อัตโนมัติ</div>'
+      : '<div class="alert alert-gold" style="margin-bottom:8px;">⚠️ การจองนี้ไม่มีช่องทาง LINE ของลูกค้า กดยืนยันแล้วระบบจะไม่ส่งข้อความให้ — ต้องติดต่อลูกค้าเองตามข้อมูลด้านบน</div>') : ''}
     ${!b.confirmed ? `<button class="btn btn-primary" style="margin-bottom:8px;" onclick="confirmBooking('${id}')">✅ ยืนยันการจอง</button>` : ''}
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="btn btn-secondary btn-sm" onclick="markBookingDone('${id}')">✅ เสร็จสิ้น</button>
@@ -1393,33 +1399,55 @@ async function deleteBookingModal() {
   if (!currentModalBookingId) return;
   if (!confirm('ต้องการลบการจองนี้หรือไม่?')) return;
   const { error } = await db.from('room_bookings').delete().eq('id', currentModalBookingId);
-  if (error) console.error('[Delete booking]', error);
+  if (error) {
+    console.error('[Delete booking]', error);
+    showFatalError('ลบการจองไม่สำเร็จ: ' + error.message + '\nการจองนี้ยังอยู่ในระบบ');
+    return;
+  }
   closeModal();
   showToast('ลบการจองแล้ว');
 }
 
 async function confirmBooking(id) {
+  const b = bookings.find(x => x.id === id);
   const { data: { user } } = await db.auth.getUser();
   const { error } = await db.from('room_bookings').update({
     confirmed: true,
     confirmed_by: user.id,
     confirmed_at: new Date().toISOString(),
   }).eq('id', id);
-  if (error) console.error('[Confirm booking]', error);
+  if (error) {
+    console.error('[Confirm booking]', error);
+    showFatalError('ยืนยันการจองไม่สำเร็จ: ' + error.message + '\nการจองยังอยู่ในสถานะรอยืนยัน ลูกค้ายังไม่ได้รับแจ้ง');
+    return;
+  }
   closeModal();
-  showToast('✅ ยืนยันการจองแล้ว');
+  // Confirming is what triggers the LINE message to the customer. A booking
+  // with no line_user_id has no channel to push to, so say so plainly rather
+  // than let staff assume the customer was told.
+  showToast(b && b.line_user_id
+    ? '✅ ยืนยันการจองแล้ว ระบบส่งข้อความแจ้งลูกค้าทาง LINE'
+    : '✅ ยืนยันการจองแล้ว — ลูกค้ารายนี้ไม่มีช่องทาง LINE กรุณาแจ้งลูกค้าเอง');
 }
 
 async function markBookingDone(id) {
   const { error } = await db.from('room_bookings').update({ status: 'done' }).eq('id', id);
-  if (error) console.error('[Update booking]', error);
+  if (error) {
+    console.error('[Update booking]', error);
+    showFatalError('บันทึกสถานะเสร็จสิ้นไม่สำเร็จ: ' + error.message);
+    return;
+  }
   closeModal();
   showToast('✅ บันทึกเสร็จสิ้นแล้ว');
 }
 
 async function markBookingUpcoming(id) {
   const { error } = await db.from('room_bookings').update({ status: 'upcoming' }).eq('id', id);
-  if (error) console.error('[Update booking]', error);
+  if (error) {
+    console.error('[Update booking]', error);
+    showFatalError('รีเซ็ตสถานะไม่สำเร็จ: ' + error.message);
+    return;
+  }
   closeModal();
   showToast('🔄 รีเซ็ตสถานะแล้ว');
 }

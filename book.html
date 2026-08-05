@@ -283,7 +283,11 @@ async function submitBooking() {
       cost, points_earned: pts,
       status: 'upcoming',
       confirmed: false,
-      source: 'online_line',
+      // Only tag the booking as a LINE booking when a LINE userId was actually
+      // captured — that id is the only thing the bot can push a confirmation
+      // to, so tagging it 'online_line' without one hides from staff that this
+      // customer cannot be notified automatically.
+      source: lineUserId ? 'online_line' : 'online_web',
       customer_uid: user.id,
       line_user_id: lineUserId || null,
     }).select().single();
@@ -291,7 +295,13 @@ async function submitBooking() {
     if (error) throw error;
 
     document.getElementById('formCard').style.display = 'none';
-    document.getElementById('successBox').style.display = '';
+    const box = document.getElementById('successBox');
+    box.style.display = '';
+    if (!lineUserId) {
+      box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน<br>' +
+        'หน้านี้เปิดนอกแอป LINE จึงส่งข้อความยืนยันให้ไม่ได้ ' +
+        'ทางร้านจะติดต่อกลับตามข้อมูลติดต่อที่กรอกไว้';
+    }
     watchBookingStatus(inserted.id);
   } catch (err) {
     console.error('[Add booking]', err);
