@@ -775,7 +775,7 @@ function renderProductSearch() {
     const stock = stockLevelMap.hasOwnProperty(p.id) ? stockLevelMap[p.id] : 0;
     const inactiveBadge = !p.is_active ? '<span class="badge badge-inactive">ปิดใช้งาน</span>' : '';
     return `
-    <div class="product-item" onclick="addToCart(${JSON.stringify(p.id)})">
+    <div class="product-item" onclick="addToCart('${p.id}')">
       <div class="product-header">
         <div>
           <div class="product-name">${escapeHtml(p.name)}</div>
@@ -916,7 +916,7 @@ function renderCustomerSearch() {
     return;
   }
   el.innerHTML = matches.map(c => `
-    <div class="product-item" style="padding:10px 14px;margin-bottom:6px;" onclick="selectCustomer(${JSON.stringify(c.id)})">
+    <div class="product-item" style="padding:10px 14px;margin-bottom:6px;" onclick="selectCustomer('${c.id}')">
       <div class="product-name">${escapeHtml(c.full_name)}</div>
       <div class="product-sub">${escapeHtml(c.phone || 'ไม่มีเบอร์โทร')}</div>
     </div>`).join('');
@@ -1087,7 +1087,7 @@ function renderSalesHistory() {
     const customerName = s.customers ? s.customers.full_name : 'ลูกค้าทั่วไป';
     const staffName = s.admins ? s.admins.full_name : 'ไม่ทราบผู้ขาย';
     return `
-    <div class="sale-item ${isVoid ? 'sale-void' : ''}" onclick="openSaleDetail(${JSON.stringify(s.id)})">
+    <div class="sale-item ${isVoid ? 'sale-void' : ''}" onclick="openSaleDetail('${s.id}')">
       <div class="sale-item-top">
         <div>
           <div class="sale-no">${escapeHtml(s.sale_no)}</div>

@@ -716,7 +716,7 @@ function renderProductItem(p) {
   const lowBadge = p.low_stock ? '<span class="badge badge-lowstock">⚠️ ใกล้หมด</span>' : '';
   const inactiveBadge = !p.is_active ? '<span class="badge badge-inactive">ปิดใช้งาน</span>' : '';
   return `
-    <div class="product-item ${p.low_stock ? 'low-stock' : ''}" onclick="openProductModal(${JSON.stringify(p.id)})">
+    <div class="product-item ${p.low_stock ? 'low-stock' : ''}" onclick="openProductModal('${p.id}')">
       <div class="product-header">
         <div>
           <div class="product-name">${escapeHtml(p.name)}</div>
