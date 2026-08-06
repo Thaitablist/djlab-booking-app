@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>เช็คสิทธิ์สมาชิก — DJ LAB SIAM</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --accent: #c8232c;
+    --gold: #b8860b;
+    --green: #1a8f4a;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--accent);
+  }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .page { padding: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 17px;
+    outline: none;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-hint { font-size: 14px; color: var(--text2); margin-top: 8px; line-height: 1.5; }
+  .btn {
+    display: block; width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+    margin-top: 14px;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .alert {
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.6;
+  }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+  .alert-plain { background: #efefef; border-color: var(--border); color: var(--text2); }
+  .result-icon { font-size: 46px; text-align: center; margin-bottom: 8px; }
+  .result-title { font-size: 20px; font-weight: 900; text-align: center; }
+  .result-sub { font-size: 15px; text-align: center; color: var(--text2); margin-top: 6px; }
+  .result-code {
+    font-size: 15px; text-align: center; margin-top: 14px;
+    background: #111111; color: #ffffff; padding: 10px; border-radius: 8px;
+  }
+  .intro { font-size: 15px; line-height: 1.6; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">DJ LAB</div>
+  <div class="logo-text">เช็คสิทธิ์สมาชิก</div>
+</div>
+
+<div class="page">
+  <div class="card" id="formCard">
+    <div class="intro">
+      กรอกเบอร์โทรที่เคยให้ไว้กับทางร้าน เพื่อเช็คว่าท่านเป็นสมาชิกหรือไม่<br>
+      หากเป็นสมาชิก ระบบจะผูกบัญชี LINE นี้ไว้กับข้อมูลสมาชิกของท่าน ครั้งต่อไปทางร้านจะรู้จักท่านทันที
+    </div>
+    <label class="form-label">เบอร์โทรศัพท์</label>
+    <input type="tel" id="phone" class="form-input" placeholder="0812345678" inputmode="numeric" autocomplete="tel">
+    <div class="form-hint">กรอกเบอร์เดียวกับที่แจ้งไว้ตอนซื้อสินค้าหรือสมัครเรียน</div>
+    <button class="btn btn-primary" id="checkBtn" onclick="check()">เช็คสิทธิ์สมาชิก</button>
+    <div id="formError"></div>
+  </div>
+
+  <div id="resultCard" style="display:none;"></div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const LIFF_ID = '__LIFF_ID__';
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let lineUserId = null;
+let ready = false;
+
+function showFormError(msg) {
+  document.getElementById('formError').innerHTML =
+    '<div class="alert alert-red" style="margin:12px 0 0;">' + escapeHtml(msg) + '</div>';
+}
+function clearFormError() { document.getElementById('formError').innerHTML = ''; }
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function showResult(html) {
+  document.getElementById('formCard').style.display = 'none';
+  const box = document.getElementById('resultCard');
+  box.className = 'card';
+  box.style.display = '';
+  box.innerHTML = html;
+}
+
+function again() {
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('formCard').style.display = '';
+  document.getElementById('phone').value = '';
+  clearFormError();
+}
+
+async function check() {
+  if (!ready) { showFormError('กำลังเชื่อมต่อ กรุณารอสักครู่แล้วลองใหม่'); return; }
+
+  const phone = document.getElementById('phone').value.trim();
+  if (phone.replace(/\D/g, '').length < 9) {
+    showFormError('กรุณากรอกเบอร์โทรให้ครบ');
+    return;
+  }
+  if (!lineUserId) {
+    showFormError('ไม่พบบัญชี LINE ของท่าน — กรุณาเปิดหน้านี้จากเมนูในแชท LINE ของร้าน');
+    return;
+  }
+
+  clearFormError();
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังตรวจสอบ...';
+
+  let data, error;
+  try {
+    ({ data, error } = await db.rpc('claim_membership', {
+      p_phone: phone,
+      p_line_user_id: lineUserId,
+    }));
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'เช็คสิทธิ์สมาชิก';
+    showFormError('ติดต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'เช็คสิทธิ์สมาชิก';
+
+  if (error) {
+    console.error('[claim_membership]', error);
+    showFormError('ตรวจสอบไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  render(data || {});
+}
+
+function render(r) {
+  const name = escapeHtml(r.full_name || '');
+  const codeLine = r.code
+    ? `<div class="result-code">รหัสสมาชิก ${escapeHtml(r.code)}</div>` : '';
+  const retry = '<button class="btn btn-secondary" onclick="again()">ลองเบอร์อื่น</button>';
+
+  switch (r.status) {
+    case 'linked':
+      showResult(`
+        <div class="result-icon">🎉</div>
+        <div class="result-title">ยินดีต้อนรับ คุณ${name}</div>
+        <div class="result-sub">${r.is_member ? 'ท่านเป็นสมาชิกของร้าน' : 'ท่านอยู่ในทะเบียนลูกค้าของร้าน'}</div>
+        ${codeLine}
+        <div class="alert alert-green" style="margin-top:16px;">ผูกบัญชี LINE นี้กับข้อมูลของท่านเรียบร้อยแล้ว ครั้งต่อไปไม่ต้องกรอกเบอร์อีก</div>
+        ${r.is_member ? '' : '<div class="alert alert-gold">ท่านยังไม่ได้สมัครสมาชิกร้าน สอบถามสิทธิประโยชน์ได้ที่หน้าร้านหรือทักแชทนี้ได้เลย</div>'}`);
+      break;
+
+    case 'already_linked':
+      showResult(`
+        <div class="result-icon">✅</div>
+        <div class="result-title">คุณ${name}</div>
+        <div class="result-sub">${r.is_member ? 'ท่านเป็นสมาชิกของร้าน' : 'ท่านอยู่ในทะเบียนลูกค้าของร้าน'}</div>
+        ${codeLine}
+        <div class="alert alert-plain" style="margin-top:16px;">บัญชี LINE นี้ผูกกับข้อมูลของท่านอยู่แล้ว</div>`);
+      break;
+
+    case 'not_found':
+      showResult(`
+        <div class="result-icon">🔎</div>
+        <div class="result-title">ไม่พบเบอร์นี้ในทะเบียน</div>
+        <div class="alert alert-gold" style="margin-top:16px;">
+          อาจเป็นเพราะให้เบอร์อื่นไว้กับทางร้าน หรือยังไม่เคยลงทะเบียน<br>
+          ทักแชทนี้เพื่อให้ทีมงานตรวจสอบให้ได้เลยครับ
+        </div>
+        ${retry}`);
+      break;
+
+    case 'line_used_by_other':
+    case 'already_linked_other':
+      showResult(`
+        <div class="result-icon">⚠️</div>
+        <div class="result-title">บัญชี LINE นี้ถูกผูกไว้แล้ว</div>
+        <div class="alert alert-gold" style="margin-top:16px;">
+          บัญชี LINE นี้ผูกอยู่กับข้อมูลของคุณ${escapeHtml(r.full_name || '')} แล้ว
+          หากไม่ถูกต้อง กรุณาทักแชทเพื่อให้ทีมงานแก้ไขให้
+        </div>`);
+      break;
+
+    case 'member_has_other_line':
+      showResult(`
+        <div class="result-icon">⚠️</div>
+        <div class="result-title">เบอร์นี้ผูกกับ LINE อื่นไว้แล้ว</div>
+        <div class="alert alert-gold" style="margin-top:16px;">
+          เบอร์นี้เคยผูกกับบัญชี LINE อื่นไปแล้ว หากเป็นเบอร์ของท่านจริง
+          กรุณาทักแชทเพื่อให้ทีมงานย้ายให้
+        </div>
+        ${retry}`);
+      break;
+
+    case 'bad_phone':
+      showFormError('รูปแบบเบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+      break;
+
+    case 'no_line_id':
+      showFormError('ไม่พบบัญชี LINE ของท่าน — กรุณาเปิดหน้านี้จากเมนูในแชท LINE ของร้าน');
+      break;
+
+    default:
+      showFormError('เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาทักแชทแจ้งทีมงาน');
+  }
+}
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) {
+      const profile = await liff.getProfile();
+      lineUserId = profile.userId;
+    }
+  } catch (err) {
+    console.error('[LIFF init]', err);
+  }
+
+  const { error } = await db.auth.signInAnonymously();
+  if (error) {
+    console.error('[Auth]', error);
+    showFormError('เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่');
+    return;
+  }
+
+  ready = true;
+
+  // Opened outside LINE there is no account to link, and nothing this page can
+  // do about it — say so instead of letting someone fill the form for nothing.
+  if (!lineUserId) {
+    document.getElementById('formError').innerHTML =
+      '<div class="alert alert-gold" style="margin:12px 0 0;">หน้านี้ต้องเปิดจากเมนูในแชท LINE ของร้าน จึงจะผูกบัญชีให้ได้</div>';
+    document.getElementById('checkBtn').disabled = true;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
