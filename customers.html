@@ -814,8 +814,41 @@ function openMemberDetail(id) {
         ? '<div class="detail-row"><div class="detail-key">LINE</div><div class="detail-val">ผูกบัญชี LINE แล้ว</div></div>'
         : '<div class="detail-row"><div class="detail-key">LINE</div><div class="detail-val" style="font-weight:400;color:var(--text2);">ยังไม่ได้ผูกบัญชี LINE</div></div>'}
     </div>
+    ${m.line_user_id && isManager() ? `
+      <div class="alert alert-plain" style="margin-top:12px;">ถ้าลูกค้าแจ้งว่าผูกผิดคน (เช่น มีคนอื่นกรอกเบอร์นี้ไปก่อน) ให้ยกเลิกการผูกเพื่อให้เจ้าตัวผูกใหม่ได้</div>
+      <button class="btn btn-secondary" id="unlinkBtn" onclick="unlinkMember('${m.id}')">ยกเลิกการผูกบัญชี LINE</button>` : ''}
     <div class="alert alert-plain" style="margin-top:12px;">ข้อมูลนี้มาจาก Google Sheet ทะเบียนสมาชิก แก้ไขในหน้านี้ไม่ได้</div>`;
   document.getElementById('memberModal').classList.add('open');
+}
+
+// Undoing a link is the safety valve for identifying members by phone alone:
+// whoever got there first holds the membership until staff release it.
+async function unlinkMember(id) {
+  const m = memberCache[id];
+  if (!m) { showToast('⚠️ ไม่พบข้อมูลสมาชิกรายนี้'); return; }
+
+  const btn = document.getElementById('unlinkBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'กำลังยกเลิก...'; }
+
+  let error;
+  try {
+    ({ error } = await db.rpc('unlink_membership', { p_member_id: id }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'ยกเลิกการผูกบัญชี LINE'; }
+    return;
+  }
+
+  if (error) {
+    console.error('[unlink_membership]', error);
+    showToast('⚠️ ยกเลิกการผูกไม่สำเร็จ: ' + error.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'ยกเลิกการผูกบัญชี LINE'; }
+    return;
+  }
+
+  m.line_user_id = null;
+  openMemberDetail(id);
+  showToast('✅ ยกเลิกการผูกบัญชี LINE แล้ว ลูกค้าผูกใหม่ได้ทันที');
 }
 
 function closeMemberModal() {
