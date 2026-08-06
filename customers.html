@@ -323,6 +323,15 @@
   </div>
 
   <div class="card">
+    <div class="card-title">ทะเบียนสมาชิกร้าน</div>
+    <div class="search-wrap">
+      <input type="text" id="memberSearch" class="form-input" placeholder="ชื่อ / เบอร์โทร / รหัสสมาชิก" autocomplete="off">
+    </div>
+    <div class="form-hint">ทะเบียนนี้นำเข้าจาก Google Sheet ของร้าน แก้ไขที่นี่ไม่ได้ — แก้ในชีตแล้วนำเข้าใหม่</div>
+    <div id="memberResults"></div>
+  </div>
+
+  <div class="card">
     <div class="card-title">รายชื่อลูกค้า</div>
     <div class="list-count" id="listCount"></div>
     <div id="customerList"></div>
@@ -372,6 +381,14 @@
       <button class="btn btn-secondary" onclick="editCurrentCustomer()">แก้ไขข้อมูล</button>
       <button class="btn btn-danger" id="deleteCustomerBtn" onclick="openDeleteModal()" style="display:none;">ลบลูกค้า</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeMemberModal()">×</button>
+    <div class="modal-title">ข้อมูลจากทะเบียนสมาชิก</div>
+    <div id="memberBody"></div>
   </div>
 </div>
 
@@ -617,6 +634,16 @@ function bookingsForCustomer(c) {
   });
 }
 
+// Same rule the member importer uses, so a number typed here matches the one
+// stored from the sheet however either was written: +66 81 234 5678,
+// 66-81-234-5678 and 0812345678 all reduce to 0812345678.
+function normalizeThaiPhone(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('0066')) d = d.slice(4);
+  if (d.startsWith('66') && d.length >= 10) d = '0' + d.slice(2);
+  return d;
+}
+
 function findPhoneTwin(phone, exceptId) {
   const digits = normalizePhone(phone);
   if (digits.length < 9) return null;
@@ -697,6 +724,121 @@ function renderList() {
   }).join('');
 }
 document.getElementById('customerSearch').addEventListener('input', renderList);
+
+// ============================
+// MEMBER ROSTER (read-only, imported from the shop's Google Sheet)
+// ============================
+const MEMBER_FIELDS = 'id, code, is_member, full_name, phone, phone_normalized, email, address, note, member_type, register_date, line_user_id';
+let memberSearchToken = 0;
+
+// Searched on the server rather than held in the browser: the roster is 800
+// rows of names, phones and home addresses, and there is no reason to ship all
+// of it to every staff phone to answer one lookup.
+async function searchMembers() {
+  const raw = (document.getElementById('memberSearch').value || '').trim();
+  const el = document.getElementById('memberResults');
+  const token = ++memberSearchToken;
+
+  // Under three characters a search against 800 rows returns noise, not answers.
+  if (raw.length < 3) { el.innerHTML = ''; return; }
+
+  // PostgREST splits an `or` filter on commas and parentheses, so a term
+  // containing either would be read as more conditions. Strip them.
+  const term = raw.replace(/[,()*]/g, ' ').trim();
+  if (!term) { el.innerHTML = ''; return; }
+
+  const filters = [`full_name.ilike.*${term}*`, `code.ilike.*${term}*`];
+  const digits = normalizeThaiPhone(raw);
+  if (digits.length >= 9) filters.push(`phone_normalized.cs.{${digits}}`);
+
+  el.innerHTML = '<div class="empty" style="padding:16px;"><div class="empty-text">กำลังค้นหา...</div></div>';
+
+  const { data, error } = await db.from('members')
+    .select(MEMBER_FIELDS).or(filters.join(',')).order('code', { nullsFirst: false }).limit(30);
+
+  if (token !== memberSearchToken) return; // a newer keystroke already ran
+
+  if (error) {
+    console.error('[Search members]', error);
+    // The roster only exists once the migration and import have been run.
+    if (/relation .*members.* does not exist|schema cache/i.test(error.message)) {
+      el.innerHTML = '<div class="alert alert-gold">ยังไม่มีทะเบียนสมาชิกในระบบ — ต้องนำเข้าจาก Google Sheet ก่อน</div>';
+    } else {
+      el.innerHTML = '<div class="alert alert-red">ค้นหาสมาชิกไม่สำเร็จ: ' + escapeHtml(error.message) + '</div>';
+    }
+    return;
+  }
+
+  const rows = data || [];
+  if (rows.length === 0) {
+    el.innerHTML = '<div class="empty" style="padding:16px;"><div class="empty-text">ไม่พบในทะเบียนสมาชิก</div></div>';
+    return;
+  }
+
+  memberCache = {};
+  el.innerHTML = rows.map(m => {
+    memberCache[m.id] = m;
+    return `
+    <div class="cust-item" onclick="openMemberDetail('${m.id}')">
+      <div class="cust-name">${escapeHtml(m.full_name)}</div>
+      <div class="cust-sub">${escapeHtml(m.phone || 'ไม่มีเบอร์โทร')}</div>
+      <div class="cust-tags">${memberBadge(m)}${m.member_type ? '<span class="badge badge-tag">' + escapeHtml(m.member_type) + '</span>' : ''}</div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('memberSearch').addEventListener('input', searchMembers);
+
+let memberCache = {};
+
+function memberBadge(m) {
+  return m.is_member
+    ? '<span class="badge badge-done">สมาชิก' + (m.code ? ' #' + escapeHtml(m.code) : '') + '</span>'
+    : '<span class="badge badge-cancelled">ยังไม่ได้สมัครสมาชิก</span>';
+}
+
+function openMemberDetail(id) {
+  const m = memberCache[id];
+  if (!m) { showToast('⚠️ ไม่พบข้อมูลสมาชิกรายนี้'); return; }
+  const row = (k, v) => v
+    ? `<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${escapeHtml(v)}</div></div>` : '';
+  document.getElementById('memberBody').innerHTML = `
+    <div class="detail-name">${escapeHtml(m.full_name)}</div>
+    <div style="margin-top:8px;">${memberBadge(m)}${m.member_type ? '<span class="badge badge-tag">' + escapeHtml(m.member_type) + '</span>' : ''}</div>
+    <div style="margin-top:10px;">
+      ${row('เบอร์โทร', m.phone)}
+      ${row('อีเมล', m.email)}
+      ${row('ที่อยู่', m.address)}
+      ${row('สมัครเมื่อ', m.register_date ? formatDate(m.register_date) : '')}
+      ${row('หมายเหตุ', m.note)}
+      ${m.line_user_id
+        ? '<div class="detail-row"><div class="detail-key">LINE</div><div class="detail-val">ผูกบัญชี LINE แล้ว</div></div>'
+        : '<div class="detail-row"><div class="detail-key">LINE</div><div class="detail-val" style="font-weight:400;color:var(--text2);">ยังไม่ได้ผูกบัญชี LINE</div></div>'}
+    </div>
+    <div class="alert alert-plain" style="margin-top:12px;">ข้อมูลนี้มาจาก Google Sheet ทะเบียนสมาชิก แก้ไขในหน้านี้ไม่ได้</div>`;
+  document.getElementById('memberModal').classList.add('open');
+}
+
+function closeMemberModal() {
+  document.getElementById('memberModal').classList.remove('open');
+}
+document.getElementById('memberModal').addEventListener('click', function (e) {
+  if (e.target === this) closeMemberModal();
+});
+
+// Look a customer up in the roster by phone. Returns undefined when the roster
+// is missing or unreachable, which the caller shows differently from "checked,
+// and this person is not in the roster".
+async function memberForPhone(phone) {
+  const digits = normalizeThaiPhone(phone);
+  if (digits.length < 9) return null;
+  const { data, error } = await db.from('members')
+    .select(MEMBER_FIELDS).contains('phone_normalized', [digits]).limit(1);
+  if (error) {
+    console.error('[Member lookup]', error);
+    return undefined;
+  }
+  return (data && data[0]) || null;
+}
 
 // ============================
 // ADD / EDIT
@@ -816,10 +958,14 @@ async function openDetail(id) {
   document.getElementById('deleteCustomerBtn').style.display = isManager() ? '' : 'none';
   document.getElementById('detailModal').classList.add('open');
 
-  const { data: sales, error } = await db.from('sales')
-    .select('id, sale_no, total, status, payment_method, created_at')
-    .eq('customer_id', id)
-    .order('created_at', { ascending: false });
+  const [salesRes, member] = await Promise.all([
+    db.from('sales')
+      .select('id, sale_no, total, status, payment_method, created_at')
+      .eq('customer_id', id)
+      .order('created_at', { ascending: false }),
+    memberForPhone(c.phone),
+  ]);
+  const { data: sales, error } = salesRes;
 
   if (error) {
     console.error('[Load customer sales]', error);
@@ -828,10 +974,32 @@ async function openDetail(id) {
 
   // A newer edit may have landed while the history was loading.
   if (detailCustomerId !== id) return;
-  renderDetail(customers.find(x => x.id === id) || c, sales || [], !!error);
+  renderDetail(customers.find(x => x.id === id) || c, sales || [], !!error, member);
 }
 
-function renderDetail(c, sales, salesFailed) {
+// `member` is the roster row matched by phone: an object when found, null when
+// checked and absent, undefined when the roster could not be read at all.
+// Those are three different things and the page says which one it is.
+function memberStatusHtml(c, member) {
+  if (member === undefined) {
+    return '<div class="alert alert-plain">ตรวจสอบสถานะสมาชิกไม่ได้ในขณะนี้</div>';
+  }
+  if (member) {
+    const label = member.is_member
+      ? '✅ เป็นสมาชิกร้าน' + (member.code ? ' (รหัส ' + escapeHtml(member.code) + ')' : '')
+      : 'มีในทะเบียนร้าน แต่ยังไม่ได้สมัครสมาชิก';
+    const cls = member.is_member ? 'alert-green' : 'alert-plain';
+    const sameName = (member.full_name || '').trim() !== (c.full_name || '').trim()
+      ? '<br>ชื่อในทะเบียน: ' + escapeHtml(member.full_name) : '';
+    return `<div class="alert ${cls}">${label}${sameName}</div>`;
+  }
+  if (!normalizeThaiPhone(c.phone) || normalizeThaiPhone(c.phone).length < 9) {
+    return '<div class="alert alert-plain">ยังไม่มีเบอร์โทรที่ใช้ตรวจสอบสถานะสมาชิกได้</div>';
+  }
+  return '<div class="alert alert-plain">ไม่พบเบอร์นี้ในทะเบียนสมาชิกร้าน</div>';
+}
+
+function renderDetail(c, sales, salesFailed, member) {
   const custBookings = bookingsForCustomer(c);
   const doneBookings = custBookings.filter(b => b.status === 'done');
   const totalHours = doneBookings.reduce((s, b) => s + (b.hours || 0), 0);
@@ -892,6 +1060,7 @@ function renderDetail(c, sales, salesFailed) {
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-name">${escapeHtml(c.full_name)}</div>
     ${tags ? `<div style="margin-top:8px;">${tags}</div>` : ''}
+    <div style="margin-top:10px;">${memberStatusHtml(c, member)}</div>
     <div style="margin-top:10px;">
       ${contactRows || '<div class="alert alert-gold">ลูกค้ารายนี้ยังไม่มีช่องทางติดต่อ — แนะนำให้เพิ่มเบอร์โทรหรือ LINE ID</div>'}
       ${c.note ? `<div class="detail-row"><div class="detail-key">หมายเหตุ</div><div class="detail-val">${escapeHtml(c.note)}</div></div>` : ''}
