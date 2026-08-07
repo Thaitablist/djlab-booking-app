@@ -329,6 +329,7 @@
     </div>
     <div class="form-hint">ทะเบียนนี้นำเข้าจาก Google Sheet ของร้าน แก้ไขที่นี่ไม่ได้ — แก้ในชีตแล้วนำเข้าใหม่</div>
     <div id="memberResults"></div>
+    <button class="btn btn-secondary" onclick="openCodeModal()" style="margin-top:12px;">+ สร้างลิงก์สมัครสมาชิก</button>
   </div>
 
   <div class="card">
@@ -381,6 +382,14 @@
       <button class="btn btn-secondary" onclick="editCurrentCustomer()">แก้ไขข้อมูล</button>
       <button class="btn btn-danger" id="deleteCustomerBtn" onclick="openDeleteModal()" style="display:none;">ลบลูกค้า</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="codeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCodeModal()">×</button>
+    <div class="modal-title">สร้างลิงก์ให้ลูกค้าสมัครเอง</div>
+    <div id="codeBody"></div>
   </div>
 </div>
 
@@ -823,6 +832,121 @@ function openMemberDetail(id) {
     <div class="alert alert-plain" style="margin-top:12px;">ข้อมูลนี้มาจาก Google Sheet ทะเบียนสมาชิก แก้ไขในหน้านี้ไม่ได้</div>`;
   document.getElementById('memberModal').classList.add('open');
 }
+
+// ============================
+// สร้างลิงก์ให้ลูกค้าสมัครเอง
+// ============================
+const REGISTER_LIFF = 'https://liff.line.me/2010938781-5HXyGxm5';
+let codeCache = [];
+
+// รหัสในทะเบียนมี 3 รูปแบบปนกัน (23xxxx, 12xxxx, 25xxx) และชุดที่ใช้อยู่ไม่ได้
+// เปลี่ยนตามปี — 25310 ออกเมื่อ มี.ค. 2569 ยังอยู่ชุด 25 อยู่ จึงเดาจากปีไม่ได้
+// ต้องดูว่ารหัสที่ออกล่าสุดหน้าตายังไง แล้วเดินต่อจากชุดนั้น
+function suggestNextCode(rows) {
+  const withCode = rows.filter(r => r.code && /^\d+$/.test(r.code.trim()));
+  if (!withCode.length) return { latest: null, next: '', series: '' };
+
+  // รหัสที่ออกล่าสุด = แถวที่ register_date ใหม่สุด (ไม่ใช่ตัวเลขมากสุด
+  // เพราะชุด 23xxxx มีค่าตัวเลขสูงกว่าชุด 25xxx ที่ใช้อยู่จริง)
+  const dated = withCode.filter(r => r.register_date).sort((a, b) => b.register_date.localeCompare(a.register_date));
+  const newest = (dated[0] || withCode[withCode.length - 1]).code.trim();
+  const len = newest.length;
+  const prefix = newest.slice(0, 2);
+
+  const sameSeries = withCode
+    .map(r => r.code.trim())
+    .filter(c => c.length === len && c.slice(0, 2) === prefix);
+
+  const max = sameSeries.reduce((m, c) => Math.max(m, parseInt(c, 10)), 0);
+  return { latest: String(max), next: String(max + 1), series: prefix + '·' + len + ' หลัก' };
+}
+
+async function openCodeModal() {
+  const body = document.getElementById('codeBody');
+  body.innerHTML = '<div class="empty" style="padding:16px;"><div class="empty-text">กำลังอ่านรหัสล่าสุด...</div></div>';
+  document.getElementById('codeModal').classList.add('open');
+
+  const { data, error } = await db.from('members').select('code, register_date, full_name');
+  if (error) {
+    console.error('[Load codes]', error);
+    body.innerHTML = '<div class="alert alert-red">อ่านรหัสสมาชิกไม่สำเร็จ: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+
+  codeCache = data || [];
+  const s = suggestNextCode(codeCache);
+  if (!s.next) {
+    body.innerHTML = '<div class="alert alert-gold">ยังไม่มีรหัสสมาชิกในระบบ กรุณากรอกรหัสที่ต้องการเอง</div>';
+  }
+
+  body.innerHTML = `
+    <div class="alert alert-plain">
+      รหัสที่ออกล่าสุด: <strong>${escapeHtml(s.latest || '—')}</strong>
+      ${s.series ? ' (ชุด ' + escapeHtml(s.series) + ')' : ''}
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสสมาชิกที่จะให้ลูกค้า</label>
+      <input type="text" id="codeInput" class="form-input" value="${escapeHtml(s.next)}" inputmode="numeric">
+      <div class="form-hint">ระบบเดาเลขถัดไปให้จากชุดที่ใช้อยู่ แก้เองได้ถ้าร้านใช้เลขอื่น</div>
+    </div>
+    <div id="codeStatus"></div>
+    <div class="form-group">
+      <label class="form-label">ลิงก์ที่จะส่งให้ลูกค้า</label>
+      <input type="text" id="codeLink" class="form-input" readonly style="font-size:14px;">
+    </div>
+    <button class="btn btn-primary" onclick="copyRegisterLink()">คัดลอกลิงก์</button>
+    <div class="alert alert-gold" style="margin-top:14px;">
+      <strong>ก่อนส่งลิงก์ ต้องเพิ่มแถวในชีตก่อน</strong><br>
+      เปิดชีต DJ LAB MEMBERSHIP แท็บ <strong>หมายเลข</strong> → เลื่อนลงแถวล่างสุด →
+      เพิ่มแถวใหม่ใส่เฉพาะช่อง <strong>Code</strong> เป็นเลขนี้ ช่องอื่นเว้นว่าง<br>
+      ถ้าไม่เพิ่มก่อน ลูกค้าจะเห็นว่า "ไม่พบรหัสสมาชิกนี้"
+    </div>`;
+
+  document.getElementById('codeInput').addEventListener('input', refreshCodeLink);
+  refreshCodeLink();
+}
+
+function refreshCodeLink() {
+  const code = (document.getElementById('codeInput').value || '').trim();
+  const linkEl = document.getElementById('codeLink');
+  const statusEl = document.getElementById('codeStatus');
+
+  linkEl.value = code ? REGISTER_LIFF + '?code=' + encodeURIComponent(code) : '';
+
+  if (!code) { statusEl.innerHTML = ''; return; }
+
+  // ฐานข้อมูลเป็นสำเนาของชีต ถ้ารหัสนี้โผล่ในฐานข้อมูลแปลว่ามีในชีตแล้ว
+  const taken = (codeCache || []).find(r => (r.code || '').trim() === code);
+  if (!taken) {
+    statusEl.innerHTML = '<div class="alert alert-plain">รหัสนี้ยังไม่มีในชีต — เพิ่มแถวก่อนส่งลิงก์</div>';
+  } else if ((taken.full_name || '').trim()) {
+    statusEl.innerHTML = '<div class="alert alert-red">⚠️ รหัสนี้มีคนใช้แล้ว: ' +
+      escapeHtml(taken.full_name) + ' — เปลี่ยนเป็นเลขอื่น</div>';
+  } else {
+    statusEl.innerHTML = '<div class="alert alert-green">✅ รหัสนี้มีแถวในชีตแล้วและยังว่าง พร้อมส่งลิงก์</div>';
+  }
+}
+
+async function copyRegisterLink() {
+  const link = document.getElementById('codeLink').value;
+  if (!link) { showToast('⚠️ กรุณากรอกรหัสสมาชิกก่อน'); return; }
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast('✅ คัดลอกลิงก์แล้ว วางในแชท LINE ของลูกค้าได้เลย');
+  } catch (err) {
+    // บางเบราว์เซอร์ไม่ให้เขียนคลิปบอร์ด — เลือกข้อความให้ผู้ใช้กดคัดลอกเอง
+    const el = document.getElementById('codeLink');
+    el.focus(); el.select();
+    showToast('⚠️ คัดลอกอัตโนมัติไม่ได้ — เลือกข้อความให้แล้ว กด ⌘C หรือแตะค้างเพื่อคัดลอก');
+  }
+}
+
+function closeCodeModal() {
+  document.getElementById('codeModal').classList.remove('open');
+}
+document.getElementById('codeModal').addEventListener('click', function (e) {
+  if (e.target === this) closeCodeModal();
+});
 
 // Undoing a link is the safety valve for identifying members by phone alone:
 // whoever got there first holds the membership until staff release it.
