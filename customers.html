@@ -641,6 +641,9 @@ function normalizeThaiPhone(raw) {
   let d = String(raw || '').replace(/\D/g, '');
   if (d.startsWith('0066')) d = d.slice(4);
   if (d.startsWith('66') && d.length >= 10) d = '0' + d.slice(2);
+  // Sheets เก็บเบอร์ที่พิมพ์เลขล้วนเป็นตัวเลข แล้วตัด 0 หน้าทิ้ง — เบอร์ 9 หลัก
+  // ที่ขึ้นต้น 6/8/9 เป็นมือถือที่ 0 หายไป (เบอร์บ้านขึ้นต้นด้วย 0 เสมอ)
+  if (d.length === 9 && ['6', '8', '9'].includes(d[0])) d = '0' + d;
   return d;
 }
 
