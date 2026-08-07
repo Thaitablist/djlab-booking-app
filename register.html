@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>สมัครสมาชิก — DJ LAB SIAM</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --accent: #c8232c;
+    --gold: #b8860b;
+    --green: #1a8f4a;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 3px solid var(--accent);
+  }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
+  .page { padding: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .intro { font-size: 15px; line-height: 1.6; margin-bottom: 14px; }
+  .code-box {
+    background: #111111;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .code-label { font-size: 14px; color: #aaaaaa; }
+  .code-value { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-top: 2px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    font-family: inherit;
+  }
+  textarea.form-input { resize: vertical; }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-hint { font-size: 14px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+  .btn {
+    display: block; width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+    margin-top: 16px;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .alert {
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.6;
+  }
+  .alert:last-child { margin-bottom: 0; }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+  .alert-plain { background: #efefef; border-color: var(--border); color: var(--text2); }
+  .result-icon { font-size: 46px; text-align: center; margin-bottom: 8px; }
+  .result-title { font-size: 20px; font-weight: 900; text-align: center; }
+  .result-sub { font-size: 15px; text-align: center; color: var(--text2); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-box">DJ LAB</div>
+  <div class="logo-text">สมัครสมาชิก</div>
+</div>
+
+<div class="page">
+  <div class="card" id="formCard" style="display:none;">
+    <div class="intro">
+      กรอกข้อมูลของท่านเพื่อลงทะเบียนสมาชิก DJ LAB SIAM<br>
+      ทางร้านจะใช้ข้อมูลนี้ในการติดต่อและดูแลสิทธิประโยชน์ของท่าน
+    </div>
+
+    <div class="code-box">
+      <div class="code-label">รหัสสมาชิกของท่าน</div>
+      <div class="code-value" id="codeValue">—</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ชื่อ-นามสกุล *</label>
+      <input type="text" id="fName" class="form-input" placeholder="ชื่อ นามสกุล" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">เบอร์โทรศัพท์ *</label>
+      <input type="tel" id="fPhone" class="form-input" placeholder="0812345678" inputmode="numeric" autocomplete="tel">
+    </div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="fEmail" class="form-input" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ที่อยู่</label>
+      <textarea id="fAddress" class="form-input" rows="3" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+      <div class="form-hint">ใช้สำหรับจัดส่งของแถมหรือเอกสารรับประกัน กรอกหรือไม่ก็ได้</div>
+    </div>
+
+    <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">ลงทะเบียนสมาชิก</button>
+    <div id="formError"></div>
+  </div>
+
+  <div id="stateCard" style="display:none;"></div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+// ตั้งค่า 2 ตัวนี้หลังสร้าง LIFF app และ deploy Apps Script Web App แล้ว
+const LIFF_ID     = '__LIFF_ID__';
+const WEB_APP_URL = '__WEB_APP_URL__';
+
+let idToken = null;
+let memberCode = '';
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/** ขึ้นข้อความบนจอเสมอ — บนมือถือเปิด console ดูไม่ได้ ถ้าไม่แสดงจะกลายเป็น "กดแล้วไม่มีอะไรเกิดขึ้น" */
+function showState(html) {
+  document.getElementById('formCard').style.display = 'none';
+  const box = document.getElementById('stateCard');
+  box.className = 'card';
+  box.style.display = '';
+  box.innerHTML = html;
+}
+
+function showFormError(msg) {
+  document.getElementById('formError').innerHTML =
+    '<div class="alert alert-red" style="margin:12px 0 0;">' + escapeHtml(msg) + '</div>';
+}
+function clearFormError() { document.getElementById('formError').innerHTML = ''; }
+
+function contactUs(extra) {
+  return '<div class="alert alert-plain" style="margin-top:14px;">' +
+    (extra ? escapeHtml(extra) + '<br>' : '') +
+    'ทักแชทนี้เพื่อให้ทีมงานช่วยตรวจสอบได้เลยครับ</div>';
+}
+
+async function submitForm() {
+  const name    = document.getElementById('fName').value.trim();
+  const phone   = document.getElementById('fPhone').value.trim();
+  const email   = document.getElementById('fEmail').value.trim();
+  const address = document.getElementById('fAddress').value.trim();
+
+  if (!name) { showFormError('กรุณากรอกชื่อ-นามสกุล'); return; }
+  if (phone.replace(/\D/g, '').length < 9) { showFormError('กรุณากรอกเบอร์โทรให้ครบ'); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showFormError('รูปแบบอีเมลไม่ถูกต้อง'); return;
+  }
+
+  clearFormError();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังลงทะเบียน...';
+
+  let data;
+  try {
+    // ไม่ตั้ง Content-Type เอง เพื่อให้เป็น request ธรรมดาที่ไม่ต้องถามสิทธิ์ล่วงหน้า
+    // (Apps Script Web App ตอบ preflight ไม่ได้ ถ้าตั้งเป็น application/json จะโดนบล็อก)
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        id_token: idToken, code: memberCode,
+        full_name: name, phone: phone, email: email, address: address,
+      }),
+    });
+    data = await res.json();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'ลงทะเบียนสมาชิก';
+    showFormError('ส่งข้อมูลไม่สำเร็จ — ตรวจสอบสัญญาณอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง');
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'ลงทะเบียนสมาชิก';
+  render(data || {});
+}
+
+function render(r) {
+  switch (r.status) {
+    case 'ok':
+      showState(
+        '<div class="result-icon">🎉</div>' +
+        '<div class="result-title">ลงทะเบียนเรียบร้อยแล้ว</div>' +
+        '<div class="result-sub">ยินดีต้อนรับ คุณ' + escapeHtml(r.full_name) + '</div>' +
+        '<div class="code-box" style="margin-top:16px;">' +
+          '<div class="code-label">รหัสสมาชิก</div>' +
+          '<div class="code-value">' + escapeHtml(r.code) + '</div>' +
+        '</div>' +
+        '<div class="alert alert-green">ผูกบัญชี LINE นี้กับข้อมูลสมาชิกของท่านให้แล้ว ' +
+        'ครั้งต่อไปทางร้านจะรู้จักท่านทันที ไม่ต้องกรอกอะไรอีก</div>');
+      break;
+
+    case 'already_registered':
+      showState(
+        '<div class="result-icon">✅</div>' +
+        '<div class="result-title">รหัสนี้ลงทะเบียนแล้ว</div>' +
+        '<div class="result-sub">ลงทะเบียนไว้ในชื่อ คุณ' + escapeHtml(r.full_name) + '</div>' +
+        contactUs('หากไม่ใช่ท่าน หรือต้องการแก้ไขข้อมูล'));
+      break;
+
+    case 'not_found':
+      showState(
+        '<div class="result-icon">🔎</div>' +
+        '<div class="result-title">ไม่พบรหัสสมาชิกนี้</div>' +
+        '<div class="result-sub">รหัส ' + escapeHtml(r.code || memberCode) + '</div>' +
+        contactUs('อาจเป็นเพราะลิงก์ไม่ถูกต้อง หรือทางร้านยังไม่ได้บันทึกรหัสนี้'));
+      break;
+
+    case 'bad_token':
+      showState('<div class="alert alert-gold">ยืนยันบัญชี LINE ของท่านไม่สำเร็จ ' +
+        'กรุณาปิดหน้านี้แล้วเปิดใหม่จากลิงก์ในแชท LINE ของร้าน</div>');
+      break;
+
+    case 'no_name':
+      showFormError('กรุณากรอกชื่อ-นามสกุล');
+      break;
+
+    case 'server_not_configured':
+    case 'sheet_missing':
+    case 'header_missing':
+      showState('<div class="alert alert-red">ระบบลงทะเบียนยังตั้งค่าไม่เสร็จ (' +
+        escapeHtml(r.status) + ')</div>' + contactUs('รบกวนแจ้งทีมงานตามข้อความนี้'));
+      break;
+
+    default:
+      showState('<div class="alert alert-red">เกิดข้อผิดพลาดที่ไม่คาดคิด' +
+        (r.status ? ' (' + escapeHtml(r.status) + ')' : '') + '</div>' + contactUs());
+  }
+}
+
+async function init() {
+  // ยังไม่ได้ตั้งค่า = หน้านี้ใช้ไม่ได้ ต้องบอกให้เห็น ไม่ใช่ปล่อยให้กรอกแล้วพัง
+  // (เคยพลาดมาแล้วกับ member.html ที่เสิร์ฟค่าตัวอย่างอยู่ครึ่งวันโดยไม่มีใครรู้)
+  if (LIFF_ID.indexOf('__') === 0 || WEB_APP_URL.indexOf('__') === 0) {
+    showState('<div class="alert alert-red">หน้านี้ยังตั้งค่าไม่เสร็จ ' +
+      '(ยังไม่ได้ใส่ LIFF ID หรือที่อยู่ระบบลงทะเบียน)</div>' +
+      contactUs('รบกวนแจ้งทีมงาน'));
+    return;
+  }
+
+  memberCode = (new URLSearchParams(location.search).get('code') || '').trim();
+
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) idToken = liff.getIDToken();
+  } catch (err) {
+    console.error('[LIFF init]', err);
+  }
+
+  if (!idToken) {
+    showState('<div class="alert alert-gold">หน้านี้ต้องเปิดจากลิงก์ในแชท LINE ของร้าน ' +
+      'จึงจะยืนยันตัวตนและลงทะเบียนให้ได้</div>' +
+      contactUs('หากเปิดจากแชท LINE แล้วยังขึ้นข้อความนี้'));
+    return;
+  }
+
+  if (!memberCode) {
+    showState('<div class="alert alert-gold">ลิงก์นี้ไม่มีรหัสสมาชิกกำกับมา ' +
+      'กรุณาใช้ลิงก์ที่ทางร้านส่งให้โดยตรง</div>' + contactUs());
+    return;
+  }
+
+  document.getElementById('codeValue').textContent = memberCode;
+  document.getElementById('formCard').style.display = '';
+}
+
+init();
+</script>
+</body>
+</html>
