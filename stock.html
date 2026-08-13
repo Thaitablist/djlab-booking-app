@@ -242,7 +242,7 @@
     display: inline-block;
     padding: 3px 10px;
     border-radius: 20px;
-    font-size: 13px;
+    font-size: 14px;   /* กฎข้อ 6: ห้ามต่ำกว่า 14px */
     font-weight: 700;
   }
   .badge-lowstock { background: rgba(200,35,44,0.1); color: var(--accent); border: 1px solid rgba(200,35,44,0.3); }
@@ -366,7 +366,7 @@
     <div class="card-title">บันทึกการเคลื่อนไหวสต็อก</div>
     <div class="form-group">
       <label class="form-label">สินค้า *</label>
-      <select id="movProduct" class="form-input"></select>
+      <select id="movProduct" class="form-input" onchange="onMovProductChange()"></select>
       <button class="btn btn-secondary" onclick="openScanner('movement')" style="margin-top:8px;">📷 สแกนบาร์โค้ดเลือกสินค้า</button>
     </div>
     <div class="form-group">
@@ -376,6 +376,15 @@
         <option value="out">ตัดออก (Out)</option>
         <option value="adjustment">ปรับยอด (Adjustment)</option>
       </select>
+    </div>
+    <div class="form-group" id="serialGroup">
+      <label class="form-label">ซีเรียลของแต่ละเครื่อง</label>
+      <button class="btn btn-secondary" onclick="openScanner('serial')">📷 ยิงซีเรียลทีละเครื่อง</button>
+      <div class="form-hint" style="font-size:14px;color:var(--gray);margin-top:6px;">
+        ยิงติดกันได้เรื่อย ๆ ไม่ต้องกดใหม่ทุกครั้ง · จำนวนจะนับให้เองตามที่ยิง<br>
+        ของที่ไม่ต้องแยกรายเครื่อง (เช่น สาย) ข้ามช่องนี้แล้วพิมพ์จำนวนได้เลย
+      </div>
+      <div id="serialList" style="margin-top:10px;"></div>
     </div>
     <div class="form-group">
       <label class="form-label" id="movQtyLabel">จำนวน (ต้องเป็นจำนวนบวก) *</label>
@@ -449,6 +458,7 @@
       <label for="pfActive">เปิดใช้งานสินค้านี้</label>
     </div>
     <button class="btn btn-primary" id="productSaveBtn" onclick="saveProduct()">บันทึกสินค้า</button>
+    <div id="pfUnits" style="margin-top:18px;"></div>
   </div>
 </div>
 
@@ -470,7 +480,7 @@
 
     <div style="display:flex;gap:10px;margin-top:12px;">
       <button class="btn btn-secondary" id="scanTorchBtn" onclick="toggleTorch()" disabled>ไฟฉาย</button>
-      <button class="btn btn-secondary" onclick="closeScanner()">ปิด</button>
+      <button class="btn btn-secondary" id="scanCloseBtn" onclick="closeScanner()">ปิด</button>
     </div>
   </div>
 </div>
@@ -801,6 +811,11 @@ function onMovTypeChange() {
     qtyInput.setAttribute('min', '1');
     label.textContent = 'จำนวน (ต้องเป็นจำนวนบวก) *';
   }
+  // ซีเรียลบันทึกได้ตอนรับเข้าเท่านั้น ตัดออก/ปรับยอดยังไม่รองรับรายเครื่อง
+  // ถ้าเปลี่ยนประเภททิ้งไว้ ต้องล้างของที่ยิงค้างด้วย ไม่งั้นจะไปโผล่ในรายการถัดไป
+  const group = document.getElementById('serialGroup');
+  if (type === 'in') { group.style.display = ''; }
+  else { group.style.display = 'none'; if (pendingSerials.length) clearSerials(); }
 }
 
 async function submitMovement() {
@@ -815,6 +830,28 @@ async function submitMovement() {
   if ((type === 'in' || type === 'out') && qty <= 0) { showToast('⚠️ จำนวนต้องเป็นค่าบวกสำหรับรับเข้า/ตัดออก'); return; }
   if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
 
+  const serials = (type === 'in') ? pendingSerials.slice() : [];
+  if (serials.length && serials.length !== qty) {
+    showToast('⚠️ จำนวนกับซีเรียลไม่ตรงกัน (' + qty + ' vs ' + serials.length + ' เครื่อง)');
+    return;
+  }
+
+  // ลงซีเรียลก่อนตัดสต็อก เพราะซีเรียลซ้ำจะถูกฐานข้อมูลปฏิเสธ (serial_no เป็น unique)
+  // ถ้าลงยอดไปก่อนแล้วซีเรียลพัง จะได้ยอดที่ถอนคืนไม่ได้ (stock_movements แก้ไม่ได้)
+  if (serials.length) {
+    const { error: uErr } = await db.from('product_units').insert(
+      serials.map(s => ({ product_id: productId, serial_no: s, barcode_code: s }))
+    );
+    if (uErr) {
+      console.error('[Add units]', uErr);
+      const dup = uErr.code === '23505' || /duplicate key/i.test(uErr.message || '');
+      showToast(dup
+        ? '⚠️ มีซีเรียลซ้ำกับที่บันทึกไว้แล้ว ยังไม่ได้บันทึกอะไรเลย — ตรวจรายการซีเรียลอีกครั้ง'
+        : '⚠️ บันทึกซีเรียลไม่สำเร็จ: ' + uErr.message + ' (ยังไม่ได้ลงยอดสต็อก)');
+      return;
+    }
+  }
+
   const { error } = await db.from('stock_movements').insert({
     product_id: productId,
     type,
@@ -825,13 +862,19 @@ async function submitMovement() {
 
   if (error) {
     console.error('[Add movement]', error);
-    showToast('⚠️ บันทึกรายการไม่สำเร็จ: ' + error.message);
+    // ซีเรียลลงไปแล้วแต่ยอดไม่ลง ต้องบอกให้ชัดว่าค้างอยู่ตรงไหน ไม่ใช่แค่ว่า "ไม่สำเร็จ"
+    showToast('⚠️ บันทึกรายการไม่สำเร็จ: ' + error.message +
+      (serials.length ? ' (ซีเรียล ' + serials.length + ' เครื่องบันทึกไปแล้ว อย่ายิงซ้ำ ให้ลงยอดใหม่อย่างเดียว)' : ''));
+    if (serials.length) clearSerials();
     return;
   }
 
+  clearSerials();
   document.getElementById('movQty').value = '';
   document.getElementById('movReason').value = '';
-  showToast('✅ บันทึกรายการเรียบร้อยแล้ว');
+  showToast(serials.length
+    ? '✅ บันทึกรายการและซีเรียล ' + serials.length + ' เครื่องเรียบร้อยแล้ว'
+    : '✅ บันทึกรายการเรียบร้อยแล้ว');
 }
 
 function formatDateTime(iso) {
@@ -913,6 +956,43 @@ function openProductModal(productId) {
   notice.style.display = writer ? 'none' : '';
 
   modal.classList.add('open');
+  loadProductUnits(productId);
+}
+
+const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold: 'ขายแล้ว', reserved: 'จองไว้', defective: 'มีตำหนิ' };
+
+// รุ่นที่เก็บซีเรียลรายเครื่องต้องดูออกว่าเครื่องไหนยังอยู่ ไม่ใช่รู้แค่ยอดรวม
+async function loadProductUnits(productId) {
+  const box = document.getElementById('pfUnits');
+  box.innerHTML = '';
+  if (!productId) return;
+
+  const { data, error } = await db.from('product_units')
+    .select('serial_no, status, received_at')
+    .eq('product_id', productId)
+    .order('received_at', { ascending: false });
+
+  if (error) {
+    console.error('[Load units]', error);
+    box.innerHTML = '<div class="alert alert-red">โหลดรายการซีเรียลไม่สำเร็จ: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+  if (!data || !data.length) return;   // รุ่นที่ไม่ได้เก็บรายเครื่อง ไม่ต้องมีหัวข้อรกหน้าจอ
+
+  const inStock = data.filter(u => u.status === 'in_stock').length;
+  box.innerHTML =
+    '<div class="card-title" style="margin-bottom:8px;">ซีเรียลรายเครื่อง (' + data.length +
+    ' เครื่อง · อยู่ในสต็อก ' + inStock + ')</div>' +
+    data.map(u =>
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;' +
+      'border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;">' +
+        '<div style="min-width:0;">' +
+          '<div style="font-weight:700;font-size:15px;word-break:break-all;">' + escapeHtml(u.serial_no) + '</div>' +
+          '<div style="font-size:14px;color:var(--gray);">รับเข้า ' + formatDateTime(u.received_at) + '</div>' +
+        '</div>' +
+        '<span class="badge badge-' + (u.status === 'in_stock' ? 'in' : 'out') + '" style="flex-shrink:0;">' +
+          (UNIT_STATUS_LABEL[u.status] || escapeHtml(u.status)) + '</span>' +
+      '</div>').join('');
 }
 
 function closeProductModal() {
@@ -999,10 +1079,71 @@ const SCAN_TITLES = {
   search:   'สแกนหาสินค้า',
   movement: 'สแกนเลือกสินค้า',
   field:    'สแกนกรอกบาร์โค้ด',
+  serial:   'ยิงซีเรียลทีละเครื่อง',
 };
 
+// ซีเรียลที่ยิงไว้รอบันทึกในรายการรับเข้าครั้งนี้ (ยังไม่ลงฐานข้อมูลจนกว่าจะกดบันทึก)
+let pendingSerials = [];
+
+function renderSerialList() {
+  const el = document.getElementById('serialList');
+  const qtyEl = document.getElementById('movQty');
+
+  if (!pendingSerials.length) {
+    el.innerHTML = '';
+    qtyEl.readOnly = false;
+    qtyEl.style.background = '';
+    return;
+  }
+
+  // จำนวนต้องเท่ากับซีเรียลที่ยิงเสมอ ล็อกไว้ไม่ให้พิมพ์ทับจนไม่ตรงกัน
+  qtyEl.value = pendingSerials.length;
+  qtyEl.readOnly = true;
+  qtyEl.style.background = 'var(--surface2)';
+
+  el.innerHTML =
+    '<div class="alert alert-plain" style="margin-bottom:8px;">ยิงไว้แล้ว <strong>' +
+    pendingSerials.length + '</strong> เครื่อง</div>' +
+    pendingSerials.map((s, i) =>
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;' +
+      'background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;">' +
+        '<span style="font-weight:700;font-size:15px;word-break:break-all;">' + escapeHtml(s) + '</span>' +
+        '<button class="btn btn-secondary btn-sm" onclick="removeSerial(' + i + ')" ' +
+        'style="flex-shrink:0;">ลบ</button>' +
+      '</div>').join('');
+}
+
+function removeSerial(i) {
+  pendingSerials.splice(i, 1);
+  renderSerialList();
+}
+
+function clearSerials() {
+  pendingSerials = [];
+  renderSerialList();
+}
+
+// เปลี่ยนรุ่นสินค้าแล้วซีเรียลที่ยิงไว้เป็นของรุ่นเดิม ถ้าปล่อยค้างจะบันทึกผิดรุ่น
+let movProductId = '';
+function onMovProductChange() {
+  const id = document.getElementById('movProduct').value;
+  if (id === movProductId) return false;
+  movProductId = id;
+  if (!pendingSerials.length) return false;
+  clearSerials();
+  showToast('เปลี่ยนสินค้าแล้ว — ล้างซีเรียลที่ยิงไว้ ต้องยิงใหม่');
+  return true;
+}
+
 async function openScanner(purpose) {
+  // ซีเรียลผูกกับรุ่นสินค้า ยิงก่อนเลือกรุ่นแล้วจะไม่รู้ว่าเครื่องพวกนี้เป็นของรุ่นไหน
+  if (purpose === 'serial' && !document.getElementById('movProduct').value) {
+    showToast('⚠️ เลือกสินค้าก่อนแล้วค่อยยิงซีเรียล');
+    return;
+  }
   scanPurpose = purpose;
+  lastScanValue = ''; lastScanAt = 0;
+  updateScanCloseBtn();
   document.getElementById('scanTitle').textContent = SCAN_TITLES[purpose] || 'สแกนบาร์โค้ด';
   document.getElementById('scanError').innerHTML = '';
   document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
@@ -1105,11 +1246,37 @@ async function scanTick() {
   if (scanning) requestAnimationFrame(scanTick);
 }
 
+let lastScanValue = '', lastScanAt = 0;
+
+// โหมดยิงต่อเนื่องไม่ปิดเองหลังอ่านได้ ปุ่มปิดจึงต้องบอกด้วยว่ายิงไปแล้วกี่เครื่อง
+function updateScanCloseBtn() {
+  const btn = document.getElementById('scanCloseBtn');
+  btn.textContent = (scanPurpose === 'serial')
+    ? 'เสร็จแล้ว (' + pendingSerials.length + ' เครื่อง)'
+    : 'ปิด';
+}
+
+function rearmScanner(hint) {
+  if (hint) document.getElementById('scanHint').textContent = hint;
+  // หน่วงสั้น ๆ ก่อนเปิดอ่านใหม่ ไม่งั้นกล้องยังจ่อใบเดิมอยู่จะอ่านซ้ำทันที
+  setTimeout(() => {
+    if (!document.getElementById('scanModal').classList.contains('open')) return;
+    scanning = true;
+    requestAnimationFrame(scanTick);
+  }, 600);
+}
+
 async function onScanned(code) {
   scanning = false;                        // หยุดทันที ไม่งั้นจะอ่านซ้ำรัว ๆ
-  if (navigator.vibrate) navigator.vibrate(120);
   const value = String(code || '').trim();
-  if (!value) { scanning = true; requestAnimationFrame(scanTick); return; }
+  if (!value) { rearmScanner(); return; }
+
+  // กันอ่านใบเดิมซ้ำตอนยิงต่อเนื่อง — คนยังถือกล้องจ่อกล่องเดิมอยู่
+  const now = performance.now();
+  if (value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
+  lastScanValue = value; lastScanAt = now;
+
+  if (navigator.vibrate) navigator.vibrate(120);
 
   if (scanPurpose === 'field') {
     document.getElementById('pfBarcode').value = value;
@@ -1118,6 +1285,8 @@ async function onScanned(code) {
     return;
   }
 
+  if (scanPurpose === 'serial') { await handleSerialScan(value); return; }
+
   document.getElementById('scanHint').textContent = 'อ่านได้: ' + value + ' — กำลังค้นหา...';
   const found = await findByBarcode(value);
 
@@ -1125,7 +1294,11 @@ async function onScanned(code) {
     closeScanner();
     if (scanPurpose === 'movement') {
       document.getElementById('movProduct').value = found.product.id;
-      showToast('✅ เลือก "' + found.product.name + '" แล้ว' + (found.viaSerial ? ' (จากซีเรียล)' : ''));
+      // ตั้งค่า .value ด้วยโค้ดไม่ทำให้ onchange ทำงาน ต้องเรียกเอง ไม่งั้นซีเรียลของรุ่นเดิมค้าง
+      const cleared = onMovProductChange();
+      showToast('✅ เลือก "' + found.product.name + '" แล้ว' +
+        (found.viaSerial ? ' (จากซีเรียล)' : '') +
+        (cleared ? ' · ล้างซีเรียลของรุ่นเดิมออกแล้ว' : ''));
     } else {
       document.getElementById('productSearch').value = found.product.name;
       renderProducts();
@@ -1134,21 +1307,83 @@ async function onScanned(code) {
     return;
   }
 
-  // อ่านบาร์โค้ดได้แต่ไม่มีในระบบ — บอกให้ชัดและเปิดทางผูกกับสินค้าเลย
-  // ดีกว่าปล่อยให้ผู้ใช้เดาว่าสแกนพลาดหรือของไม่มีจริง
+  // อ่านได้แต่ไม่มีในระบบ — บาร์โค้ดที่ยิงมาเป็นได้ 2 อย่างซึ่งต้องทำคนละเรื่อง
+  // ผูกซีเรียลของเครื่องเดียวเป็นบาร์โค้ดประจำรุ่นคือความผิดพลาดที่กู้ยาก
+  // เพราะเครื่องที่เหลือทั้งรุ่นจะยิงไม่เจอ จึงต้องให้คนเลือกเอง ไม่เดาแทน
   document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
+  const esc = escapeHtml(value);
   document.getElementById('scanError').innerHTML =
-    '<div class="alert alert-gold" style="margin-top:12px;">ยังไม่มีสินค้าไหนผูกกับบาร์โค้ด <strong>' +
-    escapeHtml(value) + '</strong>' +
-    (isWriter()
-      ? '<br>เลือกสินค้าด้านล่างเพื่อผูกบาร์โค้ดนี้เข้ากับสินค้า</div>' +
-        '<select id="linkProductSel" class="form-input" style="margin-top:10px;">' +
-        '<option value="">— เลือกสินค้า —</option>' +
-        products.filter(p => !p.barcode_ean13).map(p =>
-          '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
-        '</select>' +
-        '<button class="btn btn-primary" style="margin-top:10px;" onclick="linkBarcode(\'' + value + '\')">ผูกบาร์โค้ดนี้</button>'
-      : '<br>แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้ผูกบาร์โค้ดนี้กับสินค้าก่อน</div>');
+    '<div class="alert alert-gold" style="margin-top:12px;">' +
+      'ยังไม่มีอะไรในระบบผูกกับรหัส <strong>' + esc + '</strong><br>รหัสนี้คืออะไร?' +
+    '</div>' +
+    '<div style="border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;">' +
+      '<div style="font-weight:700;margin-bottom:4px;">บาร์โค้ดของรุ่นสินค้า</div>' +
+      '<div style="font-size:14px;color:var(--gray);margin-bottom:8px;">' +
+        'เลขใต้แท่งบนกล่อง เหมือนกันทุกกล่องของรุ่นนี้</div>' +
+      (isWriter()
+        ? '<select id="linkProductSel" class="form-input">' +
+          '<option value="">— เลือกรุ่นสินค้า —</option>' +
+          products.filter(p => !p.barcode_ean13).map(p =>
+            '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
+          '</select>' +
+          '<button class="btn btn-primary" style="margin-top:8px;" onclick="linkBarcode(\'' + esc + '\')">ผูกเป็นบาร์โค้ดของรุ่น</button>'
+        : '<div class="alert alert-plain" style="margin:0;">แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้ผูกให้ก่อน</div>') +
+    '</div>' +
+    '<div style="border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;">' +
+      '<div style="font-weight:700;margin-bottom:4px;">ซีเรียลของเครื่องเครื่องนี้</div>' +
+      '<div style="font-size:14px;color:var(--gray);margin-bottom:8px;">' +
+        'สติกเกอร์ SER. NO. ไม่ซ้ำกับเครื่องอื่น ใช้ตอนรับเข้าทีละเครื่อง</div>' +
+      '<button class="btn btn-secondary" onclick="goRegisterSerial(\'' + esc + '\')">ไปหน้ารับเข้าเพื่อบันทึกเครื่องนี้</button>' +
+    '</div>';
+}
+
+// ซีเรียลผูกกับ "เครื่อง" ไม่ใช่ "รุ่น" จึงต้องรู้ก่อนว่าเป็นเครื่องของรุ่นไหน
+// พาไปหน้ารับเข้าที่เลือกรุ่นได้ แล้วค่อยยิงซีเรียลต่อ
+function goRegisterSerial(value) {
+  closeScanner();
+  showPage('Movement');
+  document.getElementById('movType').value = 'in';
+  onMovTypeChange();
+  showToast('เลือกรุ่นสินค้าก่อน แล้วกด "ยิงซีเรียลทีละเครื่อง" — รหัส ' + value + ' ยังไม่ได้บันทึก');
+}
+
+async function handleSerialScan(value) {
+  if (pendingSerials.includes(value)) {
+    rearmScanner('ยิงซ้ำ — ' + value + ' อยู่ในรายการแล้ว');
+    return;
+  }
+
+  // ซีเรียลห้ามซ้ำทั้งระบบ ถ้ามีอยู่แล้วต้องบอกว่าเครื่องนั้นอยู่สถานะไหน
+  // ไม่งั้นจะบันทึกไม่ผ่านตอนกดบันทึกโดยไม่รู้สาเหตุ
+  const { data, error } = await db.from('product_units')
+    .select('serial_no, status, received_at, product_id').eq('serial_no', value).limit(1);
+
+  if (error) {
+    console.error('[Serial lookup]', error);
+    rearmScanner('ตรวจซีเรียลไม่สำเร็จ ลองใหม่อีกครั้ง');
+    return;
+  }
+
+  if (data && data.length) {
+    const u = data[0];
+    const p = products.find(x => x.id === u.product_id);
+    const label = { in_stock: 'อยู่ในสต็อก', sold: 'ขายไปแล้ว', reserved: 'จองไว้', defective: 'มีตำหนิ' };
+    document.getElementById('scanError').innerHTML =
+      '<div class="alert alert-red" style="margin-top:12px;">เครื่องนี้บันทึกไว้แล้ว ไม่ต้องรับเข้าซ้ำ<br>' +
+      '<strong>' + escapeHtml(value) + '</strong>' +
+      (p ? ' · ' + escapeHtml(p.name) : '') +
+      ' · สถานะ ' + (label[u.status] || escapeHtml(u.status)) +
+      ' · รับเข้า ' + formatDateTime(u.received_at) + '</div>';
+    rearmScanner('ยิงเครื่องถัดไปได้เลย');
+    return;
+  }
+
+  pendingSerials.push(value);
+  renderSerialList();
+  updateScanCloseBtn();
+  document.getElementById('scanError').innerHTML =
+    '<div class="alert alert-plain" style="margin-top:12px;">เพิ่ม <strong>' + escapeHtml(value) + '</strong> แล้ว</div>';
+  rearmScanner('เพิ่มแล้ว ' + pendingSerials.length + ' เครื่อง — ยิงเครื่องถัดไปได้เลย');
 }
 
 // บาร์โค้ดบนกล่องอาจเป็นของรุ่นสินค้า หรือเป็นซีเรียลของกล่องใบนั้น — ลองทั้งสองทาง
