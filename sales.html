@@ -364,6 +364,7 @@
       <option value="sales.html" selected>ขายสินค้า</option>
       <option value="customers.html">ข้อมูลลูกค้า</option>
       <option value="activity.html">บันทึกการใช้งาน</option>
+      <option value="daily.html">สรุปรายวัน</option>
     </select>
   </div>
   <div class="header-right">
@@ -396,6 +397,7 @@
     <div class="search-wrap">
       <input type="text" id="productSearch" class="form-input" placeholder="ค้นหาด้วยชื่อ / SKU / บาร์โค้ด" autocomplete="off">
     </div>
+    <button class="btn btn-secondary" onclick="openScanner('cart')" style="margin-bottom:10px;">📷 ยิงบาร์โค้ดเข้าตะกร้า</button>
     <div id="productSearchResults"></div>
   </div>
 
@@ -430,6 +432,10 @@
         <option value="บัตรเครดิต">บัตรเครดิต</option>
         <option value="อื่นๆ">อื่นๆ</option>
       </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <textarea id="saleNoteInput" class="form-input" rows="2" placeholder="ไม่บังคับ เช่น ลูกค้าขอใบกำกับภาษี, แลกเปลี่ยนสินค้า..."></textarea>
     </div>
     <hr>
     <div id="cartSummary"></div>
@@ -498,9 +504,33 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="scanModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeScanner()">×</button>
+    <div class="modal-title" id="scanTitle">สแกนบาร์โค้ด</div>
+
+    <div id="scanVideoWrap" style="position:relative;background:#000;border-radius:10px;overflow:hidden;">
+      <video id="scanVideo" playsinline muted style="width:100%;display:block;object-fit:cover;"></video>
+      <!-- กรอบนี้ต้องตรงกับ SCAN_ROI ในโค้ดเป๊ะ ๆ ไม่งั้นผู้ใช้เล็งผิดที่ -->
+      <div style="position:absolute;left:8%;right:8%;top:32%;bottom:32%;
+                  border:2px solid #c8232c;border-radius:6px;pointer-events:none;
+                  box-shadow:0 0 0 9999px rgba(0,0,0,0.35);"></div>
+    </div>
+
+    <div class="alert alert-plain" id="scanHint" style="margin-top:12px;">เล็งบาร์โค้ดให้อยู่ในกรอบแดง</div>
+    <div id="scanError"></div>
+
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn btn-secondary" id="scanTorchBtn" onclick="toggleTorch()" disabled>ไฟฉาย</button>
+      <button class="btn btn-secondary" id="scanCloseBtn" onclick="closeScanner()">ปิด</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 
 <script>
 function showFatalError(msg) {
@@ -712,7 +742,7 @@ async function loadCustomers() {
 
 async function loadSalesHistory() {
   const { data, error } = await db.from('sales')
-    .select('id, sale_no, customer_id, admin_id, subtotal, discount, total, payment_method, status, voided_reason, voided_at, created_at, customers:customer_id(full_name, phone), admins:admin_id(full_name)')
+    .select('id, sale_no, customer_id, admin_id, subtotal, discount, total, payment_method, status, note, voided_reason, voided_at, created_at, customers:customer_id(full_name, phone), admins:admin_id(full_name)')
     .order('created_at', { ascending: false })
     .limit(300);
   if (error) {
@@ -1013,6 +1043,7 @@ async function submitSale() {
   if (discount > subtotal) { showToast('⚠️ ส่วนลดต้องไม่มากกว่ายอดรวม'); return; }
   const paymentMethod = document.getElementById('paymentMethod').value;
   const items = cart.map(c => ({ product_id: c.product_id, qty: c.qty, unit_price: c.unit_price }));
+  const note = document.getElementById('saleNoteInput').value.trim() || null;
 
   submittingSale = true;
   const btn = document.getElementById('saveSaleBtn');
@@ -1027,6 +1058,7 @@ async function submitSale() {
       p_discount: discount,
       p_payment_method: paymentMethod,
       p_items: items,
+      p_note: note,
     }));
   } catch (err) {
     showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
@@ -1060,6 +1092,7 @@ async function submitSale() {
 
   cart = [];
   document.getElementById('discountInput').value = '';
+  document.getElementById('saleNoteInput').value = '';
   selectedCustomer = null;
   renderSelectedCustomer();
   renderCart();
@@ -1142,6 +1175,7 @@ async function openSaleDetail(saleId) {
       <div class="sale-meta">ลูกค้า: ${escapeHtml(customerName)}</div>
       <div class="sale-meta">พนักงานขาย: ${escapeHtml(staffName)}</div>
       <div class="sale-meta">ชำระโดย: ${escapeHtml(sale.payment_method || '-')}</div>
+      ${sale.note ? `<div class="sale-meta">หมายเหตุ: ${escapeHtml(sale.note)}</div>` : ''}
       ${isVoid ? `<div class="alert alert-red" style="margin-top:10px;">บิลนี้ถูกยกเลิกแล้ว${sale.voided_reason ? ' — เหตุผล: ' + escapeHtml(sale.voided_reason) : ''}</div>` : ''}
     </div>
     <hr>
@@ -1236,6 +1270,219 @@ initSupabaseSync();
 
 document.getElementById('moduleSelect').addEventListener('change', (e) => {
   if (e.target.value) location.href = e.target.value;
+});
+
+// ============================
+// สแกนบาร์โค้ดด้วยกล้อง
+// ============================
+// ยกกลไกมาจาก stock.html ที่ทดสอบกับกล่องสินค้าจริงแล้วอ่านได้ทุกใบ — ห้ามเขียนสแกนเนอร์ขึ้นใหม่
+// ค่าพวกนี้ต้องตรงกับกรอบแดงใน HTML ไม่งั้นผู้ใช้จะเล็งคนละที่กับที่ระบบอ่าน
+const SCAN_ROI = { left: 0.08, right: 0.92, top: 0.32, bottom: 0.68 };
+const SCAN_FORMATS = ['ean_13', 'code_128', 'code_39', 'qr_code'];
+
+let scanStream = null, scanTrack = null, scanning = false, torchOn = false;
+let scanDetector = null, scanReader = null, scanPurpose = null, lastZxingAt = 0;
+const scanCanvas = document.createElement('canvas');
+const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+
+const SCAN_TITLES = {
+  cart: 'ยิงบาร์โค้ดเข้าตะกร้า',
+};
+
+function updateScanCloseBtn() {
+  document.getElementById('scanCloseBtn').textContent = 'ปิด';
+}
+
+async function openScanner(purpose) {
+  scanPurpose = purpose;
+  lastScanValue = ''; lastScanAt = 0;
+  updateScanCloseBtn();
+  document.getElementById('scanTitle').textContent = SCAN_TITLES[purpose] || 'สแกนบาร์โค้ด';
+  document.getElementById('scanError').innerHTML = '';
+  document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
+  document.getElementById('scanModal').classList.add('open');
+
+  try {
+    if (!scanStream) {
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920 }, height: { ideal: 1080 },
+          focusMode: { ideal: 'continuous' },
+        },
+        audio: false,
+      });
+      const v = document.getElementById('scanVideo');
+      v.srcObject = scanStream;
+      await v.play();
+
+      scanTrack = scanStream.getVideoTracks()[0];
+      const s = scanTrack.getSettings();
+      // ให้กรอบวิดีโอมีสัดส่วนเท่าภาพจริง กรอบแดงบนจอจะได้ตรงกับพื้นที่ที่อ่านจริง
+      if (s.width && s.height) {
+        document.getElementById('scanVideoWrap').style.aspectRatio = s.width + ' / ' + s.height;
+      }
+      const caps = scanTrack.getCapabilities ? scanTrack.getCapabilities() : {};
+      document.getElementById('scanTorchBtn').disabled = !(caps && 'torch' in caps);
+
+      await setupScanEngine();
+    }
+    scanning = true;
+    requestAnimationFrame(scanTick);
+  } catch (err) {
+    // บนมือถือเปิด console ดูไม่ได้ ความล้มเหลวต้องขึ้นบนจอเสมอ
+    const msg = err && err.name === 'NotAllowedError'
+      ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง — เปิดสิทธิ์กล้องให้เว็บนี้ในตั้งค่าเบราว์เซอร์ก่อน'
+      : 'เปิดกล้องไม่สำเร็จ: ' + (err && err.message ? err.message : String(err)) +
+        '\n(บน iPhone ต้องเปิดหน้านี้ด้วย Safari เท่านั้น)';
+    document.getElementById('scanError').innerHTML =
+      '<div class="alert alert-red" style="margin-top:12px;white-space:pre-line;">' + escapeHtml(msg) + '</div>';
+  }
+}
+
+async function setupScanEngine() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      const usable = SCAN_FORMATS.filter(f => supported.includes(f));
+      if (usable.length) { scanDetector = new BarcodeDetector({ formats: usable }); return; }
+    } catch (e) { /* เครื่องนี้ใช้ไม่ได้ ตกไปใช้ ZXing */ }
+  }
+  const hints = new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+    ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
+    ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.QR_CODE,
+  ]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+  scanReader = new ZXing.MultiFormatReader();
+  scanReader.setHints(hints);
+}
+
+// อ่านเฉพาะพื้นที่ในกรอบแดง กันไม่ให้ไปอ่านบาร์โค้ดกล่องข้าง ๆ ที่วางใกล้กัน
+function drawScanROI() {
+  const v = document.getElementById('scanVideo');
+  const vw = v.videoWidth, vh = v.videoHeight;
+  if (!vw || !vh) return false;
+  const sx = Math.round(vw * SCAN_ROI.left), sy = Math.round(vh * SCAN_ROI.top);
+  const sw = Math.round(vw * (SCAN_ROI.right - SCAN_ROI.left));
+  const sh = Math.round(vh * (SCAN_ROI.bottom - SCAN_ROI.top));
+  if (scanCanvas.width !== sw || scanCanvas.height !== sh) { scanCanvas.width = sw; scanCanvas.height = sh; }
+  scanCtx.drawImage(v, sx, sy, sw, sh, 0, 0, sw, sh);
+  return true;
+}
+
+async function scanTick() {
+  if (!scanning) return;
+  if (drawScanROI()) {
+    if (scanDetector) {
+      try {
+        const codes = await scanDetector.detect(scanCanvas);
+        if (codes.length && scanning) { onScanned(codes[0].rawValue); return; }
+      } catch (e) { /* เฟรมนี้อ่านไม่ได้ ข้ามไป */ }
+    } else if (scanReader) {
+      // ZXing โยน exception ทุกเฟรมที่อ่านไม่ได้ ซึ่งแพง จำกัดไว้ ~10 ครั้ง/วินาที
+      const now = performance.now();
+      if (now - lastZxingAt >= 100) {
+        lastZxingAt = now;
+        try {
+          const src = new ZXing.HTMLCanvasElementLuminanceSource(scanCanvas);
+          const result = scanReader.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src)));
+          if (result && scanning) { onScanned(result.getText()); return; }
+        } catch (e) {
+          /* ไม่เจอบาร์โค้ดในเฟรมนี้ = เรื่องปกติ */
+        } finally {
+          if (scanReader.reset) scanReader.reset();
+        }
+      }
+    }
+  }
+  if (scanning) requestAnimationFrame(scanTick);
+}
+
+let lastScanValue = '', lastScanAt = 0;
+
+function rearmScanner(hint) {
+  if (hint) document.getElementById('scanHint').textContent = hint;
+  // หน่วงสั้น ๆ ก่อนเปิดอ่านใหม่ ไม่งั้นกล้องยังจ่อใบเดิมอยู่จะอ่านซ้ำทันที
+  setTimeout(() => {
+    if (!document.getElementById('scanModal').classList.contains('open')) return;
+    scanning = true;
+    requestAnimationFrame(scanTick);
+  }, 600);
+}
+
+// สแกนหาสินค้าเข้าตะกร้าแบบยิงต่อเนื่อง — ไม่ปิดกล่องเองหลังยิงติด เพื่อยิงชิ้นถัดไปได้ทันที
+async function onScanned(code) {
+  scanning = false;                        // หยุดทันที ไม่งั้นจะอ่านซ้ำรัว ๆ
+  const value = String(code || '').trim();
+  if (!value) { rearmScanner(); return; }
+
+  // กันอ่านใบเดิมซ้ำตอนยิงต่อเนื่อง — คนยังถือกล้องจ่อกล่องเดิมอยู่
+  const now = performance.now();
+  if (value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
+  lastScanValue = value; lastScanAt = now;
+
+  if (navigator.vibrate) navigator.vibrate(120);
+
+  document.getElementById('scanHint').textContent = 'อ่านได้: ' + value + ' — กำลังค้นหา...';
+  document.getElementById('scanError').innerHTML = '';
+  const found = await findByBarcode(value);
+
+  if (found.product) {
+    // addToCart จัดการเพิ่มจำนวนเองถ้าสินค้านี้อยู่ในตะกร้าแล้ว (ไม่ทำให้เกิดบรรทัดซ้ำ) และขึ้น toast ชื่อสินค้าอยู่แล้ว
+    addToCart(found.product.id);
+    if (found.viaSerial) {
+      showToast('✅ เพิ่ม "' + found.product.name + '" ลงตะกร้าแล้ว (ซีเรียล ' + value + ')');
+    }
+    rearmScanner('เพิ่มแล้ว — ยิงชิ้นถัดไปได้เลย');
+    return;
+  }
+
+  // อ่านได้แต่ไม่มีในระบบ — ต้องบอกผู้ใช้ตรง ๆ ในกล่องสแกน ห้ามเงียบ และห้ามปิดกล่องเอง
+  document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
+  document.getElementById('scanError').innerHTML =
+    '<div class="alert alert-gold" style="margin-top:12px;">ไม่พบรหัส <strong>' + escapeHtml(value) +
+    '</strong> ในระบบ — ตรวจสอบว่าเป็นบาร์โค้ดของรุ่นสินค้าหรือซีเรียลเครื่องที่ถูกต้อง แล้วลองยิงใหม่</div>';
+  rearmScanner();
+}
+
+// บาร์โค้ดบนกล่องอาจเป็นของรุ่นสินค้า หรือเป็นซีเรียลของเครื่องนั้น — ลองทั้งสองทาง
+async function findByBarcode(value) {
+  const p = products.find(x => (x.barcode_ean13 || '').trim() === value);
+  if (p) return { product: p, viaSerial: false };
+
+  const { data, error } = await db.from('product_units')
+    .select('product_id').eq('barcode_code', value).limit(1);
+  if (error) {
+    console.error('[Scan lookup]', error);
+    return { product: null, viaSerial: false };
+  }
+  if (data && data.length) {
+    const byId = products.find(x => x.id === data[0].product_id);
+    if (byId) return { product: byId, viaSerial: true };
+  }
+  return { product: null, viaSerial: false };
+}
+
+function toggleTorch() {
+  if (!scanTrack) return;
+  torchOn = !torchOn;
+  scanTrack.applyConstraints({ advanced: [{ torch: torchOn }] })
+    .then(() => { document.getElementById('scanTorchBtn').textContent = torchOn ? 'ปิดไฟฉาย' : 'ไฟฉาย'; })
+    .catch(() => showToast('⚠️ เครื่องนี้เปิดไฟฉายจากเว็บไม่ได้'));
+}
+
+function closeScanner() {
+  scanning = false;
+  // ปิดกล้องจริง ๆ ไม่งั้นไฟกล้องค้างและกินแบตทั้งวัน
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; scanTrack = null; }
+  scanDetector = null; scanReader = null; torchOn = false;
+  document.getElementById('scanTorchBtn').textContent = 'ไฟฉาย';
+  document.getElementById('scanTorchBtn').disabled = true;
+  document.getElementById('scanModal').classList.remove('open');
+}
+document.getElementById('scanModal').addEventListener('click', function (e) {
+  if (e.target === this) closeScanner();
 });
 </script>
 </body>
