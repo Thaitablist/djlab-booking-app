@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — จัดการข้อมูล</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link-btn:hover { color: #ffffff; }
+
+  .page { padding: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-input:disabled { background: var(--surface2); color: var(--text2); }
+  textarea.form-input { min-height: 72px; resize: vertical; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .btn-danger { background: var(--accent); color: white; }
+  .btn-sm { display: inline-block; width: auto; padding: 8px 14px; font-size: 14px; border-radius: 8px; margin: 2px 4px 2px 0; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+
+  .empty { text-align: center; padding: 24px 12px; color: var(--text2); }
+  .empty-icon { font-size: 28px; margin-bottom: 8px; }
+  .empty-text { font-size: 14px; }
+
+  .table-scroll { width: 100%; overflow-x: auto; }
+  .report-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+  .report-table th, .report-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .report-table th { font-size: 14px; color: var(--text2); font-weight: 700; white-space: nowrap; }
+  .report-table tbody tr { cursor: pointer; }
+  .report-table tbody tr:active { background: var(--surface2); }
+  .cell-clip { display: block; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .pager { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+  .pager-info { font-size: 14px; color: var(--text2); }
+
+  .field-readonly {
+    font-size: 15px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
+      <option value="stock.html">สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+      <option value="customers.html">ข้อมูลลูกค้า</option>
+      <option value="activity.html">บันทึกการใช้งาน</option>
+      <option value="daily.html">สรุปรายวัน</option>
+      <option value="admin-data.html" selected>จัดการข้อมูล</option>
+    </select>
+  </div>
+  <div class="header-right">
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="card">
+    <div class="card-title">เลือกตาราง</div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <select id="tableSelect" class="form-input" onchange="onTableChange()"></select>
+    </div>
+    <div id="tableNote"></div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label class="form-label">ค้นหา</label>
+      <input type="search" id="searchInput" class="form-input" placeholder="พิมพ์แล้วกด Enter เพื่อค้นหา">
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
+      <div class="card-title" id="rowsTitle" style="margin-bottom:0;">ข้อมูล</div>
+      <button class="btn btn-primary btn-sm" id="addRowBtn" style="display:none;" onclick="openRowModal(null)">+ เพิ่มแถว</button>
+    </div>
+    <div class="table-scroll">
+      <table class="report-table">
+        <thead><tr id="rowsHead"></tr></thead>
+        <tbody id="rowsBody"></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <button class="btn btn-secondary btn-sm" id="prevBtn" onclick="changePage(-1)">‹ ก่อนหน้า</button>
+      <div class="pager-info" id="pagerInfo">—</div>
+      <button class="btn btn-secondary btn-sm" id="nextBtn" onclick="changePage(1)">ถัดไป ›</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="rowModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRowModal()">×</button>
+    <div class="modal-title" id="rowModalTitle">รายละเอียด</div>
+    <div id="rowModalNote"></div>
+    <div id="rowModalFields"></div>
+    <button class="btn btn-primary" id="rowSaveBtn" onclick="saveRow()" style="display:none;">บันทึก</button>
+    <button class="btn btn-danger" id="rowDeleteBtn" onclick="openDeleteConfirm()" style="display:none;margin-top:8px;">ลบแถวนี้</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeRowModal()">ปิด</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDeleteModal()">×</button>
+    <div class="modal-title">ยืนยันการลบ</div>
+    <div class="alert alert-red" id="deleteModalMsg"></div>
+    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">ยืนยันลบแถวนี้</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeDeleteModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================
+// ตารางที่เปิดให้เข้าถึง และเปิดให้แค่ไหน
+//
+// mode: 'full' ดู/เพิ่ม/แก้/ลบ · 'edit' แก้ได้อย่างเดียว · 'read' ดูอย่างเดียว
+//
+// ตารางที่เป็น 'read' ไม่ได้แปลว่าไม่สำคัญ ส่วนใหญ่เป็นตรงกันข้าม — มันมีที่ทาง
+// ของมันอยู่แล้วและการแก้จากที่นี่จะข้ามกลไกที่ผูกอยู่กับมัน เหตุผลรายตัวเขียน
+// ไว้ใน note และหน้าเว็บจะแสดงให้เห็นตอนเลือก จะได้ไม่มีใครสงสัยว่าทำไมแก้ไม่ได้
+//
+// ⚠️ นี่คือรั้วกันพลาด ไม่ใช่ระบบสิทธิ์ ตัวที่กันจริงคือ RLS ในฐานข้อมูล
+// ============================
+const TABLES = [
+  { name: 'products',              label: 'สินค้า',              mode: 'full', note: '' },
+  { name: 'customers',             label: 'ลูกค้า',              mode: 'full', note: '' },
+  { name: 'expenses',              label: 'รายจ่าย',             mode: 'full', note: '' },
+  { name: 'income_entries',        label: 'รายรับกรอกมือ',        mode: 'full', note: '' },
+  { name: 'booking_settings',      label: 'ตั้งค่าการจองห้อง',     mode: 'edit',
+    note: 'มีแถวเดียวตายตัว แก้ได้ แต่เพิ่มหรือลบไม่ได้ · ค่าที่นี่คุมราคาต่อชั่วโมงและแต้มของทั้งระบบ' },
+  { name: 'members',               label: 'สมาชิก',              mode: 'read',
+    note: 'ต้นฉบับคือ Google Sheet "DJ LAB MEMBERSHIP" แท็บ หมายเลข — ตารางนี้เป็นสำเนา แก้ที่นี่จะถูกเขียนทับตอนซิงก์รอบถัดไป ให้แก้ที่ชีตเสมอ' },
+  { name: 'room_bookings',         label: 'การจองห้องซ้อม',       mode: 'read',
+    note: 'เปลี่ยนสถานะที่นี่จะไปกระตุ้นการส่งข้อความ LINE หาลูกค้าโดยไม่ตั้งใจ — แก้ที่หน้าจองห้องซ้อม' },
+  { name: 'product_units',         label: 'ซีเรียลรายเครื่อง',     mode: 'read',
+    note: 'รับเข้าและผูกซีเรียลทำที่หน้าสต็อกสินค้า ซึ่งมีลำดับการบันทึกที่กันซีเรียลซ้ำไว้แล้ว' },
+  { name: 'sales',                 label: 'บิลขาย',              mode: 'read',
+    note: 'บิลแก้ไม่ได้ตามกติกาของระบบ ลงผิดให้ยกเลิกบิลที่หน้าขายสินค้า แล้วออกใบใหม่' },
+  { name: 'sale_items',            label: 'รายการในบิล',          mode: 'read',
+    note: 'ผูกกับบิลและยอดเงินที่คำนวณจากฐานข้อมูล แก้แยกจากบิลไม่ได้' },
+  { name: 'stock_movements',       label: 'ความเคลื่อนไหวสต็อก',   mode: 'read',
+    note: 'บันทึกอย่างเดียว แก้และลบไม่ได้ทั้งระบบ ลงผิดให้ลงรายการปรับยอดกลับ เพื่อให้ตรวจย้อนหลังได้ว่าของหายไปไหน' },
+  { name: 'loyalty_points_ledger', label: 'แต้มสะสม',            mode: 'read', note: '' },
+  { name: 'activity_log',          label: 'ประวัติการแก้ข้อมูล',   mode: 'read',
+    note: 'บันทึกอย่างเดียว ทุกการแก้ในหน้านี้จะมาโผล่ที่นี่' },
+  { name: 'admins',                label: 'ทีมงาน',              mode: 'read',
+    note: 'เพิ่มหรือแก้สิทธิ์ต้องทำที่ Supabase โดยตรง เพื่อไม่ให้ใครยกระดับสิทธิ์ตัวเองจากหน้าเว็บได้' },
+];
+
+// คอลัมน์ที่ระบบดูแลเอง ไม่ให้แก้ด้วยมือไม่ว่าตารางจะเปิดแค่ไหน
+const SYSTEM_COLUMNS = ['id', 'created_at', 'updated_at', 'imported_at', 'admin_id', 'created_by'];
+// คอลัมน์ "ใครเป็นคนทำ" — เติมให้เองตอนเพิ่มแถวใหม่ ไม่ให้พิมพ์เอง
+// (expenses กับ income_entries ตั้ง admin_id เป็น not null และไม่มีค่าเริ่มต้น
+//  ถ้าไม่เติมให้ หน้าเว็บจะไปบังคับให้คนพิมพ์ UUID ของตัวเอง ซึ่งไม่มีใครรู้)
+const ACTOR_COLUMNS = ['admin_id', 'created_by'];
+// ชนิดที่ยังไม่รองรับการแก้ผ่านฟอร์ม — แสดงให้ดูได้ แต่แก้ต้องไปทำที่ต้นทาง
+const COMPLEX_TYPES = ['ARRAY', 'jsonb', 'json'];
+
+const PAGE_SIZE = 25;
+
+let currentAdmin = null;
+let currentUserId = null;
+let currentTable = TABLES[0];
+let columns = [];
+let rows = [];
+let page = 0;
+let totalCount = 0;
+let searchTerm = '';
+let editingRow = null;   // null = เพิ่มแถวใหม่
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function escapeHtml(str) {
+  return String(str === null || str === undefined ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isSystemColumn(name) { return SYSTEM_COLUMNS.indexOf(name) !== -1; }
+function isComplexType(t) { return COMPLEX_TYPES.indexOf(t) !== -1; }
+
+function canEditTable() { return currentTable.mode === 'full' || currentTable.mode === 'edit'; }
+function canAddRow() { return currentTable.mode === 'full'; }
+function canDeleteRow() { return currentTable.mode === 'full'; }
+
+// แสดงค่าที่อ่านง่ายสำหรับคน ไม่ใช่ค่าดิบของฐานข้อมูล
+function displayValue(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'ใช่' : 'ไม่ใช่';
+  if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v);
+}
+
+// ============================
+// เข้าสู่ระบบ
+// ============================
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() { db.auth.signOut(); }
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    currentAdmin = null;
+    currentUserId = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  currentUserId = session.user.id;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  loadAll();
+}
+
+// ============================
+// โหลดข้อมูล
+// ============================
+async function loadColumns() {
+  const { data, error } = await db.rpc('admin_table_columns', { p_table: currentTable.name });
+  if (error) {
+    console.error('[Load columns]', error);
+    showFatalError('อ่านโครงสร้างตาราง ' + currentTable.name + ' ไม่สำเร็จ: ' + error.message);
+    columns = [];
+    return false;
+  }
+  columns = data || [];
+  return true;
+}
+
+// เรียงจากใหม่ไปเก่าถ้าตารางมีเวลาให้เรียง ไม่งั้นเรียงตามคอลัมน์แรกเพื่อให้
+// ลำดับคงที่ระหว่างหน้า — ถ้าไม่ระบุเลย ฐานข้อมูลไม่รับประกันลำดับ แล้วการแบ่ง
+// หน้าจะสลับแถวไปมาเองจนอ่านไม่รู้เรื่อง
+function orderColumn() {
+  const names = columns.map(c => c.column_name);
+  const preferred = ['created_at', 'received_at', 'spent_on', 'date', 'imported_at'];
+  for (const p of preferred) if (names.indexOf(p) !== -1) return { col: p, asc: false };
+  if (names.indexOf('name') !== -1) return { col: 'name', asc: true };
+  return { col: names[0], asc: true };
+}
+
+async function loadRows() {
+  if (!columns.length) { rows = []; totalCount = 0; return; }
+
+  const ord = orderColumn();
+  let q = db.from(currentTable.name)
+    .select('*', { count: 'exact' })
+    .order(ord.col, { ascending: ord.asc })
+    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+
+  if (searchTerm) {
+    // ค้นเฉพาะคอลัมน์ตัวหนังสือ — ilike กับ uuid หรือตัวเลขจะทำให้ทั้ง query พัง
+    const textCols = columns
+      .filter(c => c.data_type === 'text' || c.data_type.indexOf('character') === 0)
+      .map(c => c.column_name);
+    if (textCols.length) {
+      const safe = searchTerm.replace(/[%,()]/g, ' ');
+      q = q.or(textCols.map(c => c + '.ilike.%' + safe + '%').join(','));
+    }
+  }
+
+  const { data, error, count } = await q;
+  if (error) {
+    console.error('[Load rows]', error);
+    showToast('⚠️ โหลดข้อมูลไม่สำเร็จ: ' + error.message);
+    rows = [];
+    totalCount = 0;
+    return;
+  }
+  rows = data || [];
+  totalCount = count || 0;
+}
+
+async function loadAll() {
+  const ok = await loadColumns();
+  if (!ok) { renderAll(); return; }
+  await loadRows();
+  renderAll();
+}
+
+// ============================
+// แสดงผล
+// ============================
+function visibleColumns() {
+  // โชว์พอให้จำแถวได้ ที่เหลือไปดูในกล่องรายละเอียด จอมือถือกว้างไม่พอทุกคอลัมน์
+  const preferred = columns.filter(c => !isSystemColumn(c.column_name));
+  return (preferred.length ? preferred : columns).slice(0, 4);
+}
+
+function renderTableNote() {
+  const box = document.getElementById('tableNote');
+  const parts = [];
+  if (currentTable.mode === 'read') {
+    parts.push('<div class="alert alert-gold"><strong>ดูได้อย่างเดียว</strong>' +
+      (currentTable.note ? '<br>' + escapeHtml(currentTable.note) : '') + '</div>');
+  } else if (currentTable.note) {
+    parts.push('<div class="alert alert-gold">' + escapeHtml(currentTable.note) + '</div>');
+  }
+  box.innerHTML = parts.join('');
+}
+
+function renderRowsTable() {
+  const head = document.getElementById('rowsHead');
+  const body = document.getElementById('rowsBody');
+  const cols = visibleColumns();
+
+  head.innerHTML = cols.map(c => '<th>' + escapeHtml(c.column_name) + '</th>').join('');
+
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="' + Math.max(1, cols.length) + '">' +
+      '<div class="empty"><div class="empty-icon">📭</div>' +
+      '<div class="empty-text">' + (searchTerm ? 'ไม่พบข้อมูลที่ค้นหา' : 'ยังไม่มีข้อมูลในตารางนี้') +
+      '</div></div></td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map((r, idx) => {
+    const cells = cols.map(c =>
+      '<td><span class="cell-clip">' + escapeHtml(displayValue(r[c.column_name])) + '</span></td>'
+    ).join('');
+    return '<tr onclick="openRowModal(' + idx + ')">' + cells + '</tr>';
+  }).join('');
+}
+
+function renderPager() {
+  const from = totalCount === 0 ? 0 : page * PAGE_SIZE + 1;
+  const to = Math.min(totalCount, page * PAGE_SIZE + rows.length);
+  document.getElementById('pagerInfo').textContent =
+    totalCount === 0 ? '0 แถว' : (from + '–' + to + ' จาก ' + totalCount + ' แถว');
+  document.getElementById('prevBtn').disabled = page === 0;
+  document.getElementById('nextBtn').disabled = (page + 1) * PAGE_SIZE >= totalCount;
+}
+
+function renderAll() {
+  document.getElementById('rowsTitle').textContent = currentTable.label;
+  document.getElementById('addRowBtn').style.display = canAddRow() ? 'inline-block' : 'none';
+  renderTableNote();
+  renderRowsTable();
+  renderPager();
+}
+
+// ============================
+// เลือกตาราง · ค้นหา · แบ่งหน้า
+// ============================
+function onTableChange() {
+  const name = document.getElementById('tableSelect').value;
+  currentTable = TABLES.find(t => t.name === name) || TABLES[0];
+  page = 0;
+  searchTerm = '';
+  document.getElementById('searchInput').value = '';
+  loadAll();
+}
+
+document.getElementById('searchInput').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
+  searchTerm = this.value.trim();
+  page = 0;
+  loadRows().then(renderAll);
+});
+
+function changePage(delta) {
+  const next = page + delta;
+  if (next < 0) return;
+  if (next * PAGE_SIZE >= totalCount) return;
+  page = next;
+  loadRows().then(renderAll);
+}
+
+// ============================
+// กล่องรายละเอียด / แก้ไข
+// ============================
+function inputTypeFor(dataType) {
+  if (dataType === 'boolean') return 'boolean';
+  if (['integer', 'bigint', 'smallint', 'numeric', 'double precision', 'real'].indexOf(dataType) !== -1) return 'number';
+  if (dataType === 'date') return 'date';
+  if (dataType.indexOf('timestamp') === 0) return 'datetime-local';
+  if (dataType.indexOf('time without') === 0) return 'time';
+  return 'text';
+}
+
+// ค่า timestamptz จากฐานข้อมูลเป็น ISO ที่มีโซนเวลา แต่ input datetime-local
+// รับได้แค่ YYYY-MM-DDTHH:MM ตามเวลาเครื่อง จึงต้องแปลงไปกลับ
+function toLocalInput(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+    'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function openRowModal(idx) {
+  editingRow = (idx === null || idx === undefined) ? null : rows[idx];
+  const isNew = editingRow === null;
+
+  document.getElementById('rowModalTitle').textContent =
+    isNew ? 'เพิ่มแถวใน ' + currentTable.label : 'รายละเอียด — ' + currentTable.label;
+
+  const noteBox = document.getElementById('rowModalNote');
+  noteBox.innerHTML = currentTable.mode === 'read'
+    ? '<div class="alert alert-gold">ตารางนี้ดูได้อย่างเดียว</div>' : '';
+
+  const fields = columns.map(c => {
+    const name = c.column_name;
+    const raw = isNew ? null : editingRow[name];
+    const locked = !canEditTable() || isSystemColumn(name) || isComplexType(c.data_type);
+
+    const label = '<label class="form-label">' + escapeHtml(name) +
+      ' <span style="color:#999999;">' + escapeHtml(c.data_type) + '</span>' +
+      (c.is_nullable ? '' : ' <span style="color:var(--accent);">*</span>') + '</label>';
+
+    if (locked) {
+      return '<div class="form-group">' + label +
+        '<div class="field-readonly">' + escapeHtml(displayValue(raw)) + '</div></div>';
+    }
+
+    const kind = inputTypeFor(c.data_type);
+    const id = 'fld_' + name;
+
+    if (kind === 'boolean') {
+      const v = raw === true ? 'true' : raw === false ? 'false' : '';
+      return '<div class="form-group">' + label +
+        '<select class="form-input" id="' + id + '" data-col="' + escapeHtml(name) + '" data-kind="boolean">' +
+        '<option value=""' + (v === '' ? ' selected' : '') + '>— ไม่ระบุ —</option>' +
+        '<option value="true"' + (v === 'true' ? ' selected' : '') + '>ใช่</option>' +
+        '<option value="false"' + (v === 'false' ? ' selected' : '') + '>ไม่ใช่</option>' +
+        '</select></div>';
+    }
+
+    let value = raw === null || raw === undefined ? '' : String(raw);
+    if (kind === 'datetime-local' && value) value = toLocalInput(raw);
+
+    const step = kind === 'number' ? ' step="any"' : '';
+    return '<div class="form-group">' + label +
+      '<input type="' + kind + '" class="form-input" id="' + id +
+      '" data-col="' + escapeHtml(name) + '" data-kind="' + kind + '"' + step +
+      ' value="' + escapeHtml(value) + '"></div>';
+  }).join('');
+
+  document.getElementById('rowModalFields').innerHTML = fields;
+
+  document.getElementById('rowSaveBtn').style.display =
+    (canEditTable() && (!isNew || canAddRow())) ? 'block' : 'none';
+  document.getElementById('rowDeleteBtn').style.display =
+    (!isNew && canDeleteRow()) ? 'block' : 'none';
+
+  document.getElementById('rowModal').classList.add('open');
+}
+
+function closeRowModal() {
+  document.getElementById('rowModal').classList.remove('open');
+  editingRow = null;
+}
+document.getElementById('rowModal').addEventListener('click', function (e) {
+  if (e.target === this) closeRowModal();
+});
+
+function collectFormValues() {
+  const payload = {};
+  const inputs = document.querySelectorAll('#rowModalFields [data-col]');
+  inputs.forEach(el => {
+    const col = el.getAttribute('data-col');
+    const kind = el.getAttribute('data-kind');
+    const raw = el.value;
+
+    if (kind === 'boolean') {
+      payload[col] = raw === '' ? null : (raw === 'true');
+      return;
+    }
+    if (raw === '') { payload[col] = null; return; }
+    if (kind === 'number') {
+      const n = Number(raw);
+      payload[col] = isNaN(n) ? null : n;
+      return;
+    }
+    if (kind === 'datetime-local') {
+      payload[col] = new Date(raw).toISOString();
+      return;
+    }
+    payload[col] = raw;
+  });
+  return payload;
+}
+
+async function saveRow() {
+  if (!canEditTable()) return;
+
+  const payload = collectFormValues();
+
+  // เติม "ใครเป็นคนทำ" ให้เองตอนเพิ่มแถวใหม่ — ต้องทำก่อนตรวจช่องว่าง
+  if (!editingRow) {
+    columns.forEach(c => {
+      if (ACTOR_COLUMNS.indexOf(c.column_name) !== -1 && currentUserId) {
+        payload[c.column_name] = currentUserId;
+      }
+    });
+  }
+
+  // คอลัมน์ห้ามว่างต้องมีค่าจริง ไม่งั้นฐานข้อมูลจะปฏิเสธด้วยข้อความที่อ่านยาก
+  const missing = columns.filter(c =>
+    !c.is_nullable && !c.has_default && !isSystemColumn(c.column_name) &&
+    !isComplexType(c.data_type) &&
+    (payload[c.column_name] === null || payload[c.column_name] === undefined)
+  ).map(c => c.column_name);
+  if (missing.length) {
+    showToast('⚠️ ต้องกรอก: ' + missing.join(', '));
+    return;
+  }
+
+  if (columns.some(c => c.column_name === 'updated_at')) {
+    payload.updated_at = new Date().toISOString();
+  }
+
+  const btn = document.getElementById('rowSaveBtn');
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...';
+
+  let error;
+  if (editingRow) {
+    ({ error } = await db.from(currentTable.name).update(payload).eq('id', editingRow.id));
+  } else {
+    ({ error } = await db.from(currentTable.name).insert(payload));
+  }
+
+  btn.disabled = false;
+  btn.textContent = label;
+
+  if (error) {
+    console.error('[Save row]', error);
+    showToast('⚠️ บันทึกไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeRowModal();
+  showToast('✅ บันทึกเรียบร้อยแล้ว');
+  loadAll();
+}
+
+// ============================
+// ลบแถว
+// ============================
+function openDeleteConfirm() {
+  if (!editingRow || !canDeleteRow()) return;
+  document.getElementById('deleteModalMsg').textContent =
+    'ลบแถวนี้ออกจากตาราง ' + currentTable.label + ' อย่างถาวร กู้คืนไม่ได้ ' +
+    'ถ้ามีข้อมูลอื่นอ้างถึงแถวนี้อยู่ ฐานข้อมูลจะปฏิเสธการลบเอง';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+async function confirmDelete() {
+  if (!editingRow || !canDeleteRow()) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  const { error } = await db.from(currentTable.name).delete().eq('id', editingRow.id);
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Delete row]', error);
+    showToast('⚠️ ลบไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeDeleteModal();
+  closeRowModal();
+  showToast('✅ ลบแถวเรียบร้อยแล้ว');
+  loadAll();
+}
+
+// ============================
+// เริ่มทำงาน
+// ============================
+function fillTableSelect() {
+  document.getElementById('tableSelect').innerHTML = TABLES.map(t => {
+    const tag = t.mode === 'read' ? ' (ดูอย่างเดียว)' : '';
+    return '<option value="' + t.name + '">' + t.label + tag + '</option>';
+  }).join('');
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await db.auth.getSession();
+  handleAuthState(session);
+  db.auth.onAuthStateChange((_event, session) => handleAuthState(session));
+}
+
+fillTableSelect();
+initSupabaseSync();
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
+</script>
+</body>
+</html>
