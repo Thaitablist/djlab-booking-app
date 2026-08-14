@@ -328,7 +328,7 @@
           <tr>
             <th>ลำดับ</th>
             <th>รายการ</th>
-            <th>หมวด</th>
+            <th>บิล</th>
             <th class="amount">จำนวนเงิน</th>
             <th class="no-print">จัดการ</th>
           </tr>
@@ -410,22 +410,29 @@
       <input type="text" id="efDescription" class="form-input" placeholder="รายละเอียดรายจ่าย">
     </div>
     <div class="form-group">
-      <label class="form-label">หมวด</label>
-      <input type="text" id="efCategory" class="form-input" list="expenseCategoryList" placeholder="เลือกหมวด หรือพิมพ์เอง">
-      <datalist id="expenseCategoryList">
-        <option value="ค่าของเข้าร้าน">
-        <option value="ค่าเช่า">
-        <option value="เงินเดือน">
-        <option value="ค่าน้ำค่าไฟ">
-        <option value="ค่าการตลาด">
-        <option value="อื่นๆ">
-      </datalist>
-    </div>
-    <div class="form-group">
       <label class="form-label">จำนวนเงิน (บาท) *</label>
       <input type="number" id="efAmount" class="form-input" min="0" step="0.01" placeholder="0">
     </div>
+    <div class="form-group">
+      <label class="form-label">รูปบิล</label>
+      <!-- capture="environment" ทำให้มือถือเปิดกล้องหลังให้เลย ไม่ต้องถ่ายแล้วมาเลือกจากคลัง -->
+      <input type="file" id="efReceiptFile" class="form-input" accept="image/*" capture="environment" onchange="onReceiptPicked()">
+      <div id="efReceiptState" style="margin-top:8px;font-size:14px;"></div>
+      <img id="efReceiptPreview" alt="ตัวอย่างรูปบิล"
+           style="display:none;max-width:100%;margin-top:8px;border:1px solid #cccccc;border-radius:8px;">
+      <button type="button" class="btn btn-secondary btn-sm" id="efReceiptClearBtn"
+              style="display:none;margin-top:8px;" onclick="clearReceiptChoice()">เอารูปออก</button>
+    </div>
     <button class="btn btn-primary" id="expenseSaveBtn" onclick="saveExpense()">บันทึกรายจ่าย</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReceiptModal()">×</button>
+    <div class="modal-title">รูปบิล</div>
+    <div id="receiptCaption" style="font-size:14px;margin-bottom:10px;"></div>
+    <img id="receiptImage" alt="รูปบิล" style="max-width:100%;border:1px solid #cccccc;border-radius:8px;">
   </div>
 </div>
 
@@ -494,6 +501,11 @@ let totalExpense = 0;
 let editingIncomeId = null;
 let editingExpenseId = null;
 let deleteTarget = null;
+
+// สถานะรูปบิลของกล่องแก้ไขรายจ่าย — รีเซ็ตทุกครั้งที่เปิดกล่อง
+let pendingReceiptFile = null;    // ไฟล์ที่เพิ่งเลือก ยังไม่ได้อัปโหลด
+let existingReceiptPath = null;   // รูปที่แถวนี้มีอยู่เดิมในถัง
+let receiptCleared = false;       // กด "เอารูปออก" ไว้
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -727,7 +739,10 @@ function renderExpenseTable() {
     return '<tr>' +
       '<td>' + e.seq + '</td>' +
       '<td>' + escapeHtml(e.description) + '</td>' +
-      '<td>' + escapeHtml(e.category || '-') + '</td>' +
+      '<td>' + (e.receipt_path
+        ? '<button class="btn btn-secondary btn-sm no-print" onclick="viewReceipt(\'' + e.id + '\')">🧾 ดูบิล</button>' +
+          '<span class="print-only">มีบิล</span>'
+        : '<span>—</span>') + '</td>' +
       '<td class="amount">' + formatMoney(e.amount) + '</td>' +
       '<td class="no-print">' +
         '<button class="btn btn-secondary btn-sm" onclick="openExpenseModal(\'' + e.id + '\')">แก้ไข</button>' +
@@ -846,19 +861,28 @@ function openExpenseModal(id) {
   editingExpenseId = id;
   const title = document.getElementById('expenseModalTitle');
 
+  // สถานะรูปเริ่มใหม่ทุกครั้งที่เปิดกล่อง ไม่งั้นรูปที่เลือกค้างจากรายการก่อน
+  // จะติดไปกับรายการถัดไปโดยไม่มีใครเห็น
+  pendingReceiptFile = null;
+  receiptCleared = false;
+  document.getElementById('efReceiptFile').value = '';
+  document.getElementById('efReceiptPreview').style.display = 'none';
+  document.getElementById('efReceiptPreview').removeAttribute('src');
+
   if (id) {
     const row = expenseRows.find(r => r.id === id);
     if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
     title.textContent = 'แก้ไขรายจ่าย';
     document.getElementById('efDescription').value = row.description || '';
-    document.getElementById('efCategory').value = row.category || '';
     document.getElementById('efAmount').value = row.amount;
+    existingReceiptPath = row.receipt_path || null;
   } else {
     title.textContent = 'เพิ่มรายจ่าย';
     document.getElementById('efDescription').value = '';
-    document.getElementById('efCategory').value = '';
     document.getElementById('efAmount').value = '';
+    existingReceiptPath = null;
   }
+  renderReceiptState();
 
   document.getElementById('expenseModal').classList.add('open');
 }
@@ -873,7 +897,6 @@ document.getElementById('expenseModal').addEventListener('click', function (e) {
 
 async function saveExpense() {
   const description = document.getElementById('efDescription').value.trim();
-  const category = document.getElementById('efCategory').value.trim() || null;
   const amountRaw = document.getElementById('efAmount').value;
 
   if (!description) { showToast('⚠️ กรุณากรอกรายการ'); return; }
@@ -882,27 +905,60 @@ async function saveExpense() {
   if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
 
   const btn = document.getElementById('expenseSaveBtn');
+  const btnLabel = btn.textContent;
   btn.disabled = true;
 
+  // จัดการรูปก่อนเขียนแถว เพราะถ้าอัปโหลดล้มเราอยากให้ทั้งงานล้ม ดีกว่าบันทึก
+  // รายจ่ายไว้แล้วรูปหาย โดยที่หน้าจอขึ้นว่าสำเร็จ
+  let receiptPath = existingReceiptPath;
+  let pathToDelete = null;
+  let uploadedNow = null;
+  try {
+    if (pendingReceiptFile) {
+      btn.textContent = 'กำลังอัปโหลดรูป...';
+      const blob = await shrinkImage(pendingReceiptFile);
+      uploadedNow = await uploadReceipt(blob);
+      if (existingReceiptPath) pathToDelete = existingReceiptPath;
+      receiptPath = uploadedNow;
+    } else if (receiptCleared && existingReceiptPath) {
+      pathToDelete = existingReceiptPath;
+      receiptPath = null;
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = btnLabel;
+    console.error('[Upload receipt]', e);
+    showToast('⚠️ อัปโหลดรูปบิลไม่สำเร็จ: ' + e.message);
+    return;
+  }
+
+  btn.textContent = 'กำลังบันทึก...';
   let error;
   if (editingExpenseId) {
     ({ error } = await db.from('expenses').update({
-      description, category, amount, updated_at: new Date().toISOString(),
+      description, amount, receipt_path: receiptPath, updated_at: new Date().toISOString(),
     }).eq('id', editingExpenseId));
   } else {
     // ลำดับใหม่ต่อท้ายรายการของวันที่กำลังดูอยู่โดยอัตโนมัติ
     const nextSeq = expenseRows.reduce((max, e) => Math.max(max, e.seq || 0), 0) + 1;
     ({ error } = await db.from('expenses').insert({
-      spent_on: getSelectedDate(), seq: nextSeq, description, category, amount, admin_id: currentUserId,
+      spent_on: getSelectedDate(), seq: nextSeq, description, amount,
+      receipt_path: receiptPath, admin_id: currentUserId,
     }));
   }
   btn.disabled = false;
+  btn.textContent = btnLabel;
 
   if (error) {
+    // เขียนแถวไม่ผ่านแต่รูปขึ้นไปแล้ว เก็บกวาดทิ้งไม่ให้เป็นไฟล์กำพร้าในถัง
+    if (uploadedNow) await removeReceipt(uploadedNow);
     console.error('[Save expense]', error);
     showToast('⚠️ บันทึกรายจ่ายไม่สำเร็จ: ' + error.message);
     return;
   }
+
+  // ลบรูปเก่าหลังแถวชี้ไปที่รูปใหม่เรียบร้อยแล้วเท่านั้น
+  if (pathToDelete) await removeReceipt(pathToDelete);
 
   closeExpenseModal();
   showToast(editingExpenseId ? '✅ แก้ไขรายจ่ายเรียบร้อยแล้ว' : '✅ เพิ่มรายจ่ายเรียบร้อยแล้ว');
@@ -933,6 +989,11 @@ async function confirmDelete() {
   const { type, id } = deleteTarget;
   const table = type === 'income' ? 'income_entries' : 'expenses';
 
+  // จำพาธรูปไว้ก่อน เพราะพอลบแถวแล้วจะไม่เหลืออะไรบอกว่าไฟล์ไหนเป็นของใคร
+  const receiptPath = type === 'expense'
+    ? (expenseRows.find(r => r.id === id) || {}).receipt_path || null
+    : null;
+
   const btn = document.getElementById('confirmDeleteBtn');
   btn.disabled = true;
   const { error } = await db.from(table).delete().eq('id', id);
@@ -944,10 +1005,132 @@ async function confirmDelete() {
     return;
   }
 
+  if (receiptPath) await removeReceipt(receiptPath);
+
   closeDeleteModal();
   showToast('✅ ลบรายการเรียบร้อยแล้ว');
   loadAll();
 }
+
+// ============================
+// รูปบิล (Supabase Storage — ถัง receipts เป็นแบบปิด ต้องขอ signed URL ทุกครั้ง)
+// ============================
+const RECEIPT_MAX_EDGE = 1600;   // ด้านยาวสุดหลังย่อ อ่านตัวเลขบนบิลได้สบาย
+const RECEIPT_QUALITY = 0.8;
+
+// รูปจากกล้องมือถือใบละ 3-5 MB ย่อก่อนส่งเหลือราว 200-400 KB
+// ประหยัดทั้งค่าที่เก็บและเวลารอตอนใช้เน็ตมือถือ
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, RECEIPT_MAX_EDGE / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        b => b ? resolve(b) : reject(new Error('ย่อรูปไม่สำเร็จ')),
+        'image/jpeg', RECEIPT_QUALITY
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('เปิดไฟล์รูปนี้ไม่ได้ ลองถ่ายใหม่หรือเลือกไฟล์ JPG/PNG'));
+    };
+    img.src = url;
+  });
+}
+
+async function uploadReceipt(blob) {
+  const month = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }).slice(0, 7);
+  const path = month + '/' + crypto.randomUUID() + '.jpg';
+  const { error } = await db.storage.from('receipts')
+    .upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+  if (error) throw new Error(error.message);
+  return path;
+}
+
+async function removeReceipt(path) {
+  if (!path) return;
+  const { error } = await db.storage.from('receipts').remove([path]);
+  // ลบรูปไม่ผ่านไม่ควรบล็อกงานหลัก แค่เหลือไฟล์ค้างในถัง แต่ต้องได้เห็นว่าเกิดขึ้น
+  if (error) {
+    console.error('[Remove receipt]', error);
+    showToast('⚠️ ลบไฟล์รูปเก่าไม่สำเร็จ (ข้อมูลรายจ่ายบันทึกแล้ว): ' + error.message);
+  }
+}
+
+function renderReceiptState() {
+  const state = document.getElementById('efReceiptState');
+  const clearBtn = document.getElementById('efReceiptClearBtn');
+  if (pendingReceiptFile) {
+    state.textContent = '📎 เลือกรูปใหม่ไว้แล้ว จะอัปโหลดตอนกดบันทึก';
+    clearBtn.style.display = 'inline-block';
+  } else if (existingReceiptPath && !receiptCleared) {
+    state.textContent = '🧾 มีรูปบิลอยู่แล้ว เลือกรูปใหม่เพื่อแทนที่';
+    clearBtn.style.display = 'inline-block';
+  } else if (receiptCleared) {
+    state.textContent = '🗑️ จะเอารูปออกตอนกดบันทึก';
+    clearBtn.style.display = 'none';
+  } else {
+    state.textContent = 'ยังไม่มีรูปบิล';
+    clearBtn.style.display = 'none';
+  }
+}
+
+function onReceiptPicked() {
+  const input = document.getElementById('efReceiptFile');
+  const file = input.files && input.files[0];
+  if (!file) return;
+  pendingReceiptFile = file;
+  receiptCleared = false;
+  const preview = document.getElementById('efReceiptPreview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  renderReceiptState();
+}
+
+function clearReceiptChoice() {
+  const preview = document.getElementById('efReceiptPreview');
+  if (pendingReceiptFile) {
+    // ยกเลิกเฉพาะรูปที่เพิ่งเลือก ของเดิมในถังยังอยู่
+    pendingReceiptFile = null;
+    document.getElementById('efReceiptFile').value = '';
+    preview.style.display = 'none';
+    preview.removeAttribute('src');
+  } else {
+    receiptCleared = true;
+  }
+  renderReceiptState();
+}
+
+async function viewReceipt(id) {
+  const row = expenseRows.find(r => r.id === id);
+  if (!row || !row.receipt_path) { showToast('⚠️ รายการนี้ไม่มีรูปบิล'); return; }
+  const { data, error } = await db.storage.from('receipts')
+    .createSignedUrl(row.receipt_path, 120);
+  if (error) {
+    console.error('[Signed URL]', error);
+    showToast('⚠️ เปิดรูปบิลไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  document.getElementById('receiptCaption').textContent = row.description;
+  document.getElementById('receiptImage').src = data.signedUrl;
+  document.getElementById('receiptModal').classList.add('open');
+}
+
+function closeReceiptModal() {
+  document.getElementById('receiptModal').classList.remove('open');
+  document.getElementById('receiptImage').removeAttribute('src');
+}
+document.getElementById('receiptModal').addEventListener('click', function (e) {
+  if (e.target === this) closeReceiptModal();
+});
 
 // ============================
 // ดาวน์โหลด CSV
@@ -979,9 +1162,9 @@ function downloadCsv() {
   lines.push('');
 
   lines.push(['รายจ่าย'].map(csvEscape).join(','));
-  lines.push(['ลำดับ', 'รายการ', 'หมวด', 'จำนวนเงิน'].map(csvEscape).join(','));
+  lines.push(['ลำดับ', 'รายการ', 'บิล', 'จำนวนเงิน'].map(csvEscape).join(','));
   expenseRows.forEach(e => {
-    lines.push([e.seq, e.description, e.category || '', formatMoney(e.amount)].map(csvEscape).join(','));
+    lines.push([e.seq, e.description, e.receipt_path ? 'มีบิล' : '', formatMoney(e.amount)].map(csvEscape).join(','));
   });
   lines.push(['', '', 'รวมรายจ่าย', formatMoney(totalExpense)].map(csvEscape).join(','));
   lines.push('');
