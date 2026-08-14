@@ -841,6 +841,11 @@ function addToCart(productId) {
   if (!p) { showToast('⚠️ ไม่พบสินค้านี้'); return; }
   const existing = cart.find(c => c.product_id === productId);
   if (existing) {
+    // บรรทัดที่ระบุเครื่องไว้แล้ว เพิ่มจำนวนลอย ๆ ไม่ได้ จำนวนต้องเท่าซีเรียลเสมอ
+    if (hasSerials(existing)) {
+      showToast('⚠️ "' + p.name + '" ในตะกร้าระบุเครื่องด้วยซีเรียลแล้ว — ยิงซีเรียลของเครื่องถัดไปแทน');
+      return;
+    }
     existing.qty += 1;
   } else {
     cart.push({ product_id: productId, name: p.name, sku: p.sku, unit_price: parseFloat(p.sell_price) || 0, qty: 1 });
@@ -850,6 +855,59 @@ function addToCart(productId) {
   renderCart();
   showToast('✅ เพิ่ม "' + p.name + '" ลงตะกร้าแล้ว');
 }
+
+// เพิ่มเครื่องที่มีซีเรียลเข้าตะกร้า — คืนข้อความถ้าเพิ่มไม่ได้ คืน null ถ้าสำเร็จ
+//
+// บรรทัดในตะกร้าที่มีซีเรียลจะล็อกจำนวนไว้เท่ากับจำนวนซีเรียลเสมอ เพราะฝั่ง
+// ฐานข้อมูลแตกเป็น sale_items บรรทัดละเครื่อง (product_unit_id เก็บได้ค่าเดียว)
+// ถ้าปล่อยให้พิมพ์จำนวนเองได้ ตัวเลขสองฝั่งจะไม่ตรงกันแล้วบิลจะถูกปฏิเสธ
+function addUnitToCart(product, unit) {
+  if (unit.status !== 'in_stock') {
+    return 'ซีเรียล ' + unit.serial_no + ' ขายออกไปแล้วหรือไม่พร้อมขาย (สถานะ ' + unit.status + ')';
+  }
+  for (const line of cart) {
+    if ((line.unit_ids || []).indexOf(unit.id) !== -1) {
+      return 'ซีเรียล ' + unit.serial_no + ' อยู่ในตะกร้าอยู่แล้ว';
+    }
+  }
+
+  let line = cart.find(c => c.product_id === product.id);
+  if (!line) {
+    line = {
+      product_id: product.id, name: product.name, sku: product.sku,
+      unit_price: parseFloat(product.sell_price) || 0, qty: 0,
+      unit_ids: [], serials: [],
+    };
+    cart.push(line);
+  }
+  if (!line.unit_ids) { line.unit_ids = []; line.serials = []; }
+
+  // บรรทัดที่เคยเพิ่มแบบไม่ระบุเครื่องไว้ก่อน แล้วมายิงซีเรียลทีหลัง — เริ่มนับใหม่
+  // จากจำนวนซีเรียลจริง ไม่ให้จำนวนเก่าค้างแล้วเกินจำนวนเครื่องที่ยิงไว้
+  line.unit_ids.push(unit.id);
+  line.serials.push(unit.serial_no);
+  line.qty = line.unit_ids.length;
+
+  document.getElementById('productSearch').value = '';
+  renderProductSearch();
+  renderCart();
+  showToast('✅ เพิ่ม "' + product.name + '" (ซีเรียล ' + unit.serial_no + ')');
+  return null;
+}
+
+function removeUnitFromCart(idx, unitId) {
+  const line = cart[idx];
+  if (!line || !line.unit_ids) return;
+  const at = line.unit_ids.indexOf(unitId);
+  if (at === -1) return;
+  line.unit_ids.splice(at, 1);
+  line.serials.splice(at, 1);
+  line.qty = line.unit_ids.length;
+  if (line.qty === 0) cart.splice(idx, 1);
+  renderCart();
+}
+
+function hasSerials(item) { return !!(item.unit_ids && item.unit_ids.length); }
 
 function renderCart() {
   const el = document.getElementById('cartList');
@@ -870,11 +928,19 @@ function renderCart() {
       </div>
       <div class="cart-item-sub">${escapeHtml(item.sku)} · คงเหลือในสต็อก ${stock} ชิ้น</div>
       ${overStock ? `<div class="alert alert-gold" style="margin:8px 0 0;padding:8px 10px;">⚠️ จำนวนที่ขาย (${item.qty}) มากกว่ายอดคงเหลือในสต็อก (${stock}) — ยังบันทึกได้ แต่โปรดตรวจสอบสต็อกจริงก่อนส่งมอบสินค้า</div>` : ''}
+      ${hasSerials(item) ? `<div style="margin-top:8px;font-size:14px;">
+        ${item.serials.map((s, si) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+          <span>🔖 ${escapeHtml(s)}</span>
+          <button type="button" class="cart-remove-btn" style="font-size:20px;" onclick="removeUnitFromCart(${idx}, '${item.unit_ids[si]}')" aria-label="เอาซีเรียลนี้ออก">×</button>
+        </div>`).join('')}
+      </div>` : ''}
       <div class="cart-item-row">
         <div class="qty-stepper">
-          <button type="button" onclick="changeQty(${idx}, -1)" aria-label="ลดจำนวน">−</button>
-          <input type="number" min="1" step="1" value="${item.qty}" onchange="setQty(${idx}, this.value)">
-          <button type="button" onclick="changeQty(${idx}, 1)" aria-label="เพิ่มจำนวน">+</button>
+          ${hasSerials(item)
+            ? `<span style="padding:0 10px;font-weight:700;">${item.qty} เครื่อง</span>`
+            : `<button type="button" onclick="changeQty(${idx}, -1)" aria-label="ลดจำนวน">−</button>
+               <input type="number" min="1" step="1" value="${item.qty}" onchange="setQty(${idx}, this.value)">
+               <button type="button" onclick="changeQty(${idx}, 1)" aria-label="เพิ่มจำนวน">+</button>`}
         </div>
         <div class="cart-item-price">
           <label>ราคาต่อหน่วย (บาท)</label>
@@ -890,6 +956,10 @@ function renderCart() {
 function changeQty(idx, delta) {
   const item = cart[idx];
   if (!item) return;
+  if (hasSerials(item)) {
+    showToast('⚠️ บรรทัดนี้ระบุเครื่องด้วยซีเรียลแล้ว — ยิงเพิ่มหรือเอาซีเรียลออกแทน');
+    return;
+  }
   const newQty = item.qty + delta;
   if (newQty <= 0) { removeFromCart(idx); return; }
   item.qty = newQty;
@@ -897,6 +967,11 @@ function changeQty(idx, delta) {
 }
 
 function setQty(idx, val) {
+  if (hasSerials(cart[idx])) {
+    showToast('⚠️ บรรทัดนี้ระบุเครื่องด้วยซีเรียลแล้ว — ยิงเพิ่มหรือเอาซีเรียลออกแทน');
+    renderCart();
+    return;
+  }
   const n = parseInt(val, 10);
   if (isNaN(n) || n <= 0) {
     showToast('⚠️ จำนวนต้องเป็นเลขจำนวนเต็มมากกว่า 0');
@@ -1043,7 +1118,13 @@ async function submitSale() {
   if (isNaN(discount) || discount < 0) discount = 0;
   if (discount > subtotal) { showToast('⚠️ ส่วนลดต้องไม่มากกว่ายอดรวม'); return; }
   const paymentMethod = document.getElementById('paymentMethod').value;
-  const items = cart.map(c => ({ product_id: c.product_id, qty: c.qty, unit_price: c.unit_price }));
+  // ส่ง unit_ids ไปเฉพาะบรรทัดที่ระบุเครื่องไว้ — ฝั่งฐานข้อมูลจะแตกเป็น
+  // sale_items บรรทัดละเครื่องแล้วเปลี่ยนสถานะเครื่องนั้นเป็นขายแล้ว
+  const items = cart.map(c => {
+    const item = { product_id: c.product_id, qty: c.qty, unit_price: c.unit_price };
+    if (c.unit_ids && c.unit_ids.length) item.unit_ids = c.unit_ids;
+    return item;
+  });
   const note = document.getElementById('saleNoteInput').value.trim() || null;
 
   submittingSale = true;
@@ -1144,7 +1225,7 @@ async function openSaleDetail(saleId) {
   if (!sale) { showToast('⚠️ ไม่พบข้อมูลบิลนี้'); return; }
 
   const { data, error } = await db.from('sale_items')
-    .select('id, qty, unit_price, line_total, products:product_id(name, sku)')
+    .select('id, qty, unit_price, line_total, products:product_id(name, sku), product_units:product_unit_id(serial_no)')
     .eq('sale_id', saleId);
 
   if (error) {
@@ -1164,6 +1245,7 @@ async function openSaleDetail(saleId) {
         <div>
           <div class="history-product">${escapeHtml(it.products ? it.products.name : '(ไม่พบสินค้า)')}${it.products && it.products.sku ? ' (' + escapeHtml(it.products.sku) + ')' : ''}</div>
           <div class="history-meta">จำนวน ${it.qty} × ${formatMoney(it.unit_price)} บาท</div>
+          ${it.product_units && it.product_units.serial_no ? `<div class="history-meta">🔖 ซีเรียล ${escapeHtml(it.product_units.serial_no)}</div>` : ''}
         </div>
         <div class="history-qty">${formatMoney(it.line_total)}</div>
       </div>
@@ -1430,10 +1512,19 @@ async function onScanned(code) {
   const found = await findByBarcode(value);
 
   if (found.product) {
-    // addToCart จัดการเพิ่มจำนวนเองถ้าสินค้านี้อยู่ในตะกร้าแล้ว (ไม่ทำให้เกิดบรรทัดซ้ำ) และขึ้น toast ชื่อสินค้าอยู่แล้ว
-    addToCart(found.product.id);
     if (found.viaSerial) {
-      showToast('✅ เพิ่ม "' + found.product.name + '" ลงตะกร้าแล้ว (ซีเรียล ' + value + ')');
+      const msg = addUnitToCart(found.product, found.unit);
+      if (msg) {
+        // ยิงซ้ำหรือเครื่องนี้ขายไปแล้ว — ต้องเห็นในกล่องสแกน ไม่ใช่แค่ toast ที่หายไปเอง
+        document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
+        document.getElementById('scanError').innerHTML =
+          '<div class="alert alert-gold" style="margin-top:12px;">' + escapeHtml(msg) + '</div>';
+        rearmScanner();
+        return;
+      }
+    } else {
+      // addToCart จัดการเพิ่มจำนวนเองถ้าสินค้านี้อยู่ในตะกร้าแล้ว (ไม่ทำให้เกิดบรรทัดซ้ำ) และขึ้น toast ชื่อสินค้าอยู่แล้ว
+      addToCart(found.product.id);
     }
     rearmScanner('เพิ่มแล้ว — ยิงชิ้นถัดไปได้เลย');
     return;
@@ -1450,19 +1541,22 @@ async function onScanned(code) {
 // บาร์โค้ดบนกล่องอาจเป็นของรุ่นสินค้า หรือเป็นซีเรียลของเครื่องนั้น — ลองทั้งสองทาง
 async function findByBarcode(value) {
   const p = products.find(x => (x.barcode_ean13 || '').trim() === value);
-  if (p) return { product: p, viaSerial: false };
+  if (p) return { product: p, viaSerial: false, unit: null };
 
+  // ดึงสถานะกับเลขซีเรียลมาด้วย เพื่อทักได้ตั้งแต่ตอนยิงว่าเครื่องนี้ขายไปแล้ว
+  // ไม่ต้องรอให้ฐานข้อมูลปฏิเสธตอนกดบันทึกบิล
   const { data, error } = await db.from('product_units')
-    .select('product_id').eq('barcode_code', value).limit(1);
+    .select('id, product_id, serial_no, status').eq('barcode_code', value).limit(1);
   if (error) {
     console.error('[Scan lookup]', error);
-    return { product: null, viaSerial: false };
+    return { product: null, viaSerial: false, unit: null };
   }
   if (data && data.length) {
-    const byId = products.find(x => x.id === data[0].product_id);
-    if (byId) return { product: byId, viaSerial: true };
+    const u = data[0];
+    const byId = products.find(x => x.id === u.product_id);
+    if (byId) return { product: byId, viaSerial: true, unit: u };
   }
-  return { product: null, viaSerial: false };
+  return { product: null, viaSerial: false, unit: null };
 }
 
 function toggleTorch() {
