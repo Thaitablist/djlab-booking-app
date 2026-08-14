@@ -424,6 +424,7 @@
       <option value="sales.html">ขายสินค้า</option>
       <option value="customers.html">ข้อมูลลูกค้า</option>
       <option value="activity.html">บันทึกการใช้งาน</option>
+      <option value="daily.html">สรุปรายวัน</option>
     </select>
   </div>
   <div class="header-right" id="headerDate"></div>
@@ -1146,11 +1147,38 @@ function showDayBookings(dateStr) {
 // ============================
 // TIMER
 // ============================
+// เวลาที่เหลือคำนวณจาก "นาฬิกาจริง" เสมอ — เก็บจุดที่เวลาจะหมด (timerEndsAt)
+// ไม่ใช่ตัวนับที่ลดลงทีละวินาที เพราะมือถือหยุด setInterval ของหน้าที่อยู่เบื้องหลัง
+// และสถานะถูกเขียนลง localStorage เพราะ Android อาจทิ้งหน้าเว็บทั้งหน้าตอนสลับแอป
+const TIMER_KEY = 'djlab_timer';
+const TIMER_STALE_MS = 6 * 3600 * 1000;  // หมดเวลาเกิน 6 ชม. = ของรอบก่อน ทิ้งเงียบ ๆ ไม่ต้องเตือน
+
 let timerInterval = null;
 let timerRemaining = 0;
 let timerTotal = 0;
 let timerRunning = false;
+let timerEndsAt = 0;        // epoch ms — มีค่าเฉพาะตอนกำลังเดิน
+let timerFinished = false;  // กันเตือนซ้ำรอบสอง
 let currentModalBookingId = null;
+
+function saveTimerState() {
+  try {
+    if (!timerTotal) { localStorage.removeItem(TIMER_KEY); return; }
+    localStorage.setItem(TIMER_KEY, JSON.stringify({
+      total: timerTotal, remaining: timerRemaining, endsAt: timerEndsAt,
+      running: timerRunning, finished: timerFinished
+    }));
+  } catch (e) { /* โหมดส่วนตัว / พื้นที่เต็ม — ให้ตัวจับเวลาทำงานต่อได้ แค่ไม่รอดการปิดหน้า */ }
+}
+
+function clearTimerState() {
+  try { localStorage.removeItem(TIMER_KEY); } catch (e) {}
+}
+
+// เวลาที่เหลือ ณ วินาทีนี้ — ตอนเดินอ่านจากนาฬิกา ตอนหยุดใช้ค่าที่ค้างไว้
+function liveRemaining() {
+  return timerRunning ? Math.max(0, Math.round((timerEndsAt - Date.now()) / 1000)) : timerRemaining;
+}
 
 function setTimer(h, m) {
   document.getElementById('timerHours').value = h;
@@ -1176,41 +1204,129 @@ function timerAction() {
 
 function startTimer() {
   timerRunning = true;
+  timerFinished = false;
+  timerEndsAt = Date.now() + timerRemaining * 1000;
   document.getElementById('timerStartBtn').textContent = '⏸ หยุดชั่วคราว';
   document.getElementById('timerLabel').textContent = 'กำลังนับถอยหลัง...';
-  timerInterval = setInterval(() => {
-    timerRemaining--;
-    updateTimerDisplay();
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval);
-      timerRunning = false;
-      timerRemaining = 0;
-      document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
-      document.getElementById('timerLabel').textContent = '⏰ หมดเวลาแล้ว!';
-      document.getElementById('ringProgress').style.stroke = 'var(--gold)';
-      triggerTimerAlert();
-    }
-  }, 1000);
+  runTimerTicker();
+  updateTimerDisplay();
+  saveTimerState();
+}
+
+// เต้น 250ms เพื่อให้ตัวเลขไม่กระตุก — ความถูกต้องมาจากนาฬิกา ไม่ใช่จำนวนครั้งที่เต้น
+function runTimerTicker() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(syncTimer, 250);
+}
+
+function syncTimer() {
+  if (!timerRunning) return;
+  timerRemaining = liveRemaining();
+  updateTimerDisplay();
+  if (timerRemaining <= 0) finishTimer();
+}
+
+function finishTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRunning = false;
+  timerRemaining = 0;
+  timerEndsAt = 0;
+  const alreadyAlerted = timerFinished;
+  timerFinished = true;
+  updateTimerDisplay();
+  document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
+  document.getElementById('timerLabel').textContent = '⏰ หมดเวลาแล้ว!';
+  saveTimerState();
+  if (!alreadyAlerted) triggerTimerAlert();
 }
 
 function pauseTimer() {
+  timerRemaining = liveRemaining();
   clearInterval(timerInterval);
+  timerInterval = null;
   timerRunning = false;
+  timerEndsAt = 0;
   document.getElementById('timerStartBtn').textContent = '▶ ต่อ';
   document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
+  updateTimerDisplay();
+  saveTimerState();
 }
 
 function timerReset() {
   clearInterval(timerInterval);
+  timerInterval = null;
   timerRunning = false;
+  timerFinished = false;
   timerRemaining = 0;
   timerTotal = 0;
+  timerEndsAt = 0;
+  clearTimerState();
   document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
   document.getElementById('timerLabel').textContent = 'ตั้งเวลาเพื่อเริ่ม';
   document.getElementById('timerDisplay').textContent = '00:00';
   document.getElementById('ringProgress').style.strokeDashoffset = '0';
   document.getElementById('ringProgress').style.stroke = 'var(--accent)';
 }
+
+// ตั้งค่า dropdown ให้ตรงกับเวลาที่กู้คืนมา จะได้กด Reset แล้วเริ่มใหม่ด้วยเวลาเดิมได้
+function syncTimerSelects(totalSec) {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.round((totalSec % 3600) / 60);
+  const hSel = document.getElementById('timerHours');
+  const mSel = document.getElementById('timerMins');
+  if ([...hSel.options].some(o => +o.value === h)) hSel.value = h;
+  if ([...mSel.options].some(o => +o.value === m)) mSel.value = m;
+}
+
+// กู้สถานะตอนเปิดหน้าใหม่ — Android ทิ้งหน้าเว็บตอนสลับแอปได้ทุกเมื่อ
+function restoreTimer() {
+  let s = null;
+  try {
+    const raw = localStorage.getItem(TIMER_KEY);
+    s = raw ? JSON.parse(raw) : null;
+  } catch (e) { return; }
+  if (!s || !s.total) return;
+
+  timerTotal = s.total;
+  timerFinished = !!s.finished;
+  syncTimerSelects(timerTotal);
+
+  if (s.running) {
+    if (s.endsAt - Date.now() > 0) {
+      timerRunning = true;
+      timerEndsAt = s.endsAt;
+      timerRemaining = liveRemaining();
+      document.getElementById('timerStartBtn').textContent = '⏸ หยุดชั่วคราว';
+      document.getElementById('timerLabel').textContent = 'กำลังนับถอยหลัง...';
+      runTimerTicker();
+      updateTimerDisplay();
+      return;
+    }
+    // เวลาหมดไปตอนที่แอปไม่ได้อยู่หน้าจอ
+    if (Date.now() - s.endsAt > TIMER_STALE_MS) { clearTimerState(); timerTotal = 0; return; }
+    finishTimer();
+    return;
+  }
+
+  timerRemaining = s.remaining || 0;
+  if (timerRemaining <= 0) { clearTimerState(); timerTotal = 0; return; }
+  document.getElementById('timerStartBtn').textContent = '▶ ต่อ';
+  document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
+  updateTimerDisplay();
+}
+
+// กลับมาหน้าจอ = เทียบนาฬิกาใหม่ทันที เผื่อ ticker ถูกแช่แข็งไว้ตอนอยู่เบื้องหลัง
+function resyncTimerFromClock() {
+  if (!timerRunning) return;
+  runTimerTicker();
+  syncTimer();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') resyncTimerFromClock();
+});
+window.addEventListener('pageshow', resyncTimerFromClock);
 
 function updateTimerDisplay() {
   const h = Math.floor(timerRemaining / 3600);
@@ -1808,6 +1924,7 @@ generateIcons();
 renderDashboard();
 renderCalendar();
 requestNotificationPermission();
+restoreTimer();
 initSupabaseSync();
 
 document.getElementById('moduleSelect').addEventListener('change', (e) => {
