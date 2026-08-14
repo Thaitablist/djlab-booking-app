@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8232c">
+<title>DJ LAB SIAM — สรุปรายรับ/รายจ่ายประจำวัน</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --surface2: #efefef;
+    --accent: #c8232c;
+    --accent2: #e03040;
+    --gold: #b8860b;
+    --text: #111111;
+    --text2: #555555;
+    --border: #dedede;
+    --green: #1a8f4a;
+    --orange: #c47a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .header {
+    background: #111111;
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 10px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-box {
+    background: var(--accent);
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .module-select {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 2px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .module-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .module-select option { color: #111111; background: #ffffff; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .header-link, .header-link-btn {
+    font-size: 14px;
+    color: #cccccc;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 0;
+  }
+  .header-link:hover, .header-link-btn:hover { color: #ffffff; }
+
+  .page { padding: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
+  .form-input option { background: #ffffff; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: center;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: #f0f0f0; color: #111111; border: 1.5px solid var(--border); }
+  .btn-danger { background: var(--accent); color: white; }
+  .btn-sm { display: inline-block; width: auto; padding: 8px 14px; font-size: 14px; border-radius: 8px; margin: 2px 4px 2px 0; }
+
+  .stat-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1;
+    min-width: 110px;
+    background: #111111;
+    border: 1px solid #222222;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-value { font-size: 20px; font-weight: 900; color: var(--accent); }
+  .stat-label { font-size: 14px; color: #aaaaaa; margin-top: 4px; }
+  .stat-card.negative .stat-value { color: var(--accent2); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--accent);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; color: var(--text2); font-size: 26px; cursor: pointer; margin-top: -6px; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #111111;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    border-left: 3px solid var(--accent);
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .alert-red { background: rgba(200,35,44,0.06); border-color: var(--accent); color: var(--accent); }
+  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: #8a6508; }
+  .alert-green { background: rgba(26,143,74,0.08); border-color: var(--green); color: var(--green); }
+
+  .empty { text-align: center; padding: 24px 12px; color: var(--text2); }
+  .empty-icon { font-size: 28px; margin-bottom: 8px; }
+  .empty-text { font-size: 14px; }
+
+  .table-scroll { width: 100%; overflow-x: auto; }
+  .report-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+  .report-table th, .report-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .report-table th { font-size: 14px; color: var(--text2); font-weight: 700; white-space: nowrap; }
+  .report-table td.amount, .report-table th.amount { text-align: right; white-space: nowrap; }
+  .report-table tfoot td { border-top: 2px solid var(--text); border-bottom: none; font-weight: 900; padding-top: 10px; }
+
+  .payment-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .payment-row:last-child { border-bottom: none; }
+
+  .print-only { display: none; }
+  .print-header-shop { text-align: center; font-weight: 900; font-size: 20px; margin-bottom: 4px; }
+  .print-header-date { text-align: center; font-size: 15px; margin-bottom: 18px; color: var(--text2); }
+
+  @media print {
+    .no-print { display: none !important; }
+    .modal-overlay { display: none !important; }
+    .print-only { display: block !important; }
+    body { max-width: 100%; padding-bottom: 0; }
+    .header { position: static; }
+    .card { box-shadow: none; border: 1px solid #999999; break-inside: avoid; }
+    .report-table { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="loginOverlay" style="display:flex;align-items:center;">
+  <div class="modal" style="border-radius:16px;max-width:340px;border-top:none;">
+    <div class="modal-title" style="text-align:center;">🔒 เข้าสู่ระบบทีมงาน</div>
+    <div class="form-group">
+      <label class="form-label">อีเมล</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="staff@djlabsiam.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รหัสผ่าน</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+    </div>
+    <div class="alert alert-red" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="header no-print">
+  <div class="logo">
+    <div class="logo-box">DJ LAB</div>
+    <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
+      <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
+      <option value="stock.html">สต็อกสินค้า</option>
+      <option value="sales.html">ขายสินค้า</option>
+      <option value="customers.html">ข้อมูลลูกค้า</option>
+      <option value="activity.html">บันทึกการใช้งาน</option>
+      <option value="daily.html" selected>สรุปรายวัน</option>
+    </select>
+  </div>
+  <div class="header-right">
+    <button class="header-link-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="print-only">
+    <div class="print-header-shop">DJ LAB SIAM</div>
+    <div class="print-header-date">รายงานสรุปรายรับ-รายจ่ายประจำวันที่ <span id="printDateLabel"></span></div>
+  </div>
+
+  <div class="card no-print">
+    <div class="card-title">เลือกวันที่</div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <input type="date" id="reportDate" class="form-input">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" style="flex:1;" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="downloadCsv()">⬇️ ดาวน์โหลด CSV</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">รายรับ</div>
+    <button class="btn btn-primary no-print" style="margin-bottom:12px;" onclick="openIncomeModal(null)">+ เพิ่มรายรับ</button>
+    <div class="table-scroll">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>เวลา</th>
+            <th>ที่มา</th>
+            <th>รายละเอียด</th>
+            <th>วิธีชำระ</th>
+            <th class="amount">จำนวนเงิน</th>
+            <th class="no-print">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="incomeTableBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" style="text-align:right;">รวมรายรับ</td>
+            <td class="amount" id="incomeTotal">0.00</td>
+            <td class="no-print"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">รายจ่าย</div>
+    <button class="btn btn-primary no-print" style="margin-bottom:12px;" onclick="openExpenseModal(null)">+ เพิ่มรายจ่าย</button>
+    <div class="table-scroll">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>ลำดับ</th>
+            <th>รายการ</th>
+            <th>หมวด</th>
+            <th class="amount">จำนวนเงิน</th>
+            <th class="no-print">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTableBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="text-align:right;">รวมรายจ่าย</td>
+            <td class="amount" id="expenseTotal">0.00</td>
+            <td class="no-print"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">สรุปประจำวัน</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="sumIncome">0.00</div>
+        <div class="stat-label">รายรับรวม</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="sumExpense">0.00</div>
+        <div class="stat-label">รายจ่ายรวม</div>
+      </div>
+      <div class="stat-card" id="sumNetCard">
+        <div class="stat-value" id="sumNet">0.00</div>
+        <div class="stat-label">คงเหลือสุทธิ</div>
+      </div>
+    </div>
+    <div class="card-title" style="margin-top:6px;">แยกรายรับตามวิธีชำระเงิน</div>
+    <div id="paymentBreakdown"></div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="incomeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeIncomeModal()">×</button>
+    <div class="modal-title" id="incomeModalTitle">เพิ่มรายรับ</div>
+    <div class="form-group">
+      <label class="form-label">ที่มา *</label>
+      <input type="text" id="ifSource" class="form-input" placeholder="เช่น สมัครเรียน, อื่นๆ">
+    </div>
+    <div class="form-group">
+      <label class="form-label">รายละเอียด *</label>
+      <input type="text" id="ifDescription" class="form-input" placeholder="รายละเอียดรายรับ">
+    </div>
+    <div class="form-group">
+      <label class="form-label">จำนวนเงิน (บาท) *</label>
+      <input type="number" id="ifAmount" class="form-input" min="0" step="0.01" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">วิธีชำระ</label>
+      <select id="ifPaymentMethod" class="form-input">
+        <option value="">ไม่ระบุ</option>
+        <option value="เงินสด">เงินสด</option>
+        <option value="โอน">โอน</option>
+        <option value="บัตรเครดิต">บัตรเครดิต</option>
+        <option value="อื่นๆ">อื่นๆ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">เวลา *</label>
+      <input type="datetime-local" id="ifReceivedAt" class="form-input">
+    </div>
+    <button class="btn btn-primary" id="incomeSaveBtn" onclick="saveIncome()">บันทึกรายรับ</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="expenseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeExpenseModal()">×</button>
+    <div class="modal-title" id="expenseModalTitle">เพิ่มรายจ่าย</div>
+    <div class="form-group">
+      <label class="form-label">รายการ *</label>
+      <input type="text" id="efDescription" class="form-input" placeholder="รายละเอียดรายจ่าย">
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมวด</label>
+      <input type="text" id="efCategory" class="form-input" list="expenseCategoryList" placeholder="เลือกหมวด หรือพิมพ์เอง">
+      <datalist id="expenseCategoryList">
+        <option value="ค่าของเข้าร้าน">
+        <option value="ค่าเช่า">
+        <option value="เงินเดือน">
+        <option value="ค่าน้ำค่าไฟ">
+        <option value="ค่าการตลาด">
+        <option value="อื่นๆ">
+      </datalist>
+    </div>
+    <div class="form-group">
+      <label class="form-label">จำนวนเงิน (บาท) *</label>
+      <input type="number" id="efAmount" class="form-input" min="0" step="0.01" placeholder="0">
+    </div>
+    <button class="btn btn-primary" id="expenseSaveBtn" onclick="saveExpense()">บันทึกรายจ่าย</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDeleteModal()">×</button>
+    <div class="modal-title">ยืนยันการลบ</div>
+    <div class="alert alert-red" id="deleteModalMsg"></div>
+    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">ยืนยันลบรายการนี้</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="closeDeleteModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<div class="toast no-print" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+function showFatalError(msg) {
+  let box = document.getElementById('fatalError');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'fatalError';
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+      'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
+      'word-break:break-word;max-height:45vh;overflow:auto;';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
+      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+  let text = box.querySelector('.msg');
+  if (!text) {
+    text = document.createElement('div');
+    text.className = 'msg';
+    text.style.paddingRight = '28px';
+    box.appendChild(text);
+  }
+  text.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', e => {
+  showFatalError(e.message + (e.filename ? '\n' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  showFatalError('Promise: ' + (r && r.message ? r.message : String(r)));
+});
+
+const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
+
+if (!window.supabase || !window.supabase.createClient) {
+  showFatalError('โหลดไลบรารี Supabase ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วเปิดใหม่');
+}
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentAdmin = null;
+let currentUserId = null;
+let incomeRows = [];
+let expenseRows = [];
+let totalIncome = 0;
+let totalExpense = 0;
+let editingIncomeId = null;
+let editingExpenseId = null;
+let deleteTarget = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatMoney(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '0.00';
+  return v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatTimeThai(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function formatDateThaiLong(dateStr) {
+  const parts = dateStr.split('-').map(Number);
+  const y = parts[0], m = parts[1], d = parts[2];
+  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  return d + ' ' + months[m - 1] + ' ' + (y + 543);
+}
+
+// วันที่ "วันนี้" อ้างอิงเวลาไทยเสมอ ไม่ใช่เวลาเครื่อง/เบราว์เซอร์
+function todayBangkok() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+}
+
+// แปลงวันที่ (เช่น 2569-08-14 แบบ ค.ศ. 2026-08-14) เป็นช่วงเวลา UTC ที่ตรงกับ
+// เที่ยงคืนถึงเที่ยงคืนของวันนั้นตามเวลาไทย (+07:00) — ใช้กรองรายรับตามวันจริง
+// ไม่ใช่วันที่ตัด ณ เที่ยงคืน UTC ซึ่งจะคลาดเคลื่อนจากวันไทย 7 ชั่วโมง
+function dayRangeUtc(dateStr) {
+  const start = new Date(dateStr + 'T00:00:00+07:00');
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+
+function toDatetimeLocalValue(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function getSelectedDate() {
+  return document.getElementById('reportDate').value;
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    errBox.style.display = '';
+    return;
+  }
+  document.getElementById('loginBtn').disabled = true;
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message);
+    document.getElementById('loginBtn').disabled = false;
+    return;
+  }
+  if (error) {
+    console.error('[Login]', error);
+    const code = error.code || '';
+    if (code === 'email_not_confirmed') {
+      errBox.textContent = 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล — แจ้งผู้ดูแลระบบให้ยืนยันบัญชีให้ก่อน';
+    } else if (code === 'invalid_credentials') {
+      errBox.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    } else {
+      errBox.textContent = 'เข้าสู่ระบบไม่สำเร็จ: ' + error.message;
+    }
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+  }
+}
+
+function doLogout() {
+  db.auth.signOut();
+}
+
+async function handleAuthState(session) {
+  if (!session) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    currentAdmin = null;
+    currentUserId = null;
+    return;
+  }
+
+  const { data: adminRow, error: adminErr } = await db
+    .from('admins').select('id, full_name, role, is_active').eq('id', session.user.id).maybeSingle();
+
+  if (adminErr) {
+    console.error('[Load admin row]', adminErr);
+    showFatalError('ตรวจสอบสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + adminErr.message);
+    return;
+  }
+
+  if (!adminRow || !adminRow.is_active) {
+    const errBox = document.getElementById('loginError');
+    errBox.textContent = 'บัญชีนี้ยังไม่ได้รับสิทธิ์เข้าใช้งาน — แจ้งผู้ดูแลระบบให้เพิ่มสิทธิ์ก่อน';
+    errBox.style.display = '';
+    document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginOverlay').style.display = 'flex';
+    await db.auth.signOut();
+    return;
+  }
+
+  currentAdmin = adminRow;
+  currentUserId = session.user.id;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loginBtn').disabled = false;
+
+  loadAll();
+}
+
+async function initSupabaseSync() {
+  const { data: { session } } = await db.auth.getSession();
+  handleAuthState(session);
+
+  db.auth.onAuthStateChange((_event, session) => {
+    handleAuthState(session);
+  });
+
+  db.channel('daily-income-entries')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'income_entries' }, () => loadAll())
+    .subscribe();
+
+  db.channel('daily-expenses')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => loadAll())
+    .subscribe();
+}
+
+async function loadIncome(dateStr) {
+  const { startIso, endIso } = dayRangeUtc(dateStr);
+  const { data, error } = await db.from('v_daily_income')
+    .select('*')
+    .gte('occurred_at', startIso)
+    .lt('occurred_at', endIso)
+    .order('occurred_at', { ascending: true });
+  if (error) {
+    console.error('[Load income]', error);
+    showToast('⚠️ โหลดรายรับไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  incomeRows = data || [];
+}
+
+async function loadExpenses(dateStr) {
+  const { data, error } = await db.from('expenses')
+    .select('*')
+    .eq('spent_on', dateStr)
+    .order('seq', { ascending: true });
+  if (error) {
+    console.error('[Load expenses]', error);
+    showToast('⚠️ โหลดรายจ่ายไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  expenseRows = data || [];
+}
+
+async function loadAll() {
+  const dateStr = getSelectedDate();
+  document.getElementById('printDateLabel').textContent = formatDateThaiLong(dateStr);
+  await Promise.all([loadIncome(dateStr), loadExpenses(dateStr)]);
+  renderAll();
+}
+
+function renderAll() {
+  renderIncomeTable();
+  renderExpenseTable();
+  renderSummary();
+}
+
+function renderIncomeTable() {
+  const tbody = document.getElementById('incomeTableBody');
+  totalIncome = incomeRows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+  document.getElementById('incomeTotal').textContent = formatMoney(totalIncome);
+
+  if (!incomeRows.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">💰</div>' +
+      '<div class="empty-text">ยังไม่มีรายรับในวันนี้</div></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = incomeRows.map(r => {
+    const actions = r.kind === 'manual'
+      ? '<button class="btn btn-secondary btn-sm" onclick="openIncomeModal(\'' + r.ref_id + '\')">แก้ไข</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="openDeleteConfirm(\'income\',\'' + r.ref_id + '\')">ลบ</button>'
+      : '';
+    return '<tr>' +
+      '<td>' + formatTimeThai(r.occurred_at) + '</td>' +
+      '<td>' + escapeHtml(r.source) + '</td>' +
+      '<td>' + escapeHtml(r.detail) + '</td>' +
+      '<td>' + escapeHtml(r.payment_method || '-') + '</td>' +
+      '<td class="amount">' + formatMoney(r.amount) + '</td>' +
+      '<td class="no-print">' + actions + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function renderExpenseTable() {
+  const tbody = document.getElementById('expenseTableBody');
+  totalExpense = expenseRows.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  document.getElementById('expenseTotal').textContent = formatMoney(totalExpense);
+
+  if (!expenseRows.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-icon">🧾</div>' +
+      '<div class="empty-text">ยังไม่มีรายจ่ายในวันนี้</div></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = expenseRows.map(e => {
+    return '<tr>' +
+      '<td>' + e.seq + '</td>' +
+      '<td>' + escapeHtml(e.description) + '</td>' +
+      '<td>' + escapeHtml(e.category || '-') + '</td>' +
+      '<td class="amount">' + formatMoney(e.amount) + '</td>' +
+      '<td class="no-print">' +
+        '<button class="btn btn-secondary btn-sm" onclick="openExpenseModal(\'' + e.id + '\')">แก้ไข</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="openDeleteConfirm(\'expense\',\'' + e.id + '\')">ลบ</button>' +
+      '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function renderSummary() {
+  const net = totalIncome - totalExpense;
+  document.getElementById('sumIncome').textContent = formatMoney(totalIncome);
+  document.getElementById('sumExpense').textContent = formatMoney(totalExpense);
+  document.getElementById('sumNet').textContent = formatMoney(net);
+  document.getElementById('sumNetCard').classList.toggle('negative', net < 0);
+  renderPaymentBreakdown();
+}
+
+function renderPaymentBreakdown() {
+  const labels = ['เงินสด', 'โอน', 'บัตรเครดิต', 'อื่นๆ', 'ไม่ระบุ'];
+  const buckets = { 'เงินสด': 0, 'โอน': 0, 'บัตรเครดิต': 0, 'อื่นๆ': 0, 'ไม่ระบุ': 0 };
+  incomeRows.forEach(r => {
+    const pm = (r.payment_method || '').trim();
+    if (!pm) { buckets['ไม่ระบุ'] += parseFloat(r.amount) || 0; }
+    else if (buckets.hasOwnProperty(pm)) { buckets[pm] += parseFloat(r.amount) || 0; }
+    else { buckets['อื่นๆ'] += parseFloat(r.amount) || 0; }
+  });
+  document.getElementById('paymentBreakdown').innerHTML = labels.map(l =>
+    '<div class="payment-row"><span>' + escapeHtml(l) + '</span><span>' + formatMoney(buckets[l]) + ' บาท</span></div>'
+  ).join('');
+}
+
+// ============================
+// รายรับ (income_entries) — เพิ่ม/แก้ไข
+// ============================
+function openIncomeModal(id) {
+  editingIncomeId = id;
+  const title = document.getElementById('incomeModalTitle');
+
+  if (id) {
+    const row = incomeRows.find(r => r.ref_id === id && r.kind === 'manual');
+    if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
+    title.textContent = 'แก้ไขรายรับ';
+    document.getElementById('ifSource').value = row.source || '';
+    document.getElementById('ifDescription').value = row.detail || '';
+    document.getElementById('ifAmount').value = row.amount;
+    document.getElementById('ifPaymentMethod').value = row.payment_method || '';
+    document.getElementById('ifReceivedAt').value = toDatetimeLocalValue(row.occurred_at);
+  } else {
+    title.textContent = 'เพิ่มรายรับ';
+    document.getElementById('ifSource').value = '';
+    document.getElementById('ifDescription').value = '';
+    document.getElementById('ifAmount').value = '';
+    document.getElementById('ifPaymentMethod').value = '';
+    document.getElementById('ifReceivedAt').value = toDatetimeLocalValue(new Date().toISOString());
+  }
+
+  document.getElementById('incomeModal').classList.add('open');
+}
+
+function closeIncomeModal() {
+  document.getElementById('incomeModal').classList.remove('open');
+  editingIncomeId = null;
+}
+document.getElementById('incomeModal').addEventListener('click', function (e) {
+  if (e.target === this) closeIncomeModal();
+});
+
+async function saveIncome() {
+  const source = document.getElementById('ifSource').value.trim();
+  const description = document.getElementById('ifDescription').value.trim();
+  const amountRaw = document.getElementById('ifAmount').value;
+  const paymentMethod = document.getElementById('ifPaymentMethod').value || null;
+  const receivedAtRaw = document.getElementById('ifReceivedAt').value;
+
+  if (!source) { showToast('⚠️ กรุณากรอกที่มา'); return; }
+  if (!description) { showToast('⚠️ กรุณากรอกรายละเอียด'); return; }
+  const amount = parseFloat(amountRaw);
+  if (isNaN(amount) || amount < 0) { showToast('⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง'); return; }
+  if (!receivedAtRaw) { showToast('⚠️ กรุณาระบุเวลา'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+
+  const receivedAtIso = new Date(receivedAtRaw).toISOString();
+  const btn = document.getElementById('incomeSaveBtn');
+  btn.disabled = true;
+
+  let error;
+  if (editingIncomeId) {
+    ({ error } = await db.from('income_entries').update({
+      source, description, amount, payment_method: paymentMethod,
+      received_at: receivedAtIso, updated_at: new Date().toISOString(),
+    }).eq('id', editingIncomeId));
+  } else {
+    ({ error } = await db.from('income_entries').insert({
+      source, description, amount, payment_method: paymentMethod,
+      received_at: receivedAtIso, admin_id: currentUserId,
+    }));
+  }
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Save income]', error);
+    showToast('⚠️ บันทึกรายรับไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeIncomeModal();
+  showToast(editingIncomeId ? '✅ แก้ไขรายรับเรียบร้อยแล้ว' : '✅ เพิ่มรายรับเรียบร้อยแล้ว');
+  loadAll();
+}
+
+// ============================
+// รายจ่าย (expenses) — เพิ่ม/แก้ไข
+// ============================
+function openExpenseModal(id) {
+  editingExpenseId = id;
+  const title = document.getElementById('expenseModalTitle');
+
+  if (id) {
+    const row = expenseRows.find(r => r.id === id);
+    if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
+    title.textContent = 'แก้ไขรายจ่าย';
+    document.getElementById('efDescription').value = row.description || '';
+    document.getElementById('efCategory').value = row.category || '';
+    document.getElementById('efAmount').value = row.amount;
+  } else {
+    title.textContent = 'เพิ่มรายจ่าย';
+    document.getElementById('efDescription').value = '';
+    document.getElementById('efCategory').value = '';
+    document.getElementById('efAmount').value = '';
+  }
+
+  document.getElementById('expenseModal').classList.add('open');
+}
+
+function closeExpenseModal() {
+  document.getElementById('expenseModal').classList.remove('open');
+  editingExpenseId = null;
+}
+document.getElementById('expenseModal').addEventListener('click', function (e) {
+  if (e.target === this) closeExpenseModal();
+});
+
+async function saveExpense() {
+  const description = document.getElementById('efDescription').value.trim();
+  const category = document.getElementById('efCategory').value.trim() || null;
+  const amountRaw = document.getElementById('efAmount').value;
+
+  if (!description) { showToast('⚠️ กรุณากรอกรายการ'); return; }
+  const amount = parseFloat(amountRaw);
+  if (isNaN(amount) || amount < 0) { showToast('⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+
+  const btn = document.getElementById('expenseSaveBtn');
+  btn.disabled = true;
+
+  let error;
+  if (editingExpenseId) {
+    ({ error } = await db.from('expenses').update({
+      description, category, amount, updated_at: new Date().toISOString(),
+    }).eq('id', editingExpenseId));
+  } else {
+    // ลำดับใหม่ต่อท้ายรายการของวันที่กำลังดูอยู่โดยอัตโนมัติ
+    const nextSeq = expenseRows.reduce((max, e) => Math.max(max, e.seq || 0), 0) + 1;
+    ({ error } = await db.from('expenses').insert({
+      spent_on: getSelectedDate(), seq: nextSeq, description, category, amount, admin_id: currentUserId,
+    }));
+  }
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Save expense]', error);
+    showToast('⚠️ บันทึกรายจ่ายไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeExpenseModal();
+  showToast(editingExpenseId ? '✅ แก้ไขรายจ่ายเรียบร้อยแล้ว' : '✅ เพิ่มรายจ่ายเรียบร้อยแล้ว');
+  loadAll();
+}
+
+// ============================
+// ลบรายการ (ใช้ร่วมกันทั้งรายรับ/รายจ่าย)
+// ============================
+function openDeleteConfirm(type, id) {
+  deleteTarget = { type, id };
+  document.getElementById('deleteModalMsg').textContent = type === 'income'
+    ? 'กำลังจะลบรายการรายรับนี้ออกจากระบบถาวร ไม่สามารถย้อนกลับได้'
+    : 'กำลังจะลบรายการรายจ่ายนี้ออกจากระบบถาวร ไม่สามารถย้อนกลับได้';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteTarget = null;
+}
+document.getElementById('deleteModal').addEventListener('click', function (e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+async function confirmDelete() {
+  if (!deleteTarget) return;
+  const { type, id } = deleteTarget;
+  const table = type === 'income' ? 'income_entries' : 'expenses';
+
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  const { error } = await db.from(table).delete().eq('id', id);
+  btn.disabled = false;
+
+  if (error) {
+    console.error('[Delete ' + table + ']', error);
+    showToast('⚠️ ลบรายการไม่สำเร็จ: ' + error.message);
+    return;
+  }
+
+  closeDeleteModal();
+  showToast('✅ ลบรายการเรียบร้อยแล้ว');
+  loadAll();
+}
+
+// ============================
+// ดาวน์โหลด CSV
+// ============================
+function csvEscape(val) {
+  const s = (val === null || val === undefined) ? '' : String(val);
+  if (/[",\n]/.test(s)) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function downloadCsv() {
+  const dateStr = getSelectedDate();
+  const lines = [];
+
+  lines.push(['DJ LAB SIAM'].map(csvEscape).join(','));
+  lines.push(['รายงานสรุปรายรับ-รายจ่ายประจำวันที่ ' + formatDateThaiLong(dateStr)].map(csvEscape).join(','));
+  lines.push('');
+
+  lines.push(['รายรับ'].map(csvEscape).join(','));
+  lines.push(['เวลา', 'ที่มา', 'รายละเอียด', 'วิธีชำระ', 'จำนวนเงิน'].map(csvEscape).join(','));
+  incomeRows.forEach(r => {
+    lines.push([
+      formatTimeThai(r.occurred_at), r.source, r.detail, r.payment_method || '', formatMoney(r.amount),
+    ].map(csvEscape).join(','));
+  });
+  lines.push(['', '', '', 'รวมรายรับ', formatMoney(totalIncome)].map(csvEscape).join(','));
+  lines.push('');
+
+  lines.push(['รายจ่าย'].map(csvEscape).join(','));
+  lines.push(['ลำดับ', 'รายการ', 'หมวด', 'จำนวนเงิน'].map(csvEscape).join(','));
+  expenseRows.forEach(e => {
+    lines.push([e.seq, e.description, e.category || '', formatMoney(e.amount)].map(csvEscape).join(','));
+  });
+  lines.push(['', '', 'รวมรายจ่าย', formatMoney(totalExpense)].map(csvEscape).join(','));
+  lines.push('');
+
+  lines.push(['สรุปประจำวัน'].map(csvEscape).join(','));
+  lines.push(['รายรับรวม', formatMoney(totalIncome)].map(csvEscape).join(','));
+  lines.push(['รายจ่ายรวม', formatMoney(totalExpense)].map(csvEscape).join(','));
+  lines.push(['คงเหลือสุทธิ', formatMoney(totalIncome - totalExpense)].map(csvEscape).join(','));
+
+  // ต้องขึ้นต้นด้วย BOM ไม่งั้นภาษาไทยเพี้ยนตอนเปิดใน Excel
+  const csvContent = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'djlab-daily-' + dateStr + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('moduleSelect').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
+
+document.getElementById('reportDate').value = todayBangkok();
+document.getElementById('reportDate').addEventListener('change', loadAll);
+
+initSupabaseSync();
+</script>
+</body>
+</html>
