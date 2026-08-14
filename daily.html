@@ -655,6 +655,16 @@ async function initSupabaseSync() {
   db.channel('daily-expenses')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => loadAll())
     .subscribe();
+
+  // รายรับอีกสองทางที่ไม่ได้กรอกจากหน้านี้ — subscribe ตารางต้นทางโดยตรง
+  // เพราะ realtime ส่งเฉพาะการเปลี่ยนแปลงของตาราง ไม่ส่งของ view
+  db.channel('daily-sales')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => loadAll())
+    .subscribe();
+
+  db.channel('daily-room-bookings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_bookings' }, () => loadAll())
+    .subscribe();
 }
 
 async function loadIncome(dateStr) {
