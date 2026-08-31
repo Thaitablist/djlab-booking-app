@@ -1478,11 +1478,16 @@ function wedgeChar(e) {
   let m;
   const c = e.code;
   if ((m = c.match(/^(?:Digit|Numpad)(\d)$/))) return m[1];
-  if ((m = c.match(/^Key([A-Z])$/))) {
-    // ซีเรียลเป็นตัวพิมพ์ใหญ่ เครื่องยิงจึงกด Shift มาด้วย ส่วน CapsLock กลับด้าน
-    const upper = e.shiftKey !== e.getModifierState('CapsLock');
-    return upper ? m[1] : m[1].toLowerCase();
-  }
+  // ตัวอักษรคืนเป็นพิมพ์ใหญ่เสมอ ไม่ดู Shift ไม่ดู CapsLock
+  //
+  // ถ้าทำตามระบบปฏิบัติการตรง ๆ เครื่องที่เผลอเปิด Caps Lock ค้างไว้จะได้
+  // chmp123354nn แทน CHMP123354NN แล้วหาไม่เจอในฐานข้อมูล โดยไม่มีอะไรฟ้อง
+  // ว่าสาเหตุคือปุ่มเดียวบนคีย์บอร์ด — และมันจะพังเฉพาะบางเครื่องบางเวลา
+  //
+  // บาร์โค้ดของรุ่นเป็นตัวเลขล้วน ส่วนซีเรียลของ Pioneer/AlphaTheta เป็นตัว
+  // พิมพ์ใหญ่ทั้งหมด (CHMP123354NN, FCMP510073NN) จึงไม่มีอะไรเสียจากการบังคับ
+  // และได้ผลเหมือนกันทุกเครื่องไม่ว่าจะตั้งค่าคีย์บอร์ดไว้ยังไง
+  if ((m = c.match(/^Key([A-Z])$/))) return m[1];
   if (c === 'Minus'  || c === 'NumpadSubtract') return '-';
   if (c === 'Period' || c === 'NumpadDecimal')  return '.';
   if (c === 'Slash'  || c === 'NumpadDivide')   return '/';

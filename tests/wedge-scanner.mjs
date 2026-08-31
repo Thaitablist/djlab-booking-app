@@ -269,6 +269,31 @@ async function runTests() {
       !document.getElementById('scanModal').classList.contains('open'));
   }
 
+  // ── เครื่องปลายทางเปิด Caps Lock ค้างไว้ ต้องยังได้ค่าเดิม ─────────────
+  {
+    const s2 = spy();
+    clock += 5000;
+    const seq = [['KeyC',1],['KeyH',1],['KeyM',1],['KeyP',1],['Digit1',0],['Digit2',0],
+                 ['Digit3',0],['Digit3',0],['Digit5',0],['Digit4',0],['KeyN',1],['KeyN',1]];
+    seq.forEach(([code, sh], i) => {
+      if (i) clock += 6;
+      // จำลองเครื่องที่เปิด Caps Lock ค้าง: ระบบปฏิบัติการจะให้ตัวพิมพ์เล็กกลับมา
+      const ev = new KeyboardEvent('keydown', {
+        code, key: sh ? 'c' : thaiKeyFor(code), shiftKey: !!sh,
+        modifierCapsLock: true, bubbles: true, cancelable: true,
+      });
+      Object.defineProperty(ev, 'getModifierState', { value: k => k === 'CapsLock' });
+      document.dispatchEvent(ev);
+    });
+    clock += 6;
+    press('Enter', { key: 'Enter' });
+    await 0;
+    ok('เปิด Caps Lock ค้างไว้ก็ยังได้ซีเรียลตัวเดิม',
+      s2.calls.length === 1 && s2.calls[0].code === 'CHMP123354NN',
+      JSON.stringify(s2.calls));
+    s2.restore();
+  }
+
   // ── 11-13. เส้นทางกล้องต้องไม่ถูกกระทบเลย ─────────────────────────────
   {
     ok('ปุ่มเปิดกล้องยังอยู่ครบทุกจุด',
