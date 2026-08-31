@@ -8,23 +8,11 @@
  * (event.code, ลำดับ capture, defaultPrevented) ซึ่งจำลองด้วย node ไม่ได้
  */
 
-import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runPage, HARNESS } from './lib/page-test.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-
-const html = readFileSync(join(root, 'stock.html'), 'utf8');
-
-const SUPABASE_TAG = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
-const ZXING_TAG = '<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>';
-if (!html.includes(SUPABASE_TAG)) {
-  console.error('หาแท็ก Supabase ไม่เจอ — แท็กในไฟล์จริงเปลี่ยนไปแล้ว เทสต์นี้จะไม่ได้ทดสอบอะไรเลย');
-  process.exit(1);
-}
 
 const MOCK = `<script>
 // ---- Supabase ตัวปลอม พอให้หน้าเว็บเริ่มทำงานได้โดยไม่ต่อเน็ต ----
@@ -70,60 +58,7 @@ window.supabase = {
 
 const TESTS = `<script>
 window.addEventListener('load', () => setTimeout(runTests, 300));
-
-let pass = 0, fail = 0;
-const L = m => console.log('[WEDGE] ' + m);
-function ok(name, cond, extra) {
-  if (cond) { pass++; L('[PASS] ' + name); }
-  else { fail++; L('[FAIL] ' + name + (extra ? ' — ' + extra : '')); }
-}
-
-// นาฬิกาปลอม คุมช่องไฟระหว่างปุ่มได้แม่น ๆ
-let clock = 100000;
-performance.now = () => clock;
-
-// แป้นภาษาไทย: ปุ่มเดียวกันให้ตัวอักษรคนละตัว ตารางนี้เอาไว้ปลอมให้เหมือนของจริง
-const THAI = { Digit1:'ๅ', Digit2:'/', Digit3:'-', Digit4:'ภ', Digit5:'ถ', Digit6:'ุ',
-               Digit7:'ึ', Digit8:'ค', Digit9:'ต', Digit0:'จ' };
-function thaiKeyFor(code) { return THAI[code] || 'ก'; }
-
-function press(code, opts) {
-  opts = opts || {};
-  const target = opts.target || document;
-  const ev = new KeyboardEvent('keydown', {
-    code,
-    key: opts.key !== undefined ? opts.key : thaiKeyFor(code),
-    shiftKey: !!opts.shiftKey,
-    bubbles: true, cancelable: true,
-  });
-  target.dispatchEvent(ev);
-  return ev;
-}
-
-// ยิงชุดหนึ่งครั้ง: ตัวอักษรห่างกัน gap ms แล้วปิดท้ายด้วย Enter
-function burst(codes, opts) {
-  opts = opts || {};
-  const gap = opts.gap === undefined ? 6 : opts.gap;
-  clock += 5000;                       // เว้นให้ห่างจากชุดก่อนหน้า
-  const events = [];
-  codes.forEach((c, i) => {
-    if (i) clock += gap;
-    events.push(press(c.code || c, { target: opts.target, shiftKey: c.shiftKey, key: c.key }));
-    if (c.shiftKey) { /* Shift มาก่อนตัวอักษรจริง จำลองแยกด้านล่าง */ }
-  });
-  clock += gap;
-  const enter = press('Enter', { target: opts.target, key: 'Enter' });
-  return { events, enter };
-}
-
-const digits = s => s.split('').map(d => 'Digit' + d);
-
-function spy() {
-  const calls = [];
-  const original = window.onScanned;
-  window.onScanned = async (code, viaGun) => { calls.push({ code, viaGun }); };
-  return { calls, restore: () => { window.onScanned = original; } };
-}
+${HARNESS}
 
 async function runTests() {
   L('=== เครื่องยิงบาร์โค้ดในหน้าสต็อก ===');
@@ -131,7 +66,7 @@ async function runTests() {
   // ── 1. ยิงบาร์โค้ดตัวเลข ขณะแป้นเป็นภาษาไทย ────────────────────────────
   {
     const s = spy();
-    const { enter } = burst(digits('619659216054'));
+    const enter = burst(digits('619659216054'));
     await 0;
     ok('อ่านบาร์โค้ดได้ถูกทั้งที่แป้นเป็นภาษาไทย',
       s.calls.length === 1 && s.calls[0].code === '619659216054',
@@ -165,7 +100,7 @@ async function runTests() {
   // ── 3. คนพิมพ์ปกติ ต้องไม่โดนจับเป็นการยิง ─────────────────────────────
   {
     const s = spy();
-    const { enter } = burst(digits('12345678'), { gap: 120 });
+    const enter = burst(digits('12345678'), { gap: 120 });
     await 0;
     ok('คนพิมพ์ช้า ๆ แล้วกด Enter ไม่ถือเป็นการยิง', s.calls.length === 0, JSON.stringify(s.calls));
     ok('Enter ของคนยังทำงานตามปกติ', !enter.defaultPrevented);
@@ -175,7 +110,7 @@ async function runTests() {
   // ── 4. ชุดสั้นเกินกว่าจะเป็นบาร์โค้ด ───────────────────────────────────
   {
     const s = spy();
-    const { enter } = burst(digits('1234'));
+    const enter = burst(digits('1234'));
     await 0;
     ok('ยิงมาสั้นเกิน 6 ตัว ไม่ถือเป็นบาร์โค้ด', s.calls.length === 0);
     ok('Enter ยังส่งต่อให้หน้าเว็บตามปกติ', !enter.defaultPrevented);
@@ -337,36 +272,5 @@ async function runTests() {
 }
 </script>`;
 
-const patched = html
-  .replace(SUPABASE_TAG, MOCK)
-  .replace(ZXING_TAG, '')
-  .replace('</body>', TESTS + '\n</body>');
-
-const dir = mkdtempSync(join(tmpdir(), 'djlab-wedge-'));
-const file = join(dir, 'stock.under-test.html');
-writeFileSync(file, patched);
-
-const r = spawnSync(CHROME, [
-  '--headless', '--disable-gpu', '--no-sandbox',
-  '--enable-logging=stderr', '--v=1',
-  '--virtual-time-budget=15000',
-  '--dump-dom', 'file://' + file,
-], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-
-const lines = (r.stderr || '').split('\n').filter(l => l.includes('[WEDGE]'));
-for (const l of lines) {
-  const m = l.match(/\[WEDGE\] (.*?)"?,\s*source:/) || l.match(/\[WEDGE\] (.*)$/);
-  console.log('  ' + (m ? m[1].replace(/"$/, '') : l));
-}
-
-const errors = (r.stderr || '').split('\n')
-  .filter(l => /Uncaught|SyntaxError/.test(l));
-if (errors.length) {
-  console.log('\nมี error ในหน้าเว็บ:');
-  errors.slice(0, 5).forEach(l => console.log('  ' + l));
-}
-
-const ran = lines.some(l => l.includes('RESULT:'));
-const okRun = lines.some(l => l.includes('RESULT:PASS'));
-if (!ran) console.log('\nเทสต์ไม่ได้รันจนจบ (ไม่พบบรรทัดสรุป) — น่าจะพังตั้งแต่โหลดหน้า');
-process.exit(okRun && !errors.length ? 0 : 1);
+const res = runPage({ root, file: 'stock.html', mock: MOCK, tests: TESTS });
+process.exit(res.ok ? 0 : 1);

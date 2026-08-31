@@ -399,6 +399,7 @@
       <input type="text" id="productSearch" class="form-input" placeholder="ค้นหาด้วยชื่อ / SKU / บาร์โค้ด" autocomplete="off">
     </div>
     <button class="btn btn-secondary" onclick="openScanner('cart')" style="margin-bottom:10px;">📷 ยิงบาร์โค้ดเข้าตะกร้า</button>
+    <div style="font-size:14px;color:var(--gray);margin-bottom:10px;">มีเครื่องยิงบาร์โค้ดเสียบอยู่ ยิงเข้าตะกร้าได้เลย ไม่ต้องกดปุ่มนี้ก่อน</div>
     <div id="productSearchResults"></div>
   </div>
 
@@ -1485,6 +1486,9 @@ async function scanTick() {
 let lastScanValue = '', lastScanAt = 0;
 
 function rearmScanner(hint) {
+  // ยิงมาจากเครื่องยิงสาย (ไม่ได้เปิดกล้อง) ข้อความบนกรอบกล้องจะไม่มีใครเห็น
+  // ต้องเด้ง toast แทน ไม่งั้นกลายเป็น "ยิงแล้วไม่มีอะไรเกิดขึ้น"
+  if (!scanStream) { if (hint) showToast(hint); return; }
   if (hint) document.getElementById('scanHint').textContent = hint;
   // หน่วงสั้น ๆ ก่อนเปิดอ่านใหม่ ไม่งั้นกล้องยังจ่อใบเดิมอยู่จะอ่านซ้ำทันที
   setTimeout(() => {
@@ -1495,14 +1499,16 @@ function rearmScanner(hint) {
 }
 
 // สแกนหาสินค้าเข้าตะกร้าแบบยิงต่อเนื่อง — ไม่ปิดกล่องเองหลังยิงติด เพื่อยิงชิ้นถัดไปได้ทันที
-async function onScanned(code) {
+async function onScanned(code, viaGun) {
   scanning = false;                        // หยุดทันที ไม่งั้นจะอ่านซ้ำรัว ๆ
   const value = String(code || '').trim();
   if (!value) { rearmScanner(); return; }
 
   // กันอ่านใบเดิมซ้ำตอนยิงต่อเนื่อง — คนยังถือกล้องจ่อกล่องเดิมอยู่
+  // เครื่องยิงสายไม่มีปัญหานี้ กว่าจะได้ค่าซ้ำต้องเหนี่ยวไกใหม่ ถ้าไปกันไว้
+  // จะกลายเป็นขายของสองชิ้นที่เหมือนกันติด ๆ กันแล้วคิดเงินได้ชิ้นเดียว
   const now = performance.now();
-  if (value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
+  if (!viaGun && value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
   lastScanValue = value; lastScanAt = now;
 
   if (navigator.vibrate) navigator.vibrate(120);
@@ -1515,6 +1521,9 @@ async function onScanned(code) {
     if (found.viaSerial) {
       const msg = addUnitToCart(found.product, found.unit);
       if (msg) {
+        // ยิงด้วยเครื่องยิงสาย: บอกด้วย toast แล้วยิงชิ้นถัดไปต่อได้เลย
+        // ถ้าเปิดกล่องขึ้นมาขวางทุกครั้ง หน้าเคาน์เตอร์จะคิดเงินไม่ทัน
+        if (!scanStream) { showToast('⚠️ ' + msg); return; }
         // ยิงซ้ำหรือเครื่องนี้ขายไปแล้ว — ต้องเห็นในกล่องสแกน ไม่ใช่แค่ toast ที่หายไปเอง
         document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
         document.getElementById('scanError').innerHTML =
@@ -1526,11 +1535,17 @@ async function onScanned(code) {
       // addToCart จัดการเพิ่มจำนวนเองถ้าสินค้านี้อยู่ในตะกร้าแล้ว (ไม่ทำให้เกิดบรรทัดซ้ำ) และขึ้น toast ชื่อสินค้าอยู่แล้ว
       addToCart(found.product.id);
     }
-    rearmScanner('เพิ่มแล้ว — ยิงชิ้นถัดไปได้เลย');
+    // addToCart / addUnitToCart เด้ง toast ชื่อสินค้าให้แล้ว ถ้าเติมข้อความทั่วไป
+    // ต่อท้ายจะไปทับของเดิมที่มีประโยชน์กว่า
+    rearmScanner(viaGun ? null : 'เพิ่มแล้ว — ยิงชิ้นถัดไปได้เลย');
     return;
   }
 
-  // อ่านได้แต่ไม่มีในระบบ — ต้องบอกผู้ใช้ตรง ๆ ในกล่องสแกน ห้ามเงียบ และห้ามปิดกล่องเอง
+  // อ่านได้แต่ไม่มีในระบบ — ต้องบอกผู้ใช้ตรง ๆ ห้ามเงียบ
+  if (!scanStream) {
+    showToast('⚠️ ไม่พบรหัส ' + value + ' ในระบบ — ตรวจว่าเป็นบาร์โค้ดของรุ่นหรือซีเรียลที่ถูกต้อง');
+    return;
+  }
   document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
   document.getElementById('scanError').innerHTML =
     '<div class="alert alert-gold" style="margin-top:12px;">ไม่พบรหัส <strong>' + escapeHtml(value) +
@@ -1566,6 +1581,120 @@ function toggleTorch() {
     .then(() => { document.getElementById('scanTorchBtn').textContent = torchOn ? 'ปิดไฟฉาย' : 'ไฟฉาย'; })
     .catch(() => showToast('⚠️ เครื่องนี้เปิดไฟฉายจากเว็บไม่ได้'));
 }
+
+// ===========================================================================
+// เครื่องยิงบาร์โค้ดแบบเสียบสาย (keyboard wedge)
+//
+// ⚠️ บล็อกนี้มีสองชุด: stock.html กับ sales.html — แก้ที่หนึ่งต้องแก้อีกที่ด้วย
+//    ไม่ได้แยกเป็นไฟล์ .js เพราะ service worker แคชไฟล์ที่ไม่ใช่ HTML แบบ
+//    cache-first เครื่องที่เคยโหลดไปแล้วจะค้างของเก่าจนกว่าจะขึ้นเลข CACHE_NAME
+//    ส่วน HTML เป็น network-first แก้แล้วขึ้นทันที
+//
+// เครื่องพวกนี้ไม่ใช่กล้อง มันปลอมตัวเป็นคีย์บอร์ดแล้วพิมพ์รหัสที่ยิงได้ลงใน
+// ช่องที่โฟกัสอยู่ ตามด้วย Enter — กล้องยังอยู่ครบ กดปุ่ม 📷 ใช้ได้เหมือนเดิม
+//
+// ⚠️ ต้องอ่านจาก event.code (ปุ่มจริงบนแป้น) ห้ามอ่าน event.key
+//    วัดกับเครื่อง TMS ของร้าน 31 ส.ค. 69 ตอนแป้นเป็นภาษาไทย: บาร์โค้ด
+//    619659216054 ออกมาเป็น ุๅตุถต/ๅุจถภ ถ้าอ่านตัวอักษรจะหาสินค้าไม่เจอ
+//    และพังเฉพาะตอนแป้นเป็นไทย ซึ่งคือเวลาส่วนใหญ่ที่หน้าร้านใช้จริง
+//
+// แยกจากคนพิมพ์ด้วยจังหวะ: เครื่องนี้เว้นช่องไฟเฉลี่ย 6ms สูงสุด 14ms
+// คนพิมพ์เร็วสุดยังห่างเกิน 60ms — เส้น 50ms จึงห่างทั้งสองฝั่ง
+// ===========================================================================
+const WEDGE_ENABLED = true;
+const WEDGE_MAX_GAP_MS = 50;
+const WEDGE_MIN_LENGTH = 6;
+
+let wedgeBuf = [];
+let wedgeSnapshot = null;
+
+function wedgeChar(e) {
+  let m;
+  const c = e.code;
+  if ((m = c.match(/^(?:Digit|Numpad)(\d)$/))) return m[1];
+  // ตัวอักษรคืนเป็นพิมพ์ใหญ่เสมอ ไม่ดู Shift ไม่ดู CapsLock — เครื่องที่เผลอ
+  // เปิด Caps Lock ค้างจะได้ chmp123354nn แทน CHMP123354NN แล้วหาไม่เจอ
+  // โดยไม่มีอะไรฟ้องว่าสาเหตุคือปุ่มเดียวบนคีย์บอร์ด
+  if ((m = c.match(/^Key([A-Z])$/))) return m[1];
+  if (c === 'Minus'  || c === 'NumpadSubtract') return '-';
+  if (c === 'Period' || c === 'NumpadDecimal')  return '.';
+  if (c === 'Slash'  || c === 'NumpadDivide')   return '/';
+  return null;
+}
+
+function wedgeSnap() {
+  const el = document.activeElement;
+  if (!el || typeof el.value !== 'string') return null;
+  return { el, value: el.value, start: el.selectionStart, end: el.selectionEnd };
+}
+
+// ระหว่างยิง ตัวอักษรหล่นลงช่องที่โฟกัสอยู่จริง (65ms ไม่มีใครทันเห็น) พอรู้แน่
+// ว่าเป็นการยิงค่อยคืนค่าเดิมทั้งก้อน การพิมพ์ปกติจึงไม่ถูกแตะเลย
+function wedgeRestore(s) {
+  if (!s || !s.el || !s.el.isConnected || s.el.value === s.value) return;
+  s.el.value = s.value;
+  try { s.el.setSelectionRange(s.start, s.end); } catch (err) { /* select ไม่มี selection */ }
+}
+
+// หน้าขายมีปลายทางเดียวคือตะกร้า แต่ต้องไม่ไปหยิบของใส่ตะกร้าลับหลังตอนที่คน
+// กำลังทำอย่างอื่นค้างอยู่ เช่นกรอกลูกค้าใหม่ หรือกำลังยืนยันยกเลิกบิล
+function wedgeRoute() {
+  if (document.getElementById('scanModal').classList.contains('open')) return scanPurpose || 'cart';
+  if (document.getElementById('loginOverlay').style.display !== 'none') return null;
+  const busy = ['customerModal', 'saleDetailModal', 'voidModal', 'saleSuccessModal']
+    .some(id => document.getElementById(id).classList.contains('open'));
+  if (busy) return 'blocked';
+  if (currentPage !== 'Sales') return 'wrongpage';
+  return 'cart';
+}
+
+async function onWedgeScan(value) {
+  const purpose = wedgeRoute();
+  if (!purpose) return;                       // ยังไม่ได้ล็อกอิน เงียบไว้
+  if (purpose === 'blocked') {
+    showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง');
+    return;
+  }
+  if (purpose === 'wrongpage') {
+    showToast('⚠️ ไปที่แท็บ "ขายสินค้า" ก่อนแล้วค่อยยิง');
+    return;
+  }
+  scanPurpose = purpose;
+  await onScanned(value, true);
+}
+
+document.addEventListener('keydown', e => {
+  if (!WEDGE_ENABLED) return;
+
+  // ปุ่มค้างไม่นับเป็นตัวอักษร และห้ามล้างของที่ยิงมาแล้ว ไม่งั้นซีเรียลที่มี
+  // ตัวพิมพ์ใหญ่จะขาดเป็นท่อน ๆ เพราะเครื่องยิงกด Shift คั่นทุกตัว
+  if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' ||
+      e.key === 'Meta'  || e.key === 'CapsLock' || e.key === 'AltGraph') return;
+
+  const now = performance.now();
+  const inBurst = wedgeBuf.length > 0 && (now - wedgeBuf[wedgeBuf.length - 1].t) <= WEDGE_MAX_GAP_MS;
+  if (!inBurst) { wedgeBuf = []; wedgeSnapshot = wedgeSnap(); }
+
+  if (e.key === 'Enter') {
+    const chars = wedgeBuf;
+    wedgeBuf = [];
+    if (!inBurst || chars.length < WEDGE_MIN_LENGTH) return;   // คนกด Enter เอง
+    e.preventDefault();
+    e.stopPropagation();
+    wedgeRestore(wedgeSnapshot);
+    onWedgeScan(chars.map(c => c.char).join(''));
+    return;
+  }
+
+  if (e.ctrlKey || e.metaKey || e.altKey) { wedgeBuf = []; return; }
+  const ch = wedgeChar(e);
+  if (ch === null) { wedgeBuf = []; return; }
+  wedgeBuf.push({ char: ch, t: now });
+
+  // ในช่องเลือกรายการ การพิมพ์จะเลื่อนรายการที่เลือกและยิง change ทันที
+  // คืนค่าทีหลังไม่ทัน จึงต้องกันตั้งแต่ตัวแรก
+  if (document.activeElement && document.activeElement.tagName === 'SELECT') e.preventDefault();
+}, true);
 
 function closeScanner() {
   scanning = false;
