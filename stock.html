@@ -357,6 +357,7 @@
       <input type="text" id="productSearch" class="form-input" placeholder="ค้นหาด้วยชื่อ / SKU / บาร์โค้ด">
     </div>
     <button class="btn btn-secondary" onclick="openScanner('search')" style="margin-bottom:8px;">📷 สแกนบาร์โค้ดหาสินค้า</button>
+    <div style="font-size:14px;color:var(--gray);margin-bottom:8px;">มีเครื่องยิงบาร์โค้ดเสียบอยู่ ยิงได้เลย ไม่ต้องกดปุ่มนี้ก่อน</div>
     <button class="btn btn-primary" id="addProductBtn" onclick="openProductModal(null)" style="margin-bottom:8px;">+ เพิ่มสินค้าใหม่</button>
     <div class="alert alert-gold" id="staffNotice" style="display:none;">เฉพาะเจ้าของร้านหรือผู้ดูแลระบบเท่านั้นที่สามารถเพิ่ม/แก้ไขสินค้าได้ กรุณาติดต่อผู้ดูแลระบบหากต้องการแก้ไขข้อมูลสินค้า</div>
     <div id="productList"></div>
@@ -382,6 +383,7 @@
     <div class="form-group" id="serialGroup">
       <label class="form-label">ซีเรียลของแต่ละเครื่อง</label>
       <button class="btn btn-secondary" onclick="openScanner('serial')">📷 ยิงซีเรียลทีละเครื่อง</button>
+      <div style="font-size:14px;color:var(--gray);margin-top:8px;">เลือกสินค้าแล้ว ถ้ามีเครื่องยิงเสียบอยู่ ยิงซีเรียลได้เลยไม่ต้องกดปุ่ม</div>
       <div class="form-hint" style="font-size:14px;color:var(--gray);margin-top:6px;">
         ยิงติดกันได้เรื่อย ๆ ไม่ต้องกดใหม่ทุกครั้ง · จำนวนจะนับให้เองตามที่ยิง<br>
         ของที่ไม่ต้องแยกรายเครื่อง (เช่น สาย) ข้ามช่องนี้แล้วพิมพ์จำนวนได้เลย
@@ -1259,6 +1261,9 @@ function updateScanCloseBtn() {
 }
 
 function rearmScanner(hint) {
+  // ยิงมาจากเครื่องยิงสาย (ไม่ได้เปิดกล้อง) ข้อความบนกรอบกล้องจะไม่มีใครเห็น
+  // ต้องเด้ง toast แทน ไม่งั้นกลายเป็น "ยิงแล้วไม่มีอะไรเกิดขึ้น"
+  if (!scanStream) { if (hint) showToast(hint); return; }
   if (hint) document.getElementById('scanHint').textContent = hint;
   // หน่วงสั้น ๆ ก่อนเปิดอ่านใหม่ ไม่งั้นกล้องยังจ่อใบเดิมอยู่จะอ่านซ้ำทันที
   setTimeout(() => {
@@ -1268,14 +1273,16 @@ function rearmScanner(hint) {
   }, 600);
 }
 
-async function onScanned(code) {
+async function onScanned(code, viaGun) {
   scanning = false;                        // หยุดทันที ไม่งั้นจะอ่านซ้ำรัว ๆ
   const value = String(code || '').trim();
   if (!value) { rearmScanner(); return; }
 
   // กันอ่านใบเดิมซ้ำตอนยิงต่อเนื่อง — คนยังถือกล้องจ่อกล่องเดิมอยู่
+  // เครื่องยิงสายไม่มีปัญหานี้ กว่าจะได้ค่าซ้ำต้องเหนี่ยวไกใหม่ ถ้าไปกันไว้
+  // จะกลายเป็นยิงของสองชิ้นที่เหมือนกันติด ๆ กันแล้วนับได้ชิ้นเดียว
   const now = performance.now();
-  if (value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
+  if (!viaGun && value === lastScanValue && now - lastScanAt < 2000) { rearmScanner(); return; }
   lastScanValue = value; lastScanAt = now;
 
   if (navigator.vibrate) navigator.vibrate(120);
@@ -1312,6 +1319,9 @@ async function onScanned(code) {
   // อ่านได้แต่ไม่มีในระบบ — บาร์โค้ดที่ยิงมาเป็นได้ 2 อย่างซึ่งต้องทำคนละเรื่อง
   // ผูกซีเรียลของเครื่องเดียวเป็นบาร์โค้ดประจำรุ่นคือความผิดพลาดที่กู้ยาก
   // เพราะเครื่องที่เหลือทั้งรุ่นจะยิงไม่เจอ จึงต้องให้คนเลือกเอง ไม่เดาแทน
+  // ยิงจากเครื่องยิงสายแล้วเจอรหัสที่ไม่รู้จัก ต้องเปิดแผงขึ้นมาให้เห็นตัวเลือก
+  // ไม่งั้น HTML ก้อนข้างล่างนี้ไปเขียนอยู่ในกล่องที่ปิดอยู่ ไม่มีใครเห็นเลย
+  openScanPanel('รหัสที่ยิงมายังไม่มีในระบบ — เลือกว่ามันคืออะไร');
   document.getElementById('scanHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
   const esc = escapeHtml(value);
   document.getElementById('scanError').innerHTML =
@@ -1370,6 +1380,13 @@ async function handleSerialScan(value) {
     const u = data[0];
     const p = products.find(x => x.id === u.product_id);
     const label = { in_stock: 'อยู่ในสต็อก', sold: 'ขายไปแล้ว', reserved: 'จองไว้', defective: 'มีตำหนิ' };
+    // ยิงด้วยเครื่องยิงสายแล้วเจอเครื่องที่บันทึกไว้แล้ว — บอกแล้วให้ยิงตัวถัดไป
+    // ต่อได้เลย ถ้าเปิดแผงขึ้นมาขวางทุกครั้งจะยิงรัวไม่ได้
+    if (!scanStream) {
+      showToast('⚠️ เครื่องนี้บันทึกไว้แล้ว — ' + value + (p ? ' · ' + p.name : '') +
+                ' · สถานะ ' + (label[u.status] || u.status));
+      return;
+    }
     document.getElementById('scanError').innerHTML =
       '<div class="alert alert-red" style="margin-top:12px;">เครื่องนี้บันทึกไว้แล้ว ไม่ต้องรับเข้าซ้ำ<br>' +
       '<strong>' + escapeHtml(value) + '</strong>' +
@@ -1433,6 +1450,127 @@ function toggleTorch() {
     .catch(() => showToast('⚠️ เครื่องนี้เปิดไฟฉายจากเว็บไม่ได้'));
 }
 
+// ===========================================================================
+// เครื่องยิงบาร์โค้ดแบบเสียบสาย (keyboard wedge)
+//
+// เครื่องพวกนี้ไม่ใช่กล้อง มันปลอมตัวเป็นคีย์บอร์ดแล้ว "พิมพ์" รหัสที่ยิงได้ลง
+// ในช่องที่โฟกัสอยู่ ตามด้วย Enter — เสียบแล้วใช้ได้เลย ไม่ต้องขอสิทธิ์อะไร
+// ทั้งหมดนี้ไม่ได้แทนที่กล้อง ใครถือมือถือก็ยังกดปุ่ม 📷 ใช้กล้องได้เหมือนเดิม
+//
+// ⚠️ ต้องอ่านจาก event.code (ปุ่มจริงบนแป้น) ห้ามอ่าน event.key (ตัวอักษรที่ได้)
+//    วัดกับเครื่อง TMS ของร้านเมื่อ 31 ส.ค. 69 ตอนแป้นเป็นภาษาไทย: บาร์โค้ด
+//    619659216054 ออกมาเป็น ุๅตุถต/ๅุจถภ ถ้าอ่านตัวอักษรจะหาสินค้าไม่เจอ
+//    และจะพังเฉพาะตอนแป้นเป็นไทย ซึ่งคือเวลาส่วนใหญ่ที่หน้าร้านใช้จริง
+//
+// แยกเครื่องยิงออกจากคนพิมพ์ด้วยจังหวะ: เครื่องนั้นเว้นช่องไฟเฉลี่ย 6ms สูงสุด
+// 14ms ส่วนคนพิมพ์เร็วที่สุดยังห่างกันเกิน 60ms — เส้น 50ms จึงห่างทั้งสองฝั่ง
+// อยากกลับไปเป็นแบบต้องกดปุ่มก่อนค่อยยิง ให้ตั้ง WEDGE_ENABLED = false
+// ===========================================================================
+const WEDGE_ENABLED = true;
+const WEDGE_MAX_GAP_MS = 50;   // ช่องไฟระหว่างตัวอักษรที่ยังนับว่าเป็นเครื่องยิง
+const WEDGE_MIN_LENGTH = 6;    // สั้นกว่านี้ถือว่าคนพิมพ์ ไม่ใช่บาร์โค้ด
+
+let wedgeBuf = [];        // {char, t} ของการยิงที่กำลังเข้ามา
+let wedgeSnapshot = null; // ค่าเดิมของช่องที่โฟกัสอยู่ ไว้คืนให้หลังยิงเสร็จ
+
+// ปุ่มจริง -> ตัวอักษร ไม่ขึ้นกับภาษาแป้นพิมพ์
+function wedgeChar(e) {
+  let m;
+  const c = e.code;
+  if ((m = c.match(/^(?:Digit|Numpad)(\d)$/))) return m[1];
+  if ((m = c.match(/^Key([A-Z])$/))) {
+    // ซีเรียลเป็นตัวพิมพ์ใหญ่ เครื่องยิงจึงกด Shift มาด้วย ส่วน CapsLock กลับด้าน
+    const upper = e.shiftKey !== e.getModifierState('CapsLock');
+    return upper ? m[1] : m[1].toLowerCase();
+  }
+  if (c === 'Minus'  || c === 'NumpadSubtract') return '-';
+  if (c === 'Period' || c === 'NumpadDecimal')  return '.';
+  if (c === 'Slash'  || c === 'NumpadDivide')   return '/';
+  return null;
+}
+
+function wedgeSnap() {
+  const el = document.activeElement;
+  if (!el || typeof el.value !== 'string') return null;
+  return { el, value: el.value, start: el.selectionStart, end: el.selectionEnd };
+}
+
+// ระหว่างยิง ตัวอักษรภาษาไทยจะหล่นลงไปในช่องที่โฟกัสอยู่จริง ๆ (แค่ 65ms
+// ไม่มีใครทัน) พอรู้แน่แล้วว่าเป็นการยิง ค่อยคืนค่าเดิมให้ทั้งก้อน วิธีนี้ทำให้
+// การพิมพ์ปกติไม่ถูกแตะเลย เพราะเราไม่ได้ไปขวางปุ่มไหนล่วงหน้า
+function wedgeRestore(s) {
+  if (!s || !s.el || !s.el.isConnected || s.el.value === s.value) return;
+  s.el.value = s.value;
+  try { s.el.setSelectionRange(s.start, s.end); } catch (err) { /* select ไม่มี selection */ }
+}
+
+// เปิดแผงสแกนโดยไม่เปิดกล้อง — ใช้ตอนยิงด้วยเครื่องยิงแล้วมีอะไรต้องให้คนตัดสินใจ
+function openScanPanel(hint) {
+  const modal = document.getElementById('scanModal');
+  if (modal.classList.contains('open')) return;
+  document.getElementById('scanTitle').textContent = SCAN_TITLES[scanPurpose] || 'สแกนบาร์โค้ด';
+  document.getElementById('scanHint').textContent = hint || '';
+  document.getElementById('scanVideoWrap').style.display = 'none';
+  updateScanCloseBtn();
+  modal.classList.add('open');
+}
+
+// ยิงมาแล้วจะเอาไปทำอะไร ดูจากสิ่งที่อยู่ตรงหน้าคนใช้ตอนนั้น
+function wedgeRoute() {
+  if (document.getElementById('scanModal').classList.contains('open')) return scanPurpose || 'search';
+  if (document.getElementById('productModal').classList.contains('open')) {
+    return isWriter() ? 'field' : null;
+  }
+  if (currentPage === 'Movement') {
+    // เลือกสินค้าแล้วและกำลังรับเข้า = กำลังยิงซีเรียลทีละเครื่อง
+    if (document.getElementById('movType').value === 'in' &&
+        document.getElementById('movProduct').value) return 'serial';
+    return 'movement';
+  }
+  return 'search';
+}
+
+async function onWedgeScan(value) {
+  const purpose = wedgeRoute();
+  if (!purpose) { showToast('⚠️ คุณมีสิทธิ์ดูข้อมูลเท่านั้น แก้ไขไม่ได้'); return; }
+  scanPurpose = purpose;
+  await onScanned(value, true);
+}
+
+document.addEventListener('keydown', e => {
+  if (!WEDGE_ENABLED) return;
+
+  // ปุ่มค้าง (Shift ตอนพิมพ์ตัวใหญ่ ฯลฯ) ไม่นับเป็นตัวอักษร และห้ามล้างของที่
+  // ยิงมาแล้ว ไม่งั้นซีเรียลที่มีตัวพิมพ์ใหญ่จะขาดเป็นท่อน ๆ
+  if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' ||
+      e.key === 'Meta'  || e.key === 'CapsLock' || e.key === 'AltGraph') return;
+
+  const now = performance.now();
+  const inBurst = wedgeBuf.length > 0 && (now - wedgeBuf[wedgeBuf.length - 1].t) <= WEDGE_MAX_GAP_MS;
+  if (!inBurst) { wedgeBuf = []; wedgeSnapshot = wedgeSnap(); }
+
+  if (e.key === 'Enter') {
+    const chars = wedgeBuf;
+    wedgeBuf = [];
+    // คนกด Enter เอง หรือชุดสั้นเกินกว่าจะเป็นบาร์โค้ด — ปล่อยผ่านตามปกติ
+    if (!inBurst || chars.length < WEDGE_MIN_LENGTH) return;
+    e.preventDefault();
+    e.stopPropagation();
+    wedgeRestore(wedgeSnapshot);
+    onWedgeScan(chars.map(c => c.char).join(''));
+    return;
+  }
+
+  if (e.ctrlKey || e.metaKey || e.altKey) { wedgeBuf = []; return; }
+  const ch = wedgeChar(e);
+  if (ch === null) { wedgeBuf = []; return; }
+  wedgeBuf.push({ char: ch, t: now });
+
+  // ในช่องเลือกรายการ การพิมพ์ตัวอักษรจะเลื่อนรายการที่เลือกและยิง change ทันที
+  // ซึ่งไปล้างซีเรียลที่ยิงค้างไว้ คืนค่าทีหลังไม่ทัน จึงต้องกันตั้งแต่ตัวแรก
+  if (document.activeElement && document.activeElement.tagName === 'SELECT') e.preventDefault();
+}, true);
+
 function closeScanner() {
   scanning = false;
   // ปิดกล้องจริง ๆ ไม่งั้นไฟกล้องค้างและกินแบตทั้งวัน
@@ -1440,6 +1578,7 @@ function closeScanner() {
   scanDetector = null; scanReader = null; torchOn = false;
   document.getElementById('scanTorchBtn').textContent = 'ไฟฉาย';
   document.getElementById('scanTorchBtn').disabled = true;
+  document.getElementById('scanVideoWrap').style.display = '';   // แผงแบบไม่มีกล้องซ่อนไว้
   document.getElementById('scanModal').classList.remove('open');
 }
 document.getElementById('scanModal').addEventListener('click', function (e) {
