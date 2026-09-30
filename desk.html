@@ -496,10 +496,229 @@
   .star-on { color: #8A5A00; }
   table.data tr.unread td { font-weight: 700; }
 
+  /* ---------- ผนังสต็อก (หมวดสินค้า · Brand Wings — เจ้าของเคาะ 1 ต.ค. 69) ----------
+     สต็อกอ่านเหมือนผนังโชว์ของร้าน: ทุกรุ่น = รูป + ตัวเลขใหญ่ตัวเดียว เรียงเป็นปีก
+     สลับได้ระหว่างปีกแบรนด์ (มีชั้นย่อยตามหมวด) กับปีกหมวด (เลื่อนแนวนอน · แบรนด์เป็นตัวกรอง)
+     ทุกชิ้นเหลี่ยม · ปุ่ม/ชิปที่เลือกอยู่ = ดำ · สถานะไม่บอกด้วยสีอย่างเดียว มีคำกำกับเสมอ */
+  .workspace.is-wall { padding: 18px 28px 16px; overflow: hidden; }
+  .wall-sec { height: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .wall-top { display: flex; gap: 10px; align-items: stretch; flex-shrink: 0; }
+  .scanbox { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 14px 0 16px;
+    background: var(--surface); border: 2px solid var(--black); cursor: text; }
+  .scanbox:focus-within { outline: 3px solid rgba(15,15,15,.14); outline-offset: 0; }
+  .scanbox .ico-svg { width: 24px; height: 24px; }
+  .scanbox input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; font-size: 17px; }
+  .scanbox input::placeholder { color: var(--text2); }
+  .scanbox input::-webkit-search-cancel-button { cursor: pointer; }
+  .scan-mode { flex-shrink: 0; background: var(--black); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: 14px; padding: 2px 8px; }
+  .scanbox kbd { flex-shrink: 0; }
+  .seg { display: flex; border: 1px solid var(--black); background: var(--surface); flex-shrink: 0; }
+  .seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; cursor: pointer;
+    padding: 0 16px; min-height: 34px; font-family: var(--font-head); font-weight: 600; font-size: 15px; white-space: nowrap; color: var(--text); }
+  .seg button + button { border-left: 1px solid var(--line-strong); }
+  .seg button:hover { background: var(--sel); }
+  .seg button[aria-pressed="true"] { background: var(--black); color: #fff; }
+  .seg button[aria-pressed="true"] + button { border-left-color: var(--black); }
+  .seg button:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; position: relative; z-index: 1; }
+  .modes button { min-width: 84px; font-size: 16px; }
+  .modes .m-n { font-family: var(--font-head); font-size: 14px; font-weight: 700; min-width: 22px; padding: 0 5px; background: var(--red); color: #fff; }
+  #addProductBtn { min-height: 54px; }
+
+  .wall-bar { display: flex; align-items: flex-start; gap: 12px; min-height: 36px; flex-shrink: 0; }
+  /* ชิปไม่ถูกตัดกลางตัวเลขเด็ดขาด: ที่ล้นบรรทัดเดียวถูกพับเข้าปุ่ม "+n หมวด" ท้ายแถว (layoutChips)
+     กดแล้วกางเป็นหลายบรรทัด · ชิปที่เลือกอยู่ไม่ถูกพับ */
+  .wall-chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; padding: 2px; }
+  .fchip-more { border-style: dashed; border-color: var(--black); }
+  .fchip { flex: none; display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 11px; border: 1px solid var(--line-strong);
+    background: var(--surface); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--text); }
+  .fchip small { font-size: 14px; font-weight: 500; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .fchip:hover { border-color: var(--black); }
+  .fchip[aria-pressed="true"] { background: var(--black); border-color: var(--black); color: #fff; }
+  .fchip[aria-pressed="true"] small { color: #CFCCC3; }
+  .flags { display: flex; gap: 6px; flex-shrink: 0; }
+  .flag { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--black); background: var(--surface);
+    font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--text); }
+  .flag b { font-family: var(--font-head); font-variant-numeric: tabular-nums; }
+  .flag .sw { width: 4px; align-self: stretch; background: var(--black); }
+  .flag:hover:not([aria-pressed="true"]) { background: var(--sel); }
+  .flag-low { border-color: var(--red); color: var(--red); }
+  .flag-low .sw { background: var(--red); }
+  .flag-low[aria-pressed="true"] { background: var(--red); color: #fff; }
+  .flag-low[aria-pressed="true"] .sw { background: #fff; }
+  .flag-out[aria-pressed="true"] { background: var(--black); color: #fff; }
+  .flag-out[aria-pressed="true"] .sw { background: #fff; }
+
+  .wall { flex: 1; min-height: 0; display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; outline: none; padding-bottom: 4px;
+    scrollbar-width: thin; scrollbar-color: var(--black) var(--line); }
+  .wall::-webkit-scrollbar, .wing-b::-webkit-scrollbar, .tray-b::-webkit-scrollbar { width: 8px; height: 8px; }
+  .wall::-webkit-scrollbar-track, .wing-b::-webkit-scrollbar-track, .tray-b::-webkit-scrollbar-track { background: var(--surface2); }
+  .wall::-webkit-scrollbar-thumb, .wing-b::-webkit-scrollbar-thumb, .tray-b::-webkit-scrollbar-thumb { background: var(--line-strong); }
+  .wall::-webkit-scrollbar-thumb:hover, .wing-b::-webkit-scrollbar-thumb:hover, .tray-b::-webkit-scrollbar-thumb:hover { background: var(--black); }
+  .wing { flex: 1 0 262px; display: flex; flex-direction: column; min-height: 0; background: var(--surface); border: 1px solid var(--line); }
+  .wing.w-other { flex: .78 0 226px; }
+  /* ปีกไม่พอดีจอ (จัดตามหมวด · หรือเปิดแผงขวาอยู่): กว้างเท่ากันทุกปีกให้พอดีจอเป็นจำนวนเต็ม (fitWings)
+     แล้วเลื่อนทีละปีกแบบ snap — ขอบขวาไม่มีทางตัดกลางปีก · ปุ่มดำที่ขอบบอกว่ายังมีต่อ */
+  .wall.snaps { scroll-snap-type: x mandatory; }
+  .wall.snaps .wing { flex: 0 0 var(--wing-w, 300px); scroll-snap-align: start; }
+  .wall-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
+  .wall-step { position: absolute; top: 50%; z-index: 4; width: 26px; height: 96px; margin-top: -48px; display: flex; align-items: center; justify-content: center;
+    border: 0; background: var(--black); color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(15,15,15,.22); }
+  .wall-step.prev { left: -27px; }
+  .wall-step.next { right: -27px; }
+  .wall-step:hover { background: #2A2A2A; }
+  .wall-step .ico-svg { width: 18px; height: 18px; stroke-width: 2; }
+  .wing-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 14px 10px; border-bottom: 3px solid var(--black); flex-shrink: 0; }
+  .wing-h h2 { font-size: 19px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wing-h span { font-size: 14px; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .wing-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--surface2); }
+  .wing-empty { padding: 28px 14px; color: var(--text2); font-size: 14px; }
+  .shelf-h { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; padding: 6px 14px;
+    background: var(--surface2); border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; color: var(--text2); }
+  .w-row { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+    padding: 8px 14px; border-bottom: 1px solid var(--line); cursor: pointer; scroll-margin-top: 36px; }
+  .w-row:hover { background: var(--surface2); }
+  .w-row.low { box-shadow: inset 4px 0 0 var(--red); }
+  .w-row.out { box-shadow: inset 4px 0 0 var(--black); }
+  .w-row.sel { background: var(--sel); }
+  .w-row.sel::after { content: ''; position: absolute; inset: 0; border: 2px solid var(--black); pointer-events: none; }
+  .w-row.dim { background: var(--surface2); }
+  .w-row.dim > * { opacity: .55; }
+  .w-row.picked { background: var(--sel); }
+  .w-row.hit { animation: w-hit .9s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes w-hit { 0% { background: var(--black); color: #fff; } 100% { background: var(--sel); } }
+  /* กระเบื้องรูป: พื้นขาว ขอบบาง ระยะในเท่ากันทุกรูป — รูปพื้นมืดจึงอ่านเป็นภาพในกรอบ ไม่ใช่รูโหว่บนผนัง */
+  .ph { width: 76px; height: 57px; padding: 4px; background: var(--surface); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .ph img { width: 100%; height: 100%; object-fit: contain; }
+  .sil { width: 100%; height: 100%; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  /* ช่องเพิ่มรูป (เจ้าของร้าน/ผู้ดูแล): ปกติเงียบเหมือนช่องว่าง — 100+ รุ่นที่ยังไม่มีรูปจะไม่กลายเป็นปุ่มเต็มผนัง
+     ชี้/เลือกแถวแล้วค่อยกลายเป็นปุ่ม "+ เพิ่มรูป" */
+  .ph-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; height: 100%; padding: 0;
+    border: 1px dashed transparent; background: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text2); }
+  .ph-add .idle { display: flex; width: 100%; height: 100%; }
+  .ph-add .ico-svg { width: 16px; height: 16px; }
+  .ph-add .cta { display: none; }
+  .w-row:hover .ph-add, .w-row.sel .ph-add, .ph-add:focus-visible { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
+  .w-row:hover .ph-add .cta, .w-row.sel .ph-add .cta, .ph-add:focus-visible .cta { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .w-row:hover .ph-add .idle, .w-row.sel .ph-add .idle, .ph-add:focus-visible .idle { display: none; }
+  .ph-add:hover { border-color: var(--black); }
+  .w-info { min-width: 0; }
+  .w-name { font-family: var(--font-head); font-weight: 600; font-size: 16px; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .w-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 3px; font-size: 14px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .w-brand { margin-top: 2px; font-size: 14px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .w-tag { display: inline-block; font-size: 14px; font-weight: 700; line-height: 22px; padding: 0 7px; white-space: nowrap; }
+  .w-tag.low { background: var(--red); color: #fff; }
+  .w-tag.out { border: 1px solid var(--black); color: var(--black); line-height: 20px; }
+  .w-tag.off { border: 1px dashed var(--line-strong); color: var(--text2); line-height: 20px; }
+  .w-tag.ok { border: 1px solid #BFD9C7; color: var(--ok); background: var(--ok-soft); line-height: 20px; }
+  .w-tag.pick { background: var(--black); color: #fff; }
+  .w-qty { font-family: var(--font-head); font-weight: 700; font-size: 34px; line-height: 1; min-width: 1.3ch; text-align: right; font-variant-numeric: tabular-nums; }
+  .w-row.low .w-qty { color: var(--red); }
+  .w-row.off .w-name, .w-row.off .w-qty { color: var(--text2); }
+  .w-row.off .ph img { filter: grayscale(1); }
+
+  /* ถาดล่าง — รับเข้า / นับ: ผนังหดขึ้นให้ ไม่ลอยทับ */
+  .tray { flex: 0 0 clamp(250px, 34vh, 330px); display: flex; flex-direction: column; min-height: 0; background: var(--surface);
+    border: 2px solid var(--black); box-shadow: 0 -4px 18px rgba(15,15,15,.08); }
+  .tray-h { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap; }
+  .tray-h h2 { font-size: 18px; font-weight: 700; }
+  /* ข้อความล่าสุด + ปุ่ม เป็นก้อนเดียวชิดขวา — แถบหัวแคบแล้วทั้งก้อนลงบรรทัดใหม่ด้วยกัน ไม่แตกกลางก้อน */
+  .tray-acts { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .tray-sum { font-size: 15px; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tray-sum b { font-family: var(--font-head); font-size: 20px; color: var(--text); }
+  .tray-h .input { width: auto; min-height: 36px; padding: 5px 10px; }
+  .tray-reason { width: 260px !important; }
+  .tray-b { flex: 1; min-height: 0; display: flex; gap: 18px; padding: 12px 14px; overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--surface2); }
+  .tray-empty { color: var(--text2); font-size: 15px; max-width: 72ch; }
+  .tray-empty ol { margin: 6px 0 0 20px; }
+  .tray-empty li { margin-top: 2px; }
+  .tray-note { max-width: 520px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 4px 10px; border: 1px solid var(--line-strong); background: var(--surface2); }
+  .tray-note.bad { border-color: #F0B8C1; background: var(--red-soft); color: #8A0012; }
+  .t-group { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 150px; }
+  .t-gh { display: flex; align-items: baseline; gap: 8px; font-family: var(--font-head); font-weight: 600; font-size: 16px; white-space: nowrap;
+    padding-bottom: 4px; border-bottom: 3px solid var(--line); }
+  .t-group.target .t-gh { border-bottom-color: var(--black); }
+  .t-gh .t-n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .t-gh .t-now { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text2); }
+  .t-cards { display: flex; gap: 8px; }
+  .t-card { position: relative; width: max-content; min-width: 136px; flex: none; display: flex; flex-direction: column; border: 1px solid var(--line-strong); background: var(--surface); }
+  .t-card .ph { width: 100%; height: 70px; border: 0; border-bottom: 1px solid var(--line); }
+  /* ซีเรียลบรรทัดเดียวเสมอ — พนักงานเทียบกับสติกเกอร์บนกล่องทีละตัวอักษร ตัดขึ้นบรรทัดใหม่ = อ่านผิด */
+  .t-card .sn-t { font-size: 15px; font-weight: 700; padding: 6px 10px 7px; line-height: 1.25; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  .t-card.dup { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+  .t-card.dup .sn-t::after { content: ' · ซ้ำ'; color: var(--red); }
+  .t-card.new { animation: t-in .45s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes t-in { from { transform: translateY(10px); box-shadow: 0 8px 22px rgba(15,15,15,.18); } to { transform: none; box-shadow: none; } }
+  .t-x { position: absolute; top: 0; right: 0; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    border: 0; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); cursor: pointer; color: var(--text); }
+  .t-x:hover { background: var(--black); color: #fff; }
+  .t-step { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 0; }
+  .t-step b { font-family: var(--font-head); font-size: 24px; font-variant-numeric: tabular-nums; }
+  .stepbtn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--black);
+    background: var(--surface); cursor: pointer; color: var(--text); }
+  .stepbtn:hover { background: var(--black); color: #fff; }
+  .stepbtn:disabled { opacity: .35; cursor: not-allowed; background: var(--surface); color: var(--text); }
+  .stepbtn .ico-svg { width: 16px; height: 16px; }
+  .tray-count .tray-b { flex-direction: column; gap: 0; overflow-x: hidden; overflow-y: auto; padding-top: 0; }
+  .c-line { display: grid; grid-template-columns: 60px minmax(0, 1fr) 96px 150px 150px; gap: 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .c-head { position: sticky; top: 0; z-index: 1; background: var(--surface); font-size: 14px; font-weight: 600; color: var(--text2); padding: 10px 0 6px; }
+  .c-line .ph { width: 60px; height: 45px; }
+  .c-name { font-family: var(--font-head); font-weight: 600; font-size: 15px; min-width: 0; }
+  .c-miss { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .nw { white-space: nowrap; }
+  .c-miss b { color: var(--red); font-weight: 700; }
+  .c-exp { font-family: var(--font-head); font-size: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .c-step { display: flex; align-items: center; gap: 10px; }
+  .c-step b { font-family: var(--font-head); font-size: 24px; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+  .c-var { font-size: 15px; font-weight: 700; }
+  .c-var.short { color: var(--red); }
+  .c-var.even { color: var(--ok); }
+  .c-var.idle { color: var(--text2); font-weight: 500; }
+  .c-var.zero { color: #8A0012; }
+  .zero-warn { color: #8A0012; font-weight: 700; background: var(--red-soft); border: 1px solid #F0B8C1; padding: 1px 8px; }
+  .zero-warn b { font-family: var(--font-head); }
+  .c-line.touched { background: linear-gradient(to right, var(--sel), transparent 60%); }
+  .c-scope { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text2); }
+
+  /* แผงสินค้าขวา (ลิ้นชัก) */
+  .detail.stock-drawer { width: 440px; }
+  .dr-photo { position: relative; height: 250px; margin: -18px -24px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; }
+  .dr-photo img { max-width: 86%; max-height: 86%; object-fit: contain; }
+  .dr-photo-none { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text2); font-size: 15px; }
+  .dr-photo-none .sil { width: 180px; height: 135px; stroke-width: 1.2; }
+  .dr-photo-act { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; }
+  .dr-meta { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+  .dr-count { display: flex; align-items: flex-end; gap: 16px; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 3px solid var(--black); }
+  .dr-num { font-family: var(--font-head); font-weight: 700; font-size: 80px; line-height: .82; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .dr-count.low .dr-num { color: var(--red); }
+  .dr-side { padding-bottom: 2px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .dr-side .u { font-size: 16px; font-weight: 600; }
+  .dr-side .rp { font-size: 14px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .dr-act { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--black); margin: 6px 0 14px; }
+  .dr-act button { min-height: 46px; border: 0; background: var(--surface); cursor: pointer; font-family: var(--font-head); font-weight: 600; font-size: 15px; color: var(--text); }
+  .dr-act button + button { border-left: 1px solid var(--line-strong); }
+  .dr-act button:hover, .dr-act button[aria-expanded="true"] { background: var(--black); color: #fff; }
+  .dr-act button:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; position: relative; }
+  .dr-form { border: 1px solid var(--line-strong); background: var(--surface2); padding: 14px; margin-bottom: 14px; }
+  .dr-form h3 { font-size: 15px; margin-bottom: 10px; }
+  .sn-group h4 { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text2); margin: 14px 0 6px; }
+  .sn-group h4 b { font-family: var(--font-head); color: var(--text); font-size: 15px; }
+  .sn-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sn { font-size: 14px; font-weight: 600; padding: 3px 8px; border: 1px solid var(--line-strong); background: var(--surface); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  .sn.in_stock { border-color: var(--black); }
+  .sn.sold { color: var(--text2); background: var(--surface2); }
+  .sn.defective { border-style: dashed; border-color: var(--red); color: #8A0012; }
+  .sn.reserved { background: var(--warn-soft); border-color: #E8D1A0; color: var(--warn); }
+  .sn.hit { background: var(--black); border-color: var(--black); color: #fff; }
+
   @media (prefers-reduced-motion: reduce) {
     /* ไม่มีอะไรเลื่อนหรือเด้ง — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
     .lt, .lt-icon, .ev, .player-body { transition: none !important; }
     .lt:hover .lt-icon, .ev:hover { transform: none; }
+    .w-row.hit, .t-card.new { animation: none; }
   }
 
   .print-only { display: none; }
@@ -751,40 +970,41 @@
           <div class="legend" id="calLegend"></div>
         </section>
 
-        <!-- ============ สินค้า ============ -->
-        <section class="section" id="sec-products" hidden>
-          <div class="stats">
-            <div class="stat"><div class="stat-value" id="statTotalProducts">0</div><div class="stat-label">สินค้าทั้งหมด</div></div>
-            <div class="stat"><div class="stat-value" id="statLowStock">0</div><div class="stat-label">⚠ ใกล้หมด (คงเหลือ ≤ จุดสั่งซื้อซ้ำ)</div></div>
-            <div class="stat"><div class="stat-value" id="statTotalValue">0</div><div class="stat-label">มูลค่าสต็อกตามราคาขาย (บาท)</div></div>
+        <!-- ============ สินค้า — ผนังสต็อก ============ -->
+        <section class="section wall-sec" id="sec-products" hidden>
+          <div class="wall-top">
+            <label class="scanbox" for="productSearch">
+              <svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 6V2.5h3.5M14.5 2.5H18V6M18 14v3.5h-3.5M5.5 17.5H2V14M6 6v8M9 6v8M11.5 6v8M14 6v8"/></svg>
+              <span class="scan-mode" id="scanModeTag" hidden></span>
+              <input type="search" id="productSearch" autocomplete="off" spellcheck="false"
+                     placeholder="ยิงบาร์โค้ด / ซีเรียล หรือพิมพ์ชื่อรุ่น แล้วกด Enter" aria-label="ยิงบาร์โค้ดหรือค้นหาสินค้า">
+              <kbd title="กด / หรือ Ctrl+K เพื่อมาที่ช่องนี้">/</kbd>
+            </label>
+            <div class="seg modes" role="group" aria-label="โหมดของผนัง">
+              <button type="button" data-mode="find" aria-pressed="true" onclick="setWallMode('find')">หา</button>
+              <button type="button" data-mode="receive" aria-pressed="false" onclick="setWallMode('receive')">รับเข้า</button>
+              <button type="button" data-mode="count" aria-pressed="false" onclick="setWallMode('count')">นับ</button>
+            </div>
+            <button class="btn" id="addProductBtn" type="button" onclick="adGotoRow('products', null)" hidden>+ สินค้าใหม่</button>
           </div>
-          <div class="toolbar">
-            <input type="search" id="productSearch" class="input grow" placeholder="ค้นหาชื่อ / SKU / บาร์โค้ด" autocomplete="off" aria-label="ค้นหาสินค้า">
-            <select id="fBrand" class="input" aria-label="แบรนด์"><option value="">ทุกแบรนด์</option></select>
-            <select id="fCategory" class="input" aria-label="หมวดหมู่"><option value="">ทุกหมวดหมู่</option></select>
-            <select id="fStatus" class="input" aria-label="สถานะ">
-              <option value="">ทุกสถานะ</option>
-              <option value="low">⚠ ใกล้หมด</option>
-              <option value="active">✓ เปิดขาย</option>
-              <option value="inactive">⏸ ปิดใช้งาน</option>
-            </select>
+          <div class="wall-bar">
+            <div class="seg" id="groupSwitch" role="group" aria-label="จัดผนัง (กด G สลับ)">
+              <button type="button" data-group="brand" aria-pressed="true" onclick="setWallGroup('brand')">จัดตามแบรนด์</button>
+              <button type="button" data-group="category" aria-pressed="false" onclick="setWallGroup('category')">จัดตามหมวด</button>
+            </div>
+            <div class="wall-chips" id="wallChips" role="group" aria-label="ตัวกรอง"></div>
+            <div class="flags">
+              <button type="button" class="flag flag-low" id="flagLow" aria-pressed="false" onclick="toggleWallFlag('low')"><span class="sw" aria-hidden="true"></span>ใกล้หมด <b id="nLow">0</b></button>
+              <button type="button" class="flag flag-out" id="flagOut" aria-pressed="false" onclick="toggleWallFlag('out')"><span class="sw" aria-hidden="true"></span>หมด <b id="nOut">0</b></button>
+            </div>
           </div>
-          <div class="tablewrap" id="tw-products" tabindex="0" aria-label="ตารางสินค้า — ใช้ลูกศรขึ้นลงเลือก Enter เปิดรายละเอียด">
-            <table class="data">
-              <thead><tr>
-                <th><button class="th" data-t="products" data-k="sku">SKU</button></th>
-                <th><button class="th" data-t="products" data-k="name">ชื่อสินค้า</button></th>
-                <th><button class="th" data-t="products" data-k="brand">แบรนด์</button></th>
-                <th class="col-opt"><button class="th" data-t="products" data-k="category">หมวดหมู่</button></th>
-                <th class="num"><button class="th" data-t="products" data-k="qty">คงเหลือ</button></th>
-                <th class="num col-opt"><button class="th" data-t="products" data-k="reorder">จุดสั่งซื้อซ้ำ</button></th>
-                <th class="num"><button class="th" data-t="products" data-k="price">ราคาขาย</button></th>
-                <th><button class="th" data-t="products" data-k="status">สถานะ</button></th>
-              </tr></thead>
-              <tbody id="productRows"></tbody>
-            </table>
+          <div class="wall-wrap">
+            <button type="button" class="wall-step prev" id="wallPrev" hidden tabindex="-1" aria-label="เลื่อนผนังไปทางซ้ายหนึ่งปีก" onclick="wallStep(-1)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6"/></svg></button>
+            <div class="wall" id="wall" tabindex="0" role="listbox" aria-label="ผนังสินค้า: ลูกศรเลื่อนในปีกและข้ามปีก · Enter เปิดรายละเอียด · G สลับการจัด"></div>
+            <button type="button" class="wall-step next" id="wallNext" hidden tabindex="-1" aria-label="เลื่อนผนังไปทางขวาหนึ่งปีก" onclick="wallStep(1)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4l6 6-6 6"/></svg></button>
           </div>
-          <p class="hint">มีเครื่องยิงบาร์โค้ดเสียบอยู่ ยิงหาสินค้าได้เลย <button class="btn btn-sm" id="addProductBtn" type="button" onclick="adGotoRow('products', null)" hidden style="margin-left:8px;">+ เพิ่มสินค้าใหม่</button></p>
+          <div class="tray" id="tray" hidden aria-live="polite"></div>
+          <input type="file" id="photoInput" accept="image/*" hidden>
         </section>
 
         <!-- ============ บันทึกการเคลื่อนไหว ============ -->
@@ -1227,11 +1447,13 @@
   <div class="dlg-head"><h2 id="helpTitle">คีย์ลัด</h2></div>
   <div class="dlg-body">
     <div class="help-grid">
-      <span><kbd>/</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>K</kbd></span><span>ค้นหาทั้งร้าน</span>
+      <span><kbd>/</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>K</kbd></span><span>ค้นหาทั้งร้าน · ในหมวดสินค้าไปที่ช่องยิงของผนังก่อน (กด <kbd>Ctrl</kbd>+<kbd>K</kbd> ซ้ำ = ค้นหาทั้งร้าน)</span>
       <span><kbd>Alt</kbd>+<kbd>H</kbd></span><span>หน้าแรก</span>
       <span><kbd>Alt</kbd>+<kbd>B</kbd> · <kbd>M</kbd> · <kbd>C</kbd></span><span>กระดานข้อความ · กล่องจดหมายร้าน · ปฏิทิน</span>
       <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd>, <kbd>0</kbd></span><span>หมวดคอนโซลร้าน (สินค้า … จัดการข้อมูล) ตามเลขข้างชื่อในเมนูซ้าย</span>
       <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>เลื่อนแถวที่เลือกในตาราง</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> (ผนังสินค้า)</span><span>เลื่อนในปีก · ข้ามไปปีกข้าง ๆ ที่ระดับเดียวกัน · <kbd>Enter</kbd> เปิดแผงสินค้า · <kbd>Esc</kbd> ปิด</span>
+      <span><kbd>G</kbd> (ผนังสินค้า)</span><span>สลับจัดตามแบรนด์ / จัดตามหมวด (จำไว้ให้แต่ละคน)</span>
       <span><kbd>Enter</kbd></span><span>เปิดรายละเอียดแถวที่เลือก</span>
       <span><kbd>Esc</kbd></span><span>ปิดแผงรายละเอียด / หน้าต่าง / ออกจากช่องพิมพ์</span>
       <span><kbd>Enter</kbd> (ในช่องค้นหาขาย)</span><span>ใส่สินค้าที่เลือกลงตะกร้า</span>
@@ -1605,7 +1827,6 @@ let detailToken = 0;       // กันผลโหลดของแถวเ�
 
 // สถานะของแต่ละตาราง: เรียงตามคอลัมน์ไหน · แถวที่แสดงอยู่ · แถวที่เลือก
 const view = {
-  products: { sort: 'name', dir: 1, rows: [], sel: -1, tbody: 'productRows' },
   moves:    { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'moveRows' },
   bills:    { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'billRows' },
   bookings: { sort: 'date', dir: -1, rows: [], sel: -1, tbody: 'bookingRows' },
@@ -1704,6 +1925,8 @@ async function handleAuthState(session) {
   const prevUser = currentUserId;
   currentAdmin = adminRow;
   currentUserId = session.user.id;
+  // จัดตามแบรนด์/หมวด ของคนที่เพิ่งเข้า (จำแยกรายคน) — ต่ออายุ token ของคนเดิมไม่ต้องรีเซ็ตตัวกรอง
+  if (prevUser !== currentUserId) loadWallGroup();
   if (rememberNext) { passwordLoginUser = session.user.id; rememberAccount(session, adminRow); }
   else if (isRemembered(session.user.id)) keepRememberedToken(session);
   rememberNext = false;
@@ -1846,7 +2069,6 @@ function getMergedProducts() {
 }
 
 function renderAll() {
-  renderFilters();
   renderProducts();
   renderMovementProductOptions();
   renderMovInfo();
@@ -1869,11 +2091,6 @@ function cmp(a, b) {
 }
 
 const SORT_KEYS = {
-  products: {
-    sku: p => p.sku, name: p => p.name, brand: p => p.brand, category: p => p.category || '',
-    qty: p => p.current_qty, reorder: p => p.reorder_point, price: p => parseFloat(p.sell_price) || 0,
-    status: p => (!p.is_active ? 2 : p.low_stock ? 0 : 1),
-  },
   moves: {
     created_at: m => m.created_at, product: m => (m.products ? m.products.name : ''), type: m => m.type,
     qty: m => signedQty(m), reason: m => m.reason || '', admin: m => (m.admins ? m.admins.full_name : ''),
@@ -1905,7 +2122,7 @@ function sortRows(t, rows) {
 function sortBy(t, k) {
   const v = view[t];
   if (v.sort === k) v.dir = -v.dir; else { v.sort = k; v.dir = 1; }
-  ({ products: renderProducts, moves: renderMoves, bills: renderBills })[t]();
+  ({ moves: renderMoves, bills: renderBills })[t]();
 }
 
 function markSortHeaders(t) {
@@ -1946,7 +2163,7 @@ function selectRow(t, i, noScroll) {
 function openRow(t) {
   const v = view[t], r = v.rows[v.sel];
   if (!r) return;
-  ({ products: openProduct, moves: openMove, bills: openBill, bookings: openBooking,
+  ({ moves: openMove, bills: openBill, bookings: openBooking,
      customers: openCustomer, activity: openActivity, admin: () => adOpenRow(r),
      board: openBoardMsg, mail: openMail })[t](r.id);
 }
@@ -1954,6 +2171,8 @@ function openRow(t) {
 function pickRow(t, i) { selectRow(t, i); openRow(t); }
 
 function openDetail(title, html) {
+  document.getElementById('detail').classList.remove('stock-drawer');   // openProduct ใส่กลับเองเมื่อเป็นแผงสินค้า
+  drawerId = null;
   document.getElementById('detailTitle').textContent = title;
   document.getElementById('detailBody').innerHTML = html;
   document.getElementById('detail').hidden = false;
@@ -1961,90 +2180,522 @@ function openDetail(title, html) {
 }
 function closeDetail() {
   detailToken++;
+  drawerId = null;
   document.getElementById('detail').hidden = true;
+  document.getElementById('detail').classList.remove('stock-drawer');
   document.querySelector('.content').classList.remove('has-detail');
   currentSaleDetailId = null;
 }
 function detailOpen() { return !document.getElementById('detail').hidden; }
 
 // ---------------------------------------------------------------------------
-// สินค้า
+// สินค้า — ผนังสต็อก (Brand Wings · เจ้าของเคาะ 1 ต.ค. 69)
+//
+// ทุกรุ่น = รูป + ตัวเลขคงเหลือตัวใหญ่ เรียงเป็น "ปีก" สลับได้สองแบบด้วยปุ่มเดียว (G):
+//   จัดตามแบรนด์ — 4 ปีก (AlphaTheta · Pioneer DJ · NEO by OYAIDE · แบรนด์อื่น) มีชั้นย่อยตามหมวด · หมวดเป็นตัวกรอง
+//   จัดตามหมวด  — ปีกละหมวด เลื่อนแนวนอน · แบรนด์เป็นตัวกรอง
+// สามโหมดบนช่องยิง: หา (ยิงแล้วกระโดดไปรุ่นนั้น) · รับเข้า (ถาดล่างเก็บการ์ดทีละเครื่อง) · นับ (นับสต็อกแล้วลงปรับยอดเฉพาะที่ไม่ตรง)
 // ---------------------------------------------------------------------------
-function statusHtml(p) {
-  if (!p.is_active) return '<span class="st st-off">⏸ ปิดใช้งาน</span>';
-  if (p.low_stock) return '<span class="st st-warn">⚠ ใกล้หมด</span>';
-  return '<span class="st st-ok">✓ ปกติ</span>';
+// ลำดับปีกตามที่เจ้าของเคาะ · ค่าต้องตรงกับ check ของ products.brand (migration 001) ทุกตัวอักษร
+const WALL_BRANDS = ['AlphaTheta', 'Pioneer DJ', 'NEO by OYAIDE', 'Other'];
+function brandLabel(b) { return b === 'Other' ? 'แบรนด์อื่น' : b; }
+
+// หมวดมาจากข้อมูลจริง (products.category) ไม่ได้ฝังรายการไว้ — ค่าที่รู้จักแปลเป็นไทย ที่ไม่รู้จักแสดงตามที่พิมพ์ไว้
+// ทะเบียนบางแถวพิมพ์หมวดเป็นไทยอยู่แล้ว ป้ายที่ได้จึงเหมือนกันและรวมเป็นชั้นเดียวกันเอง
+const CAT_TH = { player: 'เครื่องเล่น', 'all-in-one': 'ออลอินวัน', mixer: 'มิกเซอร์', controller: 'คอนโทรลเลอร์',
+  turntable: 'เทิร์นเทเบิล', headphones: 'หูฟัง', speaker: 'ลำโพง', accessory: 'อุปกรณ์เสริม', cable: 'สาย' };
+const CAT_ORDER = Object.values(CAT_TH);   // เรียงแบบชั้นวางในร้าน: เครื่องใหญ่ก่อน ของชิ้นเล็กท้าย · หมวดที่ไม่รู้จักต่อท้าย
+const NO_CAT = 'ไม่ระบุหมวด';
+function catLabel(c) {
+  const k = String(c || '').trim();
+  if (!k) return NO_CAT;
+  return CAT_TH[k.toLowerCase()] || k;
+}
+function catCmp(a, b) {
+  const rank = x => x === NO_CAT ? 999 : (CAT_ORDER.indexOf(x) + 1 || 500);
+  return rank(a) - rank(b) || a.localeCompare(b, 'th');
+}
+const byModel = (a, b) => String(a.name).localeCompare(String(b.name), 'en', { numeric: true, sensitivity: 'base' });
+
+const PHOTO_BUCKET = 'product-images';     // migration 030 — ถังสาธารณะ อ่านได้ทุกคน เขียนได้เฉพาะเจ้าของร้าน/ผู้ดูแล
+const ICO = {
+  plus:  '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
+  minus: '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/></svg>',
+  x:     '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+};
+
+const wall = { group: 'brand', filter: '', low: false, out: false, mode: 'find', sel: null, wings: [] };
+let drawerId = null;          // รุ่นที่แผงขวาเปิดอยู่ (null = แผงปิด หรือแผงของอย่างอื่น)
+let trayMsg = null;           // ข้อความล่าสุดบนถาด { text, bad }
+
+// สถานะของรุ่น — ปิดใช้งานไม่นับเป็นใกล้หมด/หมด (ไม่ได้ขายแล้ว ไม่ต้องเตือนให้สั่ง)
+function stockStatus(p) {
+  if (!p.is_active) return 'off';
+  if (p.current_qty <= 0) return 'out';
+  if (p.current_qty <= p.reorder_point) return 'low';
+  return 'ok';
+}
+// สถานะมีคำกำกับเสมอ ไม่บอกด้วยสีอย่างเดียว (ขอบแดง/ดำเป็นแค่ตัวช่วยหา)
+const STATUS_TAG = {
+  low: '<span class="w-tag low">ใกล้หมด</span>', out: '<span class="w-tag out">หมด</span>',
+  off: '<span class="w-tag off">ปิดใช้งาน</span>', ok: '',
+};
+function photoUrl(p) {
+  return p && p.image_path ? db.storage.from(PHOTO_BUCKET).getPublicUrl(p.image_path).data.publicUrl : '';
+}
+// ภาพลายเส้นแทนรูปที่ยังไม่มี — หนึ่งแบบต่อหมวด เส้นเดียวกันทั้งชุด (viewBox 64×48 · stroke 1.5 · มุมเหลี่ยม)
+// ผนังส่วนใหญ่ยังไม่มีรูป (Pioneer DJ ไม่มีสักรูป) — กล่องเทาซ้ำ ๆ ทั้งผนังบอกอะไรไม่ได้ ลายเส้นบอกได้ว่าเป็นเครื่องอะไร
+// คีย์ = ชื่อหมวดภาษาอังกฤษใน CAT_TH · หมวดที่ไม่รู้จักใช้ "กล่อง"
+const SIL = {
+  player: '<rect x="13" y="2" width="38" height="44"/><rect x="18" y="5" width="28" height="7"/><circle cx="31" cy="29" r="13"/><circle cx="31" cy="29" r="3.5"/><rect x="15" y="37" width="3" height="3"/><rect x="15" y="42" width="3" height="2"/><path d="M48 18v22M46.5 27h3"/>',
+  'all-in-one': '<rect x="2" y="22" width="60" height="22"/><path d="M22 18l-3-15h26l-3 15z"/><path d="M25 7h14M29 18v4M35 18v4"/><circle cx="13" cy="33" r="7"/><circle cx="51" cy="33" r="7"/><path d="M29 27v10M35 27v10"/>',
+  mixer: '<rect x="14" y="3" width="36" height="42"/><circle cx="22" cy="10" r="2"/><circle cx="32" cy="10" r="2"/><circle cx="42" cy="10" r="2"/><circle cx="22" cy="18" r="2"/><circle cx="32" cy="18" r="2"/><circle cx="42" cy="18" r="2"/><path d="M22 25v12M32 25v12M42 25v12M20 30h4M30 33h4M40 28h4M27 41h10"/>',
+  controller: '<rect x="2" y="13" width="60" height="22"/><circle cx="13" cy="24" r="8"/><circle cx="51" cy="24" r="8"/><path d="M27 17v11M32 17v11M37 17v11M25.5 22h3M30.5 25h3M35.5 20h3M28 32h8"/>',
+  turntable: '<rect x="6" y="4" width="52" height="40"/><circle cx="26" cy="24" r="15"/><circle cx="26" cy="24" r="2"/><path d="M50 9v21l-8 7M47 39h6"/>',
+  headphones: '<path d="M14 31v-6a18 18 0 0 1 36 0v6"/><rect x="9" y="29" width="9" height="15"/><rect x="46" y="29" width="9" height="15"/>',
+  speaker: '<rect x="20" y="2" width="24" height="44"/><circle cx="32" cy="10" r="3"/><circle cx="32" cy="27" r="9"/><circle cx="32" cy="27" r="4"/><path d="M28 41h8"/>',
+  accessory: '<rect x="8" y="15" width="48" height="28"/><path d="M24 15V9h16v6M8 25h48M29 25v5h6v-5"/>',
+  cable: '<rect x="3" y="30" width="10" height="7"/><path d="M1 33.5h2M13 33.5c9 0 9-20 19-20s10 20 19 20M61 33.5h2"/><rect x="51" y="30" width="10" height="7"/>',
+  box: '<path d="M12 15l20-10 20 10v23l-20 10-20-10z"/><path d="M12 15l20 10 20-10M32 25v23"/>',
+};
+const CAT_KEY = {};                  // ป้ายไทย → คีย์ภาษาอังกฤษ (หมวดที่พิมพ์เป็นไทยไว้ในทะเบียน)
+Object.keys(CAT_TH).forEach(k => { CAT_KEY[CAT_TH[k]] = k; });
+function silHtml(p) {
+  const raw = String(p && p.category || '').trim();
+  const key = CAT_TH[raw.toLowerCase()] ? raw.toLowerCase() : (CAT_KEY[raw] || 'box');
+  return '<svg class="sil" viewBox="0 0 64 48" aria-hidden="true">' + SIL[key] + '</svg><span class="sr-only">ไม่มีรูป</span>';
+}
+function photoHtml(p) {
+  const url = photoUrl(p);
+  return url ? '<img src="' + escapeHtml(url) + '" alt="" loading="lazy" decoding="async">' : silHtml(p);
+}
+function thaiDate(d) {
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
 }
 
-function renderFilters() {
-  const b = document.getElementById('fBrand'), c = document.getElementById('fCategory');
-  const bv = b.value, cv = c.value;
-  b.innerHTML = '<option value="">ทุกแบรนด์</option>' + BRAND_OPTIONS.map(x => '<option>' + escapeHtml(x) + '</option>').join('');
-  const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'th'));
-  c.innerHTML = '<option value="">ทุกหมวดหมู่</option>' + cats.map(x => '<option>' + escapeHtml(x) + '</option>').join('');
-  b.value = bv; c.value = cats.includes(cv) ? cv : '';
+// จัดตามแบรนด์/หมวด — จำแยกรายคน บนเครื่องนี้
+// ไม่ได้เก็บใน staff_home เพราะตารางนั้นไม่มีช่องให้ (launcher/apps/yt_state มี check ของตัวเอง)
+// การเพิ่มคอลัมน์ฐานข้อมูลเพื่อค่าเดียวที่เปลี่ยนได้ด้วยปุ่ม G ไม่คุ้ม
+const GROUP_KEY = 'djlab.stockGroup.v1:';   // คีย์เดียวกับ stock.html — เครื่องเดียวกันเปิดสองหน้าได้การจัดเดียวกัน
+function loadWallGroup() {
+  wall.group = 'brand';
+  wall.filter = '';
+  try {
+    const v = localStorage.getItem(GROUP_KEY + currentUserId);
+    if (v === 'brand' || v === 'category') wall.group = v;
+  } catch (e) { /* โหมดส่วนตัว/ถูกบล็อก — ใช้ค่าเริ่มต้น */ }
+}
+function saveWallGroup() {
+  try { localStorage.setItem(GROUP_KEY + currentUserId, wall.group); } catch (e) { /* จำไม่ได้ก็ใช้ต่อได้ */ }
+}
+
+// ตัวกรองสามชั้น: คำค้น · ชิป (หมวดหรือแบรนด์) · ใกล้หมด/หมด
+// ignore = ชั้นที่ไม่นับ — ตัวเลขบนชิปคิดจากชั้นอื่นทั้งหมดยกเว้นตัวมันเอง
+function wallQuery() {
+  return wall.mode === 'find' ? document.getElementById('productSearch').value.trim().toLowerCase() : '';
+}
+function wallVisible(p, ignore) {
+  const q = wallQuery();
+  if (q && ![p.name, p.sku, p.barcode_ean13].some(x => String(x || '').toLowerCase().includes(q))) return false;
+  if (ignore !== 'flags' && (wall.low || wall.out)) {
+    const s = stockStatus(p);
+    if (!((wall.low && s === 'low') || (wall.out && s === 'out'))) return false;
+  }
+  if (ignore !== 'chip' && wall.filter) {
+    if (wall.group === 'brand' ? catLabel(p.category) !== wall.filter : p.brand !== wall.filter) return false;
+  }
+  return true;
+}
+
+function buildWings(merged) {
+  const vis = merged.filter(p => wallVisible(p)).sort(byModel);
+  if (wall.group === 'brand') {
+    return WALL_BRANDS.map(b => {
+      const inBrand = vis.filter(p => p.brand === b);
+      const shelves = [...new Set(inBrand.map(p => catLabel(p.category)))].sort(catCmp)
+        .map(c => ({ label: c, items: inBrand.filter(p => catLabel(p.category) === c) }));
+      return { key: 'b:' + b, title: brandLabel(b), cls: b === 'Other' ? 'w-other' : '',
+               shelves, items: shelves.flatMap(s => s.items) };
+    });
+  }
+  // ปีกหมวดมาจากสินค้าทุกตัว (ไม่ใช่แค่ที่ผ่านตัวกรอง) ปีกจึงไม่หายไปมาเวลากดตัวกรอง — จำตำแหน่งได้
+  return [...new Set(merged.map(p => catLabel(p.category)))].sort(catCmp).map(c => {
+    const items = vis.filter(p => catLabel(p.category) === c);
+    return { key: 'c:' + c, title: c, cls: '', shelves: [{ label: null, items }], items };
+  });
+}
+
+function rowHtml(p) {
+  const s = stockStatus(p);
+  const cls = ['w-row', s];
+  if (p.id === wall.sel) cls.push('sel');
+  const counting = wall.mode === 'count';
+  if (counting && cnt.started && !cnt.ids.includes(p.id)) cls.push('dim');
+  const picked = counting && !cnt.started && cnt.scope === 'pick' && cnt.picks.includes(p.id);
+  if (picked) cls.push('picked');
+  const url = photoUrl(p);
+  const ph = url ? '<img src="' + escapeHtml(url) + '" alt="" loading="lazy" decoding="async">'
+    : isWriter() ? '<button type="button" class="ph-add" onclick="event.stopPropagation(); pickPhoto(\'' + p.id + '\')" title="เพิ่มรูปสินค้า"><span class="idle">' + silHtml(p) + '</span><span class="cta">' + ICO.plus + 'เพิ่มรูป</span></button>'
+    : silHtml(p);
+  return '<div class="' + cls.join(' ') + '" id="wr-' + p.id + '" role="option" aria-selected="' + (p.id === wall.sel) + '" onclick="wallClick(\'' + p.id + '\')">' +
+    '<div class="ph">' + ph + '</div>' +
+    '<div class="w-info"><div class="w-name" title="' + escapeHtml(p.name) + '">' + escapeHtml(p.name) + '</div>' +
+      // ปีกหมวด: แบรนด์หนึ่งบรรทัด ราคา + สถานะอีกบรรทัด — ทุกแถวสูงเท่ากัน ไม่ขึ้นกับความยาวชื่อแบรนด์
+      (wall.group === 'category' ? '<div class="w-brand">' + escapeHtml(brandLabel(p.brand)) + '</div>' : '') +
+      '<div class="w-meta"><span>' + baht0(p.sell_price) + '</span>' + STATUS_TAG[s] + (picked ? '<span class="w-tag pick">เลือกนับ</span>' : '') + '</div></div>' +
+    '<div class="w-qty" title="คงเหลือ ' + p.current_qty + ' ชิ้น">' + p.current_qty + '</div></div>';
+}
+
+function wingHtml(w) {
+  const units = w.items.reduce((sum, p) => sum + Math.max(0, p.current_qty), 0);
+  const filtered = !!(wallQuery() || wall.filter || wall.low || wall.out);
+  return '<section class="wing ' + w.cls + '" role="group" aria-label="' + escapeHtml(w.title) + '" data-key="' + escapeHtml(w.key) + '">' +
+    '<div class="wing-h"><h2>' + escapeHtml(w.title) + '</h2><span>' + w.items.length + ' รุ่น · ' + units + ' ชิ้น</span></div>' +
+    '<div class="wing-b">' + (w.items.length
+      ? w.shelves.map(s => (s.label ? '<div class="shelf-h"><span>' + escapeHtml(s.label) + '</span><span>' + s.items.length + '</span></div>' : '') +
+          s.items.map(rowHtml).join('')).join('')
+      : '<div class="wing-empty">' + (filtered ? 'ไม่มีรุ่นที่ตรงกับตัวกรอง' : 'ยังไม่มีสินค้าในปีกนี้') + '</div>') +
+    '</div></section>';
 }
 
 function renderProducts() {
+  const el = document.getElementById('wall');
   const merged = getMergedProducts();
-  const lowStock = merged.filter(p => p.low_stock);
-  const totalValue = merged.reduce((s, p) => s + (p.current_qty * (parseFloat(p.sell_price) || 0)), 0);
-  document.getElementById('statTotalProducts').textContent = merged.length;
-  document.getElementById('statLowStock').textContent = lowStock.length;
-  document.getElementById('statTotalValue').textContent = Math.round(totalValue).toLocaleString();
-
-  const q = document.getElementById('productSearch').value.trim().toLowerCase();
-  const brand = document.getElementById('fBrand').value;
-  const cat = document.getElementById('fCategory').value;
-  const st = document.getElementById('fStatus').value;
-  const rows = merged.filter(p =>
-    (!q || (p.name || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q) ||
-           (p.barcode_ean13 || '').toLowerCase().includes(q)) &&
-    (!brand || p.brand === brand) &&
-    (!cat || p.category === cat) &&
-    (!st || (st === 'low' ? p.low_stock : st === 'active' ? p.is_active : !p.is_active)));
-  fillTable('products', sortRows('products', rows), p =>
-    '<td class="nowrap">' + escapeHtml(p.sku) + '</td>' +
-    '<td><strong>' + escapeHtml(p.name) + '</strong></td>' +
-    '<td>' + escapeHtml(p.brand) + '</td>' +
-    '<td class="col-opt">' + escapeHtml(p.category || '—') + '</td>' +
-    '<td class="num"><strong>' + p.current_qty + '</strong></td>' +
-    '<td class="num col-opt">' + p.reorder_point + '</td>' +
-    '<td class="num nowrap">' + formatMoney(p.sell_price) + '</td>' +
-    '<td>' + statusHtml(p) + '</td>',
-    'ไม่พบสินค้าที่ตรงกับเงื่อนไข');
+  // วาดใหม่ทุกครั้งที่ข้อมูลเข้า (realtime) — ต้องคืนตำแหน่งเลื่อนของทุกปีก ไม่งั้นผนังเด้งกลับบนสุดกลางการใช้งาน
+  const scroll = {};
+  el.querySelectorAll('.wing').forEach(w => { scroll[w.dataset.key] = w.querySelector('.wing-b').scrollTop; });
+  const sx = el.scrollLeft;
+  wall.wings = buildWings(merged);
+  el.classList.toggle('by-cat', wall.group === 'category');
+  el.innerHTML = wall.wings.map(wingHtml).join('');
+  el.querySelectorAll('.wing').forEach(w => { if (scroll[w.dataset.key]) w.querySelector('.wing-b').scrollTop = scroll[w.dataset.key]; });
+  el.scrollLeft = sx;
+  if (wallRow(wall.sel)) el.setAttribute('aria-activedescendant', 'wr-' + wall.sel);
+  else el.removeAttribute('aria-activedescendant');
+  document.querySelectorAll('#groupSwitch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.group === wall.group)));
+  renderWallChips(merged);
+  renderWallFlags(merged);
+  fitWings();
+  refreshDrawerCount();
+  if (wall.mode !== 'find') renderTrayBody();
 }
-['productSearch', 'fBrand', 'fCategory', 'fStatus'].forEach(id =>
-  document.getElementById(id).addEventListener('input', renderProducts));
 
-async function openProduct(id) {
+// ปีกที่ไม่พอดีจอ: ตั้งความกว้างให้ k ปีกพอดีจอ แล้ว snap ทีละปีก — ขอบขวาไม่ตัดกลางปีก
+function fitWings() {
+  const el = document.getElementById('wall');
+  const n = wall.wings.length, W = el.clientWidth, gap = 12;
+  if (!W) return;
+  const min = wall.group === 'category' ? 280 : 250;
+  const snaps = n * min + gap * (n - 1) > W + 1;
+  el.classList.toggle('snaps', snaps);
+  if (snaps) {
+    const k = Math.max(1, Math.floor((W + gap) / (min + gap)));
+    el.style.setProperty('--wing-w', Math.floor((W - gap * (k - 1)) / k) + 'px');
+  } else el.style.removeProperty('--wing-w');
+  markWallSteps();
+}
+function markWallSteps() {
+  const el = document.getElementById('wall');
+  document.getElementById('wallPrev').hidden = el.scrollLeft <= 1;
+  document.getElementById('wallNext').hidden = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+}
+function wallStep(d) {
+  const el = document.getElementById('wall');
+  const w = el.querySelector('.wing');
+  if (!w) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollBy({ left: d * (w.getBoundingClientRect().width + 12), behavior: reduce ? 'auto' : 'smooth' });
+  setTimeout(markWallSteps, reduce ? 0 : 450);     // เผื่อเบราว์เซอร์ไม่ส่ง scroll ตอนเลื่อนด้วยโค้ด
+}
+document.getElementById('wall').addEventListener('scroll', markWallSteps);
+// ความกว้างของผนัง/แถวชิปเปลี่ยน (เปิด-ปิดแผงขวา · ย่อหน้าต่าง) = จัดใหม่
+(function () {
+  if (!window.ResizeObserver) return;
+  let wWall = 0, wChips = 0;
+  // จัดใหม่ในเฟรมถัดไป ไม่ใช่ในตัวเรียกกลับเอง — การซ่อน/โชว์ชิปเปลี่ยนขนาดของที่กำลังถูกเฝ้าอยู่
+  // ถ้าทำทันที เบราว์เซอร์ส่ง "ResizeObserver loop" มาเป็น error แล้วแถบแดงขึ้นทั้งที่ไม่มีอะไรพัง
+  new ResizeObserver(() => requestAnimationFrame(() => {
+    const el = document.getElementById('wall');
+    if (el.clientWidth !== wWall) { wWall = el.clientWidth; fitWings(); }
+  })).observe(document.getElementById('wall'));
+  new ResizeObserver(() => requestAnimationFrame(() => {
+    const el = document.getElementById('wallChips');
+    if (el.clientWidth !== wChips) { wChips = el.clientWidth; layoutChips(); }
+  })).observe(document.getElementById('wallChips'));
+})();
+
+function renderWallChips(merged) {
+  const pool = merged.filter(p => wallVisible(p, 'chip'));
+  const opts = wall.group === 'brand'
+    ? [...new Set(merged.map(p => catLabel(p.category)))].sort(catCmp)
+        .map(c => ({ v: c, t: c, n: pool.filter(p => catLabel(p.category) === c).length }))
+    : WALL_BRANDS.map(b => ({ v: b, t: brandLabel(b), n: pool.filter(p => p.brand === b).length }));
+  const all = { v: '', t: wall.group === 'brand' ? 'ทุกหมวด' : 'ทุกแบรนด์', n: pool.length };
+  const box = document.getElementById('wallChips');
+  box.setAttribute('aria-label', wall.group === 'brand' ? 'กรองตามหมวด' : 'กรองตามแบรนด์');
+  box.innerHTML = [all].concat(opts).map(o =>
+    '<button type="button" class="fchip" aria-pressed="' + (wall.filter === o.v) + '" data-v="' + escapeHtml(o.v) + '">' +
+      escapeHtml(o.t) + '<small>' + o.n + '</small></button>').join('');
+  layoutChips();
+}
+// พับชิปที่ล้นบรรทัดเดียวเข้าปุ่ม "+n หมวด" — ซ่อนจากท้ายทีละตัวจนทั้งแถว (รวมปุ่ม) อยู่บรรทัดเดียว
+// ชิปที่เลือกอยู่ไม่ถูกซ่อนเด็ดขาด · กางออก = หลายบรรทัด เห็นครบทุกตัว
+function layoutChips() {
+  const box = document.getElementById('wallChips');
+  const chips = [...box.querySelectorAll('.fchip[data-v]')];
+  let more = box.querySelector('.fchip-more');
+  chips.forEach(c => { c.hidden = false; });
+  if (more) more.hidden = true;
+  if (!chips.length || !box.clientWidth) return;
+  const top = chips[0].offsetTop;
+  if (!chips.some(c => c.offsetTop > top)) { if (more) more.remove(); wall.chipsOpen = false; return; }
+  if (!more) {
+    more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'fchip fchip-more';
+    box.appendChild(more);
+  }
+  more.hidden = false;
+  const noun = wall.group === 'brand' ? 'หมวด' : 'แบรนด์';
+  if (wall.chipsOpen) { more.textContent = 'ย่อ'; more.setAttribute('aria-expanded', 'true'); return; }
+  more.setAttribute('aria-expanded', 'false');
+  let hidden = 0;
+  more.textContent = '+0 ' + noun;
+  const spill = () => more.offsetTop > top || chips.some(c => !c.hidden && c.offsetTop > top);
+  for (let i = chips.length - 1; i >= 1 && spill(); i--) {
+    if (chips[i].getAttribute('aria-pressed') === 'true') continue;
+    chips[i].hidden = true;
+    hidden++;
+    more.textContent = '+' + hidden + ' ' + noun;
+  }
+  more.title = 'อีก ' + hidden + ' ' + noun + ' — กดเพื่อดูทั้งหมด';
+}
+document.getElementById('wallChips').addEventListener('click', e => {
+  if (e.target.closest('.fchip-more')) { wall.chipsOpen = !wall.chipsOpen; layoutChips(); return; }
+  const b = e.target.closest('.fchip');
+  if (!b) return;
+  wall.filter = b.dataset.v;          // อ่านจาก data- ไม่ใส่ชื่อหมวดลง onclick (ชื่อหมวดพิมพ์อะไรมาก็ได้)
+  renderProducts();
+});
+
+function renderWallFlags(merged) {
+  const pool = merged.filter(p => wallVisible(p, 'flags'));
+  document.getElementById('nLow').textContent = pool.filter(p => stockStatus(p) === 'low').length;
+  document.getElementById('nOut').textContent = pool.filter(p => stockStatus(p) === 'out').length;
+  document.getElementById('flagLow').setAttribute('aria-pressed', String(wall.low));
+  document.getElementById('flagOut').setAttribute('aria-pressed', String(wall.out));
+}
+function toggleWallFlag(k) { wall[k] = !wall[k]; renderProducts(); }
+
+function setWallGroup(g) {
+  if (g === wall.group) return;
+  wall.group = g;
+  wall.filter = '';                   // ชิปหมวดใช้กับปีกหมวดไม่ได้ (และกลับกัน)
+  wall.chipsOpen = false;
+  saveWallGroup();
+  const el = document.getElementById('wall');
+  renderProducts();
+  el.scrollLeft = 0;
+  const r = wallRow(wall.sel);
+  if (r) r.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+// G สลับการจัด — หน่วงไว้ 60ms ก่อนทำ: ถ้ามีปุ่มตามมาติด ๆ แปลว่าเป็นตัวแรกของซีเรียลที่ยิงมา
+// (เครื่องยิงเว้นช่องไฟ ≤ 14ms · คนกดปุ่มต่อไปไม่มีทางเร็วขนาดนั้น) ตัวจัดการคีย์ลัดยกเลิกให้เองเมื่อมีปุ่มถัดไปมาถึง
+let groupKeyTimer = null;
+function armGroupToggle() {
+  clearTimeout(groupKeyTimer);
+  groupKeyTimer = setTimeout(() => { groupKeyTimer = null; setWallGroup(wall.group === 'brand' ? 'category' : 'brand'); }, 60);
+}
+
+// ---- เลือกแถว · คีย์บอร์ด -------------------------------------------------
+function wallRow(id) { return id ? document.getElementById('wr-' + id) : null; }
+function wallSelect(id, noScroll) {
+  const prev = wallRow(wall.sel);
+  if (prev) { prev.classList.remove('sel'); prev.setAttribute('aria-selected', 'false'); }
+  wall.sel = id;
+  const r = wallRow(id);
+  if (!r) return;
+  r.classList.add('sel');
+  r.setAttribute('aria-selected', 'true');
+  document.getElementById('wall').setAttribute('aria-activedescendant', r.id);
+  if (!noScroll) r.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  // แผงขวาเปิดอยู่ = ตามแถวที่เลือกไปด้วย · หน่วงนิดเดียว กดลูกศรรัว ๆ จะไม่ยิงฐานข้อมูลทุกแถว
+  if (wall.mode === 'find' && detailOpen() && drawerId && drawerId !== id) {
+    clearTimeout(wallSelect.t);
+    wallSelect.t = setTimeout(() => { if (wall.sel === id && detailOpen() && drawerId !== id) openProduct(id); }, 140);
+  }
+}
+function wallMove(key) {
+  const cols = wall.wings.map(w => w.items.map(p => p.id));
+  let wi = -1, ri = -1;
+  cols.forEach((c, i) => { const j = c.indexOf(wall.sel); if (j !== -1) { wi = i; ri = j; } });
+  if (wi === -1) {                                   // ยังไม่ได้เลือก → แถวแรกของปีกแรกที่มีของ
+    const f = cols.findIndex(c => c.length);
+    if (f !== -1) wallSelect(cols[f][0]);
+    return;
+  }
+  if (key === 'ArrowDown' || key === 'ArrowUp') {
+    wallSelect(cols[wi][Math.max(0, Math.min(cols[wi].length - 1, ri + (key === 'ArrowDown' ? 1 : -1)))]);
+    return;
+  }
+  const dir = key === 'ArrowRight' ? 1 : -1;
+  let t = wi + dir;
+  while (t >= 0 && t < cols.length && !cols[t].length) t += dir;      // ข้ามปีกที่ว่าง (ถูกกรองหมด)
+  if (t < 0 || t >= cols.length) return;
+  // ไปแถวที่อยู่ระดับสายตาเดียวกันในปีกถัดไป ไม่ใช่แถวลำดับเดียวกัน — ชั้นย่อยทำให้ลำดับไม่ตรงกับตำแหน่ง
+  const y = wallRow(wall.sel).getBoundingClientRect().top;
+  let best = cols[t][0], bd = Infinity;
+  cols[t].forEach(id => {
+    const r = wallRow(id);
+    const d = r ? Math.abs(r.getBoundingClientRect().top - y) : Infinity;
+    if (d < bd) { bd = d; best = id; }
+  });
+  wallSelect(best);
+}
+function wallClick(id) {
+  document.getElementById('wall').focus({ preventScroll: true });     // คลิกแล้วลูกศรใช้ต่อได้ทันที
+  wallSelect(id, true);
+  if (wall.mode === 'receive') { rcvSetTarget(id); return; }
+  if (wall.mode === 'count' && !cnt.started && cnt.scope === 'pick') { countTogglePick(id); return; }
+  openProduct(id);
+}
+function wallEnter() {
+  if (wallRow(wall.sel)) wallClick(wall.sel);
+  else wallMove('ArrowDown');
+}
+function flashRow(id) {
+  const r = wallRow(id);
+  if (!r) return;
+  r.classList.remove('hit');
+  void r.offsetWidth;                  // เริ่มแอนิเมชันใหม่แม้ยิงรุ่นเดิมซ้ำ
+  r.classList.add('hit');
+}
+// ยิงเจอ → กระโดดไปแถวนั้น ไฮไลต์ แล้วเปิดแผงขวา (ถ้ายิงซีเรียล ไฮไลต์เครื่องนั้นในแผงด้วย)
+function wallJump(product, serial) {
+  const p = getMergedProducts().find(x => x.id === product.id) || product;
+  if (!wallVisible(p)) {
+    // ตัวกรองที่ซ่อนรุ่นนี้อยู่ต้องหลีกทาง ไม่งั้นกระโดดไปหาแถวที่มองไม่เห็น
+    wall.filter = '';
+    wall.low = wall.out = false;
+    document.getElementById('productSearch').value = '';
+  }
+  renderProducts();                    // อ่านช่องค้นหาใหม่ด้วย — ตัวอักษรที่เครื่องยิงพิมพ์ลงไปถูกคืนค่าแล้ว
+  wallSelect(p.id);
+  flashRow(p.id);
+  openProduct(p.id, serial || null);
+}
+function focusStockScan() {
+  const s = document.getElementById('productSearch');
+  s.focus();
+  s.select();
+}
+async function wallSubmit() {
+  const box = document.getElementById('productSearch');
+  const v = box.value.trim();
+  if (wall.mode !== 'find') {          // พิมพ์ซีเรียล/บาร์โค้ดเองแล้ว Enter = เหมือนยิง
+    if (!v) return;
+    box.value = '';
+    scanPurpose = wall.mode;
+    await onScanned(v, false);
+    return;
+  }
+  if (!v) { if (wall.sel) openProduct(wall.sel); return; }
+  const found = await findByBarcode(v);
+  if (found.product) {
+    box.value = '';
+    wallJump(found.product, found.viaSerial && found.unit ? found.unit.serial_no : null);
+    return;
+  }
+  renderProducts();
+  const first = wall.wings.map(w => w.items[0]).find(Boolean);
+  if (first) { wallSelect(first.id); openProduct(first.id); }
+  else showToast('⚠️ ไม่พบสินค้าที่ตรงกับ "' + v + '"');
+}
+(function () {
+  const box = document.getElementById('productSearch');
+  let t = null;
+  // หน่วงนิดเดียวก่อนกรอง: ตอนเครื่องยิงพิมพ์ตัวอักษรไทยหล่นลงช่อง (≈65ms) แล้วถูกคืนค่า ผนังจะไม่กระพริบตาม
+  box.addEventListener('input', () => { if (wall.mode !== 'find') return; clearTimeout(t); t = setTimeout(renderProducts, 90); });
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); wallSubmit(); }
+    else if (e.key === 'ArrowDown' && wall.mode === 'find') {
+      e.preventDefault();
+      document.getElementById('wall').focus();
+      if (!wallRow(wall.sel)) wallMove('ArrowDown');
+    }
+  });
+})();
+
+// ---- แผงขวา (ลิ้นชัก) -------------------------------------------------------
+function drawerCountHtml(p) {
+  const s = stockStatus(p), q = p.current_qty, rp = p.reorder_point;
+  const word = { low: '<span class="w-tag low">ใกล้หมด</span>', out: '<span class="w-tag out">หมด</span>',
+                 off: '<span class="w-tag off">ปิดใช้งาน</span>', ok: '<span class="w-tag ok">พอขาย</span>' }[s];
+  return '<div class="dr-count ' + s + '"><div class="dr-num">' + q + '</div>' +
+      '<div class="dr-side"><span class="u">ชิ้นในร้าน</span>' + word + '<span class="rp">จุดสั่งซื้อซ้ำ ≤ ' + rp + '</span></div></div>';
+}
+function refreshDrawerCount() {
+  if (!drawerId || !detailOpen()) return;
+  const box = document.getElementById('drCount');
+  const p = getMergedProducts().find(x => x.id === drawerId);
+  if (box && p) box.innerHTML = drawerCountHtml(p);
+}
+
+const UNIT_ORDER = ['in_stock', 'reserved', 'defective', 'sold'];
+let drawerUnits = [];
+function unitsHtml(list, hi, all) {
+  if (!list.length) return '<div class="hint" style="margin-top:14px;">รุ่นนี้ไม่ได้เก็บซีเรียลรายเครื่อง</div>';
+  return '<div class="sec-title">ซีเรียลรายเครื่อง</div>' + UNIT_ORDER.map(st => {
+    const xs = list.filter(u => u.status === st);
+    if (!xs.length) return '';
+    // เครื่องที่ขายแล้วสะสมไปเรื่อย ๆ — โชว์ล่าสุด 12 เครื่อง ที่เหลือกดดูได้
+    const cap = st === 'sold' && !all ? 12 : Infinity;
+    return '<div class="sn-group"><h4><b>' + xs.length + '</b>' + escapeHtml(UNIT_STATUS_LABEL[st] || st) + '</h4><div class="sn-list">' +
+      xs.slice(0, cap).map(u => '<span class="sn ' + st + (u.serial_no === hi ? ' hit' : '') + '" title="รับเข้า ' + formatDateTime(u.received_at) + '">' +
+        escapeHtml(u.serial_no) + '</span>').join('') +
+      (xs.length > cap ? '<button class="btn btn-sm btn-ghost" type="button" onclick="document.getElementById(\'dUnits\').innerHTML = unitsHtml(drawerUnits, null, true)">ดูทั้งหมด ' + xs.length + ' เครื่อง</button>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+async function openProduct(id, hiSerial) {
   const p = getMergedProducts().find(x => x.id === id);
   if (!p) { showToast('⚠️ ไม่พบข้อมูลสินค้านี้'); return; }
   const token = ++detailToken;
+  const url = photoUrl(p);
+  const w = isWriter();
+  const q = "'" + p.id + "'";
   openDetail(p.name,
-    '<div style="margin-bottom:14px;">' + statusHtml(p) + '</div>' +
-    '<dl class="kv">' +
-      '<dt>คงเหลือ</dt><dd><strong style="font-size:20px;">' + p.current_qty + '</strong> ชิ้น</dd>' +
-      '<dt>SKU</dt><dd>' + escapeHtml(p.sku) + '</dd>' +
-      '<dt>แบรนด์</dt><dd>' + escapeHtml(p.brand) + '</dd>' +
-      '<dt>หมวดหมู่</dt><dd>' + escapeHtml(p.category || '—') + '</dd>' +
-      '<dt>บาร์โค้ด EAN-13</dt><dd>' + escapeHtml(p.barcode_ean13 || '— ยังไม่ผูก') + '</dd>' +
-      '<dt>ราคาขาย</dt><dd>' + formatMoney(p.sell_price) + ' บาท</dd>' +
-      '<dt>จุดสั่งซื้อซ้ำ</dt><dd>' + p.reorder_point + '</dd>' +
-    '</dl>' +
-    '<div class="actions">' +
-      '<button class="btn btn-sm" type="button" onclick="gotoMovement(\'' + p.id + '\', \'in\')">▲ รับเข้า</button>' +
-      '<button class="btn btn-sm" type="button" onclick="gotoMovement(\'' + p.id + '\', \'out\')">▼ ตัดออก</button>' +
-      '<button class="btn btn-sm" type="button" onclick="gotoMovement(\'' + p.id + '\', \'adjustment\')">◆ ปรับยอด</button>' +
+    '<div class="dr-photo">' +
+      (url ? '<img src="' + escapeHtml(url) + '" alt="รูปสินค้า ' + escapeHtml(p.name) + '">'
+           : '<div class="dr-photo-none">' + silHtml(p) + 'ยังไม่มีรูปสินค้า</div>') +
+      // เพิ่ม/เปลี่ยน/เอารูปออก — เฉพาะเจ้าของร้าน/ผู้ดูแล (RLS ของถัง product-images · migration 030 เกณฑ์เดียวกัน)
+      (w ? '<div class="dr-photo-act"><button class="btn btn-sm" type="button" onclick="pickPhoto(' + q + ')">' + (url ? 'เปลี่ยนรูป' : 'เพิ่มรูป') + '</button>' +
+           (url ? '<button class="btn btn-sm" type="button" onclick="removePhoto(' + q + ')">เอารูปออก</button>' : '') + '</div>' : '') +
     '</div>' +
+    '<div class="dr-meta">' + escapeHtml(brandLabel(p.brand)) + ' · ' + escapeHtml(catLabel(p.category)) + ' · ' + escapeHtml(p.sku) + '</div>' +
+    '<div id="drCount">' + drawerCountHtml(p) + '</div>' +
+    '<div class="dr-act" role="group" aria-label="จัดการสต็อกรุ่นนี้">' +
+      '<button type="button" onclick="drawerReceive(' + q + ')">รับเข้า</button>' +
+      '<button type="button" id="drOut" aria-expanded="false" onclick="drawerMoveForm(' + q + ', \'out\')">ตัดออก</button>' +
+      '<button type="button" id="drAdj" aria-expanded="false" onclick="drawerMoveForm(' + q + ', \'adjustment\')">ปรับยอด</button>' +
+      '<button type="button" onclick="drawerCount(' + q + ')">นับ</button>' +
+    '</div>' +
+    '<div id="drMove"></div>' +
+    '<dl class="kv"><dt>ราคาขาย</dt><dd>' + baht0(p.sell_price) + '</dd>' +
+      '<dt>บาร์โค้ด EAN-13</dt><dd>' + escapeHtml(p.barcode_ean13 || '— ยังไม่ผูก') + '</dd></dl>' +
     // stock.html ให้แก้ข้อมูลสินค้าได้เฉพาะเจ้าของร้าน/ผู้ดูแล (RLS products_admin_write) — ใช้เกณฑ์เดียวกัน
-    (isWriter() ? '<div class="actions"><button class="btn btn-sm" type="button" onclick="adGotoRow(\'products\', \'' + p.id + '\')">✎ แก้ไขข้อมูลสินค้า</button></div>' : '') +
+    (w ? '<div class="actions"><button class="btn btn-sm" type="button" onclick="adGotoRow(\'products\', ' + q + ')">แก้ไขข้อมูลสินค้า</button></div>' : '') +
     '<div id="dUnits"><div class="hint">กำลังโหลดซีเรียล...</div></div>' +
-    '<div class="sec-title">การเคลื่อนไหวล่าสุด</div><div id="dMoves"><div class="hint">กำลังโหลด...</div></div>');
+    '<div class="sec-title">การเคลื่อนไหวล่าสุด</div><div id="dMoves"><div class="hint">กำลังโหลด...</div></div>' +
+    '<button class="btn btn-sm btn-ghost" type="button" style="margin-top:8px;" onclick="gotoProductHistory(' + q + ')">ดูประวัติทั้งหมดของรุ่นนี้ →</button>');
+  document.getElementById('detail').classList.add('stock-drawer');
+  drawerId = id;
 
   const [u, m] = await Promise.all([
     db.from('product_units').select('serial_no, status, received_at').eq('product_id', id).order('received_at', { ascending: false }),
-    db.from('stock_movements').select(MOVE_SELECT).eq('product_id', id).order('created_at', { ascending: false }).limit(30),
+    db.from('stock_movements').select(MOVE_SELECT).eq('product_id', id).order('created_at', { ascending: false }).limit(10),
   ]);
   if (token !== detailToken) return;
 
@@ -2052,18 +2703,10 @@ async function openProduct(id) {
   if (u.error) {
     console.error('[Load units]', u.error);
     uBox.innerHTML = '<div class="alert alert-red">โหลดรายการซีเรียลไม่สำเร็จ: ' + escapeHtml(u.error.message) + '</div>';
-  } else if (!u.data || !u.data.length) {
-    uBox.innerHTML = '<div class="hint">รุ่นนี้ไม่ได้เก็บซีเรียลรายเครื่อง</div>';
   } else {
-    const inStock = u.data.filter(x => x.status === 'in_stock').length;
-    uBox.innerHTML = '<div class="sec-title">ซีเรียลรายเครื่อง (' + u.data.length + ' เครื่อง · อยู่ในสต็อก ' + inStock + ')</div>' +
-      u.data.map(x =>
-        '<div class="list-row"><div><div style="font-weight:600;word-break:break-all;">' + escapeHtml(x.serial_no) + '</div>' +
-        '<div class="sub">รับเข้า ' + formatDateTime(x.received_at) + '</div></div>' +
-        '<span class="st ' + (x.status === 'in_stock' ? 'st-ok">✓ ' : 'st-off">• ') +
-          escapeHtml(UNIT_STATUS_LABEL[x.status] || x.status) + '</span></div>').join('');
+    drawerUnits = u.data || [];
+    uBox.innerHTML = unitsHtml(drawerUnits, hiSerial);
   }
-
   const mBox = document.getElementById('dMoves');
   if (m.error) {
     console.error('[Load product movements]', m.error);
@@ -2076,6 +2719,631 @@ async function openProduct(id) {
       '<div class="sub">' + formatDateTime(x.created_at) + ' · ' + escapeHtml(x.admins ? x.admins.full_name : 'ไม่ทราบผู้ทำรายการ') + '</div></div>' +
       qtyHtml(x) + '</div>').join('');
   }
+}
+
+function gotoProductHistory(id) {
+  const p = products.find(x => x.id === id);
+  showSection('moves');
+  document.getElementById('moveSearch').value = p ? p.sku : '';
+  renderMoves();
+}
+function drawerReceive(id) {
+  setWallMode('receive');
+  rcvSetTarget(id);
+}
+function drawerCount(id) {
+  setWallMode('count');
+  if (cnt.started) { showToast('⚠️ กำลังนับขอบเขตอื่นอยู่ — ยืนยันหรือเลิกนับรอบนั้นก่อน'); return; }
+  cnt.scope = 'pick';
+  cnt.picks = [id];
+  countStart();
+}
+
+// ตัดออก / ปรับยอด ในแผงเลย ไม่ต้องย้ายหมวด — ลงแค่ stock_movements แถวเดียว (เพิ่มได้อย่างเดียว · กฎข้อ 5)
+function drawerMoveForm(id, type) {
+  const box = document.getElementById('drMove');
+  const btn = document.getElementById(type === 'out' ? 'drOut' : 'drAdj');
+  const other = document.getElementById(type === 'out' ? 'drAdj' : 'drOut');
+  if (btn.getAttribute('aria-expanded') === 'true') { box.innerHTML = ''; btn.setAttribute('aria-expanded', 'false'); return; }
+  other.setAttribute('aria-expanded', 'false');
+  btn.setAttribute('aria-expanded', 'true');
+  const out = type === 'out', q = "'" + id + "'";
+  box.innerHTML = '<form class="dr-form" onsubmit="event.preventDefault(); drawerMoveSubmit(' + q + ', \'' + type + '\')">' +
+    '<h3>' + (out ? 'ตัดออก' : 'ปรับยอด') + '</h3>' +
+    '<div class="row2"><div class="field"><label class="lbl" for="drQty">' + (out ? 'จำนวนที่ตัดออก' : 'จำนวนที่ปรับ (ลดยอดใส่ติดลบ)') + '</label>' +
+      '<input class="input" id="drQty" type="number" step="1"' + (out ? ' min="1"' : '') + ' required></div>' +
+    '<div class="field"><label class="lbl" for="drReason">เหตุผล</label>' +
+      '<input class="input" id="drReason" maxlength="200" placeholder="' + (out ? 'เช่น ของเสีย ส่งคืนตัวแทน' : 'เช่น นับไม่ตรง') + '"></div></div>' +
+    (out ? '<p class="hint" style="margin:-6px 0 12px;">ขายให้ลูกค้าทำที่ขายหน้าร้าน — ตัดออกตรงนี้ไม่เปลี่ยนสถานะซีเรียล</p>' : '') +
+    '<div class="actions"><button class="btn btn-primary" id="drMoveBtn" type="submit">บันทึก' + (out ? 'ตัดออก' : 'ปรับยอด') + '</button>' +
+    '<button class="btn" type="button" onclick="drawerMoveForm(' + q + ', \'' + type + '\')">ยกเลิก</button></div>' +
+    '<p class="hint">บันทึกแล้วแก้หรือลบไม่ได้ ถ้าลงผิดให้ลงปรับยอดกลับ</p></form>';
+  document.getElementById('drQty').focus();
+}
+async function drawerMoveSubmit(id, type) {
+  const qty = parseInt(document.getElementById('drQty').value, 10);
+  const reason = document.getElementById('drReason').value.trim();
+  if (isNaN(qty) || qty === 0) { showToast('⚠️ กรุณาระบุจำนวนที่ไม่เป็นศูนย์'); return; }
+  if (type === 'out' && qty < 0) { showToast('⚠️ จำนวนตัดออกต้องเป็นค่าบวก'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  const btn = document.getElementById('drMoveBtn');
+  btn.disabled = true;
+  try {
+    const { error } = await db.from('stock_movements').insert({ product_id: id, type, qty, reason: reason || null, admin_id: currentUserId });
+    if (error) {
+      console.error('[Drawer movement]', error);
+      showFatalError('บันทึก' + (type === 'out' ? 'ตัดออก' : 'ปรับยอด') + 'ไม่สำเร็จ: ' + error.message);
+      return;
+    }
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    return;
+  } finally {
+    btn.disabled = false;
+  }
+  showToast('✅ บันทึก' + (type === 'out' ? 'ตัดออก ' + qty : 'ปรับยอด ' + (qty > 0 ? '+' : '') + qty) + ' ชิ้นแล้ว');
+  await loadAll();
+  if (drawerId === id && detailOpen()) openProduct(id);
+}
+
+// ---- รูปสินค้า (ถัง product-images · migration 030) --------------------------
+// ย่อที่เครื่องก่อนส่งแบบเดียวกับรูปบิล แต่เล็กกว่า (รูปแคตตาล็อกโชว์แค่ 76–400px) และเป็น WebP
+// Safari บางรุ่นเข้ารหัส WebP จาก canvas ไม่ได้ → ตกไปใช้ JPEG
+const PHOTO_MAX_EDGE = 800, PHOTO_QUALITY = 0.85;
+let photoTarget = null;
+// toDataURL แทน toBlob: บอกได้ทันทีว่าเข้ารหัสเป็นชนิดที่ขอได้จริงไหม (ไม่ได้ = คืน PNG มา)
+// และไม่ค้างใน Chrome headless ที่ใช้รันเทสต์ (toBlob แบบ WebP ไม่เคยเรียก callback ที่นั่น)
+// รูปแค่ 800px เข้ารหัสบนเธรดหลักไม่ถึงเสี้ยววินาที · กดโดยเจ้าของร้านทีละรูป
+function canvasBlob(canvas, type) {
+  const url = canvas.toDataURL(type, PHOTO_QUALITY);
+  if (!url.startsWith('data:' + type + ';')) return null;
+  const bin = atob(url.slice(url.indexOf(',') + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type });
+}
+function shrinkPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const src = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(src);
+      const scale = Math.min(1, PHOTO_MAX_EDGE / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale)), h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';               // PNG พื้นโปร่ง → พื้นขาวเหมือนรูปอื่นบนผนัง
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      const blob = canvasBlob(canvas, 'image/webp') || canvasBlob(canvas, 'image/jpeg');
+      if (blob) resolve(blob); else reject(new Error('ย่อรูปไม่สำเร็จ'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(src); reject(new Error('เปิดไฟล์รูปนี้ไม่ได้ ลองเลือกไฟล์ JPG/PNG/WebP')); };
+    img.src = src;
+  });
+}
+function pickPhoto(id) {
+  // ปุ่มถูกซ่อนจากพนักงานอยู่แล้ว — กันซ้ำที่นี่ด้วย ไม่พึ่งแค่การซ่อนปุ่ม (RLS ก็ปฏิเสธอยู่ดี แต่ข้อความจะอ่านไม่รู้เรื่อง)
+  if (!isWriter()) { showToast('⚠️ เพิ่มหรือเปลี่ยนรูปสินค้าได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  photoTarget = id;
+  const input = document.getElementById('photoInput');
+  input.value = '';
+  input.click();
+}
+document.getElementById('photoInput').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f && photoTarget) uploadPhoto(photoTarget, f);
+});
+async function uploadPhoto(id, file) {
+  if (!isWriter()) { showToast('⚠️ เพิ่มหรือเปลี่ยนรูปสินค้าได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return false; }
+  const p = products.find(x => x.id === id);
+  if (!p) { showToast('⚠️ ไม่พบสินค้านี้'); return false; }
+  showToast('กำลังอัปโหลดรูป "' + p.name + '"...');
+  let blob;
+  try { blob = await shrinkPhoto(file); }
+  catch (e) { showFatalError('ย่อรูปไม่สำเร็จ: ' + e.message); return false; }
+  const path = id + '/' + crypto.randomUUID() + (blob.type === 'image/webp' ? '.webp' : '.jpg');
+  const old = p.image_path || null;
+  try {
+    // ลำดับเดียวกับรูปบิล: อัปโหลดไฟล์ใหม่ → ชี้แถวไปไฟล์ใหม่ → ค่อยลบไฟล์เก่า
+    // พลาดกลางทางแล้วแถวไม่เคยชี้ไปไฟล์ที่ไม่มีอยู่จริง
+    const up = await db.storage.from(PHOTO_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+    if (up.error) { showFatalError('อัปโหลดรูปไม่สำเร็จ: ' + up.error.message + ' (รูปเดิมของสินค้ายังอยู่)'); return false; }
+    const { error } = await db.from('products').update({ image_path: path, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) {
+      await db.storage.from(PHOTO_BUCKET).remove([path]);      // ไม่ทิ้งไฟล์กำพร้าไว้ในถัง
+      console.error('[Set product image]', error);
+      showFatalError('บันทึกรูปให้สินค้าไม่สำเร็จ: ' + error.message);
+      return false;
+    }
+    if (old) await removePhotoFile(old);
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    return false;
+  }
+  p.image_path = path;                 // realtime จะส่งแถวใหม่มาอีกรอบ แต่ไม่ต้องรอ
+  renderProducts();
+  if (drawerId === id && detailOpen()) openProduct(id);
+  showToast('✅ ใส่รูป "' + p.name + '" แล้ว');
+  return true;
+}
+async function removePhotoFile(path) {
+  const { error } = await db.storage.from(PHOTO_BUCKET).remove([path]);
+  if (error) {
+    console.error('[Remove product image]', error);
+    showToast('⚠️ ลบไฟล์รูปเก่าไม่สำเร็จ (สินค้าชี้รูปใหม่แล้ว): ' + error.message);
+  }
+}
+function removePhoto(id) {
+  if (!isWriter()) { showToast('⚠️ เอารูปออกได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  const p = products.find(x => x.id === id);
+  if (!p || !p.image_path) return;
+  askConfirm('เอารูปสินค้าออก', '<p>เอารูปของ <strong>' + escapeHtml(p.name) + '</strong> ออกจากผนังสต็อก — เพิ่มรูปใหม่ได้ภายหลัง</p>',
+    'เอารูปออก', async () => {
+      const old = p.image_path;
+      const { error } = await db.from('products').update({ image_path: null, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) { console.error('[Clear product image]', error); showFatalError('เอารูปออกไม่สำเร็จ: ' + error.message); return; }
+      await removePhotoFile(old);
+      p.image_path = null;
+      closeConfirm();
+      renderProducts();
+      if (drawerId === id && detailOpen()) openProduct(id);
+      showToast('✅ เอารูปออกแล้ว');
+    });
+}
+
+// ---- โหมด หา · รับเข้า · นับ -------------------------------------------------
+const MODE_HINT = {
+  find: 'ยิงบาร์โค้ด / ซีเรียล หรือพิมพ์ชื่อรุ่น แล้วกด Enter',
+  receive: 'ยิงบาร์โค้ดของรุ่น แล้วยิงซีเรียลทีละเครื่อง (พิมพ์เองแล้ว Enter ก็ได้)',
+  count: 'ยิงบาร์โค้ดหรือซีเรียลของที่อยู่บนชั้น ทีละชิ้น',
+};
+function setWallMode(m) {
+  wall.mode = m;
+  document.querySelectorAll('.modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  const tag = document.getElementById('scanModeTag');
+  tag.hidden = m === 'find';
+  tag.textContent = m === 'receive' ? 'รับเข้า' : 'นับ';
+  const box = document.getElementById('productSearch');
+  box.placeholder = MODE_HINT[m];
+  box.value = '';                      // คำค้นของโหมดหาไม่ควรค้างไปกรองผนังตอนรับของ/นับ
+  trayMsg = null;
+  const tray = document.getElementById('tray');
+  tray.hidden = m === 'find';
+  if (m === 'count' && !cnt.scope) cnt.scope = (wall.wings.find(w => w.items.some(p => p.id === wall.sel)) || wall.wings[0] || {}).key || '';
+  if (m !== 'find') buildTray();       // รายการที่ยิงค้างไว้ของแต่ละโหมดยังอยู่ครบ สลับไปมาไม่หาย
+  renderProducts();
+  markModeCounts();
+  box.focus();
+}
+function markModeCounts() {
+  const r = document.querySelector('.modes [data-mode="receive"]');
+  const c = document.querySelector('.modes [data-mode="count"]');
+  const n = rcvTotal();
+  r.innerHTML = 'รับเข้า' + (n ? '<b class="m-n" title="ยิงค้างไว้ ' + n + ' ชิ้น ยังไม่ได้ยืนยัน">' + n + '</b>' : '');
+  c.innerHTML = 'นับ' + (cnt.started ? '<b class="m-n" title="กำลังนับอยู่ นับแล้ว ' + cnt.touched.length + ' รุ่น">' + cnt.touched.length + '</b>' : '');
+}
+function buildTray() {
+  const t = document.getElementById('tray');
+  t.className = 'tray tray-' + wall.mode;
+  if (wall.mode === 'receive') {
+    t.innerHTML = '<div class="tray-h"><h2>รับเข้ารอบนี้</h2><span class="tray-sum" id="traySum"></span>' +
+      '<input class="input tray-reason" id="rcvReason" maxlength="200" placeholder="หมายเหตุ เช่น ล็อตจากตัวแทน" aria-label="หมายเหตุการรับเข้า" oninput="rcv.reason = this.value">' +
+      '<span class="tray-acts"><span id="trayNote"></span>' +
+      '<button class="btn" type="button" id="rcvClearBtn" onclick="rcvClear()">ล้างรอบนี้</button>' +
+      '<button class="btn btn-primary" type="button" id="rcvConfirmBtn" onclick="rcvConfirm()"></button></span></div>' +
+      '<div class="tray-b" id="trayBody"></div>';
+    document.getElementById('rcvReason').value = rcv.reason || '';
+  } else if (!cnt.started) {
+    const opts = wall.wings.length ? countScopeOptions() : '';
+    t.innerHTML = '<div class="tray-h"><h2>นับสต็อก</h2>' +
+      '<label class="c-scope" for="cntScope">ขอบเขต <select id="cntScope" class="input" onchange="countSetScope(this.value)">' + opts + '</select></label>' +
+      '<span class="tray-sum" id="traySum"></span><span class="tray-acts"><span id="trayNote"></span>' +
+      '<button class="btn btn-primary" type="button" id="cntStartBtn" onclick="countStart()">เริ่มนับ</button></span></div>' +
+      '<div class="tray-b" id="trayBody"></div>';
+    document.getElementById('cntScope').value = cnt.scope;
+  } else {
+    t.innerHTML = '<div class="tray-h"><h2>นับสต็อก</h2><span class="c-scope">' + escapeHtml(scopeLabel(cnt.scope)) + ' · ' + cnt.ids.length + ' รุ่น</span>' +
+      '<span class="tray-sum" id="traySum"></span><span class="tray-acts"><span id="trayNote"></span>' +
+      '<button class="btn" type="button" onclick="countCancel()">เลิกนับ</button>' +
+      '<button class="btn btn-primary" type="button" id="cntConfirmBtn" onclick="countConfirm()"></button></span></div>' +
+      '<div class="tray-b" id="trayBody"></div>';
+  }
+  renderTrayBody();
+}
+function renderTrayBody() {
+  const note = document.getElementById('trayNote');
+  if (note) {
+    note.className = trayMsg ? 'tray-note' + (trayMsg.bad ? ' bad' : '') : '';
+    note.textContent = trayMsg ? trayMsg.text : '';
+    note.title = trayMsg ? trayMsg.text : '';
+  }
+  if (wall.mode === 'receive') renderReceiveBody();
+  else if (wall.mode === 'count') renderCountBody();
+  markModeCounts();
+}
+function trayNote(text, bad) {
+  trayMsg = { text, bad: !!bad };
+  if (bad) showToast('⚠️ ' + text);
+  renderTrayBody();
+}
+
+// ---- รับเข้า: ถาดเก็บการ์ดทีละเครื่อง แล้วยืนยันทีเดียวทั้งรอบ ------------------
+// กลุ่มละรุ่น: serials = ซีเรียลที่ยิง · loose = ชิ้นที่ไม่มีซีเรียล (สาย ฯลฯ)
+// รุ่นที่มีซีเรียลแม้แต่เครื่องเดียว จำนวน = จำนวนซีเรียลเสมอ (กฎเดิมของหน้ารับเข้า: ล็อกจำนวนเท่าซีเรียล)
+const rcv = { groups: [], target: null, last: null, reason: '', dups: [] };
+let pendingCode = null;
+function rcvGroup(pid, make) {
+  let g = rcv.groups.find(x => x.pid === pid);
+  if (!g && make) { g = { pid, serials: [], loose: 0 }; rcv.groups.push(g); }
+  return g;
+}
+function rcvUnits(g) { return g.serials.length || g.loose; }
+function rcvTotal() { return rcv.groups.reduce((s, g) => s + rcvUnits(g), 0); }
+function rcvName(pid) { const p = products.find(x => x.id === pid); return p ? p.name : '(ไม่พบสินค้า)'; }
+function rcvSetTarget(id) {
+  rcvGroup(id, true);
+  rcv.target = id;
+  trayMsg = { text: 'รับเข้า "' + rcvName(id) + '" — ยิงซีเรียลของแต่ละเครื่องได้เลย' };
+  renderTrayBody();
+}
+function rcvAddSerial(pid, serial) {
+  const g = rcvGroup(pid, true);
+  if (!g.serials.length) g.loose = 0;          // ชิ้นที่นับจากการยิงบาร์โค้ดรุ่นไว้ก่อน ไม่นับซ้ำกับซีเรียล
+  g.serials.push(serial);
+  rcv.target = pid;
+  rcv.last = serial;
+  trayMsg = { text: 'เพิ่ม ' + serial + ' · ' + rcvName(pid) + ' รวม ' + g.serials.length + ' เครื่อง' };
+  renderTrayBody();
+}
+async function receiveScan(value) {
+  // 1. บาร์โค้ดของรุ่น → รับเข้ารุ่นนั้น · ของไม่มีซีเรียลนับเพิ่มหนึ่งชิ้นทุกครั้งที่ยิง
+  const byEan = products.find(p => (p.barcode_ean13 || '').trim() === value);
+  if (byEan) {
+    const g = rcvGroup(byEan.id, true);
+    rcv.target = byEan.id;
+    if (!g.serials.length) g.loose += 1;
+    trayMsg = { text: byEan.name + (g.serials.length ? ' — ยิงซีเรียลของเครื่องถัดไปได้เลย' : ' · ไม่มีซีเรียล ' + g.loose + ' ชิ้น (ถ้ามีซีเรียลให้ยิงต่อได้เลย)') };
+    wallSelect(byEan.id);
+    flashRow(byEan.id);
+    renderTrayBody();
+    return;
+  }
+  // 2. ยิงซ้ำในรอบนี้
+  if (rcv.groups.some(g => g.serials.includes(value))) { trayNote('ยิงซ้ำ — ' + value + ' อยู่ในรอบนี้แล้ว', true); return; }
+  // 3. ซีเรียลห้ามซ้ำทั้งระบบ — มีอยู่แล้วต้องบอกว่าเครื่องนั้นเป็นรุ่นไหน สถานะอะไร ไม่เพิ่มซ้ำ
+  let data, error;
+  try {
+    ({ data, error } = await db.from('product_units').select('serial_no, status, received_at, product_id').eq('serial_no', value).limit(1));
+  } catch (err) { error = err; }
+  if (error) { console.error('[Serial lookup]', error); showFatalError('ตรวจซีเรียลไม่สำเร็จ: ' + error.message + ' — ยิงใหม่อีกครั้ง'); return; }
+  if (data && data.length) {
+    const u = data[0];
+    trayNote('ซีเรียล ' + value + ' มีในระบบแล้ว — ' + rcvName(u.product_id) + ' · ' + (UNIT_STATUS_LABEL[u.status] || u.status) +
+      ' · รับเข้า ' + formatDateTime(u.received_at) + ' ไม่เพิ่มซ้ำ', true);
+    return;
+  }
+  // 4. ซีเรียลใหม่ — ต้องรู้ว่าเป็นเครื่องของรุ่นไหน ยังไม่รู้ = ถามก่อน ไม่เดา
+  if (!rcv.target) { askCodeKind(value, true); return; }
+  rcvAddSerial(rcv.target, value);
+}
+function rcvSerialFor() {
+  const sel = document.getElementById('serialModelSel');
+  const pid = sel ? sel.value : '';
+  if (!pid) { showToast('⚠️ เลือกรุ่นสินค้าก่อน'); return; }
+  document.getElementById('codeDialog').close();
+  rcvAddSerial(pid, pendingCode);
+}
+function rcvUndo(pid, i) {
+  const g = rcvGroup(pid);
+  if (!g) return;
+  const [s] = g.serials.splice(i, 1);
+  rcv.dups = rcv.dups.filter(x => x !== s);
+  trayMsg = { text: 'เอา ' + s + ' ออกแล้ว' };
+  renderTrayBody();
+}
+function rcvLoose(pid, d) {
+  const g = rcvGroup(pid);
+  if (!g) return;
+  g.loose = Math.max(0, g.loose + d);
+  renderTrayBody();
+}
+function rcvDrop(pid) {
+  rcv.groups = rcv.groups.filter(g => g.pid !== pid);
+  if (rcv.target === pid) rcv.target = null;
+  renderTrayBody();
+}
+function resetRcv() { rcv.groups = []; rcv.target = null; rcv.last = null; rcv.dups = []; }
+function rcvClear() {
+  if (!rcvTotal()) { resetRcv(); trayMsg = null; renderTrayBody(); return; }
+  askConfirm('ล้างรอบรับเข้านี้', '<p>ทิ้งรายการที่ยิงไว้ ' + rcvTotal() + ' ชิ้น (ยังไม่ได้บันทึกลงระบบ)</p>', 'ล้างรอบนี้', () => {
+    resetRcv(); trayMsg = null; closeConfirm(); renderTrayBody();
+  });
+}
+function rcvGroupHtml(g) {
+  const p = products.find(x => x.id === g.pid) || { name: '(ไม่พบสินค้า)' };
+  const img = photoHtml(p), q = "'" + g.pid + "'";
+  const cards = g.serials.length
+    ? g.serials.map((s, i) => ({ s, i })).reverse().map(({ s, i }) =>
+        '<div class="t-card' + (s === rcv.last ? ' new' : '') + (rcv.dups.includes(s) ? ' dup' : '') + '"><div class="ph">' + img + '</div>' +
+        '<div class="sn-t">' + escapeHtml(s) + '</div>' +
+        '<button type="button" class="t-x" onclick="rcvUndo(' + q + ', ' + i + ')" aria-label="เอาซีเรียล ' + escapeHtml(s) + ' ออก" title="เอาออก">' + ICO.x + '</button></div>').join('')
+    : '<div class="t-card"><div class="ph">' + img + '</div>' +
+        '<div class="t-step"><button type="button" class="stepbtn" onclick="rcvLoose(' + q + ', -1)" aria-label="ลดหนึ่งชิ้น"' + (g.loose ? '' : ' disabled') + '>' + ICO.minus + '</button>' +
+        '<b>' + g.loose + '</b><button type="button" class="stepbtn" onclick="rcvLoose(' + q + ', 1)" aria-label="เพิ่มหนึ่งชิ้น">' + ICO.plus + '</button></div>' +
+        '<div class="sn-t">ไม่มีซีเรียล</div>' +
+        '<button type="button" class="t-x" onclick="rcvDrop(' + q + ')" aria-label="เอารุ่นนี้ออกจากรอบ" title="เอารุ่นนี้ออกจากรอบ">' + ICO.x + '</button></div>';
+  return '<div class="t-group' + (g.pid === rcv.target ? ' target' : '') + '">' +
+    '<div class="t-gh"><span>' + escapeHtml(p.name) + '</span><span class="t-n">×' + rcvUnits(g) + '</span>' +
+      (g.pid === rcv.target ? '<span class="t-now">กำลังรับเข้ารุ่นนี้</span>' : '') + '</div>' +
+    '<div class="t-cards">' + cards + '</div></div>';
+}
+function renderReceiveBody() {
+  const body = document.getElementById('trayBody');
+  if (!body) return;
+  const n = rcvTotal();
+  document.getElementById('traySum').innerHTML = '<b>' + n + '</b> ชิ้น · ' + rcv.groups.filter(g => rcvUnits(g)).length + ' รุ่น';
+  const ok = document.getElementById('rcvConfirmBtn');
+  ok.textContent = 'ยืนยันรับเข้าทั้งรอบ (' + n + ')';
+  ok.disabled = !n;
+  document.getElementById('rcvClearBtn').disabled = !rcv.groups.length;
+  if (!rcv.groups.length) {
+    body.innerHTML = '<div class="tray-empty"><strong>เริ่มรับของได้เลย</strong><ol>' +
+      '<li>ยิงบาร์โค้ดของรุ่นบนกล่อง หรือคลิกรุ่นบนผนัง</li>' +
+      '<li>ยิงซีเรียล (SER. NO.) ของแต่ละเครื่อง — ขึ้นเป็นการ์ดทีละเครื่อง กด ✕ ที่การ์ดเพื่อเอาออก</li>' +
+      '<li>ของไม่มีซีเรียล เช่น สาย: ยิงบาร์โค้ดรุ่นซ้ำตามจำนวน หรือกด + −</li>' +
+      '<li>ครบแล้วกด <strong>ยืนยันรับเข้าทั้งรอบ</strong> — ยังไม่มีอะไรลงระบบจนกว่าจะกด</li></ol></div>';
+    return;
+  }
+  const order = rcv.groups.slice().sort((a, b) => (b.pid === rcv.target) - (a.pid === rcv.target));
+  body.innerHTML = order.map(rcvGroupHtml).join('');
+  if (rcv.last) body.scrollLeft = 0;
+}
+async function rcvConfirm() {
+  const lines = rcv.groups.filter(g => rcvUnits(g) > 0);
+  if (!lines.length) { showToast('⚠️ ยังไม่มีอะไรในรอบนี้'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  const btn = document.getElementById('rcvConfirmBtn');
+  btn.disabled = true;
+  const reason = (rcv.reason || '').trim() || null;
+  const units = lines.flatMap(g => g.serials.map(s => ({ product_id: g.pid, serial_no: s, barcode_code: s })));
+  const n = rcvTotal();
+  try {
+    // ลงซีเรียลทั้งรอบก่อน แล้วค่อยลงยอด — กฎเดิมของหน้ารับเข้า: ซีเรียลซ้ำถูกฐานข้อมูลปฏิเสธ (serial_no unique)
+    // ถ้าลงยอดไปก่อนแล้วซีเรียลพัง จะได้ยอดที่ถอนคืนไม่ได้ (stock_movements แก้/ลบไม่ได้)
+    // ส่งทีเดียวทั้งรอบ = คำสั่งเดียว ผ่านทั้งหมดหรือไม่ผ่านเลย ไม่มีบางรุ่นลงบางรุ่นไม่ลง
+    if (units.length) {
+      const { error: uErr } = await db.from('product_units').insert(units);
+      if (uErr) {
+        console.error('[Receive units]', uErr);
+        const dup = uErr.code === '23505' || /duplicate key/i.test(uErr.message || '');
+        if (dup) {
+          // บอกให้ได้ว่าใบไหนซ้ำ แล้วมาร์กการ์ดนั้น — "มีซีเรียลซ้ำ" เฉย ๆ ต้องไล่หาเองทีละใบ
+          const { data } = await db.from('product_units').select('serial_no').in('serial_no', units.map(u => u.serial_no));
+          rcv.dups = (data || []).map(x => x.serial_no);
+          showFatalError('มีซีเรียลที่บันทึกไว้แล้ว' + (rcv.dups.length ? ': ' + rcv.dups.join(', ') : '') +
+            ' — ยังไม่ได้บันทึกอะไรเลยทั้งรอบ เอาการ์ดที่ขึ้นว่า "ซ้ำ" ออกแล้วกดยืนยันใหม่');
+        } else {
+          showFatalError('บันทึกซีเรียลไม่สำเร็จ: ' + uErr.message + ' (ยังไม่ได้ลงยอดสต็อก ยังไม่มีอะไรลงระบบ)');
+        }
+        return;
+      }
+    }
+    const { error } = await db.from('stock_movements').insert(lines.map(g => ({
+      product_id: g.pid, type: 'in', qty: rcvUnits(g), reason, admin_id: currentUserId,
+    })));
+    if (error) {
+      console.error('[Receive movements]', error);
+      // ซีเรียลลงไปแล้วแต่ยอดไม่ลง — บอกให้ชัดว่าค้างตรงไหน และเอากลุ่มที่มีซีเรียลออกจากถาด (กดซ้ำ = ซีเรียลซ้ำ)
+      showFatalError('ลงยอดรับเข้าไม่สำเร็จ: ' + error.message + (units.length
+        ? ' (ซีเรียล ' + units.length + ' เครื่องบันทึกไปแล้ว อย่ายิงซ้ำ — ลงยอดอย่างเดียวที่หมวด "รับเข้า / ตัดออก / ปรับยอด")' : ''));
+      if (units.length) { rcv.groups = rcv.groups.filter(g => !g.serials.length); rcv.target = null; }
+      return;
+    }
+    resetRcv();
+    trayMsg = { text: 'บันทึกรอบที่แล้ว ' + n + ' ชิ้น ' + lines.length + ' รุ่น' };
+    showToast('✅ รับเข้า ' + n + ' ชิ้น ' + lines.length + ' รุ่นเรียบร้อยแล้ว');
+    loadAll();
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+  } finally {
+    renderTrayBody();                  // ปุ่มยืนยันกลับมาตามจำนวนที่เหลือในถาด
+  }
+}
+
+// ---- นับสต็อก: เลือกขอบเขต → ยิง/กด +− → ลงปรับยอดเฉพาะรุ่นที่ไม่ตรง ------------
+const cnt = { scope: '', picks: [], started: false, ids: [], counted: {}, seen: {}, units: {}, touched: [] };
+function countScopeOptions() {
+  const brands = WALL_BRANDS.filter(b => products.some(p => p.brand === b));
+  const cats = [...new Set(products.map(p => catLabel(p.category)))].sort(catCmp);
+  return '<optgroup label="ทั้งปีกแบรนด์">' + brands.map(b => '<option value="' + escapeHtml('b:' + b) + '">' + escapeHtml(brandLabel(b)) + '</option>').join('') + '</optgroup>' +
+    '<optgroup label="ทั้งหมวด">' + cats.map(c => '<option value="' + escapeHtml('c:' + c) + '">' + escapeHtml(c) + '</option>').join('') + '</optgroup>' +
+    '<option value="pick">เลือกรุ่นเอง — คลิกรุ่นบนผนัง</option>';
+}
+function scopeLabel(key) {
+  if (key === 'pick') return 'รุ่นที่เลือก';
+  return key.startsWith('b:') ? 'ปีก ' + brandLabel(key.slice(2)) : 'หมวด ' + key.slice(2);
+}
+// รุ่นที่ปิดใช้งานแล้วแต่ยังมียอดค้าง ต้องนับด้วย ไม่งั้นยอดผีค้างอยู่ตลอดไป
+function scopeIds(key) {
+  if (key === 'pick') return cnt.picks.slice();
+  const live = p => p.is_active || qtyOf(p.id) !== 0;
+  if (key.startsWith('b:')) return products.filter(p => live(p) && p.brand === key.slice(2)).map(p => p.id);
+  if (key.startsWith('c:')) return products.filter(p => live(p) && catLabel(p.category) === key.slice(2)).map(p => p.id);
+  return [];
+}
+function countSetScope(v) { cnt.scope = v; renderProducts(); renderTrayBody(); }
+function countTogglePick(id) {
+  cnt.picks = cnt.picks.includes(id) ? cnt.picks.filter(x => x !== id) : cnt.picks.concat(id);
+  renderProducts();
+}
+async function countStart() {
+  const ids = scopeIds(cnt.scope);
+  if (!ids.length) { showToast(cnt.scope === 'pick' ? '⚠️ คลิกรุ่นบนผนังเพื่อเลือกอย่างน้อยหนึ่งรุ่น' : '⚠️ ขอบเขตนี้ไม่มีสินค้า'); return; }
+  // ซีเรียลของเครื่องที่ควรอยู่บนชั้น — ไว้บอกว่าเครื่องไหนยังไม่ได้ยิง
+  const { data, error } = await db.from('product_units').select('product_id, serial_no').in('product_id', ids).eq('status', 'in_stock');
+  if (error) { console.error('[Count units]', error); showFatalError('โหลดซีเรียลของขอบเขตนี้ไม่สำเร็จ: ' + error.message + ' — ยังไม่ได้เริ่มนับ'); return; }
+  Object.assign(cnt, { started: true, ids, counted: {}, seen: {}, units: {}, touched: [] });
+  (data || []).forEach(u => { (cnt.units[u.product_id] = cnt.units[u.product_id] || []).push(u.serial_no); });
+  trayMsg = { text: 'เริ่มนับ ' + scopeLabel(cnt.scope) + ' ' + ids.length + ' รุ่น — ยิงของบนชั้นทีละชิ้น' };
+  buildTray();
+  renderProducts();
+}
+function countTouch(pid) { cnt.touched = [pid].concat(cnt.touched.filter(x => x !== pid)); }
+async function countScan(value) {
+  if (!cnt.started) { trayNote('เลือกขอบเขตแล้วกด "เริ่มนับ" ก่อน — ' + value + ' ยังไม่ถูกนับ', true); return; }
+  let pid = null, serial = null;
+  const byEan = products.find(p => (p.barcode_ean13 || '').trim() === value);
+  if (byEan) pid = byEan.id;
+  else {
+    // เทียบกับซีเรียลที่โหลดไว้ตอนเริ่มก่อน ไม่ต้องยิงฐานข้อมูลทุกเครื่อง
+    Object.keys(cnt.units).forEach(id => { if (cnt.units[id].includes(value)) { pid = id; serial = value; } });
+    if (!pid) {
+      const f = await findByBarcode(value);
+      if (f.product && f.viaSerial && f.unit && f.unit.status !== 'in_stock') {
+        trayNote('ซีเรียล ' + value + ' สถานะ "' + (UNIT_STATUS_LABEL[f.unit.status] || f.unit.status) + '" ไม่ควรอยู่บนชั้น — ไม่ได้นับ แจ้งเจ้าของร้าน', true);
+        return;
+      }
+      if (f.product) { pid = f.product.id; serial = f.viaSerial ? value : null; }
+    }
+  }
+  if (!pid) { trayNote('ไม่พบรหัส ' + value + ' ในระบบ — ไม่ได้นับ', true); return; }
+  if (!cnt.ids.includes(pid)) { trayNote('"' + rcvName(pid) + '" ไม่อยู่ในขอบเขตที่กำลังนับ — ไม่ได้นับ', true); return; }
+  if (serial) {
+    const seen = cnt.seen[pid] = cnt.seen[pid] || [];
+    if (seen.includes(serial)) { trayNote('ยิงซ้ำ — ' + serial + ' นับไปแล้ว', true); return; }
+    seen.push(serial);
+  }
+  cnt.counted[pid] = (cnt.counted[pid] || 0) + 1;
+  countTouch(pid);
+  trayMsg = { text: rcvName(pid) + ' นับได้ ' + cnt.counted[pid] + (serial ? ' · ' + serial : '') };
+  wallSelect(pid);
+  flashRow(pid);
+  renderTrayBody();
+}
+function countAdj(pid, d) {
+  cnt.counted[pid] = Math.max(0, (cnt.counted[pid] || 0) + d);
+  countTouch(pid);
+  renderTrayBody();
+}
+function countLines() {
+  return cnt.ids.map(id => {
+    const exp = qtyOf(id), got = cnt.counted[id] || 0;
+    return { id, exp, got, diff: got - exp };
+  });
+}
+function renderCountBody() {
+  const body = document.getElementById('trayBody');
+  if (!body) return;
+  if (!cnt.started) {
+    const ids = scopeIds(cnt.scope);
+    document.getElementById('traySum').innerHTML = '<b>' + ids.length + '</b> รุ่นในขอบเขต';
+    body.innerHTML = '<div class="tray-empty"><strong>นับสต็อกทีละขอบเขต</strong><ol>' +
+      '<li>เลือกขอบเขต: ทั้งปีกแบรนด์ ทั้งหมวด หรือ "เลือกรุ่นเอง" แล้วคลิกรุ่นบนผนัง</li>' +
+      '<li>กด <strong>เริ่มนับ</strong> แล้วยิงของที่อยู่บนชั้นทีละชิ้น (บาร์โค้ดรุ่นหรือซีเรียล) · กด + − แก้ได้</li>' +
+      '<li>กด <strong>ยืนยันผลนับ</strong> — ระบบลง "ปรับยอด" ให้เฉพาะรุ่นที่ไม่ตรงเท่านั้น</li></ol></div>';
+    return;
+  }
+  const lines = countLines();
+  const sp = countSplit(lines);
+  // ยืนยันแล้วลบคืนไม่ได้ (stock_movements เพิ่มได้อย่างเดียว) — ต้องเห็นก่อนกดว่ามีกี่รุ่นที่จะถูก "ตั้งเป็น 0"
+  // เพราะยังไม่ได้นับ แยกจากรุ่นที่นับแล้วไม่ตรงจริง
+  document.getElementById('traySum').innerHTML = 'นับแล้ว <b>' + cnt.touched.length + '</b>/' + cnt.ids.length + ' รุ่น · ขาด ' +
+    sp.real.filter(x => x.diff < 0).length + ' · เกิน ' + sp.real.filter(x => x.diff > 0).length +
+    (sp.idle ? ' · <span class="' + (sp.zero.length ? 'zero-warn' : '') + '">ยังไม่นับ ' + sp.idle +
+      (sp.zero.length ? ' · จะถูกตั้งเป็น 0: <b>' + sp.zero.length + '</b>' : '') + '</span>' : '');
+  document.getElementById('cntConfirmBtn').textContent = countButtonLabel(sp);
+  const byId = {};
+  getMergedProducts().forEach(p => { byId[p.id] = p; });
+  const rest = cnt.ids.filter(id => !cnt.touched.includes(id)).sort((a, b) => byModel(byId[a] || {}, byId[b] || {}));
+  body.innerHTML = '<div class="c-line c-head"><span></span><span>รุ่น</span><span style="text-align:right;">ในระบบ</span><span>นับได้</span><span>ผลต่าง</span></div>' +
+    cnt.touched.concat(rest).map(id => {
+      const p = byId[id] || { name: '(ไม่พบสินค้า)' };
+      const x = lines.find(l => l.id === id);
+      const touched = cnt.touched.includes(id);
+      const v = !touched ? (x.exp ? ['zero', 'ยังไม่ได้นับ → จะตั้งเป็น 0 (' + (x.diff > 0 ? '+' : '') + x.diff + ')'] : ['idle', 'ยังไม่ได้นับ'])
+        : x.diff < 0 ? ['short', 'ขาด ' + (-x.diff)] : x.diff > 0 ? ['over', 'เกิน ' + x.diff] : ['even', 'ตรง'];
+      const units = cnt.units[id] || [];
+      const seen = cnt.seen[id] || [];
+      const miss = units.filter(s => !seen.includes(s));
+      const q = "'" + id + "'";
+      return '<div class="c-line' + (touched ? ' touched' : '') + '" data-id="' + id + '">' +
+        '<div class="ph">' + photoHtml(p) + '</div>' +
+        '<div class="c-name">' + escapeHtml(p.name) +
+          (units.length ? '<div class="c-miss">' + (miss.length
+            ? 'ยังไม่ได้ยิง <b>' + miss.length + '</b>: ' + miss.slice(0, 6).map(x => '<span class="nw">' + escapeHtml(x) + '</span>').join(', ') + (miss.length > 6 ? ' และอีก ' + (miss.length - 6) : '')
+            : 'ยิงครบทุกซีเรียลในสต็อกแล้ว') + '</div>' : '') + '</div>' +
+        '<div class="c-exp">' + x.exp + '</div>' +
+        '<div class="c-step"><button type="button" class="stepbtn" onclick="countAdj(' + q + ', -1)" aria-label="ลดที่นับได้"' + (x.got ? '' : ' disabled') + '>' + ICO.minus + '</button>' +
+          '<b>' + x.got + '</b><button type="button" class="stepbtn" onclick="countAdj(' + q + ', 1)" aria-label="เพิ่มที่นับได้">' + ICO.plus + '</button></div>' +
+        '<div class="c-var ' + v[0] + '">' + v[1] + '</div></div>';
+    }).join('');
+}
+function countReason() { return 'นับสต็อก ' + thaiDate(new Date()); }
+// แยกสิ่งที่จะเขียนเป็นสองกอง: นับแล้วไม่ตรงจริง · ยังไม่ได้นับเลย (ยอดในระบบไม่ใช่ 0 → จะถูกตั้งเป็น 0)
+function countSplit(lines) {
+  const touched = id => cnt.touched.includes(id);
+  return {
+    real: lines.filter(x => touched(x.id) && x.diff !== 0),
+    zero: lines.filter(x => !touched(x.id) && x.diff !== 0),
+    idle: cnt.ids.length - cnt.touched.length,
+  };
+}
+function countButtonLabel(sp) {
+  if (!sp.real.length && !sp.zero.length) return 'ยืนยันผลนับ — ตรงทุกรุ่น';
+  return 'ยืนยันผลนับ — ปรับตามที่นับ ' + sp.real.length + (sp.zero.length ? ' · ตั้งเป็น 0 อีก ' + sp.zero.length : '');
+}
+function countConfirm() {
+  const sp = countSplit(countLines());
+  const total = sp.real.length + sp.zero.length;
+  if (!total) { showToast('✅ นับตรงทุกรุ่น ไม่ต้องปรับยอด'); countReset(); return; }
+  const name = id => escapeHtml(rcvName(id));
+  const row = x => '<div class="list-row"><span>' + name(x.id) + '</span><span>' + x.exp + ' → ' + x.got +
+    ' <strong class="' + (x.diff < 0 ? 'qneg' : 'qpos') + '">(' + (x.diff > 0 ? '+' : '') + x.diff + ')</strong></span></div>';
+  askConfirm('ยืนยันผลนับสต็อก',
+    '<p style="margin-bottom:12px;">จะลง <strong>ปรับยอด</strong> รวม ' + total + ' รายการ เหตุผล "' + escapeHtml(countReason()) +
+      '" · รุ่นที่นับตรงไม่ลงอะไร · <strong>บันทึกแล้วแก้หรือลบไม่ได้</strong></p>' +
+    (sp.real.length ? '<div class="sec-title" style="margin-top:0;">ปรับตามที่นับได้ (' + sp.real.length + ')</div>' + sp.real.map(row).join('') : '') +
+    (sp.zero.length ? '<div class="alert alert-warn" style="margin-top:14px;"><strong>ตั้งเป็น 0 เพราะยังไม่ได้นับ (' + sp.zero.length + ')</strong> — ' +
+      'ถ้ารุ่นเหล่านี้ยังอยู่บนชั้น ให้กด "ไม่ทำ" แล้วนับให้ครบก่อน</div>' + sp.zero.map(row).join('') : ''),
+    'ลงปรับยอด ' + sp.real.length + (sp.zero.length ? ' + ตั้งเป็น 0 อีก ' + sp.zero.length : '') + ' (รวม ' + total + ')', countCommit);
+}
+async function countCommit() {
+  // คิดใหม่ตอนกดยืนยัน — ยอดในระบบอาจขยับระหว่างเปิดหน้าต่าง (มีคนขายหน้าร้านพอดี)
+  const off = countLines().filter(x => x.diff !== 0);
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  if (!off.length) { closeConfirm(); countReset(); showToast('✅ นับตรงทุกรุ่น ไม่ต้องปรับยอด'); return; }
+  const reason = countReason();
+  // เพิ่มได้อย่างเดียว (กฎข้อ 5): ลงเฉพาะรุ่นที่ไม่ตรง เป็นรายการ "ปรับยอด" ห้าม update/delete ของเดิม
+  // ส่งทีเดียวทั้งชุด = ผ่านทั้งหมดหรือไม่ผ่านเลย
+  try {
+    const { error } = await db.from('stock_movements').insert(off.map(x => ({
+      product_id: x.id, type: 'adjustment', qty: x.diff, reason, admin_id: currentUserId,
+    })));
+    if (error) {
+      console.error('[Count adjust]', error);
+      showFatalError('ลงปรับยอดจากการนับไม่สำเร็จ: ' + error.message + ' — ยังไม่ได้บันทึกอะไรเลย ผลนับยังอยู่ในถาด กดยืนยันใหม่ได้');
+      return;
+    }
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message + ' — ผลนับยังอยู่ในถาด');
+    return;
+  }
+  closeConfirm();
+  showToast('✅ ปรับยอดจากการนับ ' + off.length + ' รายการเรียบร้อยแล้ว');
+  countReset();
+  loadAll();
+}
+function countReset() {
+  Object.assign(cnt, { started: false, ids: [], counted: {}, seen: {}, units: {}, touched: [] });
+  trayMsg = null;
+  if (wall.mode === 'count') buildTray();
+  renderProducts();
+}
+function countCancel() {
+  if (!cnt.touched.length) { countReset(); return; }
+  askConfirm('เลิกนับ', '<p>ทิ้งผลนับ ' + cnt.touched.length + ' รุ่น (ยังไม่ได้ลงอะไรในระบบ)</p>', 'เลิกนับ', () => { closeConfirm(); countReset(); });
 }
 
 // ---------------------------------------------------------------------------
@@ -2768,6 +4036,8 @@ function showSection(id, mode) {
   closeDetail();
   document.querySelectorAll('.section').forEach(el => { el.hidden = true; });
   document.getElementById('sec-' + id).hidden = false;
+  // ผนังสต็อกเต็มความสูงจอ แต่ละปีกเลื่อนของตัวเอง — พื้นที่ทำงานต้องไม่เลื่อนทั้งหน้าซ้อนอีกชั้น
+  document.querySelector('.workspace').classList.toggle('is-wall', id === 'products');
   // หมวดที่ข้อมูลผูกกับตัวกรองของตัวเอง โหลดตอนเปิด ไม่ต้องโหลดทุกอย่างตั้งแต่ล็อกอิน
   if (currentUserId) {
     if (id === 'daily') loadDaily();
@@ -2782,7 +4052,7 @@ function showSection(id, mode) {
   document.getElementById('pageTitle').textContent = s.label;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === id));
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
-  const focusEl = { products: 'tw-products', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
+  const focusEl = { products: 'wall', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
     booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
     home: 'sec-home', board: 'tw-board', mail: 'tw-mail' }[id];
   if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
@@ -2822,9 +4092,8 @@ function openHit(i) {
   input.blur();
   if (h.kind === 'p') {
     showSection('products');
-    const idx = view.products.rows.findIndex(r => r.id === h.id);
-    if (idx !== -1) selectRow('products', idx);
-    openProduct(h.id);
+    const p = products.find(x => x.id === h.id);
+    if (p) wallJump(p);
   } else if (h.kind === 'c') {
     showSection('customers');
     openCustomer(h.id);
@@ -2859,17 +4128,25 @@ function isField(el) {
 }
 
 document.addEventListener('keydown', e => {
+  // G ที่กดไว้ยังไม่ทันทำงาน แล้วมีปุ่มถัดไปตามมาติด ๆ = ตัวแรกของซีเรียลที่ยิงมา ไม่ใช่คนกด G (armGroupToggle)
+  if (groupKeyTimer) { clearTimeout(groupKeyTimer); groupKeyTimer = null; }
   if (loginVisible()) return;
   const el = document.activeElement;
   const inField = isField(el);
   const dlg = document.querySelector('dialog[open]');
 
-  if ((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyK') { e.preventDefault(); if (!dlg) focusGlobal(); return; }
+  // หมวดสินค้า: Ctrl+K ไปช่องยิงของผนังก่อน · กดซ้ำตอนอยู่ในช่องนั้นแล้ว = ค้นหาทั้งร้าน
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyK') {
+    e.preventDefault();
+    if (!dlg) { if (current === 'products' && !(el && el.id === 'productSearch')) focusStockScan(); else focusGlobal(); }
+    return;
+  }
 
   if (e.key === 'Escape') {
     if (dlg) return;                              // dialog ปิดตัวเองด้วย Esc อยู่แล้ว
     if (el && el.id === 'globalSearch') { el.value = ''; renderGlobal(); el.blur(); return; }
     if (el && el.id === 'posSearch' && el.value) { el.value = ''; renderPosResults(); return; }
+    if (el && el.id === 'productSearch' && el.value) { el.value = ''; renderProducts(); return; }
     if (detailOpen()) { closeDetail(); return; }
     if (inField) el.blur();
     return;
@@ -2898,7 +4175,7 @@ document.addEventListener('keydown', e => {
   // ตัวที่สองเป็นต้นไปของการยิงบาร์โค้ด — ห้ามตีความเป็นคีย์ลัด (ซีเรียลมี - กับ / ได้)
   if (wedgeBuf.length > 1) return;
 
-  if (e.key === '/') { e.preventDefault(); focusGlobal(); return; }
+  if (e.key === '/') { e.preventDefault(); if (current === 'products') focusStockScan(); else focusGlobal(); return; }
   if (e.key === '?') { e.preventDefault(); openHelp(); return; }
 
   if ((current === 'booking' || current === 'daily' || current === 'calendar') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
@@ -2918,6 +4195,18 @@ document.addEventListener('keydown', e => {
     } else if ((e.key === '+' || e.key === '=') && item) { e.preventDefault(); changeQty(cartSel, 1); }
     else if (e.key === '-' && item) { e.preventDefault(); changeQty(cartSel, -1); }
     else if (e.key === 'Delete' && item) { e.preventDefault(); removeFromCart(cartSel); }
+    return;
+  }
+
+  // ผนังสต็อก: ลูกศรเลื่อนในปีก/ข้ามปีก · Enter เปิดแผง · G สลับจัดตามแบรนด์/หมวด
+  if (current === 'products') {
+    if (e.code === 'KeyG' && !e.shiftKey) { e.preventDefault(); armGroupToggle(); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      wallMove(e.key);
+      return;
+    }
+    if (e.key === 'Enter' && !(el && (el.tagName === 'BUTTON' || el.tagName === 'A'))) { e.preventDefault(); wallEnter(); }
     return;
   }
 
@@ -6682,6 +7971,8 @@ async function onScanned(code, viaGun) {
   if (!value) return;
 
   if (scanPurpose === 'serial') { await handleSerialScan(value); return; }
+  if (scanPurpose === 'receive') { await receiveScan(value); return; }
+  if (scanPurpose === 'count') { await countScan(value); return; }
 
   const found = await findByBarcode(value);
 
@@ -6710,17 +8001,20 @@ async function onScanned(code, viaGun) {
         (found.viaSerial ? ' (จากซีเรียล)' : '') +
         (cleared ? ' · ล้างซีเรียลของรุ่นเดิมออกแล้ว' : ''));
     } else {
-      showSection('products');
-      const idx = view.products.rows.findIndex(r => r.id === found.product.id);
-      if (idx !== -1) selectRow('products', idx);
-      openProduct(found.product.id);
+      if (current !== 'products') showSection('products');
+      wallJump(found.product, found.viaSerial && found.unit ? found.unit.serial_no : null);
     }
     return;
   }
+  askCodeKind(value, false);
+}
 
-  // อ่านได้แต่ไม่มีในระบบ — บาร์โค้ดที่ยิงมาเป็นได้ 2 อย่างซึ่งต้องทำคนละเรื่อง
-  // ผูกซีเรียลของเครื่องเดียวเป็นบาร์โค้ดประจำรุ่นคือความผิดพลาดที่กู้ยาก
-  // เพราะเครื่องที่เหลือทั้งรุ่นจะยิงไม่เจอ จึงต้องให้คนเลือกเอง ไม่เดาแทน
+// อ่านได้แต่ไม่มีในระบบ — บาร์โค้ดที่ยิงมาเป็นได้ 2 อย่างซึ่งต้องทำคนละเรื่อง
+// ผูกซีเรียลของเครื่องเดียวเป็นบาร์โค้ดประจำรุ่นคือความผิดพลาดที่กู้ยาก
+// เพราะเครื่องที่เหลือทั้งรุ่นจะยิงไม่เจอ จึงต้องให้คนเลือกเอง ไม่เดาแทน
+// forReceive = ยิงมาตอนรับเข้าแต่ยังไม่ได้เลือกรุ่น → ข้อสองเลือกรุ่นแล้วเข้าถาดรับเข้าได้เลย
+function askCodeKind(value, forReceive) {
+  pendingCode = value;
   const esc = escapeHtml(value);
   document.getElementById('codeBody').innerHTML =
     '<div class="alert alert-warn">ยังไม่มีอะไรในระบบผูกกับรหัส <strong>' + esc + '</strong> — รหัสนี้คืออะไร?</div>' +
@@ -6738,7 +8032,13 @@ async function onScanned(code, viaGun) {
     '<div class="opt">' +
       '<div style="font-weight:600;">ซีเรียลของเครื่องเครื่องนี้</div>' +
       '<div class="hint" style="margin:0 0 10px;">สติกเกอร์ SER. NO. ไม่ซ้ำกับเครื่องอื่น ใช้ตอนรับเข้าทีละเครื่อง</div>' +
-      '<button class="btn" type="button" onclick="goRegisterSerial(\'' + esc + '\')">ไปหน้ารับเข้าเพื่อบันทึกเครื่องนี้</button>' +
+      (forReceive
+        ? '<select id="serialModelSel" class="input"><option value="">— เป็นเครื่องของรุ่น —</option>' +
+          products.filter(p => p.is_active).slice().sort(byModel).map(p =>
+            '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
+          '</select>' +
+          '<button class="btn btn-primary" type="button" style="margin-top:8px;" onclick="rcvSerialFor()">เพิ่มเข้ารอบรับเข้า</button>'
+        : '<button class="btn" type="button" onclick="goRegisterSerial(\'' + esc + '\')">ไปหน้ารับเข้าเพื่อบันทึกเครื่องนี้</button>') +
     '</div>';
   document.getElementById('codeDialog').showModal();
 }
@@ -6892,8 +8192,10 @@ function wedgeRoute() {
         document.getElementById('movProduct').value) return 'serial';
     return 'movement';
   }
+  // ผนังสต็อก: โหมดรับเข้า/นับ ยิงแล้วเข้าถาด · โหมดหา ยิงแล้วกระโดดไปรุ่นนั้น
+  if (current === 'products') return wall.mode === 'find' ? 'search' : wall.mode;
   // หน้าแรกคือหน้าที่เปิดค้างไว้หน้าเคาน์เตอร์ — ยิงแล้วพาไปหาสินค้าเลย ไม่ต้องบอกให้เปลี่ยนหมวดก่อน
-  if (current === 'products' || current === 'moves' || current === 'home') return 'search';
+  if (current === 'moves' || current === 'home') return 'search';
   return 'wrongpage';
 }
 

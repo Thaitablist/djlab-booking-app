@@ -132,44 +132,44 @@ async function runTests() {
   key('Digit1', '1', { altKey: true });
   ok('Alt+1 พาไปหมวดสินค้า', current === 'products' && vis('sec-products'), current);
 
-  // ── 2. ตารางสินค้า ─────────────────────────────────────────────────────
-  const rows = () => [...document.querySelectorAll('#productRows tr[data-i]')];
-  ok('ตารางสินค้าแสดงครบ 3 รายการจากฐานข้อมูล', rows().length === 3, rows().length);
-  const flx = rows().find(tr => tr.textContent.indexOf('DDJ-FLX4') !== -1);
-  ok('ยอดคงเหลือมาจาก product_stock_levels', !!flx && flx.children[4].textContent.trim() === '5', flx && flx.children[4].textContent);
-  ok('สถานะแสดงเป็นข้อความ ไม่ใช่สีอย่างเดียว', document.getElementById('productRows').textContent.indexOf('ปิดใช้งาน') !== -1);
+  // ── 2. ผนังสินค้า (แทนตารางเดิม 1 ต.ค. 69 · รายละเอียดทั้งหมดอยู่ใน tests/stock-wall.mjs) ──
+  const rows = () => [...document.querySelectorAll('#wall .w-row')];
+  ok('ผนังสินค้าแสดงครบ 3 รุ่นจากฐานข้อมูล', rows().length === 3, rows().length);
+  const flx = document.getElementById('wr-p1');
+  ok('ยอดคงเหลือมาจาก product_stock_levels', !!flx && flx.querySelector('.w-qty').textContent.trim() === '5',
+    flx && flx.querySelector('.w-qty').textContent);
+  ok('สถานะแสดงเป็นข้อความ ไม่ใช่สีอย่างเดียว', document.getElementById('wall').textContent.indexOf('ปิดใช้งาน') !== -1);
+  toggleWallFlag('low');
+  ok('กด "ใกล้หมด" เหลือเฉพาะรุ่นที่ใกล้หมด', rows().length === 1 && rows()[0].id === 'wr-p2', rows().map(r => r.id).join());
+  toggleWallFlag('low');
 
-  document.querySelector('.th[data-t="products"][data-k="qty"]').click();
-  ok('คลิกหัวคอลัมน์แล้วเรียงตามคงเหลือ (น้อยไปมาก)', rows()[0].textContent.indexOf('OMNIS-DUO') !== -1, rows()[0].textContent);
-  document.querySelector('.th[data-t="products"][data-k="name"]').click();
-
-  document.getElementById('fStatus').value = 'inactive';
-  document.getElementById('fStatus').dispatchEvent(new Event('input'));
-  ok('กรองสถานะ "ปิดใช้งาน" เหลือ 1 รายการ', rows().length === 1, rows().length);
-  document.getElementById('fStatus').value = '';
-  document.getElementById('fStatus').dispatchEvent(new Event('input'));
-
-  // ── 3. คีย์บอร์ด ↓ Enter Esc ───────────────────────────────────────────
-  document.getElementById('tw-products').focus();
-  key('ArrowDown', 'ArrowDown'); key('ArrowDown', 'ArrowDown');
-  ok('↓ สองครั้ง เลือกแถวที่ 2', view.products.sel === 1, view.products.sel);
-  ok('แถวที่เลือกมีไฮไลต์', rows()[1].classList.contains('sel'));
+  // ── 3. คีย์บอร์ด ↓ → Enter Esc ─────────────────────────────────────────
+  document.getElementById('wall').focus();
+  key('ArrowDown', 'ArrowDown');
+  ok('↓ ครั้งแรกเลือกรุ่นแรกของปีกแรก (AlphaTheta)', wall.sel === 'p3', wall.sel);
+  key('ArrowRight', 'ArrowRight');
+  ok('→ ข้ามไปปีกถัดไป (Pioneer DJ)', wall.sel === 'p1', wall.sel);
+  ok('แถวที่เลือกมีไฮไลต์', document.getElementById('wr-p1').classList.contains('sel'));
   key('Enter', 'Enter');
   await sleep(100);
-  ok('Enter เปิดแผงรายละเอียดของแถวที่เลือก',
-    vis('detail') && document.getElementById('detailTitle').textContent === view.products.rows[1].name,
+  ok('Enter เปิดแผงรายละเอียดของรุ่นที่เลือก',
+    vis('detail') && document.getElementById('detailTitle').textContent === 'DDJ-FLX4',
     document.getElementById('detailTitle').textContent);
   key('Escape', 'Escape');
   ok('Esc ปิดแผงรายละเอียด', !vis('detail'));
 
-  document.getElementById('tw-products').focus();
+  document.getElementById('wall').focus();
   key('Slash', '/');
-  ok('กด / ไปที่ช่องค้นหาทั้งร้าน', document.activeElement.id === 'globalSearch', document.activeElement.id);
+  ok('หมวดสินค้า: กด / ไปที่ช่องยิงของผนัง', document.activeElement.id === 'productSearch', document.activeElement.id);
   key('Escape', 'Escape');
-  ok('Esc ออกจากช่องค้นหา', document.activeElement.id !== 'globalSearch');
+  ok('Esc ออกจากช่องยิง', document.activeElement.id !== 'productSearch');
 
   key('Digit4', '4', { altKey: true });
   ok('Alt+4 ไปหมวดขายหน้าร้าน', current === 'pos' && vis('sec-pos'), current);
+  document.activeElement.blur();
+  key('Slash', '/');
+  ok('หมวดอื่น: กด / ไปที่ช่องค้นหาทั้งร้าน', document.activeElement.id === 'globalSearch', document.activeElement.id);
+  key('Escape', 'Escape');
 
   // ── 4. ยิงบาร์โค้ดเข้าตะกร้า ───────────────────────────────────────────
   cart.length = 0; renderCart();
