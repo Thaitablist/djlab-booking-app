@@ -8,12 +8,18 @@
  * defaultPrevented) จำลองด้วย node ล้วนไม่ได้ จึงต้องเปิดเบราว์เซอร์จริง
  */
 
-import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+// เครื่องหลักเป็น Mac แต่มีคนรันบนวินโดวส์ด้วย — หาตัวที่มีจริงในเครื่อง
+const CHROME = [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+].find(p => existsSync(p)) || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const SUPABASE_TAG = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
 const ZXING_TAG = '<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>';
 
@@ -40,7 +46,7 @@ export function runPage({ root, file, mock, tests }) {
     '--headless', '--disable-gpu', '--no-sandbox',
     '--enable-logging=stderr', '--v=1',
     '--virtual-time-budget=15000',
-    '--dump-dom', 'file://' + target,
+    '--dump-dom', pathToFileURL(target).href,
   ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 
   const stderr = r.stderr || '';
