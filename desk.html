@@ -210,7 +210,8 @@
   .chip { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line-strong); padding: 8px 12px; background: var(--surface2); }
 
   /* หน้าต่างซ้อน (dialog ของเบราว์เซอร์ — Esc ปิดได้ในตัว) */
-  dialog { border: 0; padding: 0; box-shadow: 0 12px 48px rgba(15,15,15,.25); max-width: 560px; width: 92vw; background: var(--surface); color: var(--text); }
+  /* margin:auto คืนการจัดกลางของ dialog ที่ * { margin: 0 } ด้านบนลบทิ้ง (ทุกหน้าต่างเคยไปติดมุมซ้ายบน) */
+  dialog { margin: auto; border: 0; padding: 0; box-shadow: 0 12px 48px rgba(15,15,15,.25); max-width: 560px; width: 92vw; background: var(--surface); color: var(--text); }
   dialog::backdrop { background: rgba(15,15,15,.45); }
   .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
   .dlg-head h2 { font-size: 18px; }
@@ -284,36 +285,34 @@
 
   /* แถบบนของหน้าแรก = "เด็ค" สีดำ: นาฬิกา · สถานะร้าน · เส้นคลื่นของวันทำการ (12:00–20:00) */
   #sec-home:focus { outline: none; }   /* รับโฟกัสตอนเปิดหมวดเพื่อพาคีย์บอร์ดเข้ามา ไม่ใช่ปุ่ม จึงไม่วาดกรอบ */
-  .deck { background: var(--black); color: #fff; padding: 22px 28px 18px; margin: -24px -28px 22px; }
-  .deck-top { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 28px; }
-  .deck h2 { font-size: 22px; color: #fff; }
-  .deck .deck-date { font-size: 15px; color: #CFCCC3; margin-top: 2px; }
-  .clock { font-family: var(--font-head); font-weight: 600; font-size: 56px; line-height: 1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
-  .clock .sec { font-size: 22px; color: #9A978F; margin-left: 4px; }
-  .shop-state { display: flex; align-items: center; gap: 14px; min-width: 270px; }
-  .shop-state .st-line { font-family: var(--font-head); font-weight: 600; font-size: 17px; }
-  .shop-state .st-sub { font-size: 14px; color: #CFCCC3; }
-  .shop-state .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; background: #6B6962; vertical-align: 1px; }
+  /* แถบบนของหน้าแรก: นาฬิกาใหญ่เต็มแถบ (เจ้าของสั่ง 1 ต.ค. 69 — เอาแผ่นเสียงหมุนและแถบเวลาออก) */
+  .deck { background: var(--black); color: #fff; padding: 18px 28px 20px; margin: -24px -28px 0;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 28px; }
+  .bigclock { font-family: var(--font-head); font-weight: 600; font-size: 136px; line-height: .9; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bigclock .sec { font-size: 46px; color: #9A978F; margin-left: 10px; letter-spacing: 0; }
+  .deck-side { text-align: right; padding-bottom: 8px; }
+  .deck-date { font-family: var(--font-head); font-weight: 600; font-size: 24px; }
+  .shop-state { font-family: var(--font-head); font-weight: 600; font-size: 20px; margin-top: 10px; }
+  .shop-state .dot { display: inline-block; width: 12px; height: 12px; margin-right: 10px; background: #6B6962; vertical-align: 1px; }
   .shop-state.open .dot { background: #3DDC84; }
-  /* จานเสียง: หมุนเฉพาะตอนร้านเปิด ที่ 33⅓ รอบต่อนาที (1.8 วินาทีต่อรอบ) — หยุดหมุน = ร้านปิด */
-  .platter { width: 64px; height: 64px; flex-shrink: 0; }
-  .platter .disc { transform-origin: 32px 32px; }
-  .shop-state.open .platter .disc { animation: spin 1.8s linear infinite; }
-  .paused .platter .disc { animation-play-state: paused !important; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .wave { position: relative; margin-top: 18px; }
-  .wave-bars { display: flex; align-items: flex-end; gap: 2px; height: 46px; }
-  .wave-bars i { flex: 1; min-width: 0; background: #3A3A38; transform-origin: bottom; }
-  .wave-bars i.past { background: #8C8A83; }
-  .wave-bars i.bk { background: var(--room); }
-  .wave-bars i.bk.past { opacity: .55; }
-  .wave.draw .wave-bars i { animation: bar-in .5s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i) * 4ms); }
-  @keyframes bar-in { from { transform: scaleY(.08); } }
-  .playhead { position: absolute; top: -4px; bottom: 22px; width: 2px; background: var(--red); transition: left .6s cubic-bezier(0.16, 1, 0.3, 1); }
-  .playhead::before { content: ''; position: absolute; top: -6px; left: -5px; border: 6px solid transparent; border-top-color: var(--red); }
-  .wave-axis { display: flex; justify-content: space-between; font-size: 14px; color: #9A978F; margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .wave-key { display: flex; gap: 16px; font-size: 14px; color: #CFCCC3; margin-top: 4px; }
-  .wave-key span::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--k); vertical-align: -1px; }
+  .deck .st-sub { font-size: 15px; color: #CFCCC3; margin-top: 2px; }
+
+  /* แถบของฉัน: ใครล็อกอินอยู่ · สลับบัญชี · ยอดขายของฉัน · ตอกบัตร/วันลา (ยังรอปรึกษา) */
+  .me-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 26px; background: var(--surface); border: 1px solid var(--line);
+    border-top: 0; padding: 14px 20px; margin: 0 -28px 22px; }
+  .me-who { display: flex; align-items: center; gap: 12px; margin-right: 4px; }
+  .me-who .ava { width: 46px; height: 46px; font-size: 20px; }
+  .me-who strong { display: block; font-family: var(--font-head); font-size: 19px; line-height: 1.2; }
+  .me-who span { font-size: 14px; color: var(--text2); }
+  .me-stat { display: flex; flex-direction: column; min-width: 0; }
+  .me-stat > span { font-size: 14px; color: var(--text2); }
+  .me-stat > strong { font-family: var(--font-head); font-weight: 600; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .me-stat > strong small { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text2); margin-left: 4px; }
+  .me-sep { width: 1px; align-self: stretch; background: var(--line); }
+  .pill-wait { display: inline-block; font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text2);
+    border: 1px dashed var(--line-strong); padding: 1px 10px; margin-top: 2px; }
+  .me-strip .spacer { flex: 1; }
 
   /* ข้อความที่ยังไม่ได้อ่าน — จุดเดียวบนหน้าแรกที่ใช้สีแดงเต็มที่ เพราะคือสิ่งที่ต้องเห็นก่อน */
   .unread-box { background: var(--red-soft); border: 1px solid #F0B8C1; padding: 16px 20px 8px; margin-bottom: 22px; }
@@ -347,13 +346,59 @@
   .agenda-row.now { background: var(--surface2); padding-left: 8px; padding-right: 8px; margin: 0 -8px; }
   .agenda-row .state { font-size: 14px; font-weight: 700; }
   .agenda-row.now .state { color: var(--red); }
-  .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
-  .quick .btn { justify-content: flex-start; min-height: 48px; }
-  .quick .btn .ico-svg { transition: transform .15s cubic-bezier(0.16, 1, 0.3, 1); }
-  .quick .btn:hover .ico-svg { transform: translateX(2px); }
-  .clockin { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 18px; font-size: 15px; cursor: not-allowed;
-    border: 1px dashed var(--line-strong); color: var(--text2); background: repeating-linear-gradient(45deg, var(--surface2) 0 8px, var(--surface) 8px 16px); }
-  .clockin strong { color: var(--text); font-family: var(--font-head); font-weight: 600; }
+  /* ไอคอนลัด 2 × 2 (แต่ละคนเลือกเองได้) · ตัวเลขแดงมุมขวาบน = ของที่รออยู่ เหมือนป้ายบนไอคอนแอปมือถือ */
+  .launcher { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px 18px 18px; }
+  .lt { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 148px;
+    background: var(--surface2); border: 1px solid var(--line); cursor: pointer; padding: 16px 10px; font-family: var(--font-head);
+    font-weight: 600; font-size: 17px; color: var(--text); transition: border-color .15s, background-color .15s; }
+  .lt:hover { border-color: var(--black); background: var(--surface); }
+  .lt:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+  .lt svg { width: 48px; height: 48px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: square; stroke-linejoin: miter;
+    transition: transform .2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .lt:hover svg { transform: translateY(-3px); }
+  .lt .badge { position: absolute; top: 10px; right: 10px; min-width: 28px; height: 28px; padding: 0 7px; display: inline-flex; align-items: center;
+    justify-content: center; background: var(--red); color: #fff; font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+  .lt.empty { border-style: dashed; color: var(--text2); font-family: var(--font-body); font-weight: 400; font-size: 15px; }
+  .lt-edit { display: flex; flex-direction: column; gap: 8px; min-height: 148px; border: 1px dashed var(--line-strong); padding: 12px; background: var(--surface); }
+  .lt-edit .lt-prev { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-weight: 600; }
+  .lt-edit .lt-prev svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+  /* แอปที่ปักไว้ + เครื่องเล่นที่อยู่ติดจอข้ามทุกหมวด */
+  .app-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .app-row:last-child { border-bottom: 0; }
+  .app-row .kind { width: 34px; height: 34px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #fff;
+    font-family: var(--font-head); font-weight: 700; font-size: 14px; }
+  .app-row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-row .name small { display: block; font-size: 14px; color: var(--text2); }
+  .player { position: fixed; right: 20px; bottom: 20px; width: 400px; z-index: 800; background: var(--black); color: #fff;
+    box-shadow: 0 12px 40px rgba(15,15,15,.35); }
+  .player-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; font-size: 14px; }
+  .player-bar .ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .player-bar button { background: none; border: 1px solid #3A3A38; color: #fff; font-size: 14px; padding: 3px 10px; cursor: pointer; }
+  .player-bar button:hover { border-color: #fff; }
+  .player-body { height: 225px; overflow: hidden; transition: height .2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .player-body.spotify { height: 152px; }
+  .player.min .player-body { height: 0; }         /* ย่อ = ซ่อนภาพ แต่ iframe ยังอยู่ เสียงไม่หยุด */
+  .player iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .frame-hint { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 850; background: var(--warn-soft); color: var(--warn);
+    border: 1px solid #E8D1A0; padding: 8px 16px; font-size: 15px; font-weight: 600; box-shadow: var(--shadow); }
+
+  /* พนักงานขาย (หน้าขาย) */
+  .sellers { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .seller { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); background: var(--surface2); padding: 3px 4px 3px 3px; font-size: 14px; }
+  .seller .ava { width: 26px; height: 26px; font-size: 14px; }
+  .seller.primary { border-color: var(--black); font-weight: 600; }
+  .seller button { border: 0; background: none; cursor: pointer; font-size: 14px; padding: 0 6px; }
+
+  /* สลับบัญชี */
+  .acct-list { display: flex; flex-direction: column; gap: 8px; }
+  .acct { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); padding: 8px 10px; }
+  .acct .pick { flex: 1; display: flex; align-items: center; gap: 12px; background: none; border: 0; text-align: left; cursor: pointer; font-size: 16px; padding: 4px; }
+  .acct .pick:hover { background: var(--surface2); }
+  .acct .pick strong { font-family: var(--font-head); }
+  .acct.current { background: var(--surface2); }
+  .pin-input { font-family: var(--font-head); font-size: 32px; letter-spacing: .4em; text-align: center; min-height: 60px; }
+  .login-accts { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 
   /* ป้ายสีทึบ (ปฏิทิน · หน้าแรก): พื้น = สีของแหล่ง · ตัวอักษรขาว/ดำเลือกจากคอนทราสต์จริง (inkOn) ≥ 4.5:1 */
   .chip { display: inline-flex; align-items: center; background: var(--cat); color: var(--ink); font-size: 14px; font-weight: 700; padding: 1px 8px; white-space: nowrap; }
@@ -403,10 +448,10 @@
   table.data tr.unread td { font-weight: 700; }
 
   @media (prefers-reduced-motion: reduce) {
-    /* ไม่หมุน ไม่งอก ไม่เลื่อน — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
-    .shop-state.open .platter .disc, .wave.draw .wave-bars i { animation: none !important; }
-    .playhead, .row-link .go, .quick .btn .ico-svg, .ev { transition: none !important; }
-    .row-link:hover .go, .quick .btn:hover .ico-svg, .ev:hover { transform: none; }
+    /* ไม่มีอะไรเลื่อนหรือเด้ง — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
+    .lt, .lt svg, .ev, .player-body { transition: none !important; }
+    .lt:hover svg, .ev:hover { transform: none; }
+  }
   }
 
   .print-only { display: none; }
@@ -448,8 +493,11 @@
       <label class="lbl" for="loginPassword">รหัสผ่าน</label>
       <input type="password" id="loginPassword" class="input" placeholder="••••••••" autocomplete="current-password">
     </div>
+    <label class="chk" style="margin-bottom:14px;"><input type="checkbox" id="loginRemember" checked> จำบัญชีนี้ไว้ในเครื่องนี้ (ครั้งหน้าสลับเข้าด้วย PIN)</label>
     <div class="alert alert-red" id="loginError" style="display:none;" role="alert"></div>
     <button class="btn btn-primary btn-block" id="loginBtn" type="submit">เข้าสู่ระบบ</button>
+    <button class="btn btn-block" id="loginCancelBtn" type="button" hidden style="margin-top:8px;" onclick="cancelAddAccount()">ยกเลิก กลับไปบัญชีเดิม</button>
+    <div class="login-accts" id="loginAccounts" hidden></div>
   </form>
 </div>
 
@@ -485,35 +533,27 @@
         <!-- ============ หน้าแรกพนักงาน ============ -->
         <section class="section" id="sec-home" tabindex="-1" aria-label="หน้าแรกพนักงาน">
           <div class="deck">
-            <div class="deck-top">
-              <div>
-                <h2 id="homeHello">สวัสดี</h2>
-                <div class="deck-date" id="homeDate"></div>
-              </div>
-              <div class="clock" id="homeClock" aria-label="เวลาตอนนี้ (เวลาไทย)">--:--<span class="sec">--</span></div>
-              <div class="shop-state" id="shopState" role="status">
-                <svg class="platter" viewBox="0 0 64 64" aria-hidden="true">
-                  <g class="disc">
-                    <circle cx="32" cy="32" r="30" fill="#1C1C1C" stroke="#3A3A38"/>
-                    <circle cx="32" cy="32" r="24" fill="none" stroke="#2A2A28"/>
-                    <circle cx="32" cy="32" r="19" fill="none" stroke="#2A2A28"/>
-                    <circle cx="32" cy="32" r="10" fill="#CC001A"/>
-                    <rect x="31" y="23" width="2" height="5" fill="#FFFFFF"/>
-                    <circle cx="32" cy="32" r="1.6" fill="#0F0F0F"/>
-                  </g>
-                </svg>
-                <div>
-                  <div class="st-line"><span class="dot"></span><span id="shopStateText">—</span></div>
-                  <div class="st-sub" id="shopStateSub">เปิดทุกวัน 12:00–20:00</div>
-                </div>
-              </div>
+            <div class="bigclock" id="homeClock" role="timer" aria-label="เวลาตอนนี้ (เวลาไทย)">--:--<span class="sec">--</span></div>
+            <div class="deck-side">
+              <div class="deck-date" id="homeDate"></div>
+              <div class="shop-state" id="shopState" role="status"><span class="dot" aria-hidden="true"></span><span id="shopStateText">—</span></div>
+              <div class="st-sub" id="shopStateSub">เปิดทุกวัน 12:00–20:00</div>
             </div>
-            <div class="wave" id="homeWave" aria-label="การจองห้องซ้อมตลอดวันทำการ 12:00–20:00">
-              <div class="wave-bars" id="waveBars"></div>
-              <div class="playhead" id="wavePlayhead" hidden></div>
-              <div class="wave-axis" aria-hidden="true"><span>12:00</span><span>14:00</span><span>16:00</span><span>18:00</span><span>20:00</span></div>
-              <div class="wave-key" id="waveKey"></div>
-            </div>
+          </div>
+
+          <div class="me-strip" id="meStrip" aria-label="สถานะของฉัน">
+            <div class="me-who"><span id="meAvatar"></span><div><strong id="homeHello">—</strong><span id="meRole"></span></div></div>
+            <button class="btn btn-sm" id="switchBtn" type="button" onclick="openSwitchDialog()">⇄ สลับบัญชี</button>
+            <span class="me-sep" aria-hidden="true"></span>
+            <div class="me-stat"><span>ยอดขายของฉัน วันนี้</span><strong id="mySalesToday">—</strong></div>
+            <div class="me-stat"><span>เดือนนี้</span><strong id="mySalesMonth">—</strong></div>
+            <div class="me-stat"><span>ข้อความค้างอ่าน</span><strong id="myUnread">0</strong></div>
+            <span class="me-sep" aria-hidden="true"></span>
+            <!-- ตอกบัตร/วันลา: เจ้าของสั่งเว้นไว้ รอปรึกษา — ยังไม่มีตาราง ไม่มีตรรกะ มีแค่ช่องว่างไว้ -->
+            <div class="me-stat" id="clockPill"><span>ตอกบัตร</span><span class="pill-wait">รอปรึกษา</span></div>
+            <div class="me-stat" id="leavePill"><span>วันลาคงเหลือ</span><span class="pill-wait">รอปรึกษา</span></div>
+            <span class="spacer"></span>
+            <div id="pinNudge"></div>
           </div>
 
           <div id="homeUnread"></div>
@@ -531,28 +571,19 @@
             <div>
               <div class="panel">
                 <div class="panel-head">
-                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="4" width="16" height="12"/><path d="M2 5l8 6 8-6"/></svg>กล่องจดหมายร้าน</h3>
+                  <h3>ทางลัด</h3>
+                  <button class="btn btn-sm btn-ghost" id="launchEditBtn" type="button" onclick="toggleLaunchEdit()">แก้ไขไอคอน</button>
                 </div>
-                <div class="panel-body" id="tileMail"></div>
+                <div class="launcher" id="launcher" role="group" aria-label="ไอคอนลัด"></div>
+                <div id="launchNote"></div>
               </div>
               <div class="panel">
                 <div class="panel-head">
-                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h14v10H9l-4 4v-4H3z"/></svg>กระดานข้อความ</h3>
-                  <button class="btn btn-sm btn-ghost" type="button" onclick="showSection('board')">ทั้งหมด →</button>
+                  <h3>แอป</h3>
+                  <button class="btn btn-sm btn-ghost" type="button" onclick="openAppDialog()">+ เพิ่มแอป</button>
                 </div>
-                <div class="panel-body" id="tileBoard"></div>
+                <div class="panel-body" id="appList"></div>
               </div>
-              <div class="quick" aria-label="ทางลัด">
-                <button class="btn" type="button" onclick="openBoardForm(null)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg>เขียนข้อความ</button>
-                <button class="btn" type="button" onclick="showSection('mail'); openCompose(null)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 10L17 3l-4.5 14-3-5.5z"/><path d="M9.5 11.5L17 3"/></svg>เขียนอีเมล</button>
-                <button class="btn" type="button" onclick="showSection('calendar'); openEventForm(null, todayBangkok())"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>เพิ่มกิจกรรม</button>
-                <button class="btn" type="button" onclick="showSection('booking'); openBookingForm()"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>จองห้องซ้อม</button>
-              </div>
-              <!-- ตอกบัตรเข้างาน: เจ้าของสั่งเว้นไว้ก่อน รอปรึกษา — ไม่มีอะไรอยู่ข้างหลังปุ่มนี้ -->
-              <button class="clockin" type="button" id="tileClock" disabled aria-disabled="true" title="ยังไม่เปิดใช้ — รอปรึกษา">
-                <svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg>
-                <span><strong>ตอกบัตรเข้างาน</strong> · เร็ว ๆ นี้ · รอปรึกษา</span>
-              </button>
             </div>
           </div>
         </section>
@@ -765,6 +796,12 @@
             <div class="card">
               <h3>ชำระเงิน</h3>
               <div class="field">
+                <span class="lbl" id="sellersLbl">พนักงานขาย</span>
+                <div class="sellers" id="sellersBox" role="group" aria-labelledby="sellersLbl"></div>
+                <select id="addSellerSel" class="input" aria-label="เพิ่มพนักงานขายร่วม" onchange="addCoSeller(this.value)"></select>
+                <div class="hint">คนที่ล็อกอินเป็นพนักงานขายหลักเสมอ · เพิ่มคนที่ช่วยขายได้ (บิลนับให้ทุกคนที่มีชื่อ)</div>
+              </div>
+              <div class="field">
                 <label class="lbl" for="posCustomer">ลูกค้า (ไม่บังคับ)</label>
                 <div id="selectedCustomerBox" hidden></div>
                 <input type="text" id="posCustomer" class="input" list="customerOptions" autocomplete="off" placeholder="พิมพ์ชื่อหรือเบอร์โทรแล้วเลือก">
@@ -819,7 +856,7 @@
                 <th><button class="th" data-t="bills" data-k="sale_no">เลขที่บิล</button></th>
                 <th><button class="th" data-t="bills" data-k="customer">ลูกค้า</button></th>
                 <th class="col-opt"><button class="th" data-t="bills" data-k="payment">ชำระโดย</button></th>
-                <th class="col-opt"><button class="th" data-t="bills" data-k="staff">พนักงาน</button></th>
+                <th class="col-opt"><button class="th" data-t="bills" data-k="staff">พนักงานขาย</button></th>
                 <th class="num"><button class="th" data-t="bills" data-k="total">ยอดสุทธิ</button></th>
                 <th><button class="th" data-t="bills" data-k="status">สถานะ</button></th>
               </tr></thead>
@@ -1317,6 +1354,75 @@
   </form>
 </dialog>
 
+<dialog id="switchDialog" aria-labelledby="switchTitle">
+  <div class="dlg-head"><h2 id="switchTitle">สลับบัญชี</h2></div>
+  <div class="dlg-body">
+    <div id="switchList"></div>
+    <form id="pinStep" hidden onsubmit="event.preventDefault(); submitPin();">
+      <div class="me-who" style="margin-bottom:14px;"><span id="pinAvatar"></span><div><strong id="pinName"></strong><span>ใส่ PIN ของคุณ</span></div></div>
+      <label class="lbl" for="pinInput">PIN 4–6 หลัก</label>
+      <input type="password" id="pinInput" class="input pin-input" inputmode="numeric" autocomplete="off" maxlength="6" pattern="[0-9]*">
+      <div id="pinMsg" style="margin-top:10px;"></div>
+      <div class="dlg-foot" style="padding:14px 0 0;">
+        <button class="btn" type="button" onclick="backToAccountList()">← เลือกบัญชีอื่น</button>
+        <button class="btn btn-primary" id="pinGoBtn" type="submit">เข้าใช้</button>
+      </div>
+    </form>
+  </div>
+  <div class="dlg-foot" id="switchFoot">
+    <button class="btn" type="button" onclick="document.getElementById('switchDialog').close()">ปิด (Esc)</button>
+  </div>
+</dialog>
+
+<dialog id="pinSetDialog" aria-labelledby="pinSetTitle">
+  <div class="dlg-head"><h2 id="pinSetTitle">ตั้ง PIN สำหรับสลับบัญชี</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); savePin();">
+    <p class="hint" style="margin:0 0 14px;">ใช้ PIN นี้กดเข้าบัญชีของคุณจากหน้าแรกบนเครื่องที่จำบัญชีไว้ · ตัวเลข 4–6 หลัก อย่าใช้ซ้ำกับรหัสอื่น</p>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="pinNew">PIN ใหม่</label><input type="password" id="pinNew" class="input pin-input" inputmode="numeric" autocomplete="off" maxlength="6"></div>
+      <div class="field"><label class="lbl" for="pinNew2">ใส่อีกครั้ง</label><input type="password" id="pinNew2" class="input pin-input" inputmode="numeric" autocomplete="off" maxlength="6"></div>
+    </div>
+    <div id="pinSetMsg"></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('pinSetDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="pinSaveBtn" type="submit">บันทึก PIN</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="appDialog" aria-labelledby="appTitle">
+  <div class="dlg-head"><h2 id="appTitle">เพิ่มแอปบนหน้าแรก</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveApp();">
+    <div class="field">
+      <label class="lbl" for="apKind">ชนิด</label>
+      <select id="apKind" class="input" onchange="renderAppKindHint()">
+        <option value="youtube">YouTube — เล่นค้างไว้ได้ระหว่างเปลี่ยนหมวด</option>
+        <option value="spotify">Spotify — เล่นค้างไว้ได้ระหว่างเปลี่ยนหมวด</option>
+        <option value="link">เว็บอื่น (Netflix ฯลฯ) — เปิดเป็นหน้าต่างใหม่</option>
+      </select>
+      <div class="hint" id="apKindHint"></div>
+    </div>
+    <div class="field"><label class="lbl" for="apUrl">ลิงก์ *</label><input type="url" id="apUrl" class="input" autocomplete="off" placeholder="https://"></div>
+    <div class="field"><label class="lbl" for="apTitle">ชื่อที่แสดง</label><input type="text" id="apTitle" class="input" maxlength="60" placeholder="เช่น เพลงเปิดร้าน"></div>
+    <div id="apMsg"></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('appDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="apSaveBtn" type="submit">เพิ่มแอป</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- เครื่องเล่น: อยู่นอกทุกหมวด เปลี่ยนหมวดแล้วเสียงไม่หยุด (หน้าคอนโซลเป็นหน้าเดียว ไม่โหลดใหม่) -->
+<div class="player" id="player" hidden role="region" aria-label="เครื่องเล่น">
+  <div class="player-bar">
+    <span class="ttl" id="playerTitle"></span>
+    <button type="button" id="playerMinBtn" onclick="togglePlayerMin()">ย่อ</button>
+    <button type="button" onclick="closePlayer()" aria-label="ปิดเครื่องเล่น">✕ ปิด</button>
+  </div>
+  <div class="player-body" id="playerBody"></div>
+</div>
+<div class="frame-hint" id="frameHint" hidden role="status">โฟกัสอยู่ในกรอบวิดีโอ/อีเมล — คลิกที่หน้าคอนโซลหนึ่งครั้งก่อนยิงบาร์โค้ด</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1436,6 +1542,7 @@ async function doLogin() {
     return;
   }
   document.getElementById('loginBtn').disabled = true;
+  rememberNext = document.getElementById('loginRemember').checked;
   let error;
   try {
     ({ error } = await db.auth.signInWithPassword({ email, password }));
@@ -1460,6 +1567,10 @@ async function doLogin() {
 }
 
 function doLogout() {
+  // ออกจากระบบ = เพิกถอน session ของคนนี้ จึงลบออกจากรายการที่เครื่องจำไว้ด้วย (token ใช้ต่อไม่ได้แล้ว)
+  // คนอื่นที่จำไว้ยังอยู่ครบ · อยากแค่เปลี่ยนคนให้ใช้ "สลับบัญชี"
+  if (currentUserId) forgetAccount(currentUserId);
+  closePlayer();
   db.auth.signOut();
 }
 
@@ -1477,6 +1588,7 @@ async function handleAuthState(session) {
     document.getElementById('loginOverlay').style.display = 'flex';
     currentAdmin = null;
     currentUserId = null;
+    renderLoginAccounts();
     document.getElementById('loginEmail').focus();
     return;
   }
@@ -1501,10 +1613,17 @@ async function handleAuthState(session) {
     return;
   }
 
+  const prevUser = currentUserId;
   currentAdmin = adminRow;
   currentUserId = session.user.id;
+  if (rememberNext) { passwordLoginUser = session.user.id; rememberAccount(session, adminRow); }
+  else if (isRemembered(session.user.id)) keepRememberedToken(session);
+  rememberNext = false;
+  addingAccount = null;
+  document.getElementById('loginCancelBtn').hidden = true;
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('loginBtn').disabled = false;
+  if (prevUser && prevUser !== currentUserId) onAccountSwitched();
 
   const roleLabel = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' }[adminRow.role] || adminRow.role;
   document.getElementById('currentUserInfo').innerHTML =
@@ -1530,6 +1649,7 @@ async function initSupabaseSync() {
   handleAuthState(session);
 
   db.auth.onAuthStateChange((_event, session) => {
+    if (session) keepRememberedToken(session);       // token ใหม่ทุกครั้งที่ต่ออายุ — เก็บไว้ให้สลับกลับมาได้
     handleAuthState(session);
   });
 
@@ -1576,6 +1696,7 @@ async function loadAll() {
   await Promise.all([loadProducts(), loadStockLevels(), loadMovements(), loadCustomers(), loadSalesHistory(), loadStats(),
                      loadBookings(), loadBookingSettings()]);
   renderAll();
+  loadMySales();                  // ขายแล้ว (เครื่องนี้หรือเครื่องอื่น) ยอดของฉันบนหน้าแรกขยับตาม
 }
 
 async function loadProducts() {
@@ -1611,7 +1732,7 @@ async function loadCustomers() {
 
 async function loadSalesHistory() {
   const { data, error } = await db.from('sales')
-    .select('id, sale_no, customer_id, admin_id, subtotal, discount, total, payment_method, status, note, voided_reason, voided_at, created_at, customers:customer_id(full_name, phone), admins:admin_id(full_name)')
+    .select('id, sale_no, customer_id, admin_id, subtotal, discount, total, payment_method, status, note, voided_reason, voided_at, created_at, customers:customer_id(full_name, phone), admins:admin_id(full_name), sale_sellers(admin_id, role)')
     .order('created_at', { ascending: false })
     .limit(300);
   if (error) { console.error('[Load sales history]', error); showFatalError('โหลดประวัติการขายไม่สำเร็จ: ' + error.message); return; }
@@ -1671,7 +1792,7 @@ const SORT_KEYS = {
   },
   bills: {
     created_at: s => s.created_at, sale_no: s => s.sale_no, customer: s => customerName(s),
-    payment: s => s.payment_method || '', staff: s => (s.admins ? s.admins.full_name : ''),
+    payment: s => s.payment_method || '', staff: s => sellerNames(s),
     total: s => parseFloat(s.total) || 0, status: s => s.status,
   },
   bookings: {
@@ -2319,13 +2440,17 @@ async function submitSale() {
 
   let saleId, error;
   try {
-    ({ data: saleId, error } = await db.rpc('create_sale', {
+    const args = {
       p_customer_id: selectedCustomer ? selectedCustomer.id : null,
       p_discount: discount,
       p_payment_method: paymentMethod,
       p_items: items,
       p_note: note,
-    }));
+    };
+    // พนักงานขายร่วมไปในคำสั่งเดียวกับบิล (create_sale · 026) — บิล/สต็อก/คนขาย บันทึกพร้อมกันหรือไม่บันทึกเลย
+    // ไม่มีคนร่วม = ไม่ส่งพารามิเตอร์นี้ คำขอหน้าตาเหมือนเดิมทุกตัวอักษร
+    if (coSellers.length) args.p_sellers = coSellers.slice();
+    ({ data: saleId, error } = await db.rpc('create_sale', args));
   } catch (err) {
     showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
     submittingSale = false;
@@ -2356,6 +2481,9 @@ async function submitSale() {
 
   cart = [];
   cartSel = -1;
+  coSellers = [];
+  renderSellers();
+  loadMySales();
   document.getElementById('discountInput').value = '';
   document.getElementById('saleNoteInput').value = '';
   selectedCustomer = null;
@@ -2387,14 +2515,14 @@ function renderBills() {
   const st = document.getElementById('fBillStatus').value;
   const rows = sales.filter(s =>
     (!st || s.status === st) &&
-    (!q || [s.sale_no, customerName(s), s.customers && s.customers.phone, s.admins && s.admins.full_name]
+    (!q || [s.sale_no, customerName(s), s.customers && s.customers.phone, sellerNames(s)]
       .some(x => (x || '').toLowerCase().includes(q))));
   fillTable('bills', sortRows('bills', rows), s =>
     '<td style="white-space:nowrap;">' + formatDateTime(s.created_at) + '</td>' +
     '<td><strong' + (s.status === 'void' ? ' style="text-decoration:line-through;"' : '') + '>' + escapeHtml(s.sale_no) + '</strong></td>' +
     '<td>' + escapeHtml(customerName(s)) + '</td>' +
     '<td class="col-opt">' + escapeHtml(s.payment_method || '—') + '</td>' +
-    '<td class="col-opt">' + escapeHtml(s.admins ? s.admins.full_name : 'ไม่ทราบผู้ขาย') + '</td>' +
+    '<td class="col-opt">' + escapeHtml(sellerNames(s)) + '</td>' +
     '<td class="num"><strong>' + formatMoney(s.total) + '</strong></td>' +
     '<td>' + billStatusHtml(s) + '</td>',
     'ไม่พบบิลที่ตรงกับเงื่อนไข');
@@ -2433,7 +2561,7 @@ async function openBill(saleId) {
     '<dl class="kv">' +
       '<dt>วันเวลา</dt><dd>' + formatDateTime(sale.created_at) + '</dd>' +
       '<dt>ลูกค้า</dt><dd>' + escapeHtml(customerName(sale)) + '</dd>' +
-      '<dt>พนักงานขาย</dt><dd>' + escapeHtml(sale.admins ? sale.admins.full_name : 'ไม่ทราบผู้ขาย') + '</dd>' +
+      '<dt>พนักงานขาย</dt><dd id="billSellers">' + escapeHtml(sellerNames(sale, true)) + '</dd>' +
       '<dt>ชำระโดย</dt><dd>' + escapeHtml(sale.payment_method || '—') + '</dd>' +
       (sale.note ? '<dt>หมายเหตุ</dt><dd>' + escapeHtml(sale.note) + '</dd>' : '') +
     '</dl>' +
@@ -2558,6 +2686,7 @@ function showSection(id, mode) {
     if (id === 'activity' && !activityLoaded) reloadActivity();
     if (id === 'admin' && !adLoaded) adLoadAll();
     if (id === 'mail') loadMailList();
+    if (id === 'pos') renderSellers();
     if (id === 'calendar') loadCalendar();
   }
   if (id === 'home') renderHome();
@@ -4626,6 +4755,10 @@ function activeStaff() { return staff.filter(a => a.is_active); }
 
 async function loadStaffHome() {
   await loadStaff();
+  renderSellers();
+  loadHomePrefs();
+  loadMySales();
+  loadPinStatus();
   await loadBoard();
   renderBoardAll();
   const n = myUnread().length;
@@ -4662,11 +4795,11 @@ function thaiLongDate(d) {
 
 function initialOf(name) { const m = String(name || '').match(/[ก-ฮA-Za-z0-9]/); return m ? m[0].toUpperCase() : '?'; }
 const AVA_COLORS = ['#0F0F0F', '#3F51B5', '#0B8043', '#8E24AA', '#F4511E', '#616161', '#039BE5'];
-function avatarHtml(id) {
+function avatarHtml(id, name) {
   let h = 0;
   for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const k = chipColors(AVA_COLORS[h % AVA_COLORS.length]);
-  return '<span class="ava" style="background:' + k.bg + ';color:' + k.ink + '" aria-hidden="true">' + escapeHtml(initialOf(staffName(id))) + '</span>';
+  return '<span class="ava" style="background:' + k.bg + ';color:' + k.ink + '" aria-hidden="true">' + escapeHtml(initialOf(name || staffName(id))) + '</span>';
 }
 
 // เวลาไทยเสมอ ไม่ใช่เวลาของเครื่อง (กฎเดียวกับ todayBangkok)
@@ -4684,68 +4817,31 @@ function shopStateAt(min) {
   return { open: false, text: 'ปิดร้านแล้ว', sub: 'เปิดพรุ่งนี้ 12:00' };
 }
 
-// เส้นคลื่นของวันทำการ: 96 แท่ง = ช่องละ 5 นาที ตั้งแต่ 12:00 ถึง 20:00 · แท่งสีม่วง = มีคนจองห้องซ้อมช่วงนั้น
-// ความสูงของแท่งเป็นลายตายตัว (ไม่สุ่มใหม่ทุกครั้ง) ข้อมูลอยู่ที่สี ไม่ใช่ที่ความสูง · เส้นแดง = ตอนนี้
-let waveDrawn = false;
 function todaysBookings() {
   const d = todayBangkok();
   return bookings.filter(b => b.date === d && b.status !== 'cancelled');
 }
 function toMin(t) { const [h, m] = shortTime(t).split(':').map(Number); return h * 60 + m; }
-function renderWave(nowMin) {
-  const bk = todaysBookings();
-  let html = '';
-  for (let i = 0; i < 96; i++) {
-    const t = SHOP_OPEN + i * 5;
-    const booked = bk.some(b => t >= toMin(b.start_time) && t < toMin(b.start_time) + b.hours * 60);
-    const h = 28 + Math.round(72 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.37)));
-    html += '<i style="height:' + h + '%;--i:' + i + '"' + ((booked || t + 5 <= nowMin) ? ' class="' + [booked ? 'bk' : '', t + 5 <= nowMin ? 'past' : ''].join(' ').trim() + '"' : '') + '></i>';
-  }
-  const bars = document.getElementById('waveBars');
-  bars.innerHTML = html;
-  bars.style.setProperty('--room', ROOM_COLOR);
-  document.getElementById('waveKey').innerHTML = '<span style="--k:' + ROOM_COLOR + '">จองห้องซ้อม ' + bk.length + ' รายการ</span>' +
-    '<span style="--k:#8C8A83">ผ่านไปแล้ว</span><span style="--k:#CC001A">ตอนนี้</span>';
-  const wave = document.getElementById('homeWave');
-  if (!waveDrawn && currentUserId) {                // แท่งงอกขึ้นครั้งเดียวตอนเปิดหน้าแรกครั้งแรก ไม่เล่นซ้ำทุกครั้งที่ข้อมูลขยับ
-    waveDrawn = true;
-    wave.classList.add('draw');
-    setTimeout(() => wave.classList.remove('draw'), 1000);
-  }
-  placePlayhead(nowMin);
-}
-function placePlayhead(nowMin) {
-  const ph = document.getElementById('wavePlayhead');
-  const inDay = nowMin >= SHOP_OPEN && nowMin <= SHOP_CLOSE;
-  ph.hidden = !inDay;
-  if (inDay) ph.style.left = ((nowMin - SHOP_OPEN) / (SHOP_CLOSE - SHOP_OPEN) * 100) + '%';
-}
+const pad2 = n => String(n).padStart(2, '0');
+const ROLE_LABEL = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' };
+function baht0(n) { return '฿' + Math.round(Number(n) || 0).toLocaleString('th-TH'); }
 
-// ทุกวินาที: นาฬิกา · สถานะร้าน · ตำแหน่งเส้นแดง — ทำเฉพาะตอนหน้าแรกเปิดอยู่และแท็บไม่ถูกซ่อน
-let lastWaveMin = -1;
+// ทุกวินาที: นาฬิกาใหญ่ + สถานะร้าน — ทำเฉพาะตอนหน้าแรกเปิดอยู่และแท็บไม่ถูกซ่อน
 function tickHome() {
   if (current !== HOME || document.hidden) return;
   const t = bkkNow(), min = t.h * 60 + t.m;
-  document.getElementById('homeClock').innerHTML = String(t.h).padStart(2, '0') + ':' + String(t.m).padStart(2, '0') +
-    '<span class="sec">' + String(t.s).padStart(2, '0') + '</span>';
+  document.getElementById('homeClock').innerHTML = pad2(t.h) + ':' + pad2(t.m) + '<span class="sec">' + pad2(t.s) + '</span>';
   const st = shopStateAt(min);
-  const box = document.getElementById('shopState');
-  box.classList.toggle('open', st.open);
+  document.getElementById('shopState').classList.toggle('open', st.open);
   document.getElementById('shopStateText').textContent = st.text;
   document.getElementById('shopStateSub').textContent = st.sub;
-  if (min !== lastWaveMin) { lastWaveMin = min; renderWave(min); }
 }
-document.addEventListener('visibilitychange', () => {
-  document.documentElement.classList.toggle('paused', document.hidden);   // จานหยุดหมุนเมื่อแท็บถูกซ่อน
-  tickHome();
-});
+document.addEventListener('visibilitychange', tickHome);
 
 function renderHome() {
-  const today = todayBangkok();
-  document.getElementById('homeHello').textContent = currentAdmin ? 'สวัสดี คุณ' + currentAdmin.full_name : 'สวัสดี';
-  document.getElementById('homeDate').textContent = thaiLongDate(today);
-  lastWaveMin = -1;
+  document.getElementById('homeDate').textContent = thaiLongDate(todayBangkok());
   tickHome();
+  renderMeStrip();
 
   const unread = myUnread();
   document.getElementById('homeUnread').innerHTML = unread.length
@@ -4758,31 +4854,8 @@ function renderHome() {
       '</div>'
     : '';
 
-  // กระดาน: จำนวนที่ยังไม่อ่าน + ข้อความล่าสุด 3 อัน
-  const latest = boardMsgs.slice().sort((a, b) => cmp(b.created_at, a.created_at)).slice(0, 3);
-  document.getElementById('tileBoard').innerHTML =
-    '<p class="hint" style="margin:6px 0 4px;">' + (unread.length ? '<strong style="color:var(--text);">' + unread.length + '</strong> ข้อความที่คุณยังไม่ได้อ่าน'
-      : boardMsgs.length ? 'อ่านครบทุกข้อความแล้ว' : 'ยังไม่มีข้อความ') + '</p>' +
-    latest.map(m => '<button class="row-link" type="button" onclick="openFromHome(\'' + m.id + '\')">' + avatarHtml(m.author_id) +
-      '<span style="min-width:0;"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' + (isUnreadForMe(m) ? 'font-weight:700;' : '') + '">' +
-      escapeHtml(m.title) + '</span><span class="muted">' + escapeHtml(staffName(m.author_id)) + ' · ' + fmtDate(m.refers_to) + '</span></span>' +
-      '<span class="go" aria-hidden="true">→</span></button>').join('');
-
-  // กล่องจดหมาย: จำนวนแยกตามแท็บ (กล่องจดหมาย · ป้าย · ติดดาว)
-  const ms = mailState.status;
-  document.getElementById('tileMail').innerHTML =
-    ms === 'ok' ? MAIL_BOXES.map(b => {
-      const c = mailState.counts[b.key];
-      const n = !c ? null : b.key === 'starred' ? c.total : c.unseen;
-      return '<button class="row-link" type="button" data-box="' + escapeHtml(b.key) + '" onclick="openMailBox(this.dataset.box)">' +
-        '<span>' + escapeHtml(b.t) + '</span>' +
-        (mailState.counts[b.key] === null ? '<span class="muted">ยังไม่มีป้ายนี้ใน Gmail</span>' : '') +
-        '<span class="go" aria-hidden="true" style="margin-left:auto;">→</span>' +
-        (n ? '<span class="cnt' + (b.key !== 'starred' ? ' hot' : '') + '" title="' + (b.key === 'starred' ? 'ติดดาวทั้งหมด' : 'ยังไม่ได้เปิด') + '">' + n + '</span>' : '<span class="cnt"></span>') +
-        '</button>';
-    }).join('')
-    : '<p class="hint" style="margin:10px 0;">' + (ms === 'setup' ? 'ยังไม่ได้เชื่อมกล่องจดหมาย — เจ้าของร้านตั้งค่าตามคู่มือ'
-      : ms === 'error' ? '⚠ เชื่อมต่อ Gmail ไม่สำเร็จ: ' + escapeHtml(mailState.error) : 'กำลังตรวจสอบกล่องจดหมาย…') + '</p>';
+  renderLauncher();
+  renderApps();
 
   // วันนี้: ปฏิทินร้าน + Google + การจองห้อง เรียงตามเวลา · การจองที่กำลังใช้ห้อง/คิวถัดไปบอกด้วยข้อความ
   const t = bkkNow(), nowMin = t.h * 60 + t.m;
@@ -4803,6 +4876,606 @@ function renderHome() {
         '<span class="ttl" title="' + escapeHtml(r.title) + '">' + escapeHtml(r.title) + '</span><span class="state">' + (r.state ? (r.now ? '● ' : '') + r.state : '') + '</span></div>').join('')
     : '<p class="hint" style="margin:10px 0;">วันนี้ยังไม่มีกิจกรรมในปฏิทินหรือการจองห้อง</p>') +
     (homeToday.googleErr && homeToday.googleErr.code !== 'not_configured' ? '<p class="hint">⚠ ปฏิทิน Google โหลดไม่สำเร็จ: ' + escapeHtml(homeToday.googleErr.message) + '</p>' : '');
+}
+
+// ---------------------------------------------------------------------------
+// แถบของฉัน — ใครล็อกอินอยู่ · ยอดขายของฉัน · ตอกบัตร/วันลา (รอปรึกษา)
+// ---------------------------------------------------------------------------
+// ยอดขายของฉัน = ยอดเต็มของทุกบิลที่มีชื่อฉัน (หลักหรือร่วม) **ไม่หารแบ่ง** — บิลที่ขายสองคนนับเต็มให้ทั้งสองคน
+// การแบ่งเครดิตเป็นเรื่องของหน้าสถิติ/รายงาน (งานอีกชิ้น) ตัวนี้แค่บอกว่าวันนี้ฉันมีส่วนในยอดเท่าไหร่
+let mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
+let pinStatus = null;          // null = ยังไม่รู้ · true/false = ตั้ง PIN แล้วหรือยัง · 'error' = ระบบ PIN ยังไม่พร้อม (ยังไม่รัน 027)
+let passwordLoginUser = null;  // คนที่เข้าด้วยรหัสผ่านในรอบนี้ — ตั้ง/เปลี่ยน PIN ได้เฉพาะคนนี้ (เจ้าของเคาะ)
+
+function renderMeStrip() {
+  const me = currentAdmin;
+  document.getElementById('meAvatar').innerHTML = me ? avatarHtml(me.id, me.full_name) : '';
+  document.getElementById('homeHello').textContent = me ? me.full_name : '—';
+  document.getElementById('meRole').textContent = me ? ROLE_LABEL[me.role] || me.role : '';
+  const cell = (n, count) => mySales.error ? '<small title="' + escapeHtml(mySales.error) + '">⚠ โหลดไม่สำเร็จ</small>'
+    : mySales.loaded ? baht0(n) + '<small>' + count + ' บิล</small>' : '—';
+  document.getElementById('mySalesToday').innerHTML = cell(mySales.today, mySales.todayN);
+  document.getElementById('mySalesMonth').innerHTML = cell(mySales.month, mySales.monthN);
+  document.getElementById('myUnread').textContent = myUnread().length;
+  document.getElementById('pinNudge').innerHTML =
+    pinStatus === false ? '<button class="btn btn-sm btn-primary" type="button" onclick="openPinSet()">ตั้ง PIN สำหรับสลับบัญชี</button>'
+    : pinStatus === true ? '<button class="btn btn-sm btn-ghost" type="button" onclick="openPinSet()">เปลี่ยน PIN</button>'
+    : pinStatus === 'error' ? '<span class="hint" style="margin:0;">ระบบ PIN ยังไม่พร้อม</span>' : '';
+}
+
+async function loadMySales() {
+  const me = currentUserId;
+  if (!me) return;
+  const today = todayBangkok();
+  const { data, error } = await db.from('sale_sellers').select('sale_id, role, sales!inner(total, status, created_at)')
+    .eq('admin_id', me).gte('sales.created_at', today.slice(0, 8) + '01T00:00:00+07:00');
+  if (me !== currentUserId) return;                 // สลับบัญชีไประหว่างรอ — ไม่เอาตัวเลขของคนเก่ามาแสดง
+  if (error) {
+    console.error('[Load my sales]', error);
+    mySales = { loaded: false, error: error.message, today: 0, todayN: 0, month: 0, monthN: 0 };
+    renderMeStrip();
+    return;
+  }
+  const r = { loaded: true, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
+  (data || []).forEach(x => {
+    const s = x.sales;
+    if (!s || s.status !== 'completed') return;
+    const d = new Date(s.created_at).toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+    if (d.slice(0, 7) !== today.slice(0, 7)) return;
+    r.month += Number(s.total) || 0; r.monthN++;
+    if (d === today) { r.today += Number(s.total) || 0; r.todayN++; }
+  });
+  mySales = r;
+  renderMeStrip();
+}
+
+async function loadPinStatus() {
+  const me = currentUserId;
+  const { data, error } = await db.rpc('my_pin_status');
+  if (me !== currentUserId) return;
+  if (error) console.error('[PIN status]', error);
+  pinStatus = error ? 'error' : !!data;
+  renderMeStrip();
+}
+
+function openPinSet() {
+  // ตั้ง/เปลี่ยน PIN หลังเข้าด้วยรหัสผ่านเท่านั้น — คนที่รู้แค่ PIN (สลับเข้ามา) ต้องไม่เปลี่ยน PIN ของคนอื่นทิ้งได้
+  if (passwordLoginUser !== currentUserId) {
+    askConfirm('ต้องเข้าด้วยรหัสผ่านก่อน',
+      '<p>ตั้งหรือเปลี่ยน PIN ได้หลังเข้าสู่ระบบด้วยรหัสผ่านเท่านั้น — กด "เข้าด้วยรหัสผ่าน" แล้วเข้าบัญชีของคุณอีกครั้ง</p>',
+      'เข้าด้วยรหัสผ่าน', async () => { closeConfirm(); startAddAccount(currentAdmin && currentAdmin.id); });
+    return;
+  }
+  document.getElementById('pinNew').value = '';
+  document.getElementById('pinNew2').value = '';
+  document.getElementById('pinSetMsg').innerHTML = '';
+  document.getElementById('pinSetDialog').showModal();
+  document.getElementById('pinNew').focus();
+}
+
+async function savePin() {
+  const a = document.getElementById('pinNew').value, b = document.getElementById('pinNew2').value;
+  const msg = t => { document.getElementById('pinSetMsg').innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(t) + '</div>'; };
+  if (!/^[0-9]{4,6}$/.test(a)) return msg('PIN ต้องเป็นตัวเลข 4–6 หลัก');
+  if (a !== b) return msg('PIN สองช่องไม่ตรงกัน');
+  const btn = document.getElementById('pinSaveBtn');
+  btn.disabled = true;
+  const { error } = await db.rpc('set_my_pin', { p_pin: a });
+  btn.disabled = false;
+  if (error) { console.error('[Set PIN]', error); return msg('ตั้ง PIN ไม่สำเร็จ: ' + error.message); }
+  document.getElementById('pinSetDialog').close();
+  pinStatus = true;
+  renderMeStrip();
+  showToast('✅ ตั้ง PIN แล้ว — ครั้งหน้ากดสลับบัญชีแล้วใส่ PIN ได้เลย');
+}
+
+// ---------------------------------------------------------------------------
+// ไอคอนลัด 2 × 2 — แต่ละคนเลือกเองได้ (staff_home.launcher · migration 028)
+// ---------------------------------------------------------------------------
+const ICON_PATHS = {
+  scan:   '<path d="M6 13V6h8M34 6h8v7M42 35v7h-8M14 42H6v-7"/><path d="M13 15v18M18 15v18M22 15v18M27 15v18M31 15v18M35 15v18"/><path d="M4 24h40" stroke-dasharray="3 3"/>',
+  mail:   '<rect x="6" y="11" width="36" height="26"/><path d="M6 13l18 14 18-14"/>',
+  room:   '<rect x="5" y="9" width="38" height="30"/><circle cx="21" cy="24" r="10"/><circle cx="21" cy="24" r="2.5"/><path d="M37 13v14l-6 6"/>',
+  cal:    '<rect x="6" y="9" width="36" height="32"/><path d="M6 17h36M15 5v8M33 5v8M13 25h4M22 25h4M31 25h4M13 32h4M22 32h4"/>',
+  search: '<circle cx="21" cy="21" r="12"/><path d="M30 30l12 12"/><path d="M15 21h12M21 15v12" stroke-width="1"/>',
+  board:  '<path d="M6 8h36v24H20l-9 8v-8H6z"/><path d="M13 16h22M13 23h14"/>',
+  people: '<circle cx="17" cy="17" r="6"/><path d="M6 39c0-7 5-12 11-12s11 5 11 12"/><circle cx="33" cy="15" r="5"/><path d="M30 26c7 0 12 4 12 11"/>',
+  sum:    '<path d="M35 9H13l12 15-12 15h22"/>',
+  tag:    '<path d="M6 6h17l19 19-17 17L6 23z"/><circle cx="15" cy="15" r="3"/>',
+  star:   '<path d="M24 6l5.5 11.5 12.5 1.8-9 8.8 2.1 12.4L24 34.6 12.9 40.5 15 28.1l-9-8.8 12.5-1.8z"/>',
+  play:   '<path d="M15 10l24 14-24 14z"/>',
+  music:  '<path d="M18 36V10l20-4v26"/><circle cx="13" cy="36" r="5"/><circle cx="33" cy="32" r="5"/>',
+  out:    '<path d="M26 8h14v14M40 8L22 26"/><path d="M34 28v12H8V14h12"/>',
+};
+function iconSvg(k) { return '<svg viewBox="0 0 48 48" aria-hidden="true">' + (ICON_PATHS[k] || '') + '</svg>'; }
+
+// แคตตาล็อกสำเร็จรูป — เฉพาะหมวดที่พนักงานทุกคนเปิดได้ (หมวดของเจ้าของ/ผู้ดูแลไม่อยู่ในนี้)
+const LAUNCH_ITEMS = [
+  { key: 'pos',      t: 'ขายหน้าร้าน', icon: 'scan',   go: () => { showSection('pos'); focusScan(); } },
+  { key: 'mail',     t: 'อีเมล',       icon: 'mail',   go: () => openMailBox('inbox'),
+    badge: () => mailState.status === 'ok' ? (mailState.unseen || 0) : 0 },
+  { key: 'booking',  t: 'ห้องซ้อม',    icon: 'room',   go: () => showSection('booking'),
+    badge: () => bookings.filter(b => !b.confirmed && b.status !== 'cancelled').length },
+  { key: 'calendar', t: 'ปฏิทิน',      icon: 'cal',    go: () => showSection('calendar') },
+  { key: 'stock',    t: 'ค้นหาสต็อก',  icon: 'search', go: () => { showSection('products'); const s = document.getElementById('productSearch'); s.focus(); s.select(); } },
+  { key: 'board',    t: 'กระดาน',      icon: 'board',  go: () => showSection('board'), badge: () => myUnread().length },
+  { key: 'customers',t: 'ลูกค้า',      icon: 'people', go: () => showSection('customers') },
+  { key: 'daily',    t: 'สรุปรายวัน',  icon: 'sum',    go: () => showSection('daily') },
+].concat(MAIL_BOXES.filter(b => b.key !== 'inbox').map(b => ({
+  key: 'mail:' + b.key, t: b.key === 'starred' ? 'อีเมลติดดาว' : 'ป้าย ' + b.t, icon: b.key === 'starred' ? 'star' : 'tag',
+  go: () => openMailBox(b.key),
+  badge: () => { const c = mailState.counts[b.key]; return c && b.key !== 'starred' ? c.unseen : 0; },
+})));
+const LAUNCH_DEFAULT = ['pos', 'mail', 'booking', 'calendar'];
+let homePrefs = { launcher: LAUNCH_DEFAULT.slice(), apps: [], loaded: false, error: '' };
+let launchDraft = null;        // null = ไม่ได้แก้อยู่ · array = ค่าที่กำลังเลือกในโหมดแก้ไข
+
+function launchItem(key) { return LAUNCH_ITEMS.find(x => x.key === key) || null; }
+function launchGo(key) { const it = launchItem(key); if (it) it.go(); }
+function focusScan() {
+  const s = document.getElementById('posSearch');
+  s.focus();
+  s.select();
+  checkFrameFocus();
+}
+
+function renderLauncher() {
+  const box = document.getElementById('launcher');
+  document.getElementById('launchEditBtn').textContent = launchDraft ? 'ยกเลิก' : 'แก้ไขไอคอน';
+  if (launchDraft) {
+    box.innerHTML = [0, 1, 2, 3].map(i => {
+      const it = launchItem(launchDraft[i]);
+      return '<div class="lt-edit"><div class="lt-prev">' + (it ? iconSvg(it.icon) + escapeHtml(it.t) : '<span class="hint" style="margin:0;">ว่าง</span>') + '</div>' +
+        '<label class="lbl" for="ltSel' + i + '" style="margin:0;">ช่องที่ ' + (i + 1) + '</label>' +
+        '<select class="input" id="ltSel' + i + '" data-slot="' + i + '" onchange="pickLaunch(this)">' +
+        '<option value="">— ว่าง —</option>' +
+        LAUNCH_ITEMS.map(x => '<option value="' + escapeHtml(x.key) + '"' + (x.key === launchDraft[i] ? ' selected' : '') + '>' + escapeHtml(x.t) + '</option>').join('') +
+        '</select></div>';
+    }).join('') +
+    '<div style="grid-column:1 / -1;display:flex;gap:8px;justify-content:flex-end;">' +
+      '<button class="btn btn-sm" type="button" onclick="resetLaunch()">ใช้ค่าเริ่มต้น</button>' +
+      '<button class="btn btn-sm btn-primary" id="launchSaveBtn" type="button" onclick="saveLauncher()">บันทึกไอคอน</button></div>';
+    return;
+  }
+  const slots = homePrefs.launcher.filter(k => launchItem(k)).slice(0, 4);
+  while (slots.length < 4) slots.push(null);
+  box.innerHTML = slots.map(k => {
+    if (!k) return '<button class="lt empty" type="button" onclick="toggleLaunchEdit()">+ เพิ่มไอคอน</button>';
+    const it = launchItem(k), n = it.badge ? it.badge() : 0;
+    return '<button class="lt" type="button" data-key="' + escapeHtml(k) + '" onclick="launchGo(this.dataset.key)"' +
+      ' aria-label="' + escapeHtml(it.t + (n ? ' — รออยู่ ' + n : '')) + '">' + iconSvg(it.icon) + '<span>' + escapeHtml(it.t) + '</span>' +
+      (n ? '<span class="badge" aria-hidden="true">' + (n > 99 ? '99+' : n) + '</span>' : '') + '</button>';
+  }).join('');
+  document.getElementById('launchNote').innerHTML = homePrefs.error
+    ? '<p class="hint" style="margin:0 18px 14px;">⚠ โหลดไอคอนที่ตั้งไว้ไม่สำเร็จ ใช้ค่าเริ่มต้นแทน: ' + escapeHtml(homePrefs.error) + '</p>' : '';
+}
+function toggleLaunchEdit() {
+  launchDraft = launchDraft ? null : homePrefs.launcher.slice(0, 4).concat([null, null, null, null]).slice(0, 4);
+  renderLauncher();
+  if (launchDraft) document.getElementById('ltSel0').focus();
+}
+function pickLaunch(sel) { launchDraft[Number(sel.dataset.slot)] = sel.value || null; renderLauncher(); document.getElementById(sel.id).focus(); }
+function resetLaunch() { launchDraft = LAUNCH_DEFAULT.slice(); renderLauncher(); }
+async function saveLauncher() {
+  const next = launchDraft.filter(Boolean);
+  const ok = await saveHomePrefs({ launcher: next });
+  if (!ok) return;
+  launchDraft = null;
+  renderLauncher();
+  showToast('✅ บันทึกไอคอนแล้ว — ตั้งไว้เฉพาะบัญชีของคุณ');
+}
+
+async function loadHomePrefs() {
+  const me = currentUserId;
+  if (!me) return;
+  const { data, error } = await db.from('staff_home').select('launcher, apps').eq('admin_id', me).maybeSingle();
+  if (me !== currentUserId) return;
+  if (error) console.error('[Load home prefs]', error);
+  homePrefs = {
+    launcher: data && Array.isArray(data.launcher) && data.launcher.length ? data.launcher : LAUNCH_DEFAULT.slice(),
+    apps: data && Array.isArray(data.apps) ? data.apps : [],
+    loaded: !error, error: error ? error.message : '',
+  };
+  renderLauncher();
+  renderApps();
+}
+async function saveHomePrefs(patch) {
+  const row = Object.assign({ admin_id: currentUserId, launcher: homePrefs.launcher, apps: homePrefs.apps }, patch,
+                            { updated_at: new Date().toISOString() });
+  const { data, error } = await db.from('staff_home').upsert(row, { onConflict: 'admin_id' }).select('admin_id');
+  if (error || !data || !data.length) {
+    console.error('[Save home prefs]', error);
+    showFatalError('บันทึกหน้าแรกของคุณไม่สำเร็จ: ' + (error ? error.message : 'ไม่มีสิทธิ์บันทึก'));
+    return false;
+  }
+  homePrefs = Object.assign(homePrefs, patch, { error: '' });
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// แอปบนหน้าแรก (staff_home.apps) + เครื่องเล่นที่ติดจอข้ามทุกหมวด
+//
+// ⚠️ ไม่เอาลิงก์ที่ผู้ใช้วางไปใส่ iframe ตรง ๆ — แยกเอารหัสวิดีโอ/เพลงออกมา (ตรวจรูปแบบ) แล้วประกอบ
+//    ที่อยู่ embed ของ YouTube/Spotify เอง · ลิงก์ชนิด "เว็บอื่น" เปิดหน้าต่างใหม่เท่านั้น ไม่ฝัง
+//    (Netflix และเว็บส่วนใหญ่ห้ามฝังด้วย X-Frame-Options/CSP อยู่แล้ว ฝังไปก็ได้กรอบว่าง)
+// ---------------------------------------------------------------------------
+const APP_KINDS = {
+  youtube: { t: 'YouTube', icon: 'play',  color: '#0F0F0F',
+    hint: 'วางลิงก์วิดีโอหรือเพลย์ลิสต์ของ YouTube · กด "เล่น" แล้วเปลี่ยนไปหมวดอื่นได้ เสียงไม่หยุด' },
+  spotify: { t: 'Spotify', icon: 'music', color: '#1DB954',
+    hint: 'วางลิงก์เพลง อัลบั้ม หรือเพลย์ลิสต์ของ Spotify · ฟังเต็มเพลงได้เฉพาะเมื่อเบราว์เซอร์เครื่องนี้ล็อกอิน Spotify อยู่ ไม่งั้นได้ตัวอย่าง 30 วินาที' },
+  link:    { t: 'เว็บ',     icon: 'out',   color: '#616161',
+    hint: 'Netflix และเว็บส่วนใหญ่ไม่ยอมให้ฝังในหน้าอื่น — กดแล้วเปิดเป็นหน้าต่างใหม่ (ฝังในหน้าคอนโซลไม่ได้)' },
+};
+function safeUrl(s) { try { const u = new URL(String(s || '').trim()); return /^https?:$/.test(u.protocol) ? u : null; } catch (e) { return null; } }
+function parseYouTube(s) {
+  const u = safeUrl(s);
+  if (!u || !/^((www|m|music)\.)?youtube(-nocookie)?\.com$|^youtu\.be$/.test(u.hostname)) return null;
+  let v = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v');
+  const m = u.pathname.match(/^\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/);
+  if (m) v = m[1];
+  const list = u.searchParams.get('list');
+  const okV = v && /^[A-Za-z0-9_-]{11}$/.test(v) ? v : null;
+  const okL = list && /^[A-Za-z0-9_-]{10,64}$/.test(list) ? list : null;
+  return okV || okL ? { v: okV, list: okL } : null;
+}
+function youtubeEmbed(y) {
+  const q = new URLSearchParams({ autoplay: '1', rel: '0' });
+  if (y.list) q.set('list', y.list);
+  return 'https://www.youtube-nocookie.com/embed/' + (y.v || 'videoseries') + '?' + q.toString();
+}
+function parseSpotify(s) {
+  const u = safeUrl(s);
+  if (!u || u.hostname !== 'open.spotify.com') return null;
+  const m = u.pathname.match(/^\/(?:intl-[a-z-]+\/)?(?:embed\/)?(track|album|playlist|episode|show|artist)\/([A-Za-z0-9]{22})/);
+  return m ? { type: m[1], id: m[2] } : null;
+}
+function spotifyEmbed(sp) { return 'https://open.spotify.com/embed/' + sp.type + '/' + sp.id; }
+
+function renderAppKindHint() {
+  document.getElementById('apKindHint').textContent = APP_KINDS[document.getElementById('apKind').value].hint;
+}
+function openAppDialog() {
+  if (homePrefs.apps.length >= 8) { showToast('⚠️ ปักแอปได้สูงสุด 8 อัน — เอาอันเก่าออกก่อน'); return; }
+  document.getElementById('apKind').value = 'youtube';
+  document.getElementById('apUrl').value = '';
+  document.getElementById('apTitle').value = '';
+  document.getElementById('apMsg').innerHTML = '';
+  renderAppKindHint();
+  document.getElementById('appDialog').showModal();
+  document.getElementById('apUrl').focus();
+}
+async function saveApp() {
+  const kind = document.getElementById('apKind').value;
+  const url = document.getElementById('apUrl').value.trim();
+  const msg = t => { document.getElementById('apMsg').innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(t) + '</div>'; };
+  const ok = kind === 'youtube' ? parseYouTube(url) : kind === 'spotify' ? parseSpotify(url) : safeUrl(url);
+  if (!ok) {
+    return msg(kind === 'youtube' ? 'ไม่ใช่ลิงก์วิดีโอหรือเพลย์ลิสต์ของ YouTube'
+      : kind === 'spotify' ? 'ไม่ใช่ลิงก์เพลง/อัลบั้ม/เพลย์ลิสต์ของ Spotify (open.spotify.com/…)' : 'ลิงก์ต้องขึ้นต้นด้วย https://');
+  }
+  const title = document.getElementById('apTitle').value.trim() || (kind === 'link' ? ok.hostname.replace(/^www\./, '') : APP_KINDS[kind].t);
+  const app = { id: 'a' + Date.now().toString(36), kind, title: title.slice(0, 60), url };
+  const btn = document.getElementById('apSaveBtn');
+  btn.disabled = true;
+  const saved = await saveHomePrefs({ apps: homePrefs.apps.concat([app]) });
+  btn.disabled = false;
+  if (!saved) return;
+  document.getElementById('appDialog').close();
+  renderApps();
+  showToast('✅ เพิ่ม "' + app.title + '" บนหน้าแรกแล้ว');
+}
+async function removeApp(id) {
+  const app = homePrefs.apps.find(a => a.id === id);
+  if (!app) return;
+  if (!await saveHomePrefs({ apps: homePrefs.apps.filter(a => a.id !== id) })) return;
+  if (playerApp === id) closePlayer();
+  renderApps();
+  showToast('เอา "' + app.title + '" ออกจากหน้าแรกแล้ว');
+}
+function renderApps() {
+  const list = document.getElementById('appList');
+  list.innerHTML = homePrefs.apps.length ? homePrefs.apps.map(a => {
+    const k = APP_KINDS[a.kind] || APP_KINDS.link, c = chipColors(k.color);
+    const act = a.kind === 'link'
+      ? '<button class="btn btn-sm" type="button" data-id="' + escapeHtml(a.id) + '" onclick="openLinkApp(this.dataset.id)">เปิด ↗</button>'
+      : '<button class="btn btn-sm btn-primary" type="button" data-id="' + escapeHtml(a.id) + '" onclick="playApp(this.dataset.id)">' + (playerApp === a.id ? '■ กำลังเล่น' : '▶ เล่น') + '</button>';
+    return '<div class="app-row"><span class="kind" style="background:' + c.bg + ';color:' + c.ink + '"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:3">' +
+      ICON_PATHS[k.icon] + '</svg></span><span class="name">' + escapeHtml(a.title) + '<small>' + escapeHtml(k.t) +
+      (a.kind === 'link' ? ' · เปิดเป็นหน้าต่างใหม่' : '') + '</small></span>' + act +
+      '<button class="btn btn-sm btn-ghost" type="button" data-id="' + escapeHtml(a.id) + '" onclick="removeApp(this.dataset.id)" aria-label="เอา ' + escapeHtml(a.title) + ' ออก">✕</button></div>';
+  }).join('') : '<p class="hint" style="margin:10px 0;">ปักเพลงหรือวิดีโอไว้เปิดในร้านได้ (YouTube · Spotify) — เล่นค้างไว้ได้ระหว่างใช้หมวดอื่น</p>';
+}
+function openLinkApp(id) {
+  const a = homePrefs.apps.find(x => x.id === id), u = a && safeUrl(a.url);
+  if (!u) { showToast('⚠️ ลิงก์ของแอปนี้ใช้ไม่ได้ — เอาออกแล้วเพิ่มใหม่'); return; }
+  window.open(u.href, '_blank', 'noopener,noreferrer');
+}
+
+let playerApp = null;
+function playApp(id) {
+  const a = homePrefs.apps.find(x => x.id === id);
+  if (!a) return;
+  let src = null, spotify = false;
+  if (a.kind === 'youtube') { const y = parseYouTube(a.url); if (y) src = youtubeEmbed(y); }
+  if (a.kind === 'spotify') { const sp = parseSpotify(a.url); if (sp) { src = spotifyEmbed(sp); spotify = true; } }
+  if (!src) { showToast('⚠️ ลิงก์ของแอปนี้ใช้ไม่ได้ — เอาออกแล้วเพิ่มใหม่'); return; }
+  const body = document.getElementById('playerBody');
+  body.className = 'player-body' + (spotify ? ' spotify' : '');
+  body.innerHTML = '';
+  const f = document.createElement('iframe');
+  f.id = 'playerFrame';
+  f.title = a.title;
+  // กดเล่นจากปุ่มในหน้า (ผู้ใช้กดเอง) + allow="autoplay" = เบราว์เซอร์ยอมให้เล่นทันที
+  f.allow = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
+  f.referrerPolicy = 'strict-origin-when-cross-origin';   // YouTube ไม่ยอมเล่นในกรอบที่ไม่ส่ง referrer
+  f.setAttribute('allowfullscreen', '');
+  f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox');
+  f.src = src;
+  body.appendChild(f);
+  playerApp = a.id;
+  document.getElementById('playerTitle').textContent = '▶ ' + a.title;
+  const p = document.getElementById('player');
+  p.hidden = false;
+  p.classList.remove('min');
+  document.getElementById('playerMinBtn').textContent = 'ย่อ';
+  renderApps();
+}
+function togglePlayerMin() {
+  const p = document.getElementById('player');
+  p.classList.toggle('min');
+  document.getElementById('playerMinBtn').textContent = p.classList.contains('min') ? 'ขยาย' : 'ย่อ';
+}
+function closePlayer() {
+  document.getElementById('playerBody').innerHTML = '';
+  document.getElementById('player').hidden = true;
+  playerApp = null;
+  checkFrameFocus();
+  renderApps();
+}
+
+// เครื่องยิงบาร์โค้ด "พิมพ์" ลงที่ที่โฟกัสอยู่ — ถ้าโฟกัสอยู่ในกรอบวิดีโอ/อีเมล (iframe) ปุ่มไม่มาถึงหน้านี้เลย
+// ดักจากฝั่งหน้าเว็บไม่ได้ จึงบอกให้เห็นแทน: ขึ้นแถบเตือนทันทีที่โฟกัสหลุดเข้าไปในกรอบ
+function checkFrameFocus() {
+  const el = document.activeElement;
+  document.getElementById('frameHint').hidden = !(el && el.tagName === 'IFRAME');
+}
+window.addEventListener('blur', () => setTimeout(checkFrameFocus, 0));
+window.addEventListener('focus', checkFrameFocus);
+document.addEventListener('focusin', checkFrameFocus);
+
+// ---------------------------------------------------------------------------
+// พนักงานขาย (หน้าขาย) — คนที่ล็อกอิน = หลักเสมอ · เพิ่มคนที่ช่วยขายได้ (บันทึกผ่าน create_sale · migration 026)
+// ---------------------------------------------------------------------------
+let coSellers = [];
+function renderSellers() {
+  const box = document.getElementById('sellersBox');
+  const me = currentAdmin;
+  box.innerHTML = (me ? '<span class="seller primary" title="คนที่ล็อกอินอยู่เป็นพนักงานขายหลักเสมอ">' + avatarHtml(me.id, me.full_name) +
+      escapeHtml(me.full_name) + ' <small>(หลัก)</small></span>' : '') +
+    coSellers.map(id => '<span class="seller" data-id="' + escapeHtml(id) + '">' + avatarHtml(id) + escapeHtml(staffName(id)) +
+      '<button type="button" data-id="' + escapeHtml(id) + '" onclick="removeCoSeller(this.dataset.id)" aria-label="เอา ' + escapeHtml(staffName(id)) + ' ออกจากพนักงานขาย">✕</button></span>').join('');
+  const opts = activeStaff().filter(a => a.id !== currentUserId && !coSellers.includes(a.id));
+  const sel = document.getElementById('addSellerSel');
+  sel.innerHTML = '<option value="">+ เพิ่มพนักงานขาย…</option>' +
+    opts.map(a => '<option value="' + escapeHtml(a.id) + '">' + escapeHtml(a.full_name) + '</option>').join('');
+  sel.disabled = !opts.length || coSellers.length >= 5;
+}
+function addCoSeller(id) {
+  if (id && id !== currentUserId && !coSellers.includes(id) && coSellers.length < 5) coSellers.push(id);
+  renderSellers();
+}
+function removeCoSeller(id) { coSellers = coSellers.filter(x => x !== id); renderSellers(); }
+
+// ชื่อพนักงานขายของบิล: หลักก่อน แล้วคนร่วม · บิลที่ยังไม่มีข้อมูล (ก่อน 026) ใช้คนที่บันทึกบิล
+function sellerNames(s, withRole) {
+  const list = (s.sale_sellers || []).slice().sort((a, b) => (a.role === 'primary' ? -1 : 0) - (b.role === 'primary' ? -1 : 0));
+  if (!list.length) return s.admins ? s.admins.full_name : 'ไม่ทราบผู้ขาย';
+  return list.map(x => staffName(x.admin_id) + (withRole ? (x.role === 'primary' ? ' (หลัก)' : ' (ร่วม)') : '')).join(' + ');
+}
+
+// ---------------------------------------------------------------------------
+// สลับบัญชีด้วย PIN (เจ้าของเคาะ: "จำบัญชี + PIN ทุกครั้ง")
+//
+// เครื่องจำ refresh token ของแต่ละคนที่เคยเข้าด้วยรหัสผ่านบนเครื่องนี้ (localStorage ของโดเมนนี้ —
+// ที่เดียวกับที่ supabase-js เก็บ session ของคนปัจจุบันอยู่แล้ว จึงไม่ได้เปิดช่องใหม่)
+// สลับ = ต่ออายุ session ของคนปลายทางใน client แยกที่ไม่เก็บอะไรลงเครื่อง → ตรวจ PIN ที่ฐานข้อมูล
+// (verify_my_pin · migration 027 · ผิด 5 ครั้งล็อก 5 นาที) → ผ่านแล้วค่อย setSession บน client หลัก
+// PIN ผิด = client หลักไม่ถูกแตะเลย คนเดิมยังใช้งานต่อได้ตามปกติ
+//
+// ⚠️ refresh token ของ Supabase ใช้ได้ครั้งเดียว (หมุนทุกครั้งที่ต่ออายุ) — ทุกครั้งที่ต่ออายุต้องเก็บตัวใหม่ทันที
+//    ไม่งั้นครั้งหน้าจะใช้ตัวที่ถูกใช้ไปแล้ว และ Supabase อาจเพิกถอน session นั้นทั้งสาย
+// ---------------------------------------------------------------------------
+const ACCOUNTS_KEY = 'djlab.desk.accounts.v1';
+let rememberNext = false;      // ติ๊ก "จำบัญชีนี้" ตอนเข้าด้วยรหัสผ่าน
+let switchTarget = null;
+let addingAccount = null;      // กำลังเพิ่มบัญชี (เข้าด้วยรหัสผ่าน) ทั้งที่มีคนใช้อยู่ — ยกเลิกแล้วกลับคนเดิม
+
+function readAccounts() {
+  try {
+    const v = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
+    return Array.isArray(v) ? v.filter(a => a && a.id && a.rt) : [];
+  } catch (e) { return []; }
+}
+function writeAccounts(list) {
+  try { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list)); }
+  catch (e) { showToast('⚠️ เครื่องนี้จำบัญชีไม่ได้ — เบราว์เซอร์ปิดการเก็บข้อมูลไว้'); }
+}
+function isRemembered(id) { return readAccounts().some(a => a.id === id); }
+function rememberAccount(session, admin) {
+  if (!session || !session.refresh_token) return;
+  const list = readAccounts().filter(a => a.id !== session.user.id);
+  list.push({ id: session.user.id, name: admin.full_name, role: admin.role, rt: session.refresh_token, at: Date.now() });
+  writeAccounts(list);
+}
+// ทุกครั้งที่ session ของคนที่ถูกจำไว้เปลี่ยน token (ต่ออายุอัตโนมัติ/สลับเข้ามา) ต้องเก็บตัวล่าสุดไว้
+function keepRememberedToken(session) {
+  if (!session || !session.refresh_token) return;
+  const list = readAccounts(), a = list.find(x => x.id === session.user.id);
+  if (!a || a.rt === session.refresh_token) return;
+  a.rt = session.refresh_token;
+  writeAccounts(list);
+}
+function storeToken(id, rt) {
+  const list = readAccounts(), a = list.find(x => x.id === id);
+  if (a && rt) { a.rt = rt; writeAccounts(list); }
+}
+function forgetAccount(id) { writeAccounts(readAccounts().filter(a => a.id !== id)); }
+
+// client แยกสำหรับต่ออายุ/ตรวจ PIN — ไม่เก็บ session ลงเครื่อง ไม่ต่ออายุเอง ไม่ยุ่งกับ client หลัก
+function probeClient() {
+  return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'djlab-pin-probe' },
+  });
+}
+
+function accountRowHtml(a, where) {
+  const isMe = a.id === currentUserId;
+  return '<div class="acct' + (isMe ? ' current' : '') + '">' +
+    '<button class="pick" type="button" data-id="' + escapeHtml(a.id) + '" onclick="pickAccount(this.dataset.id)"' + (isMe ? ' disabled' : '') + '>' +
+      avatarHtml(a.id, a.name) + '<span><strong>' + escapeHtml(a.name) + '</strong><br><span class="hint" style="margin:0;">' +
+      escapeHtml(ROLE_LABEL[a.role] || a.role) + (isMe ? ' · ใช้งานอยู่' : ' · ใส่ PIN เพื่อเข้า') + '</span></span></button>' +
+    '<button class="btn btn-sm btn-ghost" type="button" data-id="' + escapeHtml(a.id) + '" onclick="removeRemembered(this.dataset.id)"' +
+      ' title="ลบบัญชีนี้ออกจากเครื่องนี้">ลบออกจากเครื่องนี้</button></div>';
+}
+function renderSwitchList() {
+  const list = readAccounts();
+  document.getElementById('switchList').innerHTML =
+    (list.length ? '<div class="acct-list">' + list.map(a => accountRowHtml(a)).join('') + '</div>'
+                 : '<p class="hint" style="margin:0;">เครื่องนี้ยังไม่ได้จำบัญชีไหนไว้</p>') +
+    '<button class="btn btn-block" type="button" style="margin-top:14px;" onclick="startAddAccount()">+ เข้าด้วยบัญชีอื่น (รหัสผ่าน)</button>' +
+    '<p class="hint">บัญชีที่เคยเข้าด้วยรหัสผ่านบนเครื่องนี้ (และติ๊ก "จำบัญชีนี้") จะขึ้นที่นี่ · กดแล้วใส่ PIN ของคนนั้น</p>';
+}
+function openSwitchDialog(presetId) {
+  switchTarget = null;
+  renderSwitchList();
+  document.getElementById('pinStep').hidden = true;
+  document.getElementById('switchList').hidden = false;
+  const d = document.getElementById('switchDialog');
+  if (!d.open) d.showModal();
+  if (presetId) pickAccount(presetId);
+}
+function pickAccount(id) {
+  const a = readAccounts().find(x => x.id === id);
+  if (!a) return;
+  switchTarget = a;
+  document.getElementById('switchList').hidden = true;
+  document.getElementById('pinStep').hidden = false;
+  document.getElementById('pinAvatar').innerHTML = avatarHtml(a.id, a.name);
+  document.getElementById('pinName').textContent = a.name;
+  document.getElementById('pinMsg').innerHTML = '';
+  const inp = document.getElementById('pinInput');
+  inp.value = '';
+  inp.focus();
+}
+function backToAccountList() { openSwitchDialog(); }
+function pinMsg(html, kind) {
+  document.getElementById('pinMsg').innerHTML = '<div class="alert ' + (kind || 'alert-red') + '" role="alert">' + html + '</div>';
+}
+
+async function submitPin() {
+  // อ่าน token จากที่เก็บใหม่ทุกครั้ง — ครั้งที่แล้ว (เช่น PIN ผิด) หมุน token ไปแล้ว ตัวที่จำไว้ตอนเลือกบัญชีใช้ไม่ได้
+  const a = switchTarget && readAccounts().find(x => x.id === switchTarget.id);
+  const pin = document.getElementById('pinInput').value;
+  if (!a) return;
+  if (!/^[0-9]{4,6}$/.test(pin)) { pinMsg('PIN เป็นตัวเลข 4–6 หลัก'); return; }
+  const btn = document.getElementById('pinGoBtn');
+  btn.disabled = true;
+  try {
+    const r = await pinSwitch(a, pin);
+    if (r.ok) {
+      document.getElementById('switchDialog').close();
+      return;
+    }
+    document.getElementById('pinInput').value = '';
+    if (r.reason === 'wrong') pinMsg('PIN ไม่ถูกต้อง — ลองได้อีก ' + r.attempts_left + ' ครั้ง ก่อนถูกล็อก 5 นาที');
+    else if (r.reason === 'locked') pinMsg('ใส่ PIN ผิดหลายครั้ง บัญชีนี้ล็อกไว้ถึง ' +
+      new Date(r.locked_until).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) + ' น.');
+    else if (r.reason === 'no_pin') pinMsg('บัญชีนี้ยังไม่ได้ตั้ง PIN — เข้าด้วยรหัสผ่านหนึ่งครั้ง แล้วกด "ตั้ง PIN" ที่หน้าแรก', 'alert-warn');
+    else if (r.reason === 'expired') pinMsg('บัญชีนี้หมดอายุบนเครื่องนี้แล้ว — เข้าด้วยรหัสผ่านใหม่ <button class="btn btn-sm" type="button" data-id="' +
+      escapeHtml(a.id) + '" onclick="startAddAccount(this.dataset.id)">เข้าด้วยรหัสผ่าน</button>', 'alert-warn');
+    else if (r.reason === 'not_staff') pinMsg('บัญชีนี้ไม่ได้รับสิทธิ์ทีมงานแล้ว');
+    else pinMsg('สลับบัญชีไม่สำเร็จ: ' + escapeHtml(r.message || r.reason));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function pinSwitch(a, pin) {
+  const probe = probeClient();
+  const { data: ref, error: refErr } = await probe.auth.refreshSession({ refresh_token: a.rt });
+  if (refErr || !ref || !ref.session) {
+    console.error('[PIN switch refresh]', refErr);
+    return { ok: false, reason: 'expired' };
+  }
+  storeToken(a.id, ref.session.refresh_token);          // token เก่าถูกใช้ไปแล้ว เก็บตัวใหม่ทันที ไม่ว่า PIN จะถูกหรือผิด
+  const { data: res, error } = await probe.rpc('verify_my_pin', { p_pin: pin });
+  if (error) { console.error('[verify_my_pin]', error); return { ok: false, reason: 'error', message: error.message }; }
+  if (!res || res.ok !== true) return Object.assign({ ok: false }, res || { reason: 'error' });
+  // PIN ผ่าน — เก็บ token ล่าสุดของคนที่ใช้อยู่ก่อน แล้วค่อยสลับ client หลัก
+  const { data: { session: cur } } = await db.auth.getSession();
+  if (cur) keepRememberedToken(cur);
+  const { error: setErr } = await db.auth.setSession({ access_token: ref.session.access_token, refresh_token: ref.session.refresh_token });
+  if (setErr) { console.error('[PIN switch set]', setErr); return { ok: false, reason: 'error', message: setErr.message }; }
+  return { ok: true };
+}
+
+async function removeRemembered(id) {
+  const a = readAccounts().find(x => x.id === id);
+  if (!a) return;
+  forgetAccount(id);
+  // เพิกถอน session ที่เครื่องนี้ถือไว้ด้วย (เฉพาะของเครื่องนี้ ไม่ใช่ทุกเครื่องของคนนั้น) — ถ้าไม่ใช่คนที่ใช้งานอยู่
+  if (id !== currentUserId) {
+    try {
+      const probe = probeClient();
+      const { data } = await probe.auth.refreshSession({ refresh_token: a.rt });
+      if (data && data.session) await probe.auth.signOut({ scope: 'local' });
+    } catch (e) { console.error('[Revoke remembered]', e); }
+  }
+  showToast('ลบบัญชี ' + a.name + ' ออกจากเครื่องนี้แล้ว');
+  if (document.getElementById('switchDialog').open) renderSwitchList();
+  renderLoginAccounts();
+}
+
+// เข้าด้วยรหัสผ่านเพิ่มอีกบัญชี ทั้งที่มีคนใช้อยู่ — ไม่ออกจากระบบคนเดิม (session เดิมยังอยู่ในรายการที่จำไว้)
+async function startAddAccount(prefillId) {
+  const d = document.getElementById('switchDialog');
+  if (d.open) d.close();
+  const { data: { session: cur } } = await db.auth.getSession();
+  if (cur) keepRememberedToken(cur);
+  addingAccount = currentUserId;
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginCancelBtn').hidden = !currentUserId;
+  renderLoginAccounts();
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginEmail').focus();
+}
+function cancelAddAccount() {
+  addingAccount = null;
+  document.getElementById('loginCancelBtn').hidden = true;
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+function renderLoginAccounts() {
+  const box = document.getElementById('loginAccounts');
+  const list = readAccounts().filter(a => a.id !== currentUserId);
+  box.hidden = !list.length;
+  box.innerHTML = list.length ? '<div class="lbl">หรือเลือกบัญชีที่จำไว้ในเครื่องนี้ แล้วใส่ PIN</div><div class="acct-list">' +
+    list.map(a => accountRowHtml(a)).join('') + '</div>' : '';
+}
+
+// เปลี่ยนคนแล้ว: ตะกร้าที่ค้างอยู่ "ยังอยู่" (ส่งต่อให้คนที่มาแทนขายต่อได้ ไม่ต้องยิงใหม่) แต่บิลจะเป็นชื่อคนใหม่
+// และล้างพนักงานขายร่วมที่เลือกไว้ (คนเดิมเลือกไว้ให้บิลของตัวเอง ไม่ใช่ของคนใหม่) — บอกให้รู้ทุกครั้ง
+function onAccountSwitched() {
+  coSellers = [];
+  launchDraft = null;
+  mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
+  pinStatus = null;
+  closeDetail();
+  renderSellers();
+  if (cart.length) showToast('⇄ สลับเป็น ' + currentAdmin.full_name + ' แล้ว — ตะกร้าเดิมยังอยู่ บิลนี้จะบันทึกในชื่อ ' + currentAdmin.full_name);
+  else showToast('⇄ สลับเป็น ' + currentAdmin.full_name + ' แล้ว');
 }
 
 function openFromHome(id) { showSection('board'); openBoardMsg(id); }

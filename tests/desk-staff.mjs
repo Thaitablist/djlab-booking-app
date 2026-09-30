@@ -181,18 +181,13 @@ async function runTests() {
   const badge = document.getElementById('navBadge-board');
   ok('เมนูกระดานข้อความมีตัวเลข 2', !!badge && !badge.hidden && badge.textContent === '2', badge && badge.textContent);
 
-  const clockTile = document.getElementById('tileClock');
-  ok('ไม่มีปุ่ม "เข้าสู่คอนโซลร้าน" แล้ว', !document.getElementById('homeConsoleBtn') && txt('sec-home').indexOf('เข้าสู่คอนโซลร้าน') === -1);
-  ok('ไทล์ตอกบัตรเข้างานกดไม่ได้', clockTile.disabled);
-  ok('ไทล์ตอกบัตรบอก "เร็ว ๆ นี้ · รอปรึกษา"', clockTile.textContent.indexOf('เร็ว ๆ นี้ · รอปรึกษา') !== -1, clockTile.textContent);
-  clockTile.click();
-  ok('กดไทล์ตอกบัตรแล้วไม่มีอะไรเกิดขึ้น', current === 'home' && writes().length === 0);
+  ok('ไม่มีปุ่ม "เข้าสู่คอนโซลร้าน"', !document.getElementById('homeConsoleBtn') && txt('sec-home').indexOf('เข้าสู่คอนโซลร้าน') === -1);
+  ok('ตอกบัตร: ช่องสถานะบอก "รอปรึกษา" (ยังไม่มีระบบ)', txt('clockPill').indexOf('ตอกบัตร') !== -1 && txt('clockPill').indexOf('รอปรึกษา') !== -1, txt('clockPill'));
+  ok('วันลา: ช่องสถานะบอก "รอปรึกษา" (ยังไม่มีระบบ)', txt('leavePill').indexOf('วันลา') !== -1 && txt('leavePill').indexOf('รอปรึกษา') !== -1, txt('leavePill'));
+  ok('ตอกบัตร/วันลาไม่มีปุ่มกด ไม่มีการเขียนอะไร', !document.querySelector('#clockPill button, #leavePill button') && writes().length === 0);
   ok('ไม่มีหมวดตอกบัตรในเมนู', !/ตอกบัตร/.test(txt('navList')));
-
-  const mrow = k => document.querySelector('#tileMail .row-link[data-box="' + k + '"]');
-  ok('หน้าแรกแยกอีเมลตามแท็บ: กล่องจดหมาย 3 · ส่งซ่อม 1 · ติดดาว 5', mrow('inbox').textContent.indexOf('3') !== -1 &&
-    mrow('ส่งซ่อม').querySelector('.cnt').textContent === '1' && mrow('starred').querySelector('.cnt').textContent === '5', txt('tileMail'));
-  ok('หน้าแรกบอกป้ายที่ยังไม่มีใน Gmail', mrow('Mahajak Cop').textContent.indexOf('ยังไม่มีป้ายนี้ใน Gmail') !== -1);
+  const lt = k => document.querySelector('#launcher .lt[data-key="' + k + '"]');
+  ok('ไอคอนอีเมลมีตัวเลขอีเมลที่ยังไม่ได้เปิด (3) ที่มุม', !!lt('mail') && lt('mail').querySelector('.badge').textContent === '3', lt('mail') && lt('mail').outerHTML.slice(0, 200));
   ok('เมนูกล่องจดหมายมีตัวเลข 3', txt('navBadge-mail') === '3');
   ok('ไทล์ปฏิทินแสดงกิจกรรมวันนี้ทั้งของร้านและ Google',
     txt('tileCal').indexOf('คลาส Scratch 1-on-1') !== -1 && txt('tileCal').indexOf('ประชุมกับตัวแทน Pioneer') !== -1, txt('tileCal'));
@@ -208,19 +203,17 @@ async function runTests() {
   ok('นาฬิกาแสดงเวลาไทย 14:30', txt('homeClock').indexOf('14:30') === 0, txt('homeClock'));
   ok('14:30 = ร้านเปิดอยู่ · ปิด 20:00 อีก 5 ชม. 30 นาที', document.getElementById('shopState').classList.contains('open') &&
     txt('shopStateText') === 'ร้านเปิดอยู่' && txt('shopStateSub') === 'ปิด 20:00 · อีก 5 ชม. 30 นาที', txt('shopStateSub'));
-  ok('เส้นแดง "ตอนนี้" อยู่ที่ 31.25% ของวันทำการ', document.getElementById('wavePlayhead').style.left === '31.25%', document.getElementById('wavePlayhead').style.left);
-  ok('แท่งคลื่นช่วง 13:00–15:00 เป็นสีการจองห้อง (24 แท่ง)', document.querySelectorAll('#waveBars i.bk').length === 24, document.querySelectorAll('#waveBars i.bk').length);
+
   ok('การจองที่กำลังใช้ห้องขึ้น "กำลังใช้ห้อง"', !!document.querySelector('#tileCal .agenda-row.now') &&
     document.querySelector('#tileCal .agenda-row.now').textContent.indexOf('กำลังใช้ห้อง') !== -1);
-  ok('จานเสียงหมุนเมื่อร้านเปิด', getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'spin');
+
   bkkNow = () => ({ h: 21, m: 5, s: 0 });
   renderHome();
-  ok('21:05 = ปิดร้านแล้ว และจานหยุดหมุน', txt('shopStateText') === 'ปิดร้านแล้ว' &&
-    getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'none', txt('shopStateText'));
+  ok('21:05 = ปิดร้านแล้ว', txt('shopStateText') === 'ปิดร้านแล้ว' && !document.getElementById('shopState').classList.contains('open'), txt('shopStateText'));
   bkkNow = () => ({ h: 10, m: 15, s: 0 });
   renderHome();
   ok('10:15 = ยังไม่เปิด · อีก 1 ชม. 45 นาที', txt('shopStateSub') === 'เปิด 12:00 · อีก 1 ชม. 45 นาที', txt('shopStateSub'));
-  ok('ก่อนเปิดร้านไม่มีเส้นแดง', document.getElementById('wavePlayhead').hidden);
+  ok('ไม่มีแผ่นเสียงหมุนและแถบเวลา 12:00–20:00 แล้ว (เจ้าของสั่งเอาออก)', !document.querySelector('.platter, #homeWave, #waveBars, #wavePlayhead'));
   bkkNow = () => ({ h: 14, m: 30, s: 5 });
   renderHome();
 
@@ -379,7 +372,7 @@ async function runTests() {
   const st = fns('mail', 'star')[0];
   ok('ติดดาว: เรียกฟังก์ชัน star พร้อมกล่องที่เปิดอยู่', !!st && st.body.on === true && st.body.uid === 902 && st.body.box === 'inbox', JSON.stringify(st && st.body));
   ok('ติดดาวแล้วปุ่มเปลี่ยนเป็น "เอาดาวออก"', document.getElementById('mrStarBtn').getAttribute('aria-pressed') === 'true' &&
-    txt('mrStarBtn').indexOf('เอาดาวออก') !== -1 && txt('tileMail').indexOf('6') !== -1, txt('mrStarBtn'));
+    txt('mrStarBtn').indexOf('เอาดาวออก') !== -1 && mailState.counts.starred.total === 6, txt('mrStarBtn'));
   CALLS.length = 0;
   document.querySelector('.lbl-toggle[data-label="ส่งซ่อม"]').click();
   await sleep(100);
@@ -429,7 +422,7 @@ async function runTests() {
   await loadMailList();
   ok('ฟังก์ชันตอบ not_configured → ขึ้นหน้าบอกวิธีตั้งค่า', vis('mailSetup') && !vis('mailMain') &&
     txt('mailSetup').indexOf('ยังไม่ได้เชื่อมกล่องจดหมาย') !== -1 && txt('mailSetup').indexOf('GMAIL_APP_PASSWORD') !== -1, txt('mailSetup'));
-  ok('หน้าแรกบอกว่ายังไม่ได้เชื่อม', txt('tileMail').indexOf('ยังไม่ได้เชื่อม') !== -1, txt('tileMail'));
+  ok('ยังไม่ได้เชื่อม: ไอคอนอีเมลบนหน้าแรกไม่มีตัวเลขค้าง', !document.querySelector('#launcher .lt[data-key="mail"] .badge'));
   ok('ไม่มีตัวเลขค้างบนเมนูกล่องจดหมาย', document.getElementById('navBadge-mail').hidden);
   window.FN.mail = () => ({ error: { code: 'auth_failed', message: 'Gmail ไม่รับรหัสผ่านสำหรับแอป' } });
   await loadMailList();
@@ -511,11 +504,11 @@ async function runTests() {
   ok('เบราว์เซอร์รายงานว่าลดการเคลื่อนไหวจริง', matchMedia('(prefers-reduced-motion: reduce)').matches);
   bkkNow = () => ({ h: 14, m: 30, s: 5 });
   renderHome();
-  ok('ร้านเปิดอยู่ แต่จานเสียงไม่หมุน', document.getElementById('shopState').classList.contains('open') &&
-    getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'none');
+  const lts = [...document.querySelectorAll('#launcher .lt')];
+  ok('ไอคอนลัดไม่มีแอนิเมชันเลื่อน/เด้ง', lts.length === 4 && lts.every(el => getComputedStyle(el).transitionDuration === '0s' &&
+    getComputedStyle(el.querySelector('svg')).transitionDuration === '0s'));
   ok('สถานะร้านยังบอกด้วยข้อความครบ', document.getElementById('shopStateText').textContent === 'ร้านเปิดอยู่');
-  ok('แท่งคลื่นไม่งอก', [...document.querySelectorAll('#waveBars i')].every(i => getComputedStyle(i).animationName === 'none'));
-  ok('เส้นแดงไม่เลื่อนแบบมีแอนิเมชัน', getComputedStyle(document.getElementById('wavePlayhead')).transitionDuration === '0s');
+  ok('หน้าแรกไม่มีแอนิเมชันค้างอยู่เลย', document.getAnimations().length === 0, document.getAnimations().length);
   L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
   L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
 }
