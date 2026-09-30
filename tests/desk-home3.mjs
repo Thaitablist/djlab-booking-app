@@ -187,6 +187,12 @@ async function runTests() {
   ok('หน้าเข้าสู่ระบบมีตัวเลือก "จำบัญชีนี้" ติ๊กไว้แล้ว', document.getElementById('loginRemember').checked);
   await passwordLogin('TiBass');
   ok('เข้าแล้วอยู่หน้าแรก ชื่อ TiBass บนแถบของฉัน', current === 'home' && txt('homeHello') === 'TiBass' && txt('meRole') === 'เจ้าของร้าน', txt('homeHello'));
+  // แถบดำสามช่องตามที่เจ้าของเคาะ 1 ต.ค. 69: ชื่อ+ตอกบัตรซ้าย · นาฬิกากลาง · สถานะร้านขวา
+  const deckKids = [...document.querySelector('#sec-home .deck').children];
+  ok('แถบดำ: ช่องซ้ายทักชื่อ TiBass และมีตอกบัตรวันนี้อยู่ใต้ชื่อ', txt('homeGreet') === 'TiBass'
+    && deckKids[0].contains(document.getElementById('homeGreet')) && deckKids[0].contains(document.getElementById('clockPill')), txt('homeGreet'));
+  ok('แถบดำ: นาฬิกาอยู่ช่องกลาง สถานะร้านอยู่ช่องขวา', deckKids.length === 3 && deckKids[1].id === 'homeClock'
+    && deckKids[2].contains(document.getElementById('shopState')), deckKids.map(e => e.id || e.className).join(','));
   ok('เครื่องจำบัญชี TiBass ไว้ (มี refresh token)', accounts().length === 1 && accounts()[0].id === 'u1' && /^rt-u1-/.test(accounts()[0].rt), JSON.stringify(accounts()));
   ok('ยังไม่มี PIN → มีปุ่ม "ตั้ง PIN"', txt('pinNudge').indexOf('ตั้ง PIN') !== -1, txt('pinNudge'));
   openPinSet();

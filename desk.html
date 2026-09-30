@@ -286,8 +286,16 @@
   /* แถบบนของหน้าแรก = "เด็ค" สีดำ: นาฬิกา · สถานะร้าน · เส้นคลื่นของวันทำการ (12:00–20:00) */
   #sec-home:focus { outline: none; }   /* รับโฟกัสตอนเปิดหมวดเพื่อพาคีย์บอร์ดเข้ามา ไม่ใช่ปุ่ม จึงไม่วาดกรอบ */
   /* แถบบนของหน้าแรก: นาฬิกาใหญ่เต็มแถบ (เจ้าของสั่ง 1 ต.ค. 69 — เอาแผ่นเสียงหมุนและแถบเวลาออก) */
+  /* สามช่อง: ชื่อ+ตอกบัตร ซ้าย · นาฬิกากลาง · สถานะร้านขวา (เจ้าของเคาะ 1 ต.ค. 69)
+     ช่องซ้าย/ขวากว้างเท่ากัน (1fr) นาฬิกาจึงอยู่กลางแถบพอดีไม่ว่าชื่อจะยาวแค่ไหน */
   .deck { background: var(--black); color: #fff; padding: 18px 28px 20px; margin: -24px -28px 0;
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 28px; }
+    display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 28px; }
+  .deck-hi { min-width: 0; }
+  .deck-greet { font-family: var(--font-head); font-weight: 600; font-size: 26px; line-height: 1.25;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .deck-hi .deck-date { font-size: 16px; font-weight: 500; color: #CFCCC3; margin: 2px 0 12px; }
+  .deck .me-stat > span:first-child { color: #CFCCC3; }
+  .deck .pill-wait { color: #CFCCC3; border-color: #6B6962; align-self: flex-start; }
   .bigclock { font-family: var(--font-head); font-weight: 600; font-size: 136px; line-height: .9; letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums; white-space: nowrap; }
   .bigclock .sec { font-size: 46px; color: #9A978F; margin-left: 10px; letter-spacing: 0; }
@@ -533,9 +541,15 @@
         <!-- ============ หน้าแรกพนักงาน ============ -->
         <section class="section" id="sec-home" tabindex="-1" aria-label="หน้าแรกพนักงาน">
           <div class="deck">
+            <div class="deck-hi">
+              <div class="deck-greet">สวัสดี คุณ<span id="homeGreet">—</span></div>
+              <div class="deck-date" id="homeDate"></div>
+              <!-- ตอกบัตรวันนี้: เจ้าของสั่งเว้นไว้ รอปรึกษา — ยังไม่มีตาราง ไม่มีตรรกะ มีแค่ช่องว่างไว้
+                   วางใต้ชื่อบนแถบดำตามที่เจ้าของเคาะ 1 ต.ค. 69 (เขียว = ตอกแล้ว / แดง = ยัง เมื่อมีระบบ) -->
+              <div class="me-stat" id="clockPill"><span>ตอกบัตรวันนี้</span><span class="pill-wait">รอปรึกษา</span></div>
+            </div>
             <div class="bigclock" id="homeClock" role="timer" aria-label="เวลาตอนนี้ (เวลาไทย)">--:--<span class="sec">--</span></div>
             <div class="deck-side">
-              <div class="deck-date" id="homeDate"></div>
               <div class="shop-state" id="shopState" role="status"><span class="dot" aria-hidden="true"></span><span id="shopStateText">—</span></div>
               <div class="st-sub" id="shopStateSub">เปิดทุกวัน 12:00–20:00</div>
             </div>
@@ -549,8 +563,7 @@
             <div class="me-stat"><span>เดือนนี้</span><strong id="mySalesMonth">—</strong></div>
             <div class="me-stat"><span>ข้อความค้างอ่าน</span><strong id="myUnread">0</strong></div>
             <span class="me-sep" aria-hidden="true"></span>
-            <!-- ตอกบัตร/วันลา: เจ้าของสั่งเว้นไว้ รอปรึกษา — ยังไม่มีตาราง ไม่มีตรรกะ มีแค่ช่องว่างไว้ -->
-            <div class="me-stat" id="clockPill"><span>ตอกบัตร</span><span class="pill-wait">รอปรึกษา</span></div>
+            <!-- วันลา: เจ้าของสั่งเว้นไว้ รอปรึกษา — ยังไม่มีตาราง ไม่มีตรรกะ (ตอกบัตรย้ายขึ้นไปใต้ชื่อบนแถบดำ) -->
             <div class="me-stat" id="leavePill"><span>วันลาคงเหลือ</span><span class="pill-wait">รอปรึกษา</span></div>
             <span class="spacer"></span>
             <div id="pinNudge"></div>
@@ -4891,6 +4904,7 @@ function renderMeStrip() {
   const me = currentAdmin;
   document.getElementById('meAvatar').innerHTML = me ? avatarHtml(me.id, me.full_name) : '';
   document.getElementById('homeHello').textContent = me ? me.full_name : '—';
+  document.getElementById('homeGreet').textContent = me ? me.full_name : '—';
   document.getElementById('meRole').textContent = me ? ROLE_LABEL[me.role] || me.role : '';
   const cell = (n, count) => mySales.error ? '<small title="' + escapeHtml(mySales.error) + '">⚠ โหลดไม่สำเร็จ</small>'
     : mySales.loaded ? baht0(n) + '<small>' + count + ' บิล</small>' : '—';
