@@ -57,13 +57,21 @@ const FAKE = {
 // คำตอบของ Edge Function — เทสต์สลับได้ระหว่างรัน
 window.FN = {
   mail: body => {
-    if (body.action === 'status') return { unseen: 3 };
-    if (body.action === 'list') return { page: 1, page_size: 25, total: 2, unseen: 3, messages: [
+    // จำนวนต่อแท็บ: ป้าย "Mahajak Cop" ยังไม่มีใน Gmail (null)
+    const counts = { inbox: { total: 40, unseen: 3 }, 'ส่งซ่อม': { total: 4, unseen: 1 }, BOYZ: { total: 2, unseen: 0 },
+                     starred: { total: 5, unseen: 0 }, 'Mahajak Cop': null };
+    if (body.action === 'status') return { unseen: 3, counts };
+    if (body.action === 'list' && body.box === 'Mahajak Cop') return { error: { code: 'no_label', message: 'ยังไม่มีป้ายนี้ใน Gmail' }, counts, unseen: 3, box: body.box };
+    if (body.action === 'list' && body.box === 'ส่งซ่อม') return { page: 1, page_size: 25, total: 1, unseen: 3, counts, box: body.box, messages: [
+      { uid: 55, seen: false, starred: false, date: TODAY + 'T11:00:00+07:00', from: { name: 'ลูกค้าส่งซ่อม', address: 'fix@example.com' }, subject: 'ส่ง DJM-S11 ซ่อม' },
+    ] };
+    if (body.action === 'list') return { page: 1, page_size: 25, total: 2, unseen: 3, counts, box: body.box, messages: [
       { uid: 902, seen: false, date: TODAY + 'T09:15:00+07:00', from: { name: 'Pioneer DJ Thailand', address: 'dealer@example.com' }, subject: 'ใบเสนอราคา CDJ-3000X' },
       { uid: 901, seen: true, date: '2026-09-29T16:40:00+07:00', from: { name: '', address: 'customer@example.com' }, subject: 'สอบถามคอร์สเรียน' },
     ] };
     if (body.action === 'get') return { message: {
-      uid: body.uid, seen: true, date: TODAY + 'T09:15:00+07:00', subject: 'ใบเสนอราคา CDJ-3000X',
+      uid: body.uid, box: body.box, seen: true, starred: false, date: TODAY + 'T09:15:00+07:00', subject: 'ใบเสนอราคา CDJ-3000X',
+      labels: [{ name: 'ส่งซ่อม', exists: true, on: false }, { name: 'BOYZ', exists: true, on: true }, { name: 'Mahajak Cop', exists: false, on: false }],
       from: { name: 'Pioneer DJ Thailand', address: 'dealer@example.com' }, to: [{ address: 'djlabsiam@gmail.com' }], cc: [], reply_to: [],
       message_id: '<abc@example.com>', references: '', text: 'สวัสดีครับ แนบใบเสนอราคา',
       html: '<p><b>สวัสดีครับ</b> แนบใบเสนอราคา</p><script>parent.PWNED = "script";<\\/script>' +
@@ -72,7 +80,8 @@ window.FN = {
     } };
     return { ok: true };
   },
-  gcal: body => ({ events: [
+  // สีชั้น Google = "กล้วย" (สีอ่อน) — ตั้งใจให้ตัวอักษรขาวอ่านไม่ออก เพื่อพิสูจน์ว่าหน้าเว็บเลือกตัวอักษรดำให้เอง
+  gcal: body => ({ color: '#F6BF26', events: [
     { uid: 'g1', title: 'ประชุมกับตัวแทน Pioneer', location: 'ร้าน', description: '', all_day: false,
       start: TODAY + 'T10:00', end: TODAY + 'T11:00' },
   ] }),
@@ -138,6 +147,14 @@ const txt = id => document.getElementById(id).textContent;
 const vis = id => !document.getElementById(id).hidden;
 const writes = () => CALLS.filter(c => ['insert', 'update', 'delete', 'upsert'].includes(c.op));
 const fns = (name, action) => CALLS.filter(c => c.op === 'fn' && c.name === name && (!action || c.body.action === action));
+// คอนทราสต์ของตัวอักษรกับพื้นจริงที่เบราว์เซอร์วาด (คำนวณเองตาม WCAG ไม่ใช้ฟังก์ชันของหน้าเว็บ)
+function rgbOf(c) { const m = c.match(/[0-9]+(?:[.][0-9]+)?/g).map(Number); return m.slice(0, 3); }
+function lumOf(rgb) { const v = rgb.map(x => x / 255).map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
+function contrastOf(el) {
+  const cs = getComputedStyle(el), a = lumOf(rgbOf(cs.color)), b = lumOf(rgbOf(cs.backgroundColor));
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+const worstContrast = els => els.reduce((m, el) => Math.min(m, contrastOf(el)), 99);
 
 async function runTests() {
   L('=== หน้าแรกพนักงาน desk.html ===');
@@ -154,7 +171,8 @@ async function runTests() {
   const box = document.querySelector('#homeUnread .unread-box');
   const boxText = box ? box.textContent : '';
   ok('มีกล่องเตือนข้อความที่ยังไม่ได้อ่านบนหน้าแรก', !!box);
-  ok('เตือนเฉพาะข้อความที่ "ฉัน" ยังไม่ได้อ่าน: 2 ข้อความ', boxText.indexOf('ยังไม่ได้อ่าน 2 ข้อความ') !== -1, boxText);
+  ok('เตือนเฉพาะข้อความที่ "ฉัน" ยังไม่ได้อ่าน: 2 ข้อความ', box.querySelector('.count').textContent === '2' && box.querySelectorAll('.list-row').length === 2, boxText);
+  ok('รายการเตือนมีอักษรย่อของคนเขียน', box.querySelectorAll('.ava').length === 2 && box.querySelector('.ava').textContent === 'จ', box.innerHTML.slice(0, 200));
   ok('รายการเตือนมีข้อความถึงทุกคน (m1) และข้อความถึงฉัน (m5)',
     boxText.indexOf('ของเข้าพรุ่งนี้ช่วงบ่าย') !== -1 && boxText.indexOf('ถึงคุณโดยตรง') !== -1, boxText);
   ok('ไม่เตือนข้อความที่ฉันเขียนเอง', boxText.indexOf('ข้อความที่ฉันเขียนเอง') === -1);
@@ -164,17 +182,47 @@ async function runTests() {
   ok('เมนูกระดานข้อความมีตัวเลข 2', !!badge && !badge.hidden && badge.textContent === '2', badge && badge.textContent);
 
   const clockTile = document.getElementById('tileClock');
+  ok('ไม่มีปุ่ม "เข้าสู่คอนโซลร้าน" แล้ว', !document.getElementById('homeConsoleBtn') && txt('sec-home').indexOf('เข้าสู่คอนโซลร้าน') === -1);
   ok('ไทล์ตอกบัตรเข้างานกดไม่ได้', clockTile.disabled);
   ok('ไทล์ตอกบัตรบอก "เร็ว ๆ นี้ · รอปรึกษา"', clockTile.textContent.indexOf('เร็ว ๆ นี้ · รอปรึกษา') !== -1, clockTile.textContent);
   clockTile.click();
   ok('กดไทล์ตอกบัตรแล้วไม่มีอะไรเกิดขึ้น', current === 'home' && writes().length === 0);
   ok('ไม่มีหมวดตอกบัตรในเมนู', !/ตอกบัตร/.test(txt('navList')));
 
-  ok('ไทล์กล่องจดหมายแสดงจำนวนที่ยังไม่ได้เปิด (3)', txt('tileMail').indexOf('3') !== -1, txt('tileMail'));
+  const mrow = k => document.querySelector('#tileMail .row-link[data-box="' + k + '"]');
+  ok('หน้าแรกแยกอีเมลตามแท็บ: กล่องจดหมาย 3 · ส่งซ่อม 1 · ติดดาว 5', mrow('inbox').textContent.indexOf('3') !== -1 &&
+    mrow('ส่งซ่อม').querySelector('.cnt').textContent === '1' && mrow('starred').querySelector('.cnt').textContent === '5', txt('tileMail'));
+  ok('หน้าแรกบอกป้ายที่ยังไม่มีใน Gmail', mrow('Mahajak Cop').textContent.indexOf('ยังไม่มีป้ายนี้ใน Gmail') !== -1);
   ok('เมนูกล่องจดหมายมีตัวเลข 3', txt('navBadge-mail') === '3');
   ok('ไทล์ปฏิทินแสดงกิจกรรมวันนี้ทั้งของร้านและ Google',
     txt('tileCal').indexOf('คลาส Scratch 1-on-1') !== -1 && txt('tileCal').indexOf('ประชุมกับตัวแทน Pioneer') !== -1, txt('tileCal'));
-  ok('ไทล์ปฏิทินนับการจองห้องวันนี้', txt('tileCal').indexOf('จองห้องซ้อมวันนี้ 1 รายการ') !== -1, txt('tileCal'));
+  ok('วันนี้บนหน้าแรกรวมการจองห้องด้วย', txt('tileCal').indexOf('ลูกค้าซ้อมบ่าย') !== -1, txt('tileCal'));
+  const homeChips = [...document.querySelectorAll('#tileCal .chip')];
+  ok('ป้ายสีบนหน้าแรกมีชื่อแหล่งกำกับ (คลาสเรียน · Google · ห้องซ้อม)', ['คลาสเรียน', 'Google', 'ห้องซ้อม'].every(t => homeChips.some(c => c.textContent === t)),
+    homeChips.map(c => c.textContent));
+  ok('ป้ายสีบนหน้าแรก ตัวอักษรคอนทราสต์ ≥ 4.5:1 ทุกอัน', homeChips.length === 3 && worstContrast(homeChips) >= 4.5, worstContrast(homeChips).toFixed(2));
+
+  // นาฬิกาและสถานะร้าน — ใช้เวลาที่กำหนดเอง ไม่ขึ้นกับเวลาที่รันเทสต์
+  bkkNow = () => ({ h: 14, m: 30, s: 5 });
+  renderHome();
+  ok('นาฬิกาแสดงเวลาไทย 14:30', txt('homeClock').indexOf('14:30') === 0, txt('homeClock'));
+  ok('14:30 = ร้านเปิดอยู่ · ปิด 20:00 อีก 5 ชม. 30 นาที', document.getElementById('shopState').classList.contains('open') &&
+    txt('shopStateText') === 'ร้านเปิดอยู่' && txt('shopStateSub') === 'ปิด 20:00 · อีก 5 ชม. 30 นาที', txt('shopStateSub'));
+  ok('เส้นแดง "ตอนนี้" อยู่ที่ 31.25% ของวันทำการ', document.getElementById('wavePlayhead').style.left === '31.25%', document.getElementById('wavePlayhead').style.left);
+  ok('แท่งคลื่นช่วง 13:00–15:00 เป็นสีการจองห้อง (24 แท่ง)', document.querySelectorAll('#waveBars i.bk').length === 24, document.querySelectorAll('#waveBars i.bk').length);
+  ok('การจองที่กำลังใช้ห้องขึ้น "กำลังใช้ห้อง"', !!document.querySelector('#tileCal .agenda-row.now') &&
+    document.querySelector('#tileCal .agenda-row.now').textContent.indexOf('กำลังใช้ห้อง') !== -1);
+  ok('จานเสียงหมุนเมื่อร้านเปิด', getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'spin');
+  bkkNow = () => ({ h: 21, m: 5, s: 0 });
+  renderHome();
+  ok('21:05 = ปิดร้านแล้ว และจานหยุดหมุน', txt('shopStateText') === 'ปิดร้านแล้ว' &&
+    getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'none', txt('shopStateText'));
+  bkkNow = () => ({ h: 10, m: 15, s: 0 });
+  renderHome();
+  ok('10:15 = ยังไม่เปิด · อีก 1 ชม. 45 นาที', txt('shopStateSub') === 'เปิด 12:00 · อีก 1 ชม. 45 นาที', txt('shopStateSub'));
+  ok('ก่อนเปิดร้านไม่มีเส้นแดง', document.getElementById('wavePlayhead').hidden);
+  bkkNow = () => ({ h: 14, m: 30, s: 5 });
+  renderHome();
 
   // ── 2. กระดานข้อความ ──────────────────────────────────────────────────
   key('KeyB', 'b', { altKey: true });
@@ -243,8 +291,27 @@ async function runTests() {
   ok('ป้าย Google มีข้อความกำกับ ไม่ใช่สีอย่างเดียว', chip('google')[0].textContent.indexOf('Google') === 0, chip('google')[0].textContent);
   ok('กิจกรรมร้านมีชื่อหมวดในป้าย', chip('shop').some(b => b.textContent.indexOf('คลาสเรียน') === 0 && b.textContent.indexOf('14:00') !== -1));
   ok('ชั้นการจองห้องปิดอยู่ตอนเริ่ม', chip('room').length === 0);
+  const g0 = chip('google')[0];
+  ok('ป้ายเป็นสีทึบ ไม่ใช่เส้นขอบซ้าย', getComputedStyle(g0).borderLeftWidth === '0px' && getComputedStyle(g0).backgroundColor === 'rgb(246, 191, 38)',
+    getComputedStyle(g0).backgroundColor + ' / ' + getComputedStyle(g0).borderLeftWidth);
+  ok('สีชั้น Google มาจากที่เจ้าของร้านเลือก (ฟังก์ชันส่ง color มา)', calState.gcolor === '#F6BF26');
+  ok('พื้นสีอ่อน (กล้วย) ได้ตัวอักษรดำ ไม่ใช่ขาว', getComputedStyle(g0).color === 'rgb(15, 15, 15)', getComputedStyle(g0).color);
+  ok('คลาสเรียนสีเขียวทึบ ตัวอักษรขาว', chip('shop').some(b => getComputedStyle(b).backgroundColor === 'rgb(11, 128, 67)' && getComputedStyle(b).color === 'rgb(255, 255, 255)'));
   document.getElementById('layerRooms').click();
   ok('เปิดชั้นการจองห้องแล้วเห็นการจอง', chip('room').some(b => b.textContent.indexOf('ลูกค้าซ้อมบ่าย') !== -1));
+  ok('ครบสามชั้น: ร้าน · Google · ห้องซ้อม คนละสี', new Set(['shop', 'google', 'room'].map(k => getComputedStyle(chip(k)[0]).backgroundColor)).size === 3);
+  const allChips = [...document.querySelectorAll('#calGrid .ev')];
+  ok('รายเดือน: ตัวอักษรในป้ายทุกอันคอนทราสต์ ≥ 4.5:1', worstContrast(allChips) >= 4.5, worstContrast(allChips).toFixed(2));
+  const legend = [...document.querySelectorAll('#calLegend .chip')];
+  ok('คำอธิบายสีมีครบทุกแหล่งพร้อมชื่อ (5 หมวด + Google + ห้องซ้อม)', legend.length === 7 && legend.some(c => c.textContent.indexOf('Google') === 0) &&
+    worstContrast(legend) >= 4.5, legend.map(c => c.textContent));
+  setCalView('week');
+  await sleep(150);
+  const weekChips = [...document.querySelectorAll('#calGrid.cal-week .ev, .cal-week .ev')];
+  ok('รายสัปดาห์: สีเดียวกัน ตัวอักษรคอนทราสต์ ≥ 4.5:1', weekChips.length >= 3 && worstContrast(weekChips) >= 4.5 &&
+    weekChips.some(b => b.dataset.kind === 'google' && getComputedStyle(b).backgroundColor === 'rgb(246, 191, 38)'), weekChips.length);
+  setCalView('month');
+  await sleep(150);
   document.getElementById('layerGoogle').click();
   ok('ปิดชั้น Google แล้วกิจกรรม Google หายไป', chip('google').length === 0);
   document.getElementById('layerGoogle').click();
@@ -281,6 +348,13 @@ async function runTests() {
   ok('แสดงอีเมล 2 ฉบับ', mrows.length === 2, mrows.length);
   ok('ฉบับที่ยังไม่อ่านมีป้าย "ใหม่"', mrows[0].textContent.indexOf('ใหม่') !== -1 && mrows[1].textContent.indexOf('ใหม่') === -1);
   ok('ตัวแบ่งหน้าบอก 1–2 จาก 2 ฉบับ', txt('mailPager') === '1–2 จาก 2 ฉบับ', txt('mailPager'));
+  const tabs = () => [...document.querySelectorAll('#mailTabs .mail-tab')];
+  ok('แท็บครบ 5: กล่องจดหมาย · ส่งซ่อม · BOYZ · ติดดาว · Mahajak Cop',
+    tabs().map(t => t.dataset.box).join('|') === 'inbox|ส่งซ่อม|BOYZ|ติดดาว|Mahajak Cop'.replace('ติดดาว', 'starred'), tabs().map(t => t.textContent).join('|'));
+  ok('แท็บกล่องจดหมายถูกเลือกอยู่', tabs()[0].getAttribute('aria-selected') === 'true');
+  ok('แท็บบอกจำนวน (กล่องจดหมาย 3 · ส่งซ่อม 1 · ติดดาว 5)', tabs()[0].textContent.indexOf('3') !== -1 && tabs()[1].textContent.indexOf('1') !== -1 &&
+    tabs()[3].textContent.indexOf('5') !== -1, tabs().map(t => t.textContent).join('|'));
+  ok('ป้ายที่ยังไม่มีใน Gmail แท็บจางลงพร้อมคำอธิบาย', tabs()[4].classList.contains('missing') && tabs()[4].title === 'ยังไม่มีป้ายนี้ใน Gmail');
   window.PWNED = undefined;
   document.getElementById('tw-mail').focus();
   key('ArrowDown', 'ArrowDown'); key('Enter', 'Enter');
@@ -295,6 +369,27 @@ async function runTests() {
   ok('หัวอีเมลแสดงผู้ส่งและไฟล์แนบ', txt('mailReader').indexOf('Pioneer DJ Thailand') !== -1 && txt('mailReader').indexOf('quote.pdf') !== -1);
   ok('เปิดแล้วนับว่าอ่านแล้ว ตัวเลขบนเมนูลดเหลือ 2', txt('navBadge-mail') === '2', txt('navBadge-mail'));
 
+  ok('ปุ่มป้าย: BOYZ ติดอยู่ · ส่งซ่อมยังไม่ติด · Mahajak Cop กดไม่ได้เพราะยังไม่มีใน Gmail',
+    document.querySelector('.lbl-toggle[data-label="BOYZ"]').getAttribute('aria-pressed') === 'true' &&
+    document.querySelector('.lbl-toggle[data-label="ส่งซ่อม"]').getAttribute('aria-pressed') === 'false' &&
+    document.querySelector('.lbl-toggle[data-label="Mahajak Cop"]').disabled);
+  CALLS.length = 0;
+  document.getElementById('mrStarBtn').click();
+  await sleep(100);
+  const st = fns('mail', 'star')[0];
+  ok('ติดดาว: เรียกฟังก์ชัน star พร้อมกล่องที่เปิดอยู่', !!st && st.body.on === true && st.body.uid === 902 && st.body.box === 'inbox', JSON.stringify(st && st.body));
+  ok('ติดดาวแล้วปุ่มเปลี่ยนเป็น "เอาดาวออก"', document.getElementById('mrStarBtn').getAttribute('aria-pressed') === 'true' &&
+    txt('mrStarBtn').indexOf('เอาดาวออก') !== -1 && txt('tileMail').indexOf('6') !== -1, txt('mrStarBtn'));
+  CALLS.length = 0;
+  document.querySelector('.lbl-toggle[data-label="ส่งซ่อม"]').click();
+  await sleep(100);
+  const lb = fns('mail', 'label')[0];
+  ok('ติดป้าย ส่งซ่อม: เรียกฟังก์ชัน label on=true', !!lb && lb.body.label === 'ส่งซ่อม' && lb.body.on === true && lb.body.uid === 902, JSON.stringify(lb && lb.body));
+  ok('ปุ่มป้ายส่งซ่อมเปลี่ยนเป็นติดอยู่', document.querySelector('.lbl-toggle[data-label="ส่งซ่อม"]').getAttribute('aria-pressed') === 'true');
+  CALLS.length = 0;
+  document.querySelector('.lbl-toggle[data-label="BOYZ"]').click();
+  await sleep(100);
+  ok('เอาป้าย BOYZ ออก: on=false', (fns('mail', 'label')[0] || { body: {} }).body.on === false);
   CALLS.length = 0;
   replyMail();
   ok('ตอบกลับเติมผู้รับและ Re: ให้', document.getElementById('mcTo').value === 'dealer@example.com' &&
@@ -304,6 +399,30 @@ async function runTests() {
   const snd = fns('mail', 'send')[0];
   ok('ส่งผ่านฟังก์ชัน mail พร้อม In-Reply-To ของฉบับเดิม', !!snd && snd.body.to === 'dealer@example.com' && snd.body.in_reply_to === '<abc@example.com>',
     JSON.stringify(snd && snd.body));
+
+  // แท็บป้าย
+  CALLS.length = 0;
+  tabs()[1].click();
+  await sleep(200);
+  const lsend = fns('mail', 'list')[0];
+  ok('กดแท็บ "ส่งซ่อม" → โหลดรายการของป้ายนั้น', !!lsend && lsend.body.box === 'ส่งซ่อม' && lsend.body.page === 1, JSON.stringify(lsend && lsend.body));
+  ok('แท็บ "ส่งซ่อม" ถูกเลือก และแสดงอีเมลในป้าย', tabs()[1].getAttribute('aria-selected') === 'true' &&
+    document.querySelectorAll('#mailRows tr[data-i]').length === 1 && txt('mailRows').indexOf('DJM-S11') !== -1, txt('mailRows'));
+  CALLS.length = 0;
+  document.getElementById('tw-mail').focus();
+  key('ArrowDown', 'ArrowDown'); key('Enter', 'Enter');
+  await sleep(300);
+  ok('เปิดอีเมลในป้าย ส่ง box ของป้ายไปด้วย (UID ของแต่ละโฟลเดอร์ไม่เหมือนกัน)', (fns('mail', 'get')[0] || { body: {} }).body.box === 'ส่งซ่อม');
+  ok('ในแท็บป้ายไม่มีปุ่มเก็บเข้าคลัง (ใน Gmail นั่นคือเอาป้ายออก)', txt('mailReader').indexOf('เก็บเข้าคลัง') === -1);
+  tabs()[4].click();
+  await sleep(200);
+  ok('ป้ายที่ยังไม่มี: ขึ้น "ยังไม่มีป้ายนี้ใน Gmail" พร้อมวิธีสร้าง', vis('mailNoLabel') && txt('mailNoLabel').indexOf('ยังไม่มีป้ายนี้ใน Gmail') !== -1 &&
+    txt('mailNoLabel').indexOf('Mahajak Cop') !== -1, txt('mailNoLabel'));
+  ok('ป้ายที่ยังไม่มี: ไม่ใช่แถบ error สีแดง และไม่ล้มทั้งหน้า', !document.querySelector('#mailNote .alert-red') && !document.getElementById('fatalError') &&
+    !vis('tw-mail') && vis('mailTabs'));
+  tabs()[0].click();
+  await sleep(200);
+  ok('กลับแท็บกล่องจดหมายได้ตามปกติ', vis('tw-mail') && !vis('mailNoLabel') && document.querySelectorAll('#mailRows tr[data-i]').length === 2);
 
   // ยังไม่ได้ตั้งค่า (ไม่มี secret หรือยังไม่ได้ติดตั้งฟังก์ชัน)
   window.FN.mail = () => ({ error: { code: 'not_configured', message: 'ยังไม่ได้ตั้งค่ากล่องจดหมายร้าน' } });
@@ -372,10 +491,35 @@ const ownerCal = loadWith('#calendar', 'u1', `
   await saveGcalSettings();
   ok('ที่อยู่ที่ไม่ใช่ของ Google ถูกปฏิเสธตั้งแต่หน้าเว็บ', !CALLS.some(c => c.op === 'update'), document.getElementById('toast').textContent);
   document.getElementById('gsUrl').value = 'https://calendar.google.com/calendar/ical/shop%40gmail.com/private-abc/basic.ics';
+  ok('หน้าตั้งค่ามีสีชุดของ Google ให้เลือก 11 สี พร้อมชื่อ', document.querySelectorAll('#gsSwatches .swatch').length === 11 &&
+    document.getElementById('gsSwatches').textContent.indexOf('Peacock') !== -1);
+  document.querySelector('#gsSwatches .swatch[data-hex="#8E24AA"]').click();
+  ok('เลือกสีแล้วปุ่มนั้นถูกกดค้าง', document.querySelector('#gsSwatches .swatch[data-hex="#8E24AA"]').getAttribute('aria-pressed') === 'true');
   await saveGcalSettings();
   const up = CALLS.find(c => c.op === 'update' && c.table === 'staff_settings');
   ok('บันทึกที่อยู่ลงแถวตั้งค่าแถวเดียว (id = true)', !!up && up.payload.gcal_ics_url.indexOf('https://calendar.google.com/calendar/ical/') === 0 &&
-    up.where && up.where[0][0] === 'id' && up.where[0][1] === true, JSON.stringify(up && { p: up.payload, w: up.where }));`);
+    up.where && up.where[0][0] === 'id' && up.where[0][1] === true, JSON.stringify(up && { p: up.payload, w: up.where }));
+  ok('บันทึกสีที่เลือกลง gcal_color (025)', !!up && up.payload.gcal_color === '#8E24AA', up && up.payload.gcal_color);`);
 
-process.exit(res.ok && onMail.ok && ownerCal.ok ? 0 : 1);
+const reduced = runPage({ root, file: 'desk.html', flags: ['--force-prefers-reduced-motion'],
+  mock: MOCK.replace('let SESSION = null', "let SESSION = { user: { id: 'u2' } }"),
+  tests: `<script>
+window.addEventListener('load', () => setTimeout(runTests, 700));
+${HARNESS}
+async function runTests() {
+  L('=== ผู้ใช้ตั้ง "ลดการเคลื่อนไหว" (prefers-reduced-motion) ===');
+  ok('เบราว์เซอร์รายงานว่าลดการเคลื่อนไหวจริง', matchMedia('(prefers-reduced-motion: reduce)').matches);
+  bkkNow = () => ({ h: 14, m: 30, s: 5 });
+  renderHome();
+  ok('ร้านเปิดอยู่ แต่จานเสียงไม่หมุน', document.getElementById('shopState').classList.contains('open') &&
+    getComputedStyle(document.querySelector('#shopState .disc')).animationName === 'none');
+  ok('สถานะร้านยังบอกด้วยข้อความครบ', document.getElementById('shopStateText').textContent === 'ร้านเปิดอยู่');
+  ok('แท่งคลื่นไม่งอก', [...document.querySelectorAll('#waveBars i')].every(i => getComputedStyle(i).animationName === 'none'));
+  ok('เส้นแดงไม่เลื่อนแบบมีแอนิเมชัน', getComputedStyle(document.getElementById('wavePlayhead')).transitionDuration === '0s');
+  L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
+  L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
+}
+</script>`, hash: '#home' });
+
+process.exit(res.ok && onMail.ok && ownerCal.ok && reduced.ok ? 0 : 1);
 }

@@ -275,25 +275,90 @@
 
   /* ---------- หน้าแรกพนักงาน ---------- */
   .nav-item .nbadge { background: var(--red); color: #fff; font-size: 14px; font-weight: 700; min-width: 22px; padding: 0 6px; text-align: center; }
-  .hello { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
-  .hello h2 { font-size: 24px; }
-  .unread-box { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--red); box-shadow: var(--shadow); padding: 16px 20px; margin-bottom: 20px; }
-  .unread-box h3 { font-size: 16px; margin-bottom: 8px; }
-  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .content.has-detail .tiles { grid-template-columns: repeat(2, 1fr); }
-  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; min-height: 150px;
-    background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 18px 20px; cursor: pointer; }
-  .tile:hover:not(:disabled) { border-color: var(--black); }
-  .tile .t-ico { font-size: 22px; }
-  .tile .t-name { font-family: var(--font-head); font-weight: 600; font-size: 17px; }
-  .tile .t-val { font-size: 15px; color: var(--text2); }
-  .tile .t-val strong { color: var(--text); font-family: var(--font-head); font-size: 22px; }
-  .tile:disabled { cursor: not-allowed; background: repeating-linear-gradient(45deg, var(--surface2) 0 8px, var(--surface) 8px 16px); color: var(--text3); }
   .btn-lg { min-height: 52px; padding: 12px 28px; font-size: 17px; }
   .pre { white-space: pre-wrap; word-break: break-word; }
   code { font-family: Consolas, Menlo, monospace; font-size: 14px; }   /* monospace ของเบราว์เซอร์ตั้งต้นที่ 13px — ต่ำกว่ากฎข้อ 6 */
+  ::selection { background: var(--black); color: #fff; }
+  .num-tab { font-variant-numeric: tabular-nums; }
+  .ico-svg { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: square; stroke-linejoin: miter; }
 
-  /* ปฏิทิน: สีบอกหมวด แต่ชื่อหมวดเขียนกำกับในป้ายเสมอ (ไม่ใช้สีอย่างเดียว) */
+  /* แถบบนของหน้าแรก = "เด็ค" สีดำ: นาฬิกา · สถานะร้าน · เส้นคลื่นของวันทำการ (12:00–20:00) */
+  #sec-home:focus { outline: none; }   /* รับโฟกัสตอนเปิดหมวดเพื่อพาคีย์บอร์ดเข้ามา ไม่ใช่ปุ่ม จึงไม่วาดกรอบ */
+  .deck { background: var(--black); color: #fff; padding: 22px 28px 18px; margin: -24px -28px 22px; }
+  .deck-top { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 28px; }
+  .deck h2 { font-size: 22px; color: #fff; }
+  .deck .deck-date { font-size: 15px; color: #CFCCC3; margin-top: 2px; }
+  .clock { font-family: var(--font-head); font-weight: 600; font-size: 56px; line-height: 1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .clock .sec { font-size: 22px; color: #9A978F; margin-left: 4px; }
+  .shop-state { display: flex; align-items: center; gap: 14px; min-width: 270px; }
+  .shop-state .st-line { font-family: var(--font-head); font-weight: 600; font-size: 17px; }
+  .shop-state .st-sub { font-size: 14px; color: #CFCCC3; }
+  .shop-state .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; background: #6B6962; vertical-align: 1px; }
+  .shop-state.open .dot { background: #3DDC84; }
+  /* จานเสียง: หมุนเฉพาะตอนร้านเปิด ที่ 33⅓ รอบต่อนาที (1.8 วินาทีต่อรอบ) — หยุดหมุน = ร้านปิด */
+  .platter { width: 64px; height: 64px; flex-shrink: 0; }
+  .platter .disc { transform-origin: 32px 32px; }
+  .shop-state.open .platter .disc { animation: spin 1.8s linear infinite; }
+  .paused .platter .disc { animation-play-state: paused !important; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .wave { position: relative; margin-top: 18px; }
+  .wave-bars { display: flex; align-items: flex-end; gap: 2px; height: 46px; }
+  .wave-bars i { flex: 1; min-width: 0; background: #3A3A38; transform-origin: bottom; }
+  .wave-bars i.past { background: #8C8A83; }
+  .wave-bars i.bk { background: var(--room); }
+  .wave-bars i.bk.past { opacity: .55; }
+  .wave.draw .wave-bars i { animation: bar-in .5s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i) * 4ms); }
+  @keyframes bar-in { from { transform: scaleY(.08); } }
+  .playhead { position: absolute; top: -4px; bottom: 22px; width: 2px; background: var(--red); transition: left .6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .playhead::before { content: ''; position: absolute; top: -6px; left: -5px; border: 6px solid transparent; border-top-color: var(--red); }
+  .wave-axis { display: flex; justify-content: space-between; font-size: 14px; color: #9A978F; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .wave-key { display: flex; gap: 16px; font-size: 14px; color: #CFCCC3; margin-top: 4px; }
+  .wave-key span::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--k); vertical-align: -1px; }
+
+  /* ข้อความที่ยังไม่ได้อ่าน — จุดเดียวบนหน้าแรกที่ใช้สีแดงเต็มที่ เพราะคือสิ่งที่ต้องเห็นก่อน */
+  .unread-box { background: var(--red-soft); border: 1px solid #F0B8C1; padding: 16px 20px 8px; margin-bottom: 22px; }
+  .unread-box h3 { display: flex; align-items: center; gap: 10px; font-size: 17px; margin-bottom: 6px; color: #8A0012; }
+  .unread-box .count { background: var(--red); color: #fff; font-family: var(--font-head); min-width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; }
+  .unread-box .list-row { border-bottom-color: #F3CDD4; align-items: center; }
+  .unread-box .list-row:last-child { border-bottom: 0; }
+  .ava { width: 34px; height: 34px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+  .home-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 22px; align-items: start; }
+  .content.has-detail .home-grid { grid-template-columns: 1fr; }
+  .panel { background: var(--surface); border: 1px solid var(--line); margin-bottom: 22px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .panel-head h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+  .panel-body { padding: 6px 18px 12px; }
+  .row-link { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line);
+    padding: 10px 0; cursor: pointer; font-size: 15px; transition: background-color .15s; }
+  .row-link:last-child { border-bottom: 0; }
+  .row-link:hover { background: var(--surface2); }
+  .row-link .go { margin-left: auto; color: var(--text3); transition: transform .15s cubic-bezier(0.16, 1, 0.3, 1), color .15s; }
+  .row-link:hover .go, .row-link:focus-visible .go { transform: translateX(3px); color: var(--text); }
+  .row-link .cnt { font-family: var(--font-head); font-weight: 600; min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+  .row-link .cnt.hot { background: var(--black); color: #fff; padding: 0 8px; }
+  .row-link .muted { color: var(--text2); font-size: 14px; }
+  .agenda-row { display: grid; grid-template-columns: 58px auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .agenda-row:last-child { border-bottom: 0; }
+  .agenda-row .t { font-family: var(--font-head); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .agenda-row .ttl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .agenda-row.now { background: var(--surface2); padding-left: 8px; padding-right: 8px; margin: 0 -8px; }
+  .agenda-row .state { font-size: 14px; font-weight: 700; }
+  .agenda-row.now .state { color: var(--red); }
+  .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .quick .btn { justify-content: flex-start; min-height: 48px; }
+  .quick .btn .ico-svg { transition: transform .15s cubic-bezier(0.16, 1, 0.3, 1); }
+  .quick .btn:hover .ico-svg { transform: translateX(2px); }
+  .clockin { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 18px; font-size: 15px; cursor: not-allowed;
+    border: 1px dashed var(--line-strong); color: var(--text2); background: repeating-linear-gradient(45deg, var(--surface2) 0 8px, var(--surface) 8px 16px); }
+  .clockin strong { color: var(--text); font-family: var(--font-head); font-weight: 600; }
+
+  /* ป้ายสีทึบ (ปฏิทิน · หน้าแรก): พื้น = สีของแหล่ง · ตัวอักษรขาว/ดำเลือกจากคอนทราสต์จริง (inkOn) ≥ 4.5:1 */
+  .chip { display: inline-flex; align-items: center; background: var(--cat); color: var(--ink); font-size: 14px; font-weight: 700; padding: 1px 8px; white-space: nowrap; }
+
+  /* ปฏิทิน */
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--surface); }
   .cal-grid .dow { font-size: 14px; color: var(--text2); padding: 6px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface2); }
   .cal-cell { min-height: 118px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px; min-width: 0; }
@@ -303,26 +368,46 @@
   .cal-day { border: 0; background: none; cursor: pointer; font-size: 14px; font-weight: 600; padding: 2px 6px; width: 100%; text-align: left; }
   .cal-day:hover { background: var(--sel); }
   .cal-cell.today .cal-day { color: var(--red); }
-  .ev { display: block; width: 100%; text-align: left; font-size: 14px; line-height: 1.35; margin-top: 3px; padding: 2px 6px; cursor: pointer;
-    background: var(--surface2); border: 1px solid var(--line); border-left: 4px solid var(--cat, var(--black));
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .cal-week .ev { white-space: normal; }
-  .ev:hover { border-color: var(--black); }
-  .ev b { font-weight: 700; margin-right: 4px; }
-  .ev.g { border-style: dashed; border-left-style: solid; background: var(--surface); }
-  .ev.room { background: repeating-linear-gradient(45deg, var(--surface2) 0 6px, var(--surface) 6px 12px); }
+  .ev { display: block; width: 100%; text-align: left; font-size: 14px; line-height: 1.35; margin-top: 3px; padding: 3px 7px; cursor: pointer;
+    background: var(--cat); color: var(--ink); border: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: box-shadow .15s, transform .15s cubic-bezier(0.16, 1, 0.3, 1); }
+  .cal-week .ev { white-space: normal; padding: 6px 8px; }
+  .ev:hover { box-shadow: 0 2px 8px rgba(15,15,15,.25); transform: translateY(-1px); }
+  .ev:focus-visible { outline: 2px solid var(--black); outline-offset: 1px; }
+  .ev b { font-weight: 700; margin-right: 5px; }
   .ev-more { border: 0; background: none; font-size: 14px; color: var(--text2); cursor: pointer; padding: 2px 6px; text-decoration: underline; }
-  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 14px; color: var(--text2); margin-top: 10px; }
-  .legend span { border-left: 4px solid var(--cat); padding-left: 6px; }
+  .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: var(--text2); margin-top: 12px; }
   .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .swatch { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); background: var(--surface); padding: 5px 10px 5px 5px; cursor: pointer; font-size: 14px; }
+  .swatch i { width: 22px; height: 22px; background: var(--c); }
+  .swatch[aria-pressed="true"] { border-color: var(--black); box-shadow: inset 0 0 0 1px var(--black); font-weight: 700; }
 
-  /* กล่องจดหมาย: รายการซ้าย อ่านขวา */
+  /* กล่องจดหมาย */
+  .mail-tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line-strong); margin-bottom: 14px; }
+  .mail-tab { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px;
+    padding: 10px 16px; font-size: 15px; cursor: pointer; color: var(--text2); }
+  .mail-tab:hover { color: var(--text); background: var(--surface2); }
+  .mail-tab[aria-selected="true"] { color: var(--text); font-weight: 700; border-bottom-color: var(--black); }
+  .mail-tab .n { font-family: var(--font-head); font-size: 14px; background: var(--black); color: #fff; padding: 0 7px; }
+  .mail-tab .n.soft { background: var(--sel); color: var(--text); }
+  .mail-tab.missing { color: var(--text3); }
   .mail-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
   .mail-reader { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-height: 300px; }
   .mail-reader .mr-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
   .mail-reader .mr-head h2 { font-size: 18px; margin-bottom: 6px; word-break: break-word; }
-  .mail-reader iframe { display: block; width: 100%; height: calc(100vh - 380px); min-height: 320px; border: 0; background: #fff; }
+  .mail-reader iframe { display: block; width: 100%; height: calc(100vh - 430px); min-height: 320px; border: 0; background: #fff; }
+  .lbl-toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; color: var(--text2); }
+  .lbl-toggle[aria-pressed="true"] { background: var(--black); color: #fff; }
+  .star-on { color: #8A5A00; }
   table.data tr.unread td { font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* ไม่หมุน ไม่งอก ไม่เลื่อน — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
+    .shop-state.open .platter .disc, .wave.draw .wave-bars i { animation: none !important; }
+    .playhead, .row-link .go, .quick .btn .ico-svg, .ev { transition: none !important; }
+    .row-link:hover .go, .quick .btn:hover .ico-svg, .ev:hover { transform: none; }
+  }
 
   .print-only { display: none; }
   @media print {
@@ -398,33 +483,78 @@
       <main class="workspace">
 
         <!-- ============ หน้าแรกพนักงาน ============ -->
-        <section class="section" id="sec-home">
-          <div class="hello">
-            <h2 id="homeHello">สวัสดี</h2>
-            <span class="hint" id="homeDate" style="margin:0;"></span>
+        <section class="section" id="sec-home" tabindex="-1" aria-label="หน้าแรกพนักงาน">
+          <div class="deck">
+            <div class="deck-top">
+              <div>
+                <h2 id="homeHello">สวัสดี</h2>
+                <div class="deck-date" id="homeDate"></div>
+              </div>
+              <div class="clock" id="homeClock" aria-label="เวลาตอนนี้ (เวลาไทย)">--:--<span class="sec">--</span></div>
+              <div class="shop-state" id="shopState" role="status">
+                <svg class="platter" viewBox="0 0 64 64" aria-hidden="true">
+                  <g class="disc">
+                    <circle cx="32" cy="32" r="30" fill="#1C1C1C" stroke="#3A3A38"/>
+                    <circle cx="32" cy="32" r="24" fill="none" stroke="#2A2A28"/>
+                    <circle cx="32" cy="32" r="19" fill="none" stroke="#2A2A28"/>
+                    <circle cx="32" cy="32" r="10" fill="#CC001A"/>
+                    <rect x="31" y="23" width="2" height="5" fill="#FFFFFF"/>
+                    <circle cx="32" cy="32" r="1.6" fill="#0F0F0F"/>
+                  </g>
+                </svg>
+                <div>
+                  <div class="st-line"><span class="dot"></span><span id="shopStateText">—</span></div>
+                  <div class="st-sub" id="shopStateSub">เปิดทุกวัน 12:00–20:00</div>
+                </div>
+              </div>
+            </div>
+            <div class="wave" id="homeWave" aria-label="การจองห้องซ้อมตลอดวันทำการ 12:00–20:00">
+              <div class="wave-bars" id="waveBars"></div>
+              <div class="playhead" id="wavePlayhead" hidden></div>
+              <div class="wave-axis" aria-hidden="true"><span>12:00</span><span>14:00</span><span>16:00</span><span>18:00</span><span>20:00</span></div>
+              <div class="wave-key" id="waveKey"></div>
+            </div>
           </div>
+
           <div id="homeUnread"></div>
-          <div class="tiles">
-            <button class="tile" type="button" onclick="showSection('board')">
-              <span class="t-ico" aria-hidden="true">✎</span><span class="t-name">กระดานข้อความ</span>
-              <span class="t-val" id="tileBoard">—</span>
-            </button>
-            <button class="tile" type="button" onclick="showSection('mail')">
-              <span class="t-ico" aria-hidden="true">✉</span><span class="t-name">กล่องจดหมายร้าน</span>
-              <span class="t-val" id="tileMail">—</span>
-            </button>
-            <button class="tile" type="button" onclick="showSection('calendar')">
-              <span class="t-ico" aria-hidden="true">▤</span><span class="t-name">ปฏิทินวันนี้</span>
-              <span class="t-val" id="tileCal">—</span>
-            </button>
-            <!-- ตอกบัตรเข้างาน: เจ้าของสั่งเว้นไว้ก่อน รอปรึกษา — ไม่มีอะไรอยู่ข้างหลังปุ่มนี้ -->
-            <button class="tile" type="button" id="tileClock" disabled aria-disabled="true" title="ยังไม่เปิดใช้ — รอปรึกษา">
-              <span class="t-ico" aria-hidden="true">◴</span><span class="t-name">ตอกบัตรเข้างาน</span>
-              <span class="t-val">เร็ว ๆ นี้ · รอปรึกษา</span>
-            </button>
+
+          <div class="home-grid">
+            <div>
+              <div class="panel">
+                <div class="panel-head">
+                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="13.5"/><path d="M2.5 8h15M6.5 2v4M13.5 2v4"/></svg>วันนี้</h3>
+                  <button class="btn btn-sm btn-ghost" type="button" onclick="showSection('calendar')">เปิดปฏิทิน →</button>
+                </div>
+                <div class="panel-body" id="tileCal"></div>
+              </div>
+            </div>
+            <div>
+              <div class="panel">
+                <div class="panel-head">
+                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="4" width="16" height="12"/><path d="M2 5l8 6 8-6"/></svg>กล่องจดหมายร้าน</h3>
+                </div>
+                <div class="panel-body" id="tileMail"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">
+                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h14v10H9l-4 4v-4H3z"/></svg>กระดานข้อความ</h3>
+                  <button class="btn btn-sm btn-ghost" type="button" onclick="showSection('board')">ทั้งหมด →</button>
+                </div>
+                <div class="panel-body" id="tileBoard"></div>
+              </div>
+              <div class="quick" aria-label="ทางลัด">
+                <button class="btn" type="button" onclick="openBoardForm(null)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg>เขียนข้อความ</button>
+                <button class="btn" type="button" onclick="showSection('mail'); openCompose(null)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 10L17 3l-4.5 14-3-5.5z"/><path d="M9.5 11.5L17 3"/></svg>เขียนอีเมล</button>
+                <button class="btn" type="button" onclick="showSection('calendar'); openEventForm(null, todayBangkok())"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>เพิ่มกิจกรรม</button>
+                <button class="btn" type="button" onclick="showSection('booking'); openBookingForm()"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>จองห้องซ้อม</button>
+              </div>
+              <!-- ตอกบัตรเข้างาน: เจ้าของสั่งเว้นไว้ก่อน รอปรึกษา — ไม่มีอะไรอยู่ข้างหลังปุ่มนี้ -->
+              <button class="clockin" type="button" id="tileClock" disabled aria-disabled="true" title="ยังไม่เปิดใช้ — รอปรึกษา">
+                <svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg>
+                <span><strong>ตอกบัตรเข้างาน</strong> · เร็ว ๆ นี้ · รอปรึกษา</span>
+              </button>
+            </div>
           </div>
-          <button class="btn btn-primary btn-lg" id="homeConsoleBtn" type="button" onclick="showSection('products')">เข้าสู่คอนโซลร้าน →</button>
-          <p class="hint">สต็อก · ขายหน้าร้าน · จองห้องซ้อม · ลูกค้า · สรุปรายวัน อยู่ในเมนูซ้ายเหมือนเดิม (Alt+1…9, Alt+0)</p>
         </section>
 
         <!-- ============ กระดานข้อความ ============ -->
@@ -458,6 +588,7 @@
         <section class="section" id="sec-mail" hidden>
           <div id="mailSetup" hidden></div>
           <div id="mailMain">
+            <div class="mail-tabs" id="mailTabs" role="tablist" aria-label="กล่องและป้ายของ Gmail"></div>
             <div class="toolbar">
               <input type="search" id="mailSearch" class="input grow" placeholder="ค้นหาอีเมล แล้วกด Enter (ใช้คำค้นแบบ Gmail ได้ เช่น from:pioneer)" autocomplete="off" aria-label="ค้นหาอีเมล">
               <button class="btn" type="button" onclick="loadMailList()">↻ รีเฟรช</button>
@@ -466,6 +597,7 @@
             <div id="mailNote"></div>
             <div class="mail-split">
               <div>
+                <div id="mailNoLabel" hidden></div>
                 <div class="tablewrap" id="tw-mail" tabindex="0" aria-label="รายการอีเมล — ใช้ลูกศรขึ้นลงเลือก Enter เปิดอ่าน">
                   <table class="data">
                     <thead><tr><th class="pad">จาก</th><th class="pad">เรื่อง</th><th class="pad">เวลา</th></tr></thead>
@@ -1155,6 +1287,12 @@
       <label class="lbl" for="gsUrl">ที่อยู่ลับในรูปแบบ iCal</label>
       <input type="url" id="gsUrl" class="input" placeholder="https://calendar.google.com/calendar/ical/.../private-.../basic.ics" autocomplete="off">
       <div class="hint">Google Calendar → การตั้งค่าของปฏิทินนั้น → ผสานรวมปฏิทิน → “ที่อยู่ลับในรูปแบบ iCal” · เว้นว่างแล้วบันทึก = เลิกเชื่อม</div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="gsColorLbl">สีของกิจกรรมจาก Google บนปฏิทินร้าน</span>
+      <div class="swatches" id="gsSwatches" role="group" aria-labelledby="gsColorLbl"></div>
+      <label class="chk" style="margin-top:6px;">สีอื่น <input type="color" id="gsColor" aria-label="เลือกสีเอง" oninput="pickGcalColor(this.value)"></label>
+      <div class="hint">ไฟล์ iCal ของ Google ไม่ส่งสีมาด้วย — เลือกชื่อสีให้ตรงกับที่ตั้งไว้ใน Google Calendar (ชื่อเดียวกับในเมนูสีของ Google)</div>
     </div>
     <div class="alert alert-warn">ที่อยู่นี้เป็นความลับ ใครได้ไปก็เปิดดูปฏิทินได้ทั้งปฏิทิน — ระบบเก็บไว้ให้เจ้าของร้าน/ผู้ดูแลเห็นเท่านั้น พนักงานเห็นแค่กิจกรรม</div>
     <div class="dlg-foot" style="padding:0;">
@@ -2428,7 +2566,7 @@ function showSection(id, mode) {
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
   const focusEl = { products: 'tw-products', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
     booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
-    home: 'homeConsoleBtn', board: 'tw-board', mail: 'tw-mail' }[id];
+    home: 'sec-home', board: 'tw-board', mail: 'tw-mail' }[id];
   if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
   return true;
 }
@@ -4408,21 +4546,62 @@ let editingBoardId = null;
 let editingEventId = null;
 let homeToday = { shop: [], google: [], googleErr: null };
 // status: null = ยังไม่รู้ · 'ok' · 'setup' = ยังไม่ได้ตั้งค่า/ยังไม่ได้ติดตั้งฟังก์ชัน · 'error'
-const mailState = { status: null, unseen: null, error: '', page: 1, q: '', total: 0, pageSize: 25,
-                    messages: [], open: null, listToken: 0, readToken: 0, reply: null };
-const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null,
+// box = แท็บที่เปิดอยู่ (inbox / starred / ชื่อป้าย) · counts = จำนวนต่อแท็บจากฟังก์ชัน (null = ป้ายยังไม่มีใน Gmail)
+const mailState = { status: null, unseen: null, error: '', page: 1, q: '', total: 0, pageSize: 25, box: 'inbox', counts: {},
+                    noLabel: false, messages: [], open: null, listToken: 0, readToken: 0, reply: null };
+const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null, gcolor: null,
                    layers: { shop: true, google: true, rooms: false }, token: 0 };
 
 const THAI_DAYS_LONG = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 const GCAL_PREFIX = 'https://calendar.google.com/calendar/ical/';   // ต้องตรงกับ check ใน migration 023
-// สีเป็นตัวช่วยหา — ชื่อหมวดเขียนกำกับในป้ายของทุกกิจกรรมเสมอ
+// สีทึบต่อแหล่ง (เจ้าของขอ "สีชัด ๆ ตามปฏิทินหลัก") — แต่ชื่อหมวดยังเขียนกำกับในป้ายเสมอ สีเป็นตัวช่วยหา ไม่ใช่ตัวบอกอย่างเดียว
+// แดงของแบรนด์ไม่ใช้เป็นสีหมวด สงวนไว้ให้ "ต้องเห็นก่อน" (ข้อความที่ยังไม่ได้อ่าน · วันนี้ · ตอนนี้)
 const CAL_CATS = {
   shop:  { t: 'ร้าน',      color: '#0F0F0F' },
-  class: { t: 'คลาสเรียน', color: '#1F6B3A' },
-  event: { t: 'อีเวนต์',    color: '#8A5A00' },
-  staff: { t: 'ทีมงาน',     color: '#2B5C8A' },
-  other: { t: 'อื่น ๆ',     color: '#807D75' },
+  class: { t: 'คลาสเรียน', color: '#0B8043' },
+  event: { t: 'อีเวนต์',    color: '#F4511E' },
+  staff: { t: 'ทีมงาน',     color: '#3F51B5' },
+  other: { t: 'อื่น ๆ',     color: '#616161' },
 };
+const ROOM_COLOR = '#8E24AA';           // ชั้นการจองห้องซ้อม (ใช้ทั้งปฏิทิน · หน้าแรก · เส้นคลื่นของวัน)
+const GCAL_DEFAULT = '#039BE5';         // สีตั้งต้นของปฏิทิน Google ("นกยูง") — ใช้เมื่อเจ้าของยังไม่ได้เลือก (025)
+// สีชุดเดียวกับเมนูสีของ Google Calendar — ไฟล์ iCal ไม่ส่งสีมา เจ้าของจึงเลือกชื่อสีให้ตรงกับที่ตั้งใน Google
+const GCAL_PALETTE = [
+  ['มะเขือเทศ (Tomato)', '#D50000'], ['ฟลามิงโก (Flamingo)', '#E67C73'], ['ส้มเขียวหวาน (Tangerine)', '#F4511E'],
+  ['กล้วย (Banana)', '#F6BF26'], ['เสจ (Sage)', '#33B679'], ['โหระพา (Basil)', '#0B8043'], ['นกยูง (Peacock)', '#039BE5'],
+  ['บลูเบอร์รี่ (Blueberry)', '#3F51B5'], ['ลาเวนเดอร์ (Lavender)', '#7986CB'], ['องุ่น (Grape)', '#8E24AA'], ['กราไฟต์ (Graphite)', '#616161'],
+];
+function gcalColor() { return calState.gcolor || GCAL_DEFAULT; }
+
+// WCAG 2.x — ความสว่างสัมพัทธ์ และอัตราส่วนคอนทราสต์ของสีสองสี
+function relLum(hex) {
+  const ch = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+function contrastRatio(a, b) {
+  const x = relLum(a), y = relLum(b);
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}
+// ป้ายสีทึบ: ตัวอักษรขาวหรือดำ เลือกตัวที่คอนทราสต์สูงกว่า · สีกลาง ๆ บางสี (เช่นที่เจ้าของเลือกเอง) ได้ไม่ถึง 4.5:1
+// ทั้งสองแบบ — ตอนนั้นค่อย ๆ หรี่พื้นลงจนตัวอักษรขาวถึง 4.5:1 ไม่ยอมให้อ่านยาก
+function chipColors(bg) {
+  const pick = c => contrastRatio(c, '#FFFFFF') >= contrastRatio(c, '#0F0F0F') ? '#FFFFFF' : '#0F0F0F';
+  let c = bg;
+  for (let i = 0; i < 12 && contrastRatio(c, pick(c)) < 4.5; i++) {
+    c = '#' + [1, 3, 5].map(k => Math.round(parseInt(c.slice(k, k + 2), 16) * 0.9).toString(16).padStart(2, '0')).join('');
+  }
+  return { bg: c, ink: pick(c) };
+}
+function chipStyle(color) { const k = chipColors(color); return '--cat:' + k.bg + ';--ink:' + k.ink; }
+function chip(label, color) { return '<span class="chip" style="' + chipStyle(color) + '">' + escapeHtml(label) + '</span>'; }
+
+// กล่องและป้ายของ Gmail ที่แยกดูในกล่องจดหมาย — ชื่อป้ายต้องตรงกับ MAIL_LABELS ใน Edge Function `mail`
+const MAIL_BOXES = [
+  { key: 'inbox', t: 'กล่องจดหมาย' }, { key: 'ส่งซ่อม', t: 'ส่งซ่อม' }, { key: 'BOYZ', t: 'BOYZ' },
+  { key: 'starred', t: 'ติดดาว' }, { key: 'Mahajak Cop', t: 'Mahajak Cop' },
+];
+const MAIL_LABEL_KEYS = ['ส่งซ่อม', 'BOYZ', 'Mahajak Cop'];
 
 // เรียก Edge Function — ฟังก์ชันตอบ { error: { code, message } } ทั้งตอนสำเร็จบางกรณี (200) และตอนล้ม (4xx/5xx)
 // ตัวนี้แปลงทุกทางให้เป็นรูปเดียว หน้าเว็บจะได้ไม่ต้องแยกกรณีเอง
@@ -4481,42 +4660,149 @@ function thaiLongDate(d) {
   return 'วัน' + THAI_DAYS_LONG[dt.getDay()] + 'ที่ ' + dt.getDate() + ' ' + THAI_MONTHS_LONG[dt.getMonth()] + ' ' + (dt.getFullYear() + 543);
 }
 
+function initialOf(name) { const m = String(name || '').match(/[ก-ฮA-Za-z0-9]/); return m ? m[0].toUpperCase() : '?'; }
+const AVA_COLORS = ['#0F0F0F', '#3F51B5', '#0B8043', '#8E24AA', '#F4511E', '#616161', '#039BE5'];
+function avatarHtml(id) {
+  let h = 0;
+  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const k = chipColors(AVA_COLORS[h % AVA_COLORS.length]);
+  return '<span class="ava" style="background:' + k.bg + ';color:' + k.ink + '" aria-hidden="true">' + escapeHtml(initialOf(staffName(id))) + '</span>';
+}
+
+// เวลาไทยเสมอ ไม่ใช่เวลาของเครื่อง (กฎเดียวกับ todayBangkok)
+function bkkNow() {
+  const p = {};
+  new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  return { h: Number(p.hour) % 24, m: Number(p.minute), s: Number(p.second) };
+}
+const SHOP_OPEN = 12 * 60, SHOP_CLOSE = 20 * 60;       // เปิดทุกวัน 12:00–20:00 (CLAUDE.md ของ workspace)
+function durText(min) { const h = Math.floor(min / 60), m = min % 60; return (h ? h + ' ชม. ' : '') + m + ' นาที'; }
+function shopStateAt(min) {
+  if (min < SHOP_OPEN) return { open: false, text: 'ยังไม่เปิดร้าน', sub: 'เปิด 12:00 · อีก ' + durText(SHOP_OPEN - min) };
+  if (min < SHOP_CLOSE) return { open: true, text: 'ร้านเปิดอยู่', sub: 'ปิด 20:00 · อีก ' + durText(SHOP_CLOSE - min) };
+  return { open: false, text: 'ปิดร้านแล้ว', sub: 'เปิดพรุ่งนี้ 12:00' };
+}
+
+// เส้นคลื่นของวันทำการ: 96 แท่ง = ช่องละ 5 นาที ตั้งแต่ 12:00 ถึง 20:00 · แท่งสีม่วง = มีคนจองห้องซ้อมช่วงนั้น
+// ความสูงของแท่งเป็นลายตายตัว (ไม่สุ่มใหม่ทุกครั้ง) ข้อมูลอยู่ที่สี ไม่ใช่ที่ความสูง · เส้นแดง = ตอนนี้
+let waveDrawn = false;
+function todaysBookings() {
+  const d = todayBangkok();
+  return bookings.filter(b => b.date === d && b.status !== 'cancelled');
+}
+function toMin(t) { const [h, m] = shortTime(t).split(':').map(Number); return h * 60 + m; }
+function renderWave(nowMin) {
+  const bk = todaysBookings();
+  let html = '';
+  for (let i = 0; i < 96; i++) {
+    const t = SHOP_OPEN + i * 5;
+    const booked = bk.some(b => t >= toMin(b.start_time) && t < toMin(b.start_time) + b.hours * 60);
+    const h = 28 + Math.round(72 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.37)));
+    html += '<i style="height:' + h + '%;--i:' + i + '"' + ((booked || t + 5 <= nowMin) ? ' class="' + [booked ? 'bk' : '', t + 5 <= nowMin ? 'past' : ''].join(' ').trim() + '"' : '') + '></i>';
+  }
+  const bars = document.getElementById('waveBars');
+  bars.innerHTML = html;
+  bars.style.setProperty('--room', ROOM_COLOR);
+  document.getElementById('waveKey').innerHTML = '<span style="--k:' + ROOM_COLOR + '">จองห้องซ้อม ' + bk.length + ' รายการ</span>' +
+    '<span style="--k:#8C8A83">ผ่านไปแล้ว</span><span style="--k:#CC001A">ตอนนี้</span>';
+  const wave = document.getElementById('homeWave');
+  if (!waveDrawn && currentUserId) {                // แท่งงอกขึ้นครั้งเดียวตอนเปิดหน้าแรกครั้งแรก ไม่เล่นซ้ำทุกครั้งที่ข้อมูลขยับ
+    waveDrawn = true;
+    wave.classList.add('draw');
+    setTimeout(() => wave.classList.remove('draw'), 1000);
+  }
+  placePlayhead(nowMin);
+}
+function placePlayhead(nowMin) {
+  const ph = document.getElementById('wavePlayhead');
+  const inDay = nowMin >= SHOP_OPEN && nowMin <= SHOP_CLOSE;
+  ph.hidden = !inDay;
+  if (inDay) ph.style.left = ((nowMin - SHOP_OPEN) / (SHOP_CLOSE - SHOP_OPEN) * 100) + '%';
+}
+
+// ทุกวินาที: นาฬิกา · สถานะร้าน · ตำแหน่งเส้นแดง — ทำเฉพาะตอนหน้าแรกเปิดอยู่และแท็บไม่ถูกซ่อน
+let lastWaveMin = -1;
+function tickHome() {
+  if (current !== HOME || document.hidden) return;
+  const t = bkkNow(), min = t.h * 60 + t.m;
+  document.getElementById('homeClock').innerHTML = String(t.h).padStart(2, '0') + ':' + String(t.m).padStart(2, '0') +
+    '<span class="sec">' + String(t.s).padStart(2, '0') + '</span>';
+  const st = shopStateAt(min);
+  const box = document.getElementById('shopState');
+  box.classList.toggle('open', st.open);
+  document.getElementById('shopStateText').textContent = st.text;
+  document.getElementById('shopStateSub').textContent = st.sub;
+  if (min !== lastWaveMin) { lastWaveMin = min; renderWave(min); }
+}
+document.addEventListener('visibilitychange', () => {
+  document.documentElement.classList.toggle('paused', document.hidden);   // จานหยุดหมุนเมื่อแท็บถูกซ่อน
+  tickHome();
+});
+
 function renderHome() {
   const today = todayBangkok();
   document.getElementById('homeHello').textContent = currentAdmin ? 'สวัสดี คุณ' + currentAdmin.full_name : 'สวัสดี';
   document.getElementById('homeDate').textContent = thaiLongDate(today);
+  lastWaveMin = -1;
+  tickHome();
 
   const unread = myUnread();
   document.getElementById('homeUnread').innerHTML = unread.length
-    ? '<div class="unread-box" role="alert"><h3>● มีข้อความที่คุณยังไม่ได้อ่าน ' + unread.length + ' ข้อความ</h3>' +
-      unread.slice(0, 8).map(m => '<div class="list-row"><div><strong>' + escapeHtml(m.title) + '</strong>' +
+    ? '<div class="unread-box" role="alert"><h3><span class="count">' + unread.length + '</span>ข้อความบนกระดานที่คุณยังไม่ได้อ่าน</h3>' +
+      unread.slice(0, 8).map(m => '<div class="list-row"><div class="who">' + avatarHtml(m.author_id) + '<div><strong>' + escapeHtml(m.title) + '</strong>' +
         '<div class="sub">' + escapeHtml(staffName(m.author_id)) + ' · เรื่องของวันที่ ' + fmtDate(m.refers_to) +
-        (m.target_admin_id ? ' · ถึงคุณโดยตรง' : '') + '</div></div>' +
+        (m.target_admin_id ? ' · ถึงคุณโดยตรง' : '') + '</div></div></div>' +
         '<div class="lr-end"><button class="btn btn-sm" type="button" onclick="openFromHome(\'' + m.id + '\')">เปิดอ่าน</button></div></div>').join('') +
       (unread.length > 8 ? '<p class="hint">และอีก ' + (unread.length - 8) + ' ข้อความ — ดูทั้งหมดที่กระดานข้อความ</p>' : '') +
       '</div>'
     : '';
 
-  document.getElementById('tileBoard').innerHTML = unread.length
-    ? '<strong>' + unread.length + '</strong> ข้อความที่ยังไม่ได้อ่าน'
-    : (boardMsgs.length ? 'อ่านครบทุกข้อความแล้ว' : 'ยังไม่มีข้อความ');
+  // กระดาน: จำนวนที่ยังไม่อ่าน + ข้อความล่าสุด 3 อัน
+  const latest = boardMsgs.slice().sort((a, b) => cmp(b.created_at, a.created_at)).slice(0, 3);
+  document.getElementById('tileBoard').innerHTML =
+    '<p class="hint" style="margin:6px 0 4px;">' + (unread.length ? '<strong style="color:var(--text);">' + unread.length + '</strong> ข้อความที่คุณยังไม่ได้อ่าน'
+      : boardMsgs.length ? 'อ่านครบทุกข้อความแล้ว' : 'ยังไม่มีข้อความ') + '</p>' +
+    latest.map(m => '<button class="row-link" type="button" onclick="openFromHome(\'' + m.id + '\')">' + avatarHtml(m.author_id) +
+      '<span style="min-width:0;"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' + (isUnreadForMe(m) ? 'font-weight:700;' : '') + '">' +
+      escapeHtml(m.title) + '</span><span class="muted">' + escapeHtml(staffName(m.author_id)) + ' · ' + fmtDate(m.refers_to) + '</span></span>' +
+      '<span class="go" aria-hidden="true">→</span></button>').join('');
 
+  // กล่องจดหมาย: จำนวนแยกตามแท็บ (กล่องจดหมาย · ป้าย · ติดดาว)
   const ms = mailState.status;
   document.getElementById('tileMail').innerHTML =
-    ms === 'ok' ? (mailState.unseen ? '<strong>' + mailState.unseen + '</strong> ฉบับที่ยังไม่ได้เปิด' : 'ไม่มีอีเมลใหม่')
-    : ms === 'setup' ? 'ยังไม่ได้เชื่อมกล่องจดหมาย'
-    : ms === 'error' ? '⚠ เชื่อมต่อ Gmail ไม่สำเร็จ'
-    : 'กำลังตรวจสอบ…';
+    ms === 'ok' ? MAIL_BOXES.map(b => {
+      const c = mailState.counts[b.key];
+      const n = !c ? null : b.key === 'starred' ? c.total : c.unseen;
+      return '<button class="row-link" type="button" data-box="' + escapeHtml(b.key) + '" onclick="openMailBox(this.dataset.box)">' +
+        '<span>' + escapeHtml(b.t) + '</span>' +
+        (mailState.counts[b.key] === null ? '<span class="muted">ยังไม่มีป้ายนี้ใน Gmail</span>' : '') +
+        '<span class="go" aria-hidden="true" style="margin-left:auto;">→</span>' +
+        (n ? '<span class="cnt' + (b.key !== 'starred' ? ' hot' : '') + '" title="' + (b.key === 'starred' ? 'ติดดาวทั้งหมด' : 'ยังไม่ได้เปิด') + '">' + n + '</span>' : '<span class="cnt"></span>') +
+        '</button>';
+    }).join('')
+    : '<p class="hint" style="margin:10px 0;">' + (ms === 'setup' ? 'ยังไม่ได้เชื่อมกล่องจดหมาย — เจ้าของร้านตั้งค่าตามคู่มือ'
+      : ms === 'error' ? '⚠ เชื่อมต่อ Gmail ไม่สำเร็จ: ' + escapeHtml(mailState.error) : 'กำลังตรวจสอบกล่องจดหมาย…') + '</p>';
 
-  const items = homeToday.shop.map(e => ({ k: e.all_day ? '' : shortTime(e.start_time), t: (e.all_day ? 'ทั้งวัน' : shortTime(e.start_time)) + ' ' + e.title }))
-    .concat(homeToday.google.map(g => ({ k: g.all_day ? '' : g.start.slice(11, 16), t: (g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16)) + ' ' + g.title + ' (Google)' })))
-    .sort((a, b) => cmp(a.k, b.k));
-  const rooms = bookings.filter(b => b.date === today && b.status !== 'cancelled').length;
-  document.getElementById('tileCal').innerHTML =
-    (items.length ? items.slice(0, 3).map(x => escapeHtml(x.t)).join('<br>') + (items.length > 3 ? '<br>และอีก ' + (items.length - 3) + ' รายการ' : '')
-                  : 'วันนี้ยังไม่มีกิจกรรมในปฏิทิน') +
-    (homeToday.googleErr && homeToday.googleErr.code !== 'not_configured' ? '<br>⚠ ปฏิทิน Google โหลดไม่สำเร็จ' : '') +
-    '<br>จองห้องซ้อมวันนี้ ' + rooms + ' รายการ';
+  // วันนี้: ปฏิทินร้าน + Google + การจองห้อง เรียงตามเวลา · การจองที่กำลังใช้ห้อง/คิวถัดไปบอกด้วยข้อความ
+  const t = bkkNow(), nowMin = t.h * 60 + t.m;
+  const bk = todaysBookings().slice().sort((a, b) => cmp(a.start_time, b.start_time));
+  const nextBk = bk.find(b => toMin(b.start_time) > nowMin);
+  const rows = homeToday.shop.map(e => {
+    const c = CAL_CATS[e.category] || CAL_CATS.other;
+    return { k: e.all_day ? '' : shortTime(e.start_time), time: e.all_day ? 'ทั้งวัน' : shortTime(e.start_time), chip: chip(c.t, c.color), title: e.title, state: '' };
+  }).concat(homeToday.google.map(g => ({
+    k: g.all_day ? '' : g.start.slice(11, 16), time: g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16), chip: chip('Google', gcalColor()), title: g.title, state: '',
+  }))).concat(bk.map(b => {
+    const s0 = toMin(b.start_time), now = nowMin >= s0 && nowMin < s0 + b.hours * 60;
+    return { k: shortTime(b.start_time), time: shortTime(b.start_time), chip: chip('ห้องซ้อม', ROOM_COLOR),
+      title: b.customer_name + ' · ' + b.hours + ' ชม.', state: now ? 'กำลังใช้ห้อง' : b === nextBk ? 'ถัดไป' : '', now };
+  })).sort((a, b) => cmp(a.k, b.k));
+  document.getElementById('tileCal').innerHTML = (rows.length
+    ? rows.map(r => '<div class="agenda-row' + (r.now ? ' now' : '') + '"><span class="t">' + escapeHtml(r.time) + '</span>' + r.chip +
+        '<span class="ttl" title="' + escapeHtml(r.title) + '">' + escapeHtml(r.title) + '</span><span class="state">' + (r.state ? (r.now ? '● ' : '') + r.state : '') + '</span></div>').join('')
+    : '<p class="hint" style="margin:10px 0;">วันนี้ยังไม่มีกิจกรรมในปฏิทินหรือการจองห้อง</p>') +
+    (homeToday.googleErr && homeToday.googleErr.code !== 'not_configured' ? '<p class="hint">⚠ ปฏิทิน Google โหลดไม่สำเร็จ: ' + escapeHtml(homeToday.googleErr.message) + '</p>' : '');
 }
 
 function openFromHome(id) { showSection('board'); openBoardMsg(id); }
@@ -4529,6 +4815,7 @@ async function loadHomeToday() {
     callFn('gcal', { from: d, to: d }),
   ]);
   if (ev.error) { console.error('[Load today events]', ev.error); showFatalError('โหลดกิจกรรมวันนี้ไม่สำเร็จ: ' + ev.error.message); }
+  if (g.color) calState.gcolor = g.color;
   homeToday = { shop: ev.data || [], google: g.events || [], googleErr: g.error || null };
   renderHome();
 }
@@ -4735,23 +5022,56 @@ function mailFailed(r) {
 
 async function loadMailStatus() {
   const r = await callFn('mail', { action: 'status' });
-  if (!mailFailed(r)) { mailState.status = 'ok'; mailState.unseen = r.unseen; }
+  if (!mailFailed(r)) { mailState.status = 'ok'; mailState.unseen = r.unseen; mailState.counts = r.counts || {}; }
   renderHome();
   updateNavBadges();
+  if (current === 'mail') renderMailTabs();
 }
 
 async function loadMailList() {
   const token = ++mailState.listToken;
   document.getElementById('mailNote').innerHTML = '<div class="alert alert-plain">กำลังโหลดกล่องจดหมาย…</div>';
-  const r = await callFn('mail', { action: 'list', page: mailState.page, q: mailState.q });
-  if (token !== mailState.listToken) return;       // มีคำขอใหม่กว่าแล้ว (เปลี่ยนหน้า/ค้นหาต่อกัน)
-  if (!mailFailed(r)) {
+  const r = await callFn('mail', { action: 'list', page: mailState.page, q: mailState.q, box: mailState.box });
+  if (token !== mailState.listToken) return;       // มีคำขอใหม่กว่าแล้ว (เปลี่ยนหน้า/แท็บ/ค้นหาต่อกัน)
+  if (r.counts) mailState.counts = r.counts;
+  // ป้ายที่ยังไม่ได้สร้างใน Gmail: ไม่ใช่ความขัดข้อง — ขึ้นข้อความชวนไปสร้าง แท็บอื่นใช้ได้ตามปกติ
+  mailState.noLabel = !!(r.error && r.error.code === 'no_label');
+  if (mailState.noLabel) {
+    Object.assign(mailState, { status: 'ok', messages: [], total: 0, unseen: r.unseen });
+  } else if (!mailFailed(r)) {
     Object.assign(mailState, { status: 'ok', messages: r.messages || [], total: r.total || 0, unseen: r.unseen,
                                pageSize: r.page_size || 25 });
   }
   renderMail();
   renderHome();
   updateNavBadges();
+}
+
+function openMailBox(key) {
+  mailState.box = key;
+  mailState.page = 1;
+  mailState.q = '';
+  document.getElementById('mailSearch').value = '';
+  mailState.open = null;
+  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div>';
+  if (current !== 'mail') showSection('mail'); else loadMailList();
+  renderMailTabs();
+}
+
+function boxTitle(key) { const b = MAIL_BOXES.find(x => x.key === key); return b ? b.t : key; }
+
+function renderMailTabs() {
+  document.getElementById('mailTabs').innerHTML = MAIL_BOXES.map(b => {
+    const c = mailState.counts[b.key];
+    const n = !c ? 0 : b.key === 'starred' ? c.total : c.unseen;
+    const missing = c === null;
+    return '<button class="mail-tab' + (missing ? ' missing' : '') + '" type="button" role="tab" data-box="' + escapeHtml(b.key) + '"' +
+      ' aria-selected="' + (b.key === mailState.box) + '" onclick="openMailBox(this.dataset.box)"' +
+      (missing ? ' title="ยังไม่มีป้ายนี้ใน Gmail"' : '') + '>' +
+      (b.key === 'starred' ? '<span aria-hidden="true">★</span>' : '') + escapeHtml(b.t) +
+      (n ? '<span class="n' + (b.key === 'starred' ? ' soft' : '') + '" aria-label="' + (b.key === 'starred' ? 'ทั้งหมด ' : 'ยังไม่ได้เปิด ') + n + '">' + n + '</span>' : '') +
+      '</button>';
+  }).join('');
 }
 
 function fromLabel(a) { return a ? (a.name || a.address || '') : '(ไม่ทราบผู้ส่ง)'; }
@@ -4777,12 +5097,22 @@ function renderMail() {
       '</div>';
     return;
   }
+  renderMailTabs();
+  const nl = document.getElementById('mailNoLabel');
+  nl.hidden = !mailState.noLabel;
+  document.getElementById('tw-mail').hidden = mailState.noLabel;
+  if (mailState.noLabel) {
+    nl.innerHTML = '<div class="card" style="box-shadow:none;"><h3>ยังไม่มีป้ายนี้ใน Gmail</h3>' +
+      '<p>กล่องจดหมายของร้านยังไม่มีป้าย “' + escapeHtml(boxTitle(mailState.box)) + '” — สร้างใน Gmail ก่อน แล้วกด ↻ รีเฟรช</p>' +
+      '<ol style="padding-left:22px;margin:10px 0 0;"><li>เปิด Gmail ของ djlabsiam@gmail.com บนคอมพิวเตอร์</li>' +
+      '<li>แถบซ้ายหัวข้อ “ป้ายกำกับ” กด <strong>+</strong></li><li>ตั้งชื่อ <strong>' + escapeHtml(boxTitle(mailState.box)) + '</strong> ให้สะกดตรงกัน แล้วกดสร้าง</li></ol></div>';
+  }
   document.getElementById('mailNote').innerHTML = mailState.status === 'error'
     ? '<div class="alert alert-red" role="alert">' + escapeHtml(mailState.error) +
       ' <button class="btn btn-sm" type="button" onclick="loadMailList()">ลองอีกครั้ง</button></div>'
     : '';
   fillTable('mail', mailState.messages.map(x => Object.assign({ id: String(x.uid) }, x)), m =>
-    '<td>' + (m.seen ? '' : '<span class="st st-warn">● ใหม่</span> ') + escapeHtml(fromLabel(m.from)) + '</td>' +
+    '<td>' + (m.seen ? '' : '<span class="st st-warn">● ใหม่</span> ') + (m.starred ? '<span class="star-on" title="ติดดาว">★</span> ' : '') + escapeHtml(fromLabel(m.from)) + '</td>' +
     '<td>' + escapeHtml(m.subject || '(ไม่มีหัวเรื่อง)') + '</td>' +
     '<td class="nowrap">' + mailDate(m.date) + '</td>',
     mailState.status === 'error' ? 'โหลดอีเมลไม่สำเร็จ' : mailState.q ? 'ไม่พบอีเมลที่ตรงกับคำค้น' : 'ไม่มีอีเมลในกล่องจดหมาย');
@@ -4813,7 +5143,7 @@ async function openMail(id) {
   const token = ++mailState.readToken;
   const reader = document.getElementById('mailReader');
   reader.innerHTML = '<div class="empty">กำลังเปิดอีเมล…</div>';
-  const r = await callFn('mail', { action: 'get', uid });
+  const r = await callFn('mail', { action: 'get', uid, box: mailState.box });
   if (token !== mailState.readToken) return;
   if (r.error) {
     reader.innerHTML = '<div class="alert alert-red" role="alert" style="margin:16px;">เปิดอีเมลไม่สำเร็จ: ' + escapeHtml(r.error.message) + '</div>';
@@ -4843,9 +5173,10 @@ function mailDoc(msg) {
 function renderMailReader(msg) {
   const reader = document.getElementById('mailReader');
   const from = msg.from ? escapeHtml(fromLabel(msg.from)) + (msg.from.address && msg.from.name ? ' &lt;' + escapeHtml(msg.from.address) + '&gt;' : '') : '(ไม่ทราบผู้ส่ง)';
+  const labels = msg.labels || [];
   reader.innerHTML =
     '<div class="mr-head">' +
-      '<h2>' + escapeHtml(msg.subject || '(ไม่มีหัวเรื่อง)') + '</h2>' +
+      '<h2>' + (msg.starred ? '<span class="star-on" aria-label="ติดดาว">★</span> ' : '') + escapeHtml(msg.subject || '(ไม่มีหัวเรื่อง)') + '</h2>' +
       '<div class="sub">จาก <strong>' + from + '</strong></div>' +
       '<div class="sub">ถึง ' + escapeHtml((msg.to || []).map(a => a.address || a.name).join(', ')) + ' · ' + mailDate(msg.date) + '</div>' +
       (msg.attachments && msg.attachments.length
@@ -4853,9 +5184,16 @@ function renderMailReader(msg) {
       (msg.truncated ? '<div class="alert alert-warn" style="margin:8px 0 0;">อีเมลนี้ใหญ่เกิน 3 MB แสดงเฉพาะส่วนต้น — ดูฉบับเต็มที่ Gmail</div>' : '') +
       '<div class="actions" style="margin:12px 0 0;">' +
         '<button class="btn btn-sm btn-primary" type="button" onclick="replyMail()">↩ ตอบกลับ</button>' +
+        '<button class="btn btn-sm" type="button" id="mrStarBtn" aria-pressed="' + !!msg.starred + '" onclick="starMail(' + !msg.starred + ')">' +
+          (msg.starred ? '★ เอาดาวออก' : '☆ ติดดาว') + '</button>' +
         '<button class="btn btn-sm" type="button" onclick="flagMail(' + (msg.seen ? 'false' : 'true') + ')">' + (msg.seen ? 'ทำเป็นยังไม่ได้อ่าน' : 'ทำเป็นอ่านแล้ว') + '</button>' +
-        '<button class="btn btn-sm" type="button" onclick="archiveMail()">เก็บเข้าคลัง</button>' +
+        (msg.box === 'inbox' || !msg.box ? '<button class="btn btn-sm" type="button" onclick="archiveMail()">เก็บเข้าคลัง</button>' : '') +
       '</div>' +
+      (labels.length ? '<div class="lbl-toggles" role="group" aria-label="ป้ายของร้าน">ป้าย:' +
+        labels.map(l => '<button class="btn btn-sm lbl-toggle" type="button" data-label="' + escapeHtml(l.name) + '" aria-pressed="' + !!l.on + '"' +
+          (l.exists ? ' onclick="labelMail(this.dataset.label, ' + !l.on + ')" title="' + (l.on ? 'เอาป้ายออก' : 'ติดป้ายนี้') + '"'
+                    : ' disabled title="ยังไม่มีป้ายนี้ใน Gmail"') + '>' +
+          (l.on ? '✓ ' : '+ ') + escapeHtml(l.name) + '</button>').join('') + '</div>' : '') +
     '</div>';
   const f = document.createElement('iframe');
   f.id = 'mailBody';
@@ -4866,10 +5204,43 @@ function renderMailReader(msg) {
   reader.appendChild(f);
 }
 
+async function starMail(on) {
+  const m = mailState.open;
+  if (!m) return;
+  const r = await callFn('mail', { action: 'star', box: m.box || mailState.box, uid: m.uid, on });
+  if (r.error) { showFatalError('ติดดาวไม่สำเร็จ: ' + r.error.message); return; }
+  m.starred = on;
+  const row = mailState.messages.find(x => x.uid === m.uid);
+  if (row) row.starred = on;
+  const c = mailState.counts.starred;
+  if (c) c.total = Math.max(0, c.total + (on ? 1 : -1));
+  renderMail(); renderHome();
+  renderMailReader(m);
+  showToast(on ? '★ ติดดาวแล้ว' : '☆ เอาดาวออกแล้ว');
+}
+
+async function labelMail(label, on) {
+  const m = mailState.open;
+  if (!m) return;
+  const r = await callFn('mail', { action: 'label', box: m.box || mailState.box, uid: m.uid, label, on });
+  if (r.error) {
+    if (r.error.code === 'no_label') { showToast('⚠️ ยังไม่มีป้าย “' + label + '” ใน Gmail — สร้างใน Gmail ก่อน'); return; }
+    showFatalError('เปลี่ยนป้ายไม่สำเร็จ: ' + r.error.message);
+    return;
+  }
+  const l = (m.labels || []).find(x => x.name === label);
+  if (l) l.on = on;
+  const c = mailState.counts[label];
+  if (c) c.total = Math.max(0, c.total + (on ? 1 : -1));
+  renderMailReader(m);
+  renderMailTabs();
+  showToast(on ? '✓ ติดป้าย ' + label + ' แล้ว' : '✓ เอาป้าย ' + label + ' ออกแล้ว');
+}
+
 async function flagMail(seen) {
   const m = mailState.open;
   if (!m) return;
-  const r = await callFn('mail', { action: 'flag', uid: m.uid, seen });
+  const r = await callFn('mail', { action: 'flag', uid: m.uid, seen, box: m.box || mailState.box });
   if (r.error) { showFatalError('เปลี่ยนสถานะอีเมลไม่สำเร็จ: ' + r.error.message); return; }
   if (m.seen !== seen && mailState.unseen !== null) mailState.unseen += seen ? -1 : 1;
   m.seen = seen;
@@ -4883,7 +5254,7 @@ async function flagMail(seen) {
 async function archiveMail() {
   const m = mailState.open;
   if (!m) return;
-  const r = await callFn('mail', { action: 'archive', uid: m.uid });
+  const r = await callFn('mail', { action: 'archive', uid: m.uid, box: 'inbox' });
   if (r.error) { showFatalError('เก็บเข้าคลังไม่สำเร็จ: ' + r.error.message); return; }
   mailState.messages = mailState.messages.filter(x => x.uid !== m.uid);
   mailState.total = Math.max(0, mailState.total - 1);
@@ -4973,7 +5344,7 @@ async function loadCalendar() {
   if (token !== calState.token) return;
   if (ev.error) { console.error('[Load calendar]', ev.error); showFatalError('โหลดปฏิทินร้านไม่สำเร็จ: ' + ev.error.message); }
   else calState.events = ev.data || [];
-  if (g) { calState.google = g.events || []; calState.googleNote = g.error || null; }
+  if (g) { calState.google = g.events || []; calState.googleNote = g.error || null; if (g.color) calState.gcolor = g.color; }
   renderCalendar();
 }
 
@@ -4988,18 +5359,18 @@ function calItems(d) {
     if (g.start.slice(0, 10) > d || g.end.slice(0, 10) < d) return;
     const first = g.start.slice(0, 10) === d;
     out.push({ kind: 'google', ref: String(i), allDay: g.all_day || !first, time: g.all_day || !first ? '' : g.start.slice(11, 16),
-               end: g.all_day ? '' : g.end.slice(11, 16), title: g.title, label: 'Google', color: '#5B5953' });
+               end: g.all_day ? '' : g.end.slice(11, 16), title: g.title, label: 'Google', color: gcalColor() });
   });
   if (calState.layers.rooms) bookings.filter(b => b.date === d && b.status !== 'cancelled').forEach(b => {
     out.push({ kind: 'room', ref: b.id, allDay: false, time: shortTime(b.start_time), end: addHours(b.start_time, b.hours),
-               title: b.customer_name, label: 'ห้องซ้อม', color: '#0F0F0F' });
+               title: b.customer_name, label: 'ห้องซ้อม', color: ROOM_COLOR });
   });
   return out.sort((a, b) => (Number(b.allDay) - Number(a.allDay)) || cmp(a.time, b.time));
 }
 
 function chipHtml(it) {
   const when = it.allDay ? 'ทั้งวัน' : it.time + (it.end ? '–' + it.end : '');
-  return '<button class="ev' + (it.kind === 'google' ? ' g' : it.kind === 'room' ? ' room' : '') + '" type="button" style="--cat:' + it.color + '"' +
+  return '<button class="ev" type="button" style="' + chipStyle(it.color) + '"' +
     ' data-kind="' + it.kind + '" title="' + escapeHtml(it.label + ' · ' + when + ' · ' + it.title) + '"' +
     ' onclick="openCalItem(\'' + it.kind + '\', \'' + it.ref + '\')"><b>' + escapeHtml(it.label) + '</b>' +
     (it.time ? escapeHtml(it.time) + ' ' : '') + escapeHtml(it.title) + '</button>';
@@ -5039,10 +5410,10 @@ function renderCalendar() {
       '</div>';
   }
   document.getElementById('calGrid').innerHTML = html + '</div>';
-  document.getElementById('calLegend').innerHTML = 'หมวด: ' +
-    Object.values(CAL_CATS).map(c => '<span style="--cat:' + c.color + '">' + c.t + '</span>').join('') +
-    '<span style="--cat:#5B5953">Google (กรอบประ · อ่านอย่างเดียว)</span><span style="--cat:#0F0F0F">ห้องซ้อม (ลายเส้น)</span>' +
-    ' · คลิกเลขวันที่เพื่อเพิ่มกิจกรรมวันนั้น';
+  document.getElementById('calLegend').innerHTML = '<span>สีตามแหล่ง:</span>' +
+    Object.values(CAL_CATS).map(c => chip(c.t, c.color)).join('') +
+    chip('Google (อ่านอย่างเดียว)', gcalColor()) + chip('ห้องซ้อม', ROOM_COLOR) +
+    '<span>· คลิกเลขวันที่เพื่อเพิ่มกิจกรรมวันนั้น</span>';
 }
 
 function whenText(allDay, dateFrom, dateTo, t1, t2) {
@@ -5077,7 +5448,7 @@ function openCalItem(kind, ref) {
   const c = CAL_CATS[e.category] || CAL_CATS.other;
   openDetail(e.title,
     '<dl class="kv"><dt>เวลา</dt><dd>' + whenText(e.all_day, e.event_date, null, shortTime(e.start_time), shortTime(e.end_time)) + '</dd>' +
-    '<dt>หมวด</dt><dd><span class="ev" style="--cat:' + c.color + ';display:inline-block;width:auto;cursor:default;">' + c.t + '</span></dd>' +
+    '<dt>หมวด</dt><dd>' + chip(c.t, c.color) + '</dd>' +
     (e.note ? '<dt>หมายเหตุ</dt><dd class="pre">' + escapeHtml(e.note) + '</dd>' : '') +
     '<dt>บันทึกโดย</dt><dd>' + escapeHtml(staffName(e.created_by)) + '</dd></dl>' +
     '<div class="actions"><button class="btn btn-sm" type="button" onclick="openEventForm(\'' + e.id + '\')">แก้ไขกิจกรรม</button>' +
@@ -5147,11 +5518,23 @@ function deleteEvent(id) {
   });
 }
 
+let gcalPicked = null;
+function renderGcalSwatches() {
+  document.getElementById('gsSwatches').innerHTML = GCAL_PALETTE.map(([name, hex]) =>
+    '<button class="swatch" type="button" style="--c:' + hex + '" aria-pressed="' + (gcalPicked === hex) + '"' +
+    ' data-hex="' + hex + '" onclick="pickGcalColor(this.dataset.hex)"><i aria-hidden="true"></i>' + escapeHtml(name) + '</button>').join('');
+  document.getElementById('gsColor').value = gcalPicked || GCAL_DEFAULT;
+}
+function pickGcalColor(hex) { gcalPicked = hex.toUpperCase(); renderGcalSwatches(); }
+
 async function openGcalSettings() {
   if (!isManager()) { showToast('⚠️ ตั้งค่าได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
-  const { data, error } = await db.from('staff_settings').select('gcal_ics_url').eq('id', true).maybeSingle();
+  // select('*') — หน้านี้ต้องเปิดได้แม้ยังไม่ได้รัน 025 (คอลัมน์ gcal_color)
+  const { data, error } = await db.from('staff_settings').select('*').eq('id', true).maybeSingle();
   if (error) { console.error('[Load staff settings]', error); showFatalError('อ่านการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
   document.getElementById('gsUrl').value = (data && data.gcal_ics_url) || '';
+  gcalPicked = ((data && data.gcal_color) || GCAL_DEFAULT).toUpperCase();
+  renderGcalSwatches();
   document.getElementById('gcalDialog').showModal();
 }
 
@@ -5161,16 +5544,18 @@ async function saveGcalSettings() {
   const btn = document.getElementById('gsSaveBtn');
   btn.disabled = true;
   const { data, error } = await db.from('staff_settings')
-    .update({ gcal_ics_url: v || null, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+    .update({ gcal_ics_url: v || null, gcal_color: gcalPicked, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
   btn.disabled = false;
   if (error) { console.error('[Save staff settings]', error); showFatalError('บันทึกการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
   if (!data || !data.length) { showFatalError('บันทึกการตั้งค่าไม่สำเร็จ — บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 023'); return; }
+  calState.gcolor = gcalPicked;
   document.getElementById('gcalDialog').close();
   showToast(v ? '✅ เชื่อม Google Calendar แล้ว' : '✅ เลิกเชื่อม Google Calendar แล้ว');
   loadCalendar();
   loadHomeToday();
 }
 
+setInterval(tickHome, 1000);
 renderNav();
 pendingRoute = sectionFromHash();
 history.replaceState({ n: 0 }, '', location.hash || '#home');
