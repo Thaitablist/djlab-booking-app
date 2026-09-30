@@ -23,7 +23,7 @@ const CHROME = [
 const SUPABASE_TAG = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
 const ZXING_TAG = '<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>';
 
-export function runPage({ root, file, mock, tests }) {
+export function runPage({ root, file, mock, tests, hash }) {
   const html = readFileSync(join(root, file), 'utf8');
 
   // ถ้าแท็กในไฟล์จริงเปลี่ยนไป การสลับจะไม่เกิด แล้วเทสต์จะยิงเน็ตจริงโดยไม่มี
@@ -46,8 +46,12 @@ export function runPage({ root, file, mock, tests }) {
     '--headless', '--disable-gpu', '--no-sandbox',
     '--enable-logging=stderr', '--v=1',
     '--virtual-time-budget=15000',
-    '--dump-dom', pathToFileURL(target).href,
-  ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    '--dump-dom', pathToFileURL(target).href + (hash || ''),   // hash = เปิดหน้าตรงเข้าหมวด (desk.html)
+  ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+       // หน้าที่ถูกพาออกไปที่อื่น (เช่น history.back() ตอนไม่มีอะไรให้ย้อน) ทำให้ Chrome ค้างไม่จบ
+       // ตัดทิ้งแล้วนับว่าไม่ผ่าน ดีกว่าให้ชุดเทสต์ค้างเงียบ ๆ
+       timeout: 120000 });
+  if (r.error && r.error.code === 'ETIMEDOUT') console.log('  Chrome ค้างเกิน 2 นาที — นับว่าไม่ผ่าน');
 
   const stderr = r.stderr || '';
   const lines = stderr.split('\n').filter(l => l.includes('[WEDGE]'));

@@ -80,7 +80,8 @@
     display: flex; align-items: center; gap: 20px; padding: 14px 28px;
     background: var(--surface); border-bottom: 1px solid var(--line);
   }
-  .topbar h1 { font-size: 20px; flex-shrink: 0; min-width: 220px; }
+  .topbar h1 { font-size: 20px; flex-shrink: 0; min-width: 200px; }
+  #backBtn:disabled { opacity: .4; }
   .gsearch { position: relative; flex: 1; max-width: 560px; }
   .gsearch input { width: 100%; }
   .gresults {
@@ -181,6 +182,9 @@
   .sec-title { font-family: var(--font-head); font-weight: 600; font-size: 15px; margin: 20px 0 10px; }
   .list-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
   .list-row .sub { color: var(--text2); font-size: 14px; }
+  .list-row > div:first-child { min-width: 0; }
+  .list-row .lr-end { flex-shrink: 0; max-width: 55%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
+  .badges { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 
   .alert { padding: 10px 14px; border-left: 3px solid; font-size: 14px; margin-bottom: 14px; }
@@ -214,6 +218,71 @@
   .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 0 22px 20px; }
   .opt { border: 1px solid var(--line); padding: 14px; margin-top: 12px; }
   .help-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 15px; }
+
+  /* โครงสองคอลัมน์ของหมวดจองห้อง / ลูกค้า / สรุปรายวัน */
+  .split { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; margin-bottom: 20px; }
+  .stats-4 { grid-template-columns: repeat(4, 1fr); }
+  /* แผงรายละเอียดเปิดแล้วพื้นที่เหลือไม่พอสองคอลัมน์ — เรียงลงแทนการบีบไทม์ไลน์ */
+  .content.has-detail .split { grid-template-columns: 1fr; }
+  /* ลูกของ grid ต้องหดได้ ไม่งั้นตารางดันคอลัมน์ออกนอกจอแล้วถูกตัด แทนที่จะเลื่อนแนวนอนในกรอบของมันเอง */
+  .split > *, .admin-grid > * { min-width: 0; }
+  .content.has-detail .admin-grid { grid-template-columns: 200px 1fr; }
+  .content.has-detail .stats-4 { grid-template-columns: repeat(2, 1fr); }
+  th.pad { padding: 10px 14px !important; }
+
+  /* ไทม์ไลน์ห้องซ้อมรายวัน: แกนนอน 08:00–24:00 = 16 ช่อง */
+  .tl-row { display: grid; grid-template-columns: 150px 1fr; border-top: 1px solid var(--line); }
+  .tl-head { display: grid; grid-template-columns: 150px 1fr; }
+  .tl-hours { display: grid; grid-template-columns: repeat(16, 1fr); font-size: 14px; color: var(--text2); }
+  .tl-room { padding: 10px 10px 10px 0; font-weight: 600; font-size: 14px; line-height: 1.3; }
+  .tl-track { position: relative; min-height: 62px;
+    background-image: linear-gradient(to right, var(--line) 1px, transparent 1px); background-size: calc(100% / 16) 100%; }
+  .tl-block { position: absolute; top: 6px; bottom: 6px; overflow: hidden; padding: 3px 5px; font-size: 14px; line-height: 1.35;
+    border: 2px solid var(--black); background: var(--surface); color: var(--text); cursor: pointer; text-align: left; min-width: 0; }
+  /* ก้อนสั้นต้องยังอ่านได้: บรรทัดละหนึ่งเรื่อง ตัดท้ายด้วย … (ไม่ตัดกลางตัวอักษร) เวลามาก่อนชื่อ
+     เพราะเวลาคือสิ่งที่หน้าเคาน์เตอร์ต้องเห็นอย่างน้อยที่สุด ข้อความเต็มอยู่ใน title */
+  .tl-block span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-block .tl-time { font-weight: 700; }
+  .tl-block:hover { box-shadow: var(--shadow); }
+  .tl-block.pending { background: var(--warn-soft); border-color: var(--warn); border-width: 1px; }
+  .tl-block.active { background: var(--black); color: #fff; }
+  .tl-block.done { background: var(--surface2); color: var(--text2); border: 1px solid var(--line-strong); }
+  .tl-block.cancelled { background: repeating-linear-gradient(45deg, var(--surface2) 0 6px, var(--surface) 6px 12px);
+    color: var(--text3); text-decoration: line-through; border: 1px dashed var(--line-strong); }
+  .tl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); pointer-events: none; }
+
+  .mcal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .mcal .dow { font-size: 14px; color: var(--text2); padding: 2px 0; }
+  .mcal button { border: 1px solid transparent; background: none; min-height: 42px; cursor: pointer; font-size: 14px; line-height: 1.2; }
+  .mcal button:hover { background: var(--sel); }
+  .mcal button.on { border-color: var(--black); font-weight: 700; }
+  .mcal button.today { color: var(--red); font-weight: 700; }
+  .mcal .cnt { display: block; font-size: 14px; color: var(--text2); }
+
+  .timer-big { font-family: var(--font-head); font-size: 44px; font-weight: 600; text-align: center; }
+  .bar { height: 8px; background: var(--surface2); border: 1px solid var(--line); }
+  .bar > div { height: 100%; background: var(--black); }
+
+  .admin-grid { display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: start; }
+  .tlist button { display: flex; justify-content: space-between; gap: 6px; width: 100%; text-align: left; background: none;
+    border: 0; border-left: 3px solid transparent; padding: 7px 8px; cursor: pointer; font-size: 14px; }
+  .tlist button:hover { background: var(--sel); }
+  .tlist button.active { border-left-color: var(--black); background: var(--sel); font-weight: 600; }
+  .tlist .mode { color: var(--text2); }
+  .colname { display: block; font-size: 14px; font-weight: 400; color: var(--text3); }
+  table.data th .colname { font-weight: 400; }
+  .ro { background: var(--surface2); border: 1px solid var(--line); padding: 8px 12px; min-height: 40px; word-break: break-word; }
+
+  .print-only { display: none; }
+  @media print {
+    .sidebar, .topbar, .detail, .no-print, .toast, #fatalError { display: none !important; }
+    .app { display: block; height: auto; min-width: 0; }
+    .main, .content, .workspace { display: block; height: auto; overflow: visible; padding: 0; }
+    .split { display: block; }
+    .print-only { display: block !important; }
+    .card, .tablewrap { box-shadow: none; max-height: none; overflow: visible; }
+    body { background: #fff; }
+  }
 
   /* เข้าสู่ระบบ */
   .login { position: fixed; inset: 0; z-index: 900; background: var(--bg); display: flex; align-items: center; justify-content: center; }
@@ -259,11 +328,13 @@
 
   <div class="main">
     <header class="topbar">
+      <button class="btn btn-sm" id="backBtn" type="button" onclick="goBack()" disabled
+              title="ย้อนกลับไปหมวดก่อนหน้า (Alt+←)" aria-label="ย้อนกลับไปหมวดก่อนหน้า">← ย้อนกลับ</button>
       <h1 id="pageTitle">สินค้า</h1>
       <div class="gsearch">
         <input type="search" id="globalSearch" class="input" autocomplete="off"
-               placeholder="ค้นหาสินค้า / บิล — กด / หรือ Ctrl+K" title="ค้นหาทั้งร้าน (/ หรือ Ctrl+K)"
-               aria-label="ค้นหาสินค้าหรือบิล">
+               placeholder="ค้นหาสินค้า / บิล / ลูกค้า — กด / หรือ Ctrl+K" title="ค้นหาทั้งร้าน (/ หรือ Ctrl+K)"
+               aria-label="ค้นหาสินค้า บิล หรือลูกค้า">
         <div class="gresults" id="globalResults" hidden></div>
       </div>
       <div class="user">
@@ -308,7 +379,7 @@
               <tbody id="productRows"></tbody>
             </table>
           </div>
-          <p class="hint">เพิ่ม/แก้ไขข้อมูลสินค้า (ชื่อ ราคา จุดสั่งซื้อซ้ำ) ยังทำที่ <a href="stock.html">หน้าสต็อกสินค้า</a> · มีเครื่องยิงบาร์โค้ดเสียบอยู่ ยิงหาสินค้าได้เลย</p>
+          <p class="hint">มีเครื่องยิงบาร์โค้ดเสียบอยู่ ยิงหาสินค้าได้เลย <button class="btn btn-sm" id="addProductBtn" type="button" onclick="adGotoRow('products', null)" hidden style="margin-left:8px;">+ เพิ่มสินค้าใหม่</button></p>
         </section>
 
         <!-- ============ บันทึกการเคลื่อนไหว ============ -->
@@ -406,7 +477,7 @@
                 <div id="selectedCustomerBox" hidden></div>
                 <input type="text" id="posCustomer" class="input" list="customerOptions" autocomplete="off" placeholder="พิมพ์ชื่อหรือเบอร์โทรแล้วเลือก">
                 <datalist id="customerOptions"></datalist>
-                <div class="hint">ลูกค้าใหม่เพิ่มได้ที่ <a href="customers.html">หน้าข้อมูลลูกค้า</a></div>
+                <button class="btn btn-sm" type="button" style="margin-top:8px;" onclick="openCustomerForm(null, true)">+ ลูกค้าใหม่</button>
               </div>
               <div class="row2">
                 <div class="field">
@@ -466,12 +537,234 @@
           <p class="hint">แสดง 300 บิลล่าสุด</p>
         </section>
 
-        <!-- ============ หมวดที่ยังไม่ย้ายมา ============ -->
-        <section class="section" id="sec-soon" hidden>
-          <div class="card" style="max-width:640px;">
-            <h3 id="soonTitle"></h3>
-            <p style="margin-bottom:16px;" class="hint">หมวดนี้กำลังย้ายมาอยู่ในคอนโซล — ระหว่างนี้ใช้หน้าเดิมได้ตามปกติ ข้อมูลเป็นชุดเดียวกัน</p>
-            <a class="btn btn-primary" id="soonLink" href="#">เปิดหน้าเดิม →</a>
+        <!-- ============ จองห้องซ้อม ============ -->
+        <section class="section" id="sec-booking" hidden>
+          <div class="stats stats-4">
+            <div class="stat"><div class="stat-value" id="bkStatRevenue">0</div><div class="stat-label">ค่าห้องเดือนนี้ (ใช้บริการแล้ว · บาท)</div></div>
+            <div class="stat"><div class="stat-value" id="bkStatHours">0</div><div class="stat-label">ชั่วโมงซ้อมเดือนนี้</div></div>
+            <div class="stat"><div class="stat-value" id="bkStatSessions">0</div><div class="stat-label">ครั้งที่ใช้บริการเดือนนี้</div></div>
+            <div class="stat"><div class="stat-value" id="bkStatPending">0</div><div class="stat-label">◷ รอยืนยัน (ทั้งหมด)</div></div>
+          </div>
+          <div class="split">
+            <div class="card">
+              <div class="toolbar" style="margin-bottom:16px;">
+                <button class="btn btn-sm" type="button" onclick="shiftBkDate(-1)" title="วันก่อนหน้า" aria-label="วันก่อนหน้า">‹</button>
+                <input type="date" id="bkDate" class="input" style="width:auto;" aria-label="วันที่แสดงในไทม์ไลน์">
+                <button class="btn btn-sm" type="button" onclick="shiftBkDate(1)" title="วันถัดไป" aria-label="วันถัดไป">›</button>
+                <button class="btn btn-sm" type="button" onclick="setBkDate(todayBangkok())">วันนี้</button>
+                <strong id="bkDateLabel" style="margin-left:6px;"></strong>
+                <span style="flex:1;"></span>
+                <button class="btn btn-primary" type="button" onclick="openBookingForm()">+ จองห้องใหม่</button>
+              </div>
+              <div id="bkTimeline"></div>
+              <p class="hint">กรอบเข้ม = ยืนยันแล้ว · ◷ พื้นเหลือง = รอยืนยัน · ▶ พื้นดำ = กำลังใช้งาน · ✓ พื้นเทา = ใช้บริการแล้ว · ลายเส้น = ยกเลิก</p>
+            </div>
+            <div>
+              <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                  <button class="btn btn-sm btn-ghost" type="button" onclick="shiftBkMonth(-1)" aria-label="เดือนก่อนหน้า">‹</button>
+                  <strong id="bkCalTitle"></strong>
+                  <button class="btn btn-sm btn-ghost" type="button" onclick="shiftBkMonth(1)" aria-label="เดือนถัดไป">›</button>
+                </div>
+                <div class="mcal" id="bkCal"></div>
+              </div>
+              <div class="card">
+                <h3>จับเวลาห้องซ้อม</h3>
+                <div class="timer-big" id="timerDisplay">00:00</div>
+                <div class="bar" style="margin:8px 0;"><div id="timerBar" style="width:100%;"></div></div>
+                <div class="hint" id="timerLabel" style="text-align:center;margin:0 0 12px;">ตั้งเวลาเพื่อเริ่ม</div>
+                <div class="row2">
+                  <div class="field"><label class="lbl" for="timerHours">ชั่วโมง</label>
+                    <select id="timerHours" class="input"><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+                  <div class="field"><label class="lbl" for="timerMins">นาที</label>
+                    <select id="timerMins" class="input"><option selected>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>30</option><option>45</option></select></div>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" id="timerStartBtn" type="button" onclick="timerAction()" style="flex:1;">▶ เริ่ม</button>
+                  <button class="btn" type="button" onclick="timerReset()">↺ รีเซ็ต</button>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-sm" type="button" onclick="setTimer(0,30)">30 นาที</button>
+                  <button class="btn btn-sm" type="button" onclick="setTimer(1,0)">1 ชม.</button>
+                  <button class="btn btn-sm" type="button" onclick="setTimer(2,0)">2 ชม.</button>
+                  <button class="btn btn-sm" type="button" onclick="setTimer(3,0)">3 ชม.</button>
+                </div>
+                <p class="hint">ตัวจับเวลาชุดเดียวกับหน้าจองห้องซ้อมเดิม (จำไว้ในเครื่องนี้)</p>
+              </div>
+            </div>
+          </div>
+          <div class="toolbar">
+            <input type="search" id="bkSearch" class="input grow" placeholder="ค้นหาชื่อผู้จอง / ข้อมูลติดต่อ / ห้อง" autocomplete="off" aria-label="ค้นหาการจอง">
+            <select id="fBkStatus" class="input" aria-label="สถานะการจอง">
+              <option value="">ทุกสถานะ</option>
+              <option value="pending">◷ รอยืนยัน</option>
+              <option value="upcoming">รอเข้าใช้</option>
+              <option value="active">▶ กำลังใช้งาน</option>
+              <option value="done">✓ ใช้บริการแล้ว</option>
+              <option value="cancelled">✕ ยกเลิก</option>
+            </select>
+            <select id="fBkMonth" class="input" aria-label="เดือน"><option value="">ทุกเดือน</option></select>
+          </div>
+          <div class="tablewrap" id="tw-bookings" tabindex="0" aria-label="ตารางการจองห้องซ้อม">
+            <table class="data">
+              <thead><tr>
+                <th><button class="th" data-t="bookings" data-k="date">วันที่</button></th>
+                <th><button class="th" data-t="bookings" data-k="time">เวลา</button></th>
+                <th><button class="th" data-t="bookings" data-k="name">ผู้จอง</button></th>
+                <th class="col-opt"><button class="th" data-t="bookings" data-k="contact">ติดต่อ</button></th>
+                <th class="col-opt"><button class="th" data-t="bookings" data-k="room">ห้อง</button></th>
+                <th class="num"><button class="th" data-t="bookings" data-k="cost">ค่าห้อง</button></th>
+                <th><button class="th" data-t="bookings" data-k="status">สถานะ</button></th>
+              </tr></thead>
+              <tbody id="bookingRows"></tbody>
+            </table>
+          </div>
+          <p class="hint">ตั้งราคาต่อชั่วโมงและเกณฑ์ชั่วโมงสะสมได้ที่หมวด “จัดการข้อมูล” → ตั้งค่าการจองห้อง</p>
+        </section>
+
+        <!-- ============ ข้อมูลลูกค้า ============ -->
+        <section class="section" id="sec-customers" hidden>
+          <div class="stats">
+            <div class="stat"><div class="stat-value" id="custStatTotal">0</div><div class="stat-label">ลูกค้าทั้งหมด</div></div>
+            <div class="stat"><div class="stat-value" id="custStatNew">0</div><div class="stat-label">เพิ่มเดือนนี้</div></div>
+            <div class="stat"><div class="stat-value" id="custStatNoContact">0</div><div class="stat-label">⚠ ไม่มีช่องทางติดต่อ</div></div>
+          </div>
+          <div class="split">
+            <div>
+              <div class="toolbar">
+                <input type="search" id="customerSearch" class="input grow" placeholder="ชื่อ / เบอร์โทร / LINE ID / อีเมล / แท็ก" autocomplete="off" aria-label="ค้นหาลูกค้า">
+                <button class="btn btn-primary" type="button" onclick="openCustomerForm(null)">+ เพิ่มลูกค้าใหม่</button>
+              </div>
+              <div class="tablewrap" id="tw-customers" tabindex="0" aria-label="ตารางลูกค้า">
+                <table class="data">
+                  <thead><tr>
+                    <th><button class="th" data-t="customers" data-k="name">ชื่อลูกค้า</button></th>
+                    <th><button class="th" data-t="customers" data-k="phone">เบอร์โทร</button></th>
+                    <th class="col-opt"><button class="th" data-t="customers" data-k="line">LINE ID</button></th>
+                    <th class="col-opt"><button class="th" data-t="customers" data-k="tags">แท็ก</button></th>
+                    <th><button class="th" data-t="customers" data-k="created_at">เพิ่มเมื่อ</button></th>
+                  </tr></thead>
+                  <tbody id="customerRows"></tbody>
+                </table>
+              </div>
+              <p class="hint" id="custCount"></p>
+            </div>
+            <div class="card">
+              <h3>ทะเบียนสมาชิกร้าน</h3>
+              <input type="search" id="memberSearch" class="input" placeholder="ชื่อ / เบอร์โทร / รหัสสมาชิก (3 ตัวขึ้นไป)" autocomplete="off" aria-label="ค้นหาสมาชิก">
+              <p class="hint">ทะเบียนนี้มาจาก Google Sheet ของร้าน — ดูได้อย่างเดียว แก้ที่ชีตเท่านั้น</p>
+              <div id="memberResults" style="margin-top:8px;"></div>
+              <button class="btn btn-block" type="button" onclick="openCodeModal()" style="margin-top:12px;">+ สร้างลิงก์สมัครสมาชิก</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ สรุปรายวัน ============ -->
+        <section class="section" id="sec-daily" hidden>
+          <div class="toolbar no-print">
+            <button class="btn btn-sm" type="button" onclick="shiftDailyDate(-1)" title="วันก่อนหน้า" aria-label="วันก่อนหน้า">‹</button>
+            <input type="date" id="reportDate" class="input" style="width:auto;" aria-label="วันที่ของรายงาน">
+            <button class="btn btn-sm" type="button" onclick="shiftDailyDate(1)" title="วันถัดไป" aria-label="วันถัดไป">›</button>
+            <button class="btn btn-sm" type="button" onclick="setDailyDate(todayBangkok())">วันนี้</button>
+            <span style="flex:1;"></span>
+            <button class="btn" type="button" onclick="openIncomeModal(null)">+ รายรับ</button>
+            <button class="btn" type="button" onclick="openExpenseModal(null)">+ รายจ่าย</button>
+            <button class="btn" type="button" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+            <button class="btn" type="button" onclick="downloadCsv()">ดาวน์โหลด CSV</button>
+          </div>
+          <div class="print-only" style="text-align:center;margin-bottom:16px;">
+            <div class="head" style="font-size:20px;">DJ LAB SIAM</div>
+            <div>รายงานสรุปรายรับ-รายจ่ายประจำวันที่ <span id="printDateLabel"></span></div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="stat-value" id="sumIncome">0.00</div><div class="stat-label">รายรับรวม (บาท)</div></div>
+            <div class="stat"><div class="stat-value" id="sumExpense">0.00</div><div class="stat-label">รายจ่ายรวม (บาท)</div></div>
+            <div class="stat" id="sumNetCard"><div class="stat-value" id="sumNet">0.00</div><div class="stat-label" id="sumNetLabel">คงเหลือสุทธิ (บาท)</div></div>
+          </div>
+          <div class="split">
+            <div>
+              <div class="card" style="padding:0;">
+                <h3 style="padding:16px 20px 0;">รายรับ</h3>
+                <table class="data">
+                  <thead><tr><th class="pad">เวลา</th><th class="pad">ที่มา</th><th class="pad">รายละเอียด</th>
+                    <th class="pad">วิธีชำระ</th><th class="num pad">จำนวนเงิน</th><th class="no-print pad"></th></tr></thead>
+                  <tbody id="incomeTableBody"></tbody>
+                  <tfoot><tr><td colspan="4" style="text-align:right;font-weight:600;">รวมรายรับ</td><td class="num" id="incomeTotal" style="font-weight:700;">0.00</td><td class="no-print"></td></tr></tfoot>
+                </table>
+              </div>
+              <div class="card" style="padding:0;">
+                <h3 style="padding:16px 20px 0;">รายจ่าย</h3>
+                <table class="data">
+                  <thead><tr><th class="pad">ลำดับ</th><th class="pad">รายการ</th><th class="pad">บิล</th>
+                    <th class="num pad">จำนวนเงิน</th><th class="no-print pad"></th></tr></thead>
+                  <tbody id="expenseTableBody"></tbody>
+                  <tfoot><tr><td colspan="3" style="text-align:right;font-weight:600;">รวมรายจ่าย</td><td class="num" id="expenseTotal" style="font-weight:700;">0.00</td><td class="no-print"></td></tr></tfoot>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <h3>แยกรายรับตามวิธีชำระเงิน</h3>
+              <div id="paymentBreakdown"></div>
+              <p class="hint no-print">รายรับจากการขายและค่าห้องดึงมาเอง แก้ที่ต้นทาง (ประวัติบิล / จองห้องซ้อม) · ที่นี่แก้ได้เฉพาะรายรับที่กรอกมือ</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ บันทึกการใช้งาน ============ -->
+        <section class="section" id="sec-activity" hidden>
+          <div class="alert alert-plain">บันทึกนี้แก้ไขและลบไม่ได้ทั้งระบบ แม้แต่เจ้าของร้าน — ทุกแถวเขียนโดยฐานข้อมูลเองทุกครั้งที่มีการเปลี่ยนแปลงข้อมูล</div>
+          <div class="toolbar">
+            <label class="hint" for="filterTable" style="margin:0;">หมวด</label><select id="filterTable" class="input"></select>
+            <label class="hint" for="filterAction" style="margin:0;">การกระทำ</label>
+            <select id="filterAction" class="input">
+              <option value="">ทั้งหมด</option><option value="INSERT">เพิ่มใหม่</option><option value="UPDATE">แก้ไข</option><option value="DELETE">ลบ</option>
+            </select>
+            <label class="hint" for="filterActor" style="margin:0;">โดย</label><select id="filterActor" class="input"><option value="">ทั้งหมด</option></select>
+            <label class="hint" for="filterRange" style="margin:0;">ช่วงเวลา</label>
+            <select id="filterRange" class="input">
+              <option value="7" selected>7 วันล่าสุด</option><option value="1">วันนี้</option><option value="30">30 วันล่าสุด</option><option value="0">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="tablewrap" id="tw-activity" tabindex="0" aria-label="ตารางบันทึกการใช้งาน (อ่านอย่างเดียว)">
+            <table class="data">
+              <thead><tr>
+                <th><button class="th" data-t="activity" data-k="created_at">วันเวลา</button></th>
+                <th><button class="th" data-t="activity" data-k="table">หมวด</button></th>
+                <th><button class="th" data-t="activity" data-k="entity">รายการ</button></th>
+                <th><button class="th" data-t="activity" data-k="action">การกระทำ</button></th>
+                <th class="col-opt"><button class="th" data-t="activity" data-k="who">โดย</button></th>
+              </tr></thead>
+              <tbody id="activityRows"></tbody>
+            </table>
+          </div>
+          <div class="toolbar" style="margin-top:10px;">
+            <span class="hint" id="activityCount" style="margin:0;"></span>
+            <button class="btn btn-sm" id="loadMoreBtn" type="button" onclick="fetchActivityPage()" hidden>โหลดเพิ่มอีก 200 รายการ</button>
+          </div>
+        </section>
+
+        <!-- ============ จัดการข้อมูล ============ -->
+        <section class="section" id="sec-admin" hidden>
+          <div class="admin-grid">
+            <div class="card" style="padding:12px;">
+              <div class="hint" style="margin:0 0 8px;">เลือกตาราง</div>
+              <div id="adTableList" class="tlist"></div>
+            </div>
+            <div>
+              <div id="adNote"></div>
+              <div class="toolbar">
+                <input type="search" id="adSearch" class="input grow" placeholder="พิมพ์แล้วกด Enter เพื่อค้นหา" aria-label="ค้นหาในตาราง">
+                <button class="btn btn-primary" id="adAddBtn" type="button" onclick="adOpenRow(null)" hidden>+ เพิ่มแถว</button>
+              </div>
+              <div class="tablewrap" id="tw-admin" tabindex="0" aria-label="ข้อมูลในตาราง">
+                <table class="data"><thead><tr id="adHead"></tr></thead><tbody id="adRows"></tbody></table>
+              </div>
+              <div class="toolbar" style="margin-top:10px;">
+                <button class="btn btn-sm" id="adPrevBtn" type="button" onclick="adChangePage(-1)">‹ ก่อนหน้า</button>
+                <span class="hint" id="adPagerInfo" style="margin:0;">—</span>
+                <button class="btn btn-sm" id="adNextBtn" type="button" onclick="adChangePage(1)">ถัดไป ›</button>
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -524,7 +817,7 @@
   <div class="dlg-body">
     <div class="help-grid">
       <span><kbd>/</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>K</kbd></span><span>ค้นหาทั้งร้าน</span>
-      <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd></span><span>สลับหมวดตามลำดับในเมนูซ้าย</span>
+      <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd>, <kbd>0</kbd></span><span>สลับหมวดตามลำดับในเมนูซ้าย (ตัวเลขแสดงข้างชื่อหมวด)</span>
       <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>เลื่อนแถวที่เลือกในตาราง</span>
       <span><kbd>Enter</kbd></span><span>เปิดรายละเอียดแถวที่เลือก</span>
       <span><kbd>Esc</kbd></span><span>ปิดแผงรายละเอียด / หน้าต่าง / ออกจากช่องพิมพ์</span>
@@ -532,11 +825,127 @@
       <span><kbd>+</kbd> <kbd>−</kbd></span><span>เพิ่ม/ลดจำนวนบรรทัดที่เลือกในตะกร้า</span>
       <span><kbd>Delete</kbd></span><span>ลบบรรทัดที่เลือกออกจากตะกร้า</span>
       <span><kbd>F9</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span><span>บันทึกการขาย (กดได้แม้อยู่ในช่องส่วนลด/หมายเหตุ)</span>
+      <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน</span>
+      <span><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd></span><span>กลับไปหมวดก่อนหน้า / ไปข้างหน้า (เหมือนปุ่ม ← ย้อนกลับ บนแถบบน และปุ่มย้อนของเมาส์)</span>
       <span><kbd>?</kbd></span><span>เปิดหน้านี้</span>
     </div>
     <p class="hint" style="margin-top:14px;">คีย์ลัดไม่ทำงานระหว่างพิมพ์ในช่องกรอก (ยกเว้น Esc, Ctrl+K, F9) และไม่รบกวนเครื่องยิงบาร์โค้ด</p>
   </div>
   <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('helpDialog').close()">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
+  <div class="dlg-head"><h2 id="confirmTitle">ยืนยัน</h2></div>
+  <div class="dlg-body" id="confirmBody"></div>
+  <div class="dlg-foot">
+    <button class="btn" type="button" onclick="document.getElementById('confirmDialog').close()">ไม่ทำ (Esc)</button>
+    <button class="btn btn-danger" id="confirmOkBtn" type="button" onclick="runConfirm()">ยืนยัน</button>
+  </div>
+</dialog>
+
+<dialog id="bookingDialog" aria-labelledby="bookingTitle">
+  <div class="dlg-head"><h2 id="bookingTitle">จองห้องซ้อม</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); submitBooking();">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="bookName">ชื่อผู้จอง *</label><input type="text" id="bookName" class="input" placeholder="ชื่อ - นามสกุล"></div>
+      <div class="field"><label class="lbl" for="bookContact">ข้อมูลติดต่อ *</label><input type="text" id="bookContact" class="input" placeholder="เบอร์โทร / LINE ID"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="bookDate">วันที่ *</label><input type="date" id="bookDate" class="input"></div>
+      <div class="field"><label class="lbl" for="bookTime">เวลาเริ่ม *</label><input type="time" id="bookTime" class="input" value="10:00"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="bookHours">จำนวนชั่วโมง *</label>
+        <select id="bookHours" class="input" onchange="updateCostPreview()">
+          <option value="1">1 ชั่วโมง</option><option value="2">2 ชั่วโมง</option><option value="3">3 ชั่วโมง</option><option value="4">4 ชั่วโมง</option>
+          <option value="5">5 ชั่วโมง</option><option value="6">6 ชั่วโมง</option><option value="8">8 ชั่วโมง</option>
+        </select></div>
+      <div class="field"><label class="lbl" for="bookRoom">ห้อง / Setup</label><select id="bookRoom" class="input"></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="bookRoomModel">ระบุรุ่นที่ต้องการ</label><input type="text" id="bookRoomModel" class="input" placeholder="เช่น DJM-S11, DJM-A9"></div>
+      <div class="field"><label class="lbl" for="bookEquip">อุปกรณ์เพิ่มเติม</label><input type="text" id="bookEquip" class="input" placeholder="เช่น Headphone"></div>
+    </div>
+    <div class="field"><label class="lbl" for="bookNote">หมายเหตุ</label><input type="text" id="bookNote" class="input" placeholder="รายละเอียดเพิ่มเติม"></div>
+    <div class="alert alert-plain">ค่าใช้จ่ายโดยประมาณ: <strong id="costAmount">—</strong></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('bookingDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="bookSaveBtn" type="submit">ยืนยันการจอง</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="customerDialog" aria-labelledby="customerFormTitle">
+  <div class="dlg-head"><h2 id="customerFormTitle">เพิ่มลูกค้าใหม่</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveCustomer();">
+    <div class="field"><label class="lbl" for="cfName">ชื่อลูกค้า *</label><input type="text" id="cfName" class="input" placeholder="ชื่อ-นามสกุล"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="cfPhone">เบอร์โทร</label><input type="text" id="cfPhone" class="input" placeholder="0812345678" inputmode="tel"><div id="cfPhoneWarn"></div></div>
+      <div class="field"><label class="lbl" for="cfLineId">LINE ID</label><input type="text" id="cfLineId" class="input" placeholder="@djlabsiam"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="cfEmail">อีเมล</label><input type="email" id="cfEmail" class="input" placeholder="customer@email.com"></div>
+      <div class="field"><label class="lbl" for="cfTags">แท็ก</label><input type="text" id="cfTags" class="input" placeholder="ลูกค้าประจำ, นักเรียน"><div class="hint">คั่นแต่ละแท็กด้วย ( , )</div></div>
+    </div>
+    <div class="field"><label class="lbl" for="cfNote">หมายเหตุ</label><textarea id="cfNote" class="input" rows="2" placeholder="เช่น สนใจ CDJ-3000, เรียนคอร์ส Scratch"></textarea></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('customerDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="saveCustomerBtn" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="codeLinkDialog" aria-labelledby="codeLinkTitle">
+  <div class="dlg-head"><h2 id="codeLinkTitle">สร้างลิงก์ให้ลูกค้าสมัครเอง</h2></div>
+  <div class="dlg-body" id="codeLinkBody"></div>
+  <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('codeLinkDialog').close()">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="incomeDialog" aria-labelledby="incomeModalTitle">
+  <div class="dlg-head"><h2 id="incomeModalTitle">เพิ่มรายรับ</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveIncome();">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="ifSource">ที่มา *</label><input type="text" id="ifSource" class="input" placeholder="เช่น สมัครเรียน, อื่นๆ"></div>
+      <div class="field"><label class="lbl" for="ifAmount">จำนวนเงิน (บาท) *</label><input type="number" id="ifAmount" class="input" min="0" step="0.01" placeholder="0"></div>
+    </div>
+    <div class="field"><label class="lbl" for="ifDescription">รายละเอียด *</label><input type="text" id="ifDescription" class="input" placeholder="รายละเอียดรายรับ"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="ifPaymentMethod">วิธีชำระ</label>
+        <select id="ifPaymentMethod" class="input"><option value="">ไม่ระบุ</option><option value="เงินสด">เงินสด</option><option value="โอน">โอน</option><option value="บัตรเครดิต">บัตรเครดิต</option><option value="อื่นๆ">อื่นๆ</option></select></div>
+      <div class="field"><label class="lbl" for="ifReceivedAt">เวลา *</label><input type="datetime-local" id="ifReceivedAt" class="input"></div>
+    </div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('incomeDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="incomeSaveBtn" type="submit">บันทึกรายรับ</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="expenseDialog" aria-labelledby="expenseModalTitle">
+  <div class="dlg-head"><h2 id="expenseModalTitle">เพิ่มรายจ่าย</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveExpense();">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="efDescription">รายการ *</label><input type="text" id="efDescription" class="input" placeholder="รายละเอียดรายจ่าย"></div>
+      <div class="field"><label class="lbl" for="efAmount">จำนวนเงิน (บาท) *</label><input type="number" id="efAmount" class="input" min="0" step="0.01" placeholder="0"></div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="efReceiptFile">รูปบิล</label>
+      <input type="file" id="efReceiptFile" class="input" accept="image/*" onchange="onReceiptPicked()">
+      <div id="efReceiptState" class="hint"></div>
+      <img id="efReceiptPreview" alt="ตัวอย่างรูปบิล" style="display:none;max-width:100%;max-height:240px;margin-top:8px;border:1px solid var(--line);">
+      <button type="button" class="btn btn-sm" id="efReceiptClearBtn" style="display:none;margin-top:8px;" onclick="clearReceiptChoice()">เอารูปออก</button>
+    </div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('expenseDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="expenseSaveBtn" type="submit">บันทึกรายจ่าย</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="receiptDialog" aria-labelledby="receiptCaption" style="max-width:760px;">
+  <div class="dlg-head"><h2 id="receiptCaption">รูปบิล</h2></div>
+  <div class="dlg-body"><img id="receiptImage" alt="รูปบิล" style="max-width:100%;border:1px solid var(--line);"></div>
+  <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('receiptDialog').close()">ปิด (Esc)</button></div>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -591,18 +1000,20 @@ const BRAND_OPTIONS = ['Pioneer DJ', 'AlphaTheta', 'NEO by OYAIDE', 'Other'];
 const TYPE_LABEL = { in: '▲ รับเข้า', out: '▼ ตัดออก', adjustment: '◆ ปรับยอด' };
 const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold: 'ขายแล้ว', reserved: 'จองไว้', defective: 'มีตำหนิ' };
 
-// ลำดับในเมนูซ้าย = ลำดับของ Alt+1..9 · หมวดที่มี href ยังไม่ย้ายมา เปิดหน้าเดิมแทน
+// ลำดับในเมนูซ้าย = ลำดับของ Alt+1..9 แล้ว Alt+0 · manager: true = เฉพาะเจ้าของร้าน/ผู้ดูแล
+// (activity ตาม activity.html · admin เจ้าของร้านสั่งปิดจากพนักงานในคอนโซล — admin-data.html เดิมไม่ได้กั้น)
+// hash = ชื่อใน URL (#stock, #pos ...) ทำให้ปุ่มย้อนกลับ/เปิดหน้าใหม่แล้วกลับหมวดเดิมได้
 const SECTIONS = [
-  { id: 'products', group: 'สต็อกสินค้า', icon: '▦', label: 'สินค้า' },
-  { id: 'movement', group: 'สต็อกสินค้า', icon: '⇅', label: 'รับเข้า / ตัดออก / ปรับยอด' },
-  { id: 'moves',    group: 'สต็อกสินค้า', icon: '☰', label: 'ประวัติการเคลื่อนไหว' },
-  { id: 'pos',      group: 'การขาย',      icon: '＋', label: 'ขายหน้าร้าน' },
-  { id: 'bills',    group: 'การขาย',      icon: '≡', label: 'ประวัติบิล' },
-  { id: 'booking',  group: 'กำลังย้ายมา', icon: '◷', label: 'จองห้องซ้อม', href: 'DJ_LAB_SIAM_BookingApp.html' },
-  { id: 'customers',group: 'กำลังย้ายมา', icon: '☺', label: 'ข้อมูลลูกค้า', href: 'customers.html' },
-  { id: 'daily',    group: 'กำลังย้ายมา', icon: '∑', label: 'สรุปรายวัน', href: 'daily.html' },
-  { id: 'activity', group: 'กำลังย้ายมา', icon: '⌕', label: 'บันทึกการใช้งาน', href: 'activity.html' },
-  { id: 'admin',    group: 'กำลังย้ายมา', icon: '⚙', label: 'จัดการข้อมูล', href: 'admin-data.html' },
+  { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: '▦', label: 'สินค้า' },
+  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: '⇅', label: 'รับเข้า / ตัดออก / ปรับยอด' },
+  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: '☰', label: 'ประวัติการเคลื่อนไหว' },
+  { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: '＋', label: 'ขายหน้าร้าน' },
+  { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: '≡', label: 'ประวัติบิล' },
+  { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: '◷', label: 'จองห้องซ้อม' },
+  { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: '☺', label: 'ข้อมูลลูกค้า' },
+  { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: '∑', label: 'สรุปรายวัน' },
+  { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: '⌕', label: 'บันทึกการใช้งาน', manager: true },
+  { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: '⚙', label: 'จัดการข้อมูล', manager: true },
 ];
 
 let products = [];
@@ -626,6 +1037,10 @@ const view = {
   products: { sort: 'name', dir: 1, rows: [], sel: -1, tbody: 'productRows' },
   moves:    { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'moveRows' },
   bills:    { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'billRows' },
+  bookings: { sort: 'date', dir: -1, rows: [], sel: -1, tbody: 'bookingRows' },
+  customers:{ sort: 'name', dir: 1, rows: [], sel: -1, tbody: 'customerRows' },
+  activity: { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'activityRows' },
+  admin:    { sort: null, dir: 1, rows: [], sel: -1, tbody: 'adRows' },     // เรียงที่ฐานข้อมูล (แบ่งหน้า)
 };
 
 // ---------------------------------------------------------------------------
@@ -715,6 +1130,17 @@ async function handleAuthState(session) {
   const roleLabel = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' }[adminRow.role] || adminRow.role;
   document.getElementById('currentUserInfo').innerHTML =
     '<strong>' + escapeHtml(adminRow.full_name) + '</strong> · ' + escapeHtml(roleLabel);
+  renderNav();
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === current));
+  document.getElementById('addProductBtn').hidden = !isWriter();
+  // สลับบัญชีจากเจ้าของเป็นพนักงานบนเครื่องเดิม ต้องไม่ค้างอยู่ในหมวดที่พนักงานเปิดไม่ได้
+  const sec = SECTIONS.find(x => x.id === current);
+  if (pendingRoute) {
+    const r = pendingRoute;
+    pendingRoute = null;
+    if (!showSection(r, 'replace')) showSection('products', 'replace');
+  } else if (sec && sec.manager && !isManager()) showSection('products', 'replace');
+  else if (current === 'daily' || current === 'activity' || current === 'admin') showSection(current, 'none');
 
   loadAll();
 }
@@ -736,13 +1162,29 @@ async function initSupabaseSync() {
   db.channel('desk-sales')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => loadAll())
     .subscribe();
+  db.channel('desk-room-bookings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_bookings' },
+        () => { loadBookings().then(() => { renderBookings(); if (current === 'daily') loadDaily(); }); })
+    .subscribe();
+  db.channel('desk-booking-settings')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'booking_settings' }, () => loadBookingSettings())
+    .subscribe();
+  db.channel('desk-customers')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' },
+        () => { loadCustomers().then(() => { renderCustomers(); renderCustomerOptions(); }); })
+    .subscribe();
+  db.channel('desk-daily')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'income_entries' }, () => { if (current === 'daily') loadDaily(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => { if (current === 'daily') loadDaily(); })
+    .subscribe();
 }
 
 // ---------------------------------------------------------------------------
 // โหลดข้อมูล — query ชุดเดียวกับ stock.html / sales.html
 // ---------------------------------------------------------------------------
 async function loadAll() {
-  await Promise.all([loadProducts(), loadStockLevels(), loadMovements(), loadCustomers(), loadSalesHistory(), loadStats()]);
+  await Promise.all([loadProducts(), loadStockLevels(), loadMovements(), loadCustomers(), loadSalesHistory(), loadStats(),
+                     loadBookings(), loadBookingSettings()]);
   renderAll();
 }
 
@@ -769,7 +1211,10 @@ async function loadMovements() {
 }
 
 async function loadCustomers() {
-  const { data, error } = await db.from('customers').select('id, full_name, phone').order('full_name');
+  // ชุดคอลัมน์เดียวกับ customers.html — หน้าขายใช้แค่ชื่อ/เบอร์จากชุดนี้
+  const { data, error } = await db.from('customers')
+    .select('id, full_name, phone, line_id, email, note, tags, created_at, created_by, admins:created_by(full_name)')
+    .order('full_name');
   if (error) { console.error('[Load customers]', error); showFatalError('โหลดรายชื่อลูกค้าไม่สำเร็จ: ' + error.message); return; }
   customers = data || [];
 }
@@ -811,6 +1256,8 @@ function renderAll() {
   renderStats();
   renderCustomerOptions();
   renderCart();
+  renderBookings();
+  renderCustomers();
 }
 
 // ---------------------------------------------------------------------------
@@ -835,6 +1282,18 @@ const SORT_KEYS = {
     created_at: s => s.created_at, sale_no: s => s.sale_no, customer: s => customerName(s),
     payment: s => s.payment_method || '', staff: s => (s.admins ? s.admins.full_name : ''),
     total: s => parseFloat(s.total) || 0, status: s => s.status,
+  },
+  bookings: {
+    date: b => b.date + ' ' + b.start_time, time: b => b.start_time, name: b => b.customer_name, contact: b => b.contact || '',
+    room: b => b.room, cost: b => parseFloat(b.cost) || 0, status: b => (!b.confirmed && b.status !== 'cancelled' ? '0' : '1') + b.status,
+  },
+  customers: {
+    name: c => c.full_name, phone: c => c.phone || '', line: c => c.line_id || '', tags: c => (c.tags || []).join(','),
+    created_at: c => c.created_at,
+  },
+  activity: {
+    created_at: r => r.created_at, table: r => tableLabel(r.table_name), entity: r => entityLabel(r),
+    action: r => r.action, who: r => actWho(r),
   },
 };
 
@@ -875,21 +1334,20 @@ function fillTable(t, rows, rowHtml, emptyText) {
   markSortHeaders(t);
 }
 
-function selectRow(t, i) {
+function selectRow(t, i, noScroll) {
   const v = view[t];
   if (!v.rows.length) return;
   v.sel = Math.max(0, Math.min(v.rows.length - 1, i));
   const trs = document.getElementById(v.tbody).querySelectorAll('tr');
   trs.forEach((tr, j) => tr.classList.toggle('sel', j === v.sel));
-  if (trs[v.sel]) trs[v.sel].scrollIntoView({ block: 'nearest' });
+  if (trs[v.sel] && !noScroll) trs[v.sel].scrollIntoView({ block: 'nearest' });
 }
 
 function openRow(t) {
   const v = view[t], r = v.rows[v.sel];
   if (!r) return;
-  if (t === 'products') openProduct(r.id);
-  else if (t === 'moves') openMove(r.id);
-  else openBill(r.id);
+  ({ products: openProduct, moves: openMove, bills: openBill, bookings: openBooking,
+     customers: openCustomer, activity: openActivity, admin: () => adOpenRow(r) })[t](r.id);
 }
 
 function pickRow(t, i) { selectRow(t, i); openRow(t); }
@@ -978,6 +1436,8 @@ async function openProduct(id) {
       '<button class="btn btn-sm" type="button" onclick="gotoMovement(\'' + p.id + '\', \'out\')">▼ ตัดออก</button>' +
       '<button class="btn btn-sm" type="button" onclick="gotoMovement(\'' + p.id + '\', \'adjustment\')">◆ ปรับยอด</button>' +
     '</div>' +
+    // stock.html ให้แก้ข้อมูลสินค้าได้เฉพาะเจ้าของร้าน/ผู้ดูแล (RLS products_admin_write) — ใช้เกณฑ์เดียวกัน
+    (isWriter() ? '<div class="actions"><button class="btn btn-sm" type="button" onclick="adGotoRow(\'products\', \'' + p.id + '\')">✎ แก้ไขข้อมูลสินค้า</button></div>' : '') +
     '<div id="dUnits"><div class="hint">กำลังโหลดซีเรียล...</div></div>' +
     '<div class="sec-title">การเคลื่อนไหวล่าสุด</div><div id="dMoves"><div class="hint">กำลังโหลด...</div></div>');
 
@@ -1638,38 +2098,78 @@ async function confirmVoid() {
 function renderNav() {
   let html = '', group = '';
   SECTIONS.forEach((s, i) => {
+    if (s.manager && !isManager()) return;      // พนักงานไม่เห็นหมวดที่หน้าเดิมปิดไว้
     if (s.group !== group) {
       if (group) html += '</div>';
       group = s.group;
       html += '<div class="nav-group"><div class="nav-group-title">' + escapeHtml(group) + '</div>';
     }
-    const key = i < 9 ? 'Alt+' + (i + 1) : '';
+    const key = sectionKey(i);
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
       '<span class="ico" aria-hidden="true">' + s.icon + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
-      (s.href ? '<span class="soon">เร็ว ๆ นี้</span>' : (key ? '<span class="kbd">' + key + '</span>' : '')) + '</button>';
+      (key ? '<span class="kbd">' + key + '</span>' : '') + '</button>';
   });
   document.getElementById('navList').innerHTML = html + '</div>';
 }
 
-function showSection(id) {
+function sectionKey(i) { return i < 9 ? 'Alt+' + (i + 1) : (i === 9 ? 'Alt+0' : ''); }
+
+// ---------------------------------------------------------------------------
+// ประวัติการเปลี่ยนหมวด — เจ้าของเปิดคอนโซลเป็นหน้าต่างแอป (--app=) ซึ่งไม่มีปุ่ม back ของเบราว์เซอร์
+// ทุกครั้งที่เปลี่ยนหมวดจึงลง history จริง (#stock, #pos ...) ให้ปุ่ม ← ย้อนกลับ · Alt+← · ปุ่มย้อนของเมาส์
+// ใช้กลไกเดียวกันหมด · state.n = ลำดับของรายการนี้ในการใช้งานรอบนี้ (0 = ถอยต่อไม่ได้แล้ว)
+// แผงรายละเอียดไม่ลง history — Esc ปิดได้อยู่แล้ว
+// ---------------------------------------------------------------------------
+let navN = 0;
+let pendingRoute = null;     // หมวดจาก URL ตอนเปิดหน้า รอรู้ตำแหน่งผู้ใช้ก่อนค่อยพาไป
+function sectionFromHash() {
+  const h = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+  const s = SECTIONS.find(x => x.hash === h);
+  return s ? s.id : null;
+}
+function updateBackBtn() { document.getElementById('backBtn').disabled = navN <= 0; }
+function goBack() { if (navN > 0) history.back(); }
+window.addEventListener('popstate', e => {
+  // พิมพ์ hash เองในแถบที่อยู่ = รายการใหม่ที่ไม่มี state นับต่อจากที่อยู่
+  if (e.state && typeof e.state.n === 'number') navN = e.state.n;
+  else { navN += 1; history.replaceState({ n: navN }, '', location.hash); }
+  document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  const id = sectionFromHash() || 'products';
+  if (!showSection(id, 'none')) showSection('products', 'replace');
+  updateBackBtn();
+});
+
+// mode: 'push' (ค่าเริ่มต้น) = ลง history ใหม่ · 'replace' = แทนรายการปัจจุบัน · 'none' = มาจาก back/forward
+function showSection(id, mode) {
   const s = SECTIONS.find(x => x.id === id);
-  if (!s) return;
+  if (!s) return false;
+  if (s.manager && !isManager()) {
+    showToast('⚠️ หมวด "' + s.label + '" เปิดได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ');
+    return false;
+  }
+  if (mode !== 'none' && location.hash !== '#' + s.hash) {
+    if (mode === 'replace') history.replaceState({ n: navN }, '', '#' + s.hash);
+    else { navN += 1; history.pushState({ n: navN }, '', '#' + s.hash); }
+    updateBackBtn();
+  }
   current = id;
   closeDetail();
   document.querySelectorAll('.section').forEach(el => { el.hidden = true; });
-  if (s.href) {
-    document.getElementById('soonTitle').textContent = s.label;
-    document.getElementById('soonLink').href = s.href;
-    document.getElementById('sec-soon').hidden = false;
-  } else {
-    document.getElementById('sec-' + id).hidden = false;
+  document.getElementById('sec-' + id).hidden = false;
+  // หมวดที่ข้อมูลผูกกับตัวกรองของตัวเอง โหลดตอนเปิด ไม่ต้องโหลดทุกอย่างตั้งแต่ล็อกอิน
+  if (currentUserId) {
+    if (id === 'daily') loadDaily();
+    if (id === 'activity' && !activityLoaded) reloadActivity();
+    if (id === 'admin' && !adLoaded) adLoadAll();
   }
   document.getElementById('pageTitle').textContent = s.label;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === id));
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
-  const focusEl = { products: 'tw-products', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch' }[id];
-  if (focusEl) document.getElementById(focusEl).focus();
+  const focusEl = { products: 'tw-products', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
+    booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin' }[id];
+  if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1686,12 +2186,15 @@ function renderGlobal() {
   const bs = sales.filter(s => [s.sale_no, customerName(s)].some(x => (x || '').toLowerCase().includes(q))).slice(0, 5)
     .map(s => ({ kind: 'b', id: s.id, html: '<span><strong>' + escapeHtml(s.sale_no) + '</strong> <span class="muted">' +
       escapeHtml(customerName(s)) + '</span></span><span class="muted">บิล · ' + formatMoney(s.total) + '</span>' }));
-  gHits = ps.concat(bs);
+  const cs = customers.filter(c => [c.full_name, c.phone, c.line_id].some(x => (x || '').toLowerCase().includes(q))).slice(0, 5)
+    .map(c => ({ kind: 'c', id: c.id, html: '<span><strong>' + escapeHtml(c.full_name) + '</strong> <span class="muted">' +
+      escapeHtml(c.phone || '') + '</span></span><span class="muted">ลูกค้า</span>' }));
+  gHits = ps.concat(bs, cs);
   gHi = Math.min(gHi, Math.max(0, gHits.length - 1));
   box.hidden = false;
   box.innerHTML = gHits.length
     ? gHits.map((h, i) => '<div class="gresult' + (i === gHi ? ' hi' : '') + '" onmousedown="event.preventDefault(); openHit(' + i + ')">' + h.html + '</div>').join('')
-    : '<div class="empty">ไม่พบสินค้าหรือบิลที่ตรงกับคำค้นหา</div>';
+    : '<div class="empty">ไม่พบสินค้า บิล หรือลูกค้าที่ตรงกับคำค้นหา</div>';
 }
 function openHit(i) {
   const h = gHits[i];
@@ -1705,6 +2208,9 @@ function openHit(i) {
     const idx = view.products.rows.findIndex(r => r.id === h.id);
     if (idx !== -1) selectRow('products', idx);
     openProduct(h.id);
+  } else if (h.kind === 'c') {
+    showSection('customers');
+    openCustomer(h.id);
   } else {
     showSection('bills');
     openBill(h.id);
@@ -1753,14 +2259,22 @@ document.addEventListener('keydown', e => {
   }
   if (dlg) return;
 
+  // ย้อน/ไปข้างหน้าระหว่างหมวด — ไม่พิมพ์อะไรลงช่อง จึงกดได้ทุกที่ และกันไม่ให้เบราว์เซอร์ทำซ้ำอีกรอบ
+  if (e.altKey && !e.ctrlKey && !e.metaKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    if (e.key === 'ArrowLeft') goBack(); else history.forward();
+    return;
+  }
+
   // บันทึกการขายไม่พิมพ์อะไรลงช่อง จึงยอมให้กดได้แม้อยู่ในช่องส่วนลด/หมายเหตุ
   if (e.key === 'F9' || ((e.ctrlKey || e.metaKey) && e.key === 'Enter')) {
     if (current === 'pos') { e.preventDefault(); submitSale(); }
     return;
   }
 
-  if (e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[1-9]$/.test(e.code)) {
-    const s = SECTIONS[parseInt(e.code.slice(5), 10) - 1];
+  if (e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[0-9]$/.test(e.code)) {
+    const n = parseInt(e.code.slice(5), 10);
+    const s = SECTIONS[n === 0 ? 9 : n - 1];
     if (s) { e.preventDefault(); showSection(s.id); }
     return;
   }
@@ -1771,6 +2285,13 @@ document.addEventListener('keydown', e => {
 
   if (e.key === '/') { e.preventDefault(); focusGlobal(); return; }
   if (e.key === '?') { e.preventDefault(); openHelp(); return; }
+
+  if ((current === 'booking' || current === 'daily') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    const n = e.key === 'ArrowLeft' ? -1 : 1;
+    if (current === 'booking') shiftBkDate(n); else shiftDailyDate(n);
+    return;
+  }
 
   if (current === 'pos') {
     const item = cart[cartSel];
@@ -1831,10 +2352,1798 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// ===========================================================================
+// ตัวช่วยร่วมของหมวดระยะที่ 2
+// ===========================================================================
+const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const THAI_MONTHS_LONG = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+const THAI_DAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
+// วันที่ "วันนี้" อ้างอิงเวลาไทยเสมอ ไม่ใช่เวลาเครื่อง (ยกมาจาก daily.html)
+function todayBangkok() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+}
+
+// วันที่แบบ 'YYYY-MM-DD' ต้องแยกเอง ถ้าให้ Date แปลงจะถือเป็น UTC แล้ววันเลื่อนถอยหลัง
+function fmtDate(dateStr) {
+  if (!dateStr) return '-';
+  const parts = String(dateStr).split('-');
+  if (parts.length !== 3) return escapeHtml(dateStr);
+  const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), day = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(day)) return escapeHtml(dateStr);
+  return `${day} ${THAI_MONTHS[m - 1] || ''} ${y + 543}`;
+}
+function fmtDateDow(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return isNaN(d) ? '-' : THAI_DAYS[d.getDay()] + ' ' + fmtDate(dateStr);
+}
+function shortTime(t) { return (t || '').slice(0, 5); }
+function addHours(timeStr, hours) {
+  const [h, m] = shortTime(timeStr).split(':').map(Number);
+  const end = new Date(2000, 0, 1, h + hours, m);
+  return `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+}
+function shiftDateStr(dateStr, days) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString('en-CA');
+}
+function normalizePhone(str) { return (str || '').replace(/\D/g, ''); }
+
+// หน้าต่างยืนยันกลาง ใช้กับทุกอย่างที่ย้อนกลับไม่ได้ (ลบ / ยกเลิก)
+let confirmFn = null;
+function askConfirm(title, html, okLabel, fn) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmBody').innerHTML = html;
+  const ok = document.getElementById('confirmOkBtn');
+  ok.textContent = okLabel;
+  ok.hidden = !fn;
+  ok.disabled = false;
+  confirmFn = fn;
+  const dlg = document.getElementById('confirmDialog');
+  if (!dlg.open) dlg.showModal();
+}
+async function runConfirm() {
+  if (!confirmFn) return;
+  const ok = document.getElementById('confirmOkBtn');
+  ok.disabled = true;
+  try { await confirmFn(); } finally { ok.disabled = false; }
+}
+function closeConfirm() { const d = document.getElementById('confirmDialog'); if (d.open) d.close(); confirmFn = null; }
+
+// ===========================================================================
+// จองห้องซ้อม — ตรรกะเดียวกับ DJ_LAB_SIAM_BookingApp.html
+// ===========================================================================
+// ชื่อห้องต้องตรงกับตัวเลือกในหน้าจองเดิมทุกตัวอักษร เพราะเก็บเป็นข้อความลง room_bookings.room
+const ROOMS = [
+  'Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)',
+  'Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)',
+  'Controller Setup',
+];
+const BK_STATUS = {
+  upcoming:  { t: 'รอเข้าใช้', cls: 'st-warn', i: '◷' },
+  active:    { t: 'กำลังใช้งาน', cls: 'st-ok', i: '▶' },
+  done:      { t: 'ใช้บริการแล้ว', cls: 'st-off', i: '✓' },
+  cancelled: { t: 'ยกเลิก', cls: 'st-bad', i: '✕' },
+};
+// ช่วงแกนเวลาปรับตามวัน: เริ่มที่เวลาเปิดร้าน 12:00–20:00 ขยายเฉพาะเมื่อมีการจองนอกช่วง
+// ยิ่งแคบ ก้อน 1 ชม. ยิ่งกว้างพอให้อ่านเวลาเริ่มได้เต็ม ๆ
+let TL_START = 12, TL_HOURS = 8;
+
+let bookings = [];
+let settings = { pricePerHour: 800, pointsPerHour: 1, freeHourThreshold: 10, freeHoursReward: 1, roomName: 'DJ LAB SIAM' };
+let bkDate = todayBangkok();
+
+async function loadBookings() {
+  const { data, error } = await db.from('room_bookings').select('*').order('date').order('start_time');
+  if (error) { console.error('[Load bookings]', error); showFatalError('โหลดรายการจองห้องไม่สำเร็จ: ' + error.message); return; }
+  bookings = data || [];
+}
+
+async function loadBookingSettings() {
+  const { data, error } = await db.from('booking_settings')
+    .select('price_per_hour, points_per_hour, free_hour_threshold, free_hours_reward, room_name').single();
+  if (error) { console.error('[Load settings]', error); showFatalError('โหลดราคาห้องซ้อมไม่สำเร็จ: ' + error.message); return; }
+  if (data) {
+    settings.pricePerHour = data.price_per_hour;
+    settings.pointsPerHour = data.points_per_hour;
+    settings.freeHourThreshold = data.free_hour_threshold;
+    settings.freeHoursReward = data.free_hours_reward;
+    settings.roomName = data.room_name;
+  }
+  updateCostPreview();
+}
+
+function bkStatusHtml(b) {
+  const s = BK_STATUS[b.status] || { t: b.status, cls: 'st-off', i: '•' };
+  return '<span class="badges"><span class="st ' + s.cls + '">' + s.i + ' ' + escapeHtml(s.t) + '</span>' +
+    (!b.confirmed && b.status !== 'cancelled' ? '<span class="st st-warn">◷ รอยืนยัน</span>' : '') + '</span>';
+}
+
+function setBkDate(d) {
+  bkDate = d;
+  document.getElementById('bkDate').value = d;
+  renderBookings();
+}
+function shiftBkDate(days) { setBkDate(shiftDateStr(bkDate, days)); }
+function shiftBkMonth(dir) {
+  const [y, m] = bkDate.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  setBkDate(d.toLocaleDateString('en-CA'));
+}
+document.getElementById('bkDate').addEventListener('change', e => { if (e.target.value) setBkDate(e.target.value); });
+
+function renderBookings() {
+  document.getElementById('bkDate').value = bkDate;
+  document.getElementById('bkDateLabel').textContent = fmtDateDow(bkDate);
+  const month = bkDate.slice(0, 7);
+  const doneInMonth = bookings.filter(b => b.date.startsWith(month) && b.status === 'done');
+  document.getElementById('bkStatRevenue').textContent = formatMoney(doneInMonth.reduce((s, b) => s + (parseFloat(b.cost) || 0), 0));
+  document.getElementById('bkStatHours').textContent = doneInMonth.reduce((s, b) => s + b.hours, 0);
+  document.getElementById('bkStatSessions').textContent = doneInMonth.length;
+  document.getElementById('bkStatPending').textContent = bookings.filter(b => !b.confirmed && b.status !== 'cancelled').length;
+  renderTimeline();
+  renderBkCalendar();
+  renderBookingTable();
+}
+
+function renderTimeline() {
+  const day = bookings.filter(b => b.date === bkDate);
+  let lo = 12, hi = 20;
+  day.forEach(b => {
+    const [h, m] = shortTime(b.start_time).split(':').map(Number);
+    lo = Math.min(lo, h);
+    hi = Math.max(hi, Math.ceil(h + m / 60 + b.hours));
+  });
+  TL_START = Math.max(0, lo);
+  TL_HOURS = Math.min(24, hi) - TL_START;
+  const rooms = ROOMS.slice();
+  day.forEach(b => { if (rooms.indexOf(b.room) === -1) rooms.push(b.room); });   // ห้องที่พิมพ์ต่างไปจากรายการ ยังต้องเห็น
+  const hours = [];
+  for (let h = TL_START; h < TL_START + TL_HOURS; h++) hours.push('<span>' + String(h).padStart(2, '0') + '</span>');
+  let now = '';
+  if (bkDate === todayBangkok()) {
+    const t = new Date();
+    const pos = ((t.getHours() + t.getMinutes() / 60) - TL_START) / TL_HOURS * 100;
+    if (pos >= 0 && pos <= 100) now = '<div class="tl-now" style="left:' + pos.toFixed(2) + '%;" title="เวลาปัจจุบัน"></div>';
+  }
+  document.getElementById('bkTimeline').innerHTML =
+    '<div class="tl-head"><span></span><div class="tl-hours" style="grid-template-columns:repeat(' + TL_HOURS + ', 1fr);">' + hours.join('') + '</div></div>' +
+    rooms.map(room => {
+      const blocks = day.filter(b => b.room === room).map(b => {
+        const [h, m] = shortTime(b.start_time).split(':').map(Number);
+        const start = h + m / 60 - TL_START;
+        const left = Math.max(0, start) / TL_HOURS * 100;
+        const width = Math.max(2, (Math.min(TL_HOURS, start + b.hours) - Math.max(0, start)) / TL_HOURS * 100);
+        const cls = b.status === 'cancelled' ? 'cancelled' : b.status === 'done' ? 'done' : b.status === 'active' ? 'active' : (!b.confirmed ? 'pending' : '');
+        const icon = b.status === 'cancelled' ? '✕' : b.status === 'done' ? '✓' : b.status === 'active' ? '▶' : (!b.confirmed ? '◷' : '');
+        const span = shortTime(b.start_time) + '–' + addHours(b.start_time, b.hours);
+        const stText = b.status === 'cancelled' ? 'ยกเลิก' : b.status === 'done' ? 'ใช้บริการแล้ว' : b.status === 'active' ? 'กำลังใช้งาน' : (!b.confirmed ? 'รอยืนยัน' : 'ยืนยันแล้ว');
+        return '<button type="button" class="tl-block ' + cls + '" style="left:' + left.toFixed(2) + '%;width:' + width.toFixed(2) + '%;"' +
+          ' onclick="openBooking(\'' + b.id + '\')" title="' + escapeHtml(b.customer_name + ' · ' + span + ' · ' + stText) + '"' +
+          ' aria-label="' + escapeHtml(b.customer_name + ' ' + span + ' ' + stText) + '">' +
+          '<span class="tl-time">' + shortTime(b.start_time) + '<span style="display:inline;">–' + addHours(b.start_time, b.hours) + '</span></span>' +
+          '<span>' + (icon ? icon + ' ' : '') + escapeHtml(b.customer_name) + '</span></button>';
+      }).join('');
+      const short = room.split(' (')[0];
+      return '<div class="tl-row"><div class="tl-room" title="' + escapeHtml(room) + '">' + escapeHtml(short) + '</div>' +
+        '<div class="tl-track" style="background-size:calc(100% / ' + TL_HOURS + ') 100%;">' + now + blocks + '</div></div>';
+    }).join('') +
+    (day.length ? '' : '<div class="empty">ยังไม่มีการจองวันนี้ — กด “+ จองห้องใหม่” เพื่อเพิ่ม</div>');
+}
+
+function renderBkCalendar() {
+  const [y, m] = bkDate.split('-').map(Number);
+  document.getElementById('bkCalTitle').textContent = THAI_MONTHS_LONG[m - 1] + ' ' + (y + 543);
+  const first = new Date(y, m - 1, 1).getDay();
+  const days = new Date(y, m, 0).getDate();
+  const today = todayBangkok();
+  let html = THAI_DAYS.map(d => '<span class="dow">' + d + '</span>').join('');
+  for (let i = 0; i < first; i++) html += '<span></span>';
+  for (let d = 1; d <= days; d++) {
+    const ds = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const n = bookings.filter(b => b.date === ds && b.status !== 'cancelled').length;
+    html += '<button type="button" class="' + (ds === bkDate ? 'on ' : '') + (ds === today ? 'today' : '') + '"' +
+      ' onclick="setBkDate(\'' + ds + '\')" aria-label="' + fmtDate(ds) + (n ? ' มีการจอง ' + n + ' รายการ' : '') + '">' +
+      d + (n ? '<span class="cnt">' + n + ' จอง</span>' : '') + '</button>';
+  }
+  document.getElementById('bkCal').innerHTML = html;
+}
+
+function renderBookingTable() {
+  const monthSel = document.getElementById('fBkMonth');
+  const cur = monthSel.value;
+  const months = [...new Set(bookings.map(b => b.date.slice(0, 7)))].sort().reverse();
+  monthSel.innerHTML = '<option value="">ทุกเดือน</option>' + months.map(mo => {
+    const [yy, mm] = mo.split('-');
+    return '<option value="' + mo + '"' + (mo === cur ? ' selected' : '') + '>' + THAI_MONTHS[parseInt(mm, 10) - 1] + ' ' + (parseInt(yy, 10) + 543) + '</option>';
+  }).join('');
+  const q = document.getElementById('bkSearch').value.trim().toLowerCase();
+  const st = document.getElementById('fBkStatus').value;
+  const mo = monthSel.value;
+  const rows = bookings.filter(b =>
+    (!mo || b.date.startsWith(mo)) &&
+    (!st || (st === 'pending' ? (!b.confirmed && b.status !== 'cancelled') : b.status === st)) &&
+    (!q || [b.customer_name, b.contact, b.room].some(x => (x || '').toLowerCase().includes(q))));
+  fillTable('bookings', sortRows('bookings', rows), b =>
+    '<td class="nowrap">' + fmtDateDow(b.date) + '</td>' +
+    '<td class="nowrap">' + shortTime(b.start_time) + '–' + addHours(b.start_time, b.hours) + ' <span class="sub">(' + b.hours + ' ชม.)</span></td>' +
+    '<td><strong>' + escapeHtml(b.customer_name) + '</strong></td>' +
+    '<td class="col-opt">' + escapeHtml(b.contact || '—') + '</td>' +
+    '<td class="col-opt">' + escapeHtml((b.room || '').split(' (')[0]) + '</td>' +
+    '<td class="num">' + formatMoney(b.cost) + '</td>' +
+    '<td>' + bkStatusHtml(b) + '</td>',
+    'ไม่พบการจองที่ตรงกับเงื่อนไข');
+}
+['bkSearch', 'fBkStatus', 'fBkMonth'].forEach(id => document.getElementById(id).addEventListener('input', renderBookingTable));
+
+function openBooking(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) { showToast('⚠️ ไม่พบการจองนี้'); return; }
+  detailToken++;
+  const i = view.bookings.rows.findIndex(r => r.id === id);
+  if (i !== -1) selectRow('bookings', i, true);
+  const lineNote = !b.confirmed && b.source !== 'staff'
+    ? (b.line_user_id
+      ? '<div class="alert alert-plain" style="border-color:var(--ok);color:var(--ok);background:var(--ok-soft);">✓ เมื่อกดยืนยัน ระบบจะส่งข้อความแจ้งลูกค้าทาง LINE อัตโนมัติ</div>'
+      : '<div class="alert alert-warn">⚠ การจองนี้ไม่มีช่องทาง LINE ของลูกค้า กดยืนยันแล้วระบบจะไม่ส่งข้อความให้ — ต้องติดต่อลูกค้าเองตามข้อมูลด้านบน</div>')
+    : '';
+  openDetail(b.customer_name,
+    '<div style="margin-bottom:14px;">' + bkStatusHtml(b) + (b.confirmed ? ' <span class="st st-ok">✓ ยืนยันแล้ว</span>' : '') + '</div>' +
+    '<dl class="kv">' +
+      '<dt>ติดต่อ</dt><dd>' + escapeHtml(b.contact || '—') + '</dd>' +
+      '<dt>วันที่</dt><dd>' + fmtDateDow(b.date) + '</dd>' +
+      '<dt>เวลา</dt><dd>' + shortTime(b.start_time) + ' — ' + addHours(b.start_time, b.hours) + ' (' + b.hours + ' ชั่วโมง)</dd>' +
+      '<dt>Setup</dt><dd>' + escapeHtml(b.room) + '</dd>' +
+      (b.room_model ? '<dt>รุ่นที่ระบุ</dt><dd>' + escapeHtml(b.room_model) + '</dd>' : '') +
+      (b.equip ? '<dt>อุปกรณ์</dt><dd>' + escapeHtml(b.equip) + '</dd>' : '') +
+      (b.note ? '<dt>หมายเหตุ</dt><dd>' + escapeHtml(b.note) + '</dd>' : '') +
+      '<dt>ค่าใช้จ่าย</dt><dd><strong style="font-size:20px;">' + formatMoney(b.cost) + '</strong> บาท</dd>' +
+      '<dt>ชั่วโมงสะสม</dt><dd>+' + b.hours + ' ชม.</dd>' +
+      '<dt>ช่องทาง</dt><dd>' + escapeHtml({ staff: 'พนักงานบันทึก', online_line: 'จองผ่าน LINE', online_web: 'จองผ่านเว็บ' }[b.source] || b.source) + '</dd>' +
+    '</dl>' +
+    lineNote +
+    (!b.confirmed ? '<button class="btn btn-primary btn-block" id="bkConfirmBtn" type="button" style="margin-bottom:10px;" onclick="confirmBooking(\'' + b.id + '\')">✓ ยืนยันการจอง</button>' : '') +
+    '<div class="actions">' +
+      '<button class="btn btn-sm" type="button" onclick="startTimerFromBooking(\'' + b.id + '\')">▶ เริ่มจับเวลา</button>' +
+      '<button class="btn btn-sm" type="button" onclick="markBookingDone(\'' + b.id + '\')">✓ ใช้บริการแล้ว</button>' +
+      '<button class="btn btn-sm" type="button" onclick="markBookingUpcoming(\'' + b.id + '\')">↺ กลับเป็นรอเข้าใช้</button>' +
+    '</div>' +
+    '<div class="actions" style="margin-top:16px;">' +
+      (b.status !== 'cancelled' ? '<button class="btn btn-sm btn-danger" type="button" onclick="cancelBooking(\'' + b.id + '\')">✕ ยกเลิกการจอง</button>' : '') +
+      '<button class="btn btn-sm btn-danger" type="button" onclick="deleteBooking(\'' + b.id + '\')">ลบการจอง</button>' +
+    '</div>');
+}
+
+function reopenBooking(id) { renderBookings(); if (detailOpen() && bookings.some(b => b.id === id)) openBooking(id); }
+
+// ⚠️ การยืนยันคือสิ่งที่ไปกระตุ้น trigger trg_notify_booking_confirmed ให้บอท LINE แจ้งลูกค้า
+//    ต้องเขียนเหมือนหน้าจองเดิมทุกคอลัมน์ (confirmed / confirmed_by / confirmed_at) ห้ามแต่งเพิ่ม
+async function confirmBooking(id) {
+  const b = bookings.find(x => x.id === id);
+  const { data: { user } } = await db.auth.getUser();
+  const { error } = await db.from('room_bookings').update({
+    confirmed: true,
+    confirmed_by: user.id,
+    confirmed_at: new Date().toISOString(),
+  }).eq('id', id);
+  if (error) {
+    console.error('[Confirm booking]', error);
+    showFatalError('ยืนยันการจองไม่สำเร็จ: ' + error.message + '\nการจองยังอยู่ในสถานะรอยืนยัน ลูกค้ายังไม่ได้รับแจ้ง');
+    return;
+  }
+  showToast(b && b.line_user_id
+    ? '✅ ยืนยันการจองแล้ว ระบบส่งข้อความแจ้งลูกค้าทาง LINE'
+    : '✅ ยืนยันการจองแล้ว — ลูกค้ารายนี้ไม่มีช่องทาง LINE กรุณาแจ้งลูกค้าเอง');
+  await loadBookings();
+  reopenBooking(id);
+}
+
+async function setBookingStatus(id, status, okMsg, failMsg) {
+  const { error } = await db.from('room_bookings').update({ status }).eq('id', id);
+  if (error) {
+    console.error('[Update booking]', error);
+    showFatalError(failMsg + ': ' + error.message);
+    return false;
+  }
+  if (okMsg) showToast(okMsg);
+  await loadBookings();
+  reopenBooking(id);
+  return true;
+}
+function markBookingDone(id) { return setBookingStatus(id, 'done', '✅ บันทึกว่าใช้บริการแล้ว', 'บันทึกสถานะเสร็จสิ้นไม่สำเร็จ'); }
+function markBookingUpcoming(id) { return setBookingStatus(id, 'upcoming', '↺ กลับเป็นรอเข้าใช้แล้ว', 'รีเซ็ตสถานะไม่สำเร็จ'); }
+
+function cancelBooking(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+  askConfirm('ยกเลิกการจอง', '<div class="alert alert-red">ยกเลิกการจองของ <strong>' + escapeHtml(b.customer_name) + '</strong> ' +
+    fmtDateDow(b.date) + ' ' + shortTime(b.start_time) + ' — การจองยังอยู่ในประวัติแต่ไม่นับเป็นรายได้ และระบบจะไม่แจ้งลูกค้าให้ ต้องแจ้งเอง</div>',
+    '✕ ยืนยันยกเลิกการจอง', async () => {
+      if (await setBookingStatus(id, 'cancelled', '✅ ยกเลิกการจองแล้ว', 'ยกเลิกการจองไม่สำเร็จ')) closeConfirm();
+    });
+}
+
+function deleteBooking(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+  askConfirm('ลบการจอง', '<div class="alert alert-red">ลบการจองของ <strong>' + escapeHtml(b.customer_name) + '</strong> ออกจากระบบถาวร กู้คืนไม่ได้ ' +
+    '(ถ้าแค่ลูกค้าไม่มา ให้ใช้ “ยกเลิกการจอง” แทน ประวัติจะยังอยู่)</div>', 'ลบการจองนี้', async () => {
+      const { error } = await db.from('room_bookings').delete().eq('id', id);
+      if (error) {
+        console.error('[Delete booking]', error);
+        showFatalError('ลบการจองไม่สำเร็จ: ' + error.message + '\nการจองนี้ยังอยู่ในระบบ');
+        return;
+      }
+      closeConfirm();
+      closeDetail();
+      showToast('ลบการจองแล้ว');
+      await loadBookings();
+      renderBookings();
+    });
+}
+
+function updateCostPreview() {
+  const hrs = parseInt(document.getElementById('bookHours').value, 10);
+  document.getElementById('costAmount').textContent = (hrs * settings.pricePerHour).toLocaleString() + ' บาท (' + hrs + ' ชม.)';
+}
+
+function openBookingForm() {
+  const room = document.getElementById('bookRoom');
+  if (!room.options.length) room.innerHTML = ROOMS.map(r => '<option>' + escapeHtml(r) + '</option>').join('');
+  ['bookName', 'bookContact', 'bookRoomModel', 'bookEquip', 'bookNote'].forEach(x => { document.getElementById(x).value = ''; });
+  document.getElementById('bookDate').value = bkDate < todayBangkok() ? todayBangkok() : bkDate;
+  document.getElementById('bookDate').min = todayBangkok();
+  document.getElementById('bookTime').value = '10:00';
+  document.getElementById('bookHours').value = '1';
+  updateCostPreview();
+  document.getElementById('bookingDialog').showModal();
+  document.getElementById('bookName').focus();
+}
+
+// เขียนแบบเดียวกับหน้าจองเดิม: พนักงานเป็นคนบันทึก = ยืนยันแล้วในตัว ไม่ต้องแจ้ง LINE
+async function submitBooking() {
+  const name = document.getElementById('bookName').value.trim();
+  const contact = document.getElementById('bookContact').value.trim();
+  const date = document.getElementById('bookDate').value;
+  const time = document.getElementById('bookTime').value;
+  const hours = parseInt(document.getElementById('bookHours').value, 10);
+  const room = document.getElementById('bookRoom').value;
+  const roomModel = document.getElementById('bookRoomModel').value.trim();
+  const equip = document.getElementById('bookEquip').value.trim();
+  const note = document.getElementById('bookNote').value.trim();
+  if (!name || !contact || !date || !time) { showToast('⚠️ กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+
+  const cost = hours * settings.pricePerHour;
+  const pts = hours * settings.pointsPerHour;
+  const btn = document.getElementById('bookSaveBtn');
+  btn.disabled = true;
+  try {
+    const { data: { user } } = await db.auth.getUser();
+    const { error } = await db.from('room_bookings').insert({
+      customer_name: name, contact, date, start_time: time, hours,
+      room, room_model: roomModel, equip, note,
+      cost, points_earned: pts,
+      status: 'upcoming',
+      confirmed: true,
+      source: 'staff',
+      created_by: user.id,
+    });
+    if (error) {
+      console.error('[Add booking]', error);
+      showFatalError('บันทึกการจองไม่สำเร็จ: ' + error.message);
+      return;
+    }
+  } finally {
+    btn.disabled = false;
+  }
+  document.getElementById('bookingDialog').close();
+  showToast('✅ จองสำเร็จ — ' + name + ' ' + fmtDate(date) + ' ' + time);
+  await loadBookings();
+  setBkDate(date);
+}
+
+// ---- ตัวจับเวลา: ยกมาจากหน้าจองเดิม ใช้คีย์ localStorage เดียวกัน ----
+// เวลาที่เหลือคำนวณจากนาฬิกาจริงเสมอ (timerEndsAt) ไม่ใช่ตัวนับที่ลดทีละวินาที
+const TIMER_KEY = 'djlab_timer';
+const TIMER_STALE_MS = 6 * 3600 * 1000;
+let timerInterval = null, timerRemaining = 0, timerTotal = 0, timerRunning = false, timerEndsAt = 0, timerFinished = false;
+
+function saveTimerState() {
+  try {
+    if (!timerTotal) { localStorage.removeItem(TIMER_KEY); return; }
+    localStorage.setItem(TIMER_KEY, JSON.stringify({
+      total: timerTotal, remaining: timerRemaining, endsAt: timerEndsAt, running: timerRunning, finished: timerFinished,
+    }));
+  } catch (e) { /* โหมดส่วนตัว — จับเวลาต่อได้ แค่ไม่รอดการปิดหน้า */ }
+}
+function clearTimerState() { try { localStorage.removeItem(TIMER_KEY); } catch (e) {} }
+function liveRemaining() { return timerRunning ? Math.max(0, Math.round((timerEndsAt - Date.now()) / 1000)) : timerRemaining; }
+function setTimer(h, m) {
+  document.getElementById('timerHours').value = h;
+  document.getElementById('timerMins').value = m;
+  timerReset();
+  updateTimerDisplay();
+}
+function timerAction() {
+  if (!timerRunning) {
+    const h = parseInt(document.getElementById('timerHours').value, 10);
+    const m = parseInt(document.getElementById('timerMins').value, 10);
+    if (h === 0 && m === 0) { showToast('⚠️ กรุณาตั้งเวลา'); return; }
+    if (timerRemaining === 0) { timerTotal = h * 3600 + m * 60; timerRemaining = timerTotal; }
+    startTimer();
+  } else {
+    pauseTimer();
+  }
+}
+function startTimer() {
+  timerRunning = true;
+  timerFinished = false;
+  timerEndsAt = Date.now() + timerRemaining * 1000;
+  document.getElementById('timerStartBtn').textContent = '⏸ หยุดชั่วคราว';
+  document.getElementById('timerLabel').textContent = 'กำลังนับถอยหลัง...';
+  runTimerTicker();
+  updateTimerDisplay();
+  saveTimerState();
+}
+function runTimerTicker() { clearInterval(timerInterval); timerInterval = setInterval(syncTimer, 250); }
+function syncTimer() {
+  if (!timerRunning) return;
+  timerRemaining = liveRemaining();
+  updateTimerDisplay();
+  if (timerRemaining <= 0) finishTimer();
+}
+function finishTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null; timerRunning = false; timerRemaining = 0; timerEndsAt = 0;
+  const alreadyAlerted = timerFinished;
+  timerFinished = true;
+  updateTimerDisplay();
+  document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
+  document.getElementById('timerLabel').textContent = '⏰ หมดเวลาแล้ว';
+  saveTimerState();
+  if (!alreadyAlerted) triggerTimerAlert();
+}
+function pauseTimer() {
+  timerRemaining = liveRemaining();
+  clearInterval(timerInterval);
+  timerInterval = null; timerRunning = false; timerEndsAt = 0;
+  document.getElementById('timerStartBtn').textContent = '▶ ต่อ';
+  document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
+  updateTimerDisplay();
+  saveTimerState();
+}
+function timerReset() {
+  clearInterval(timerInterval);
+  timerInterval = null; timerRunning = false; timerFinished = false; timerRemaining = 0; timerTotal = 0; timerEndsAt = 0;
+  clearTimerState();
+  document.getElementById('timerStartBtn').textContent = '▶ เริ่ม';
+  document.getElementById('timerLabel').textContent = 'ตั้งเวลาเพื่อเริ่ม';
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerBar').style.width = '100%';
+}
+function syncTimerSelects(totalSec) {
+  const h = Math.floor(totalSec / 3600), m = Math.round((totalSec % 3600) / 60);
+  const hSel = document.getElementById('timerHours'), mSel = document.getElementById('timerMins');
+  if ([...hSel.options].some(o => +o.value === h)) hSel.value = h;
+  if ([...mSel.options].some(o => +o.value === m)) mSel.value = m;
+}
+function restoreTimer() {
+  let st = null;
+  try { const raw = localStorage.getItem(TIMER_KEY); st = raw ? JSON.parse(raw) : null; } catch (e) { return; }
+  if (!st || !st.total) return;
+  timerTotal = st.total;
+  timerFinished = !!st.finished;
+  syncTimerSelects(timerTotal);
+  if (st.running) {
+    if (st.endsAt - Date.now() > 0) {
+      timerRunning = true;
+      timerEndsAt = st.endsAt;
+      timerRemaining = liveRemaining();
+      document.getElementById('timerStartBtn').textContent = '⏸ หยุดชั่วคราว';
+      document.getElementById('timerLabel').textContent = 'กำลังนับถอยหลัง...';
+      runTimerTicker();
+      updateTimerDisplay();
+      return;
+    }
+    if (Date.now() - st.endsAt > TIMER_STALE_MS) { clearTimerState(); timerTotal = 0; return; }
+    finishTimer();
+    return;
+  }
+  timerRemaining = st.remaining || 0;
+  if (timerRemaining <= 0) { clearTimerState(); timerTotal = 0; return; }
+  document.getElementById('timerStartBtn').textContent = '▶ ต่อ';
+  document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
+  updateTimerDisplay();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && timerRunning) { runTimerTicker(); syncTimer(); }
+});
+function updateTimerDisplay() {
+  const h = Math.floor(timerRemaining / 3600), m = Math.floor((timerRemaining % 3600) / 60), sec = timerRemaining % 60;
+  document.getElementById('timerDisplay').textContent = h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+    : `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  const progress = timerTotal > 0 ? timerRemaining / timerTotal : 1;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = (progress * 100).toFixed(1) + '%';
+  bar.style.background = progress < 0.1 ? 'var(--red)' : 'var(--black)';
+}
+function triggerTimerAlert() {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('DJ LAB SIAM — หมดเวลาซ้อม', { body: 'เวลาซ้อมสิ้นสุดแล้ว กรุณาตรวจสอบห้องซ้อม' });
+  }
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = i % 2 === 0 ? 880 : 660;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.4 + 0.3);
+      osc.start(ctx.currentTime + i * 0.4);
+      osc.stop(ctx.currentTime + i * 0.4 + 0.4);
+    }
+  } catch (e) { /* เครื่องนี้เล่นเสียงไม่ได้ ยังมีข้อความบนจอ */ }
+  showToast('⏰ หมดเวลาซ้อมแล้ว');
+}
+async function startTimerFromBooking(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+  setTimer(b.hours, 0);
+  timerAction();
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  await setBookingStatus(id, 'active', null, 'เริ่มจับเวลาแล้ว แต่บันทึกสถานะ "กำลังใช้งาน" ไม่สำเร็จ');
+}
+
+// ===========================================================================
+// ข้อมูลลูกค้า — ตรรกะเดียวกับ customers.html
+// ===========================================================================
+let editingCustomerId = null, customerFormForPos = false, savingCustomer = false, detailCustomerId = null;
+
+// room_bookings มีคอลัมน์ customer_id แต่ไม่มีอะไรเขียนลงไป — ประวัติการจองจึงจับคู่จากข้อความ:
+// ชื่อตรงกัน หรือเลขท้าย 9 หลักของเบอร์ตรงกัน (08x, +668x, 66-8x จึงเป็นเบอร์เดียวกัน)
+function bookingsForCustomer(c) {
+  const nameKey = (c.full_name || '').trim().toLowerCase();
+  const phoneKey = normalizePhone(c.phone);
+  return bookings.filter(b => {
+    if (nameKey && (b.customer_name || '').trim().toLowerCase() === nameKey) return true;
+    if (phoneKey.length >= 9) {
+      const bp = normalizePhone(b.contact);
+      if (bp.length >= 9 && bp.slice(-9) === phoneKey.slice(-9)) return true;
+    }
+    return false;
+  }).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+// กฎเดียวกับ normalize_thai_phone ในฐานข้อมูล และ scripts/import-members.mjs (CLAUDE.md "กับดักเบอร์โทร")
+function normalizeThaiPhone(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('0066')) d = d.slice(4);
+  if (d.startsWith('66') && d.length >= 10) d = '0' + d.slice(2);
+  // Sheets เก็บเบอร์ที่พิมพ์เลขล้วนเป็นตัวเลข แล้วตัด 0 หน้าทิ้ง — เบอร์ 9 หลัก
+  // ที่ขึ้นต้น 6/8/9 เป็นมือถือที่ 0 หายไป (เบอร์บ้านขึ้นต้นด้วย 0 เสมอ)
+  if (d.length === 9 && ['6', '8', '9'].includes(d[0])) d = '0' + d;
+  return d;
+}
+
+function findPhoneTwin(phone, exceptId) {
+  const digits = normalizePhone(phone);
+  if (digits.length < 9) return null;
+  return customers.find(c => c.id !== exceptId && normalizePhone(c.phone).length >= 9 &&
+    normalizePhone(c.phone).slice(-9) === digits.slice(-9)) || null;
+}
+
+function matchesQuery(c, q, digits) {
+  if ((c.full_name || '').toLowerCase().includes(q)) return true;
+  if ((c.line_id || '').toLowerCase().includes(q)) return true;
+  if ((c.email || '').toLowerCase().includes(q)) return true;
+  if ((c.note || '').toLowerCase().includes(q)) return true;
+  if ((c.tags || []).some(t => (t || '').toLowerCase().includes(q))) return true;
+  if ((c.phone || '').toLowerCase().includes(q)) return true;
+  if (digits.length >= 4 && normalizePhone(c.phone).includes(digits)) return true;
+  return false;
+}
+
+function renderCustomers() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  document.getElementById('custStatTotal').textContent = customers.length;
+  document.getElementById('custStatNew').textContent = customers.filter(c => new Date(c.created_at) >= startOfMonth).length;
+  document.getElementById('custStatNoContact').textContent = customers.filter(c => !c.phone && !c.line_id && !c.email).length;
+
+  const raw = document.getElementById('customerSearch').value.trim();
+  const q = raw.toLowerCase(), digits = normalizePhone(raw);
+  const rows = q ? customers.filter(c => matchesQuery(c, q, digits)) : customers.slice();
+  document.getElementById('custCount').textContent = q
+    ? 'พบ ' + rows.length + ' รายจากทั้งหมด ' + customers.length + ' ราย' : 'ทั้งหมด ' + customers.length + ' ราย';
+  fillTable('customers', sortRows('customers', rows), c =>
+    '<td><strong>' + escapeHtml(c.full_name) + '</strong>' + (!c.phone && !c.line_id && !c.email ? ' <span class="st st-warn">⚠ ไม่มีช่องทางติดต่อ</span>' : '') + '</td>' +
+    '<td class="nowrap">' + escapeHtml(c.phone || '—') + '</td>' +
+    '<td class="col-opt">' + escapeHtml(c.line_id || '—') + '</td>' +
+    '<td class="col-opt">' + escapeHtml((c.tags || []).join(', ') || '—') + '</td>' +
+    '<td class="nowrap">' + fmtDate((c.created_at || '').slice(0, 10)) + '</td>',
+    customers.length ? 'ไม่พบลูกค้าที่ตรงกับคำค้นหา' : 'ยังไม่มีข้อมูลลูกค้าในระบบ');
+}
+document.getElementById('customerSearch').addEventListener('input', renderCustomers);
+
+async function memberForPhone(phone) {
+  const digits = normalizeThaiPhone(phone);
+  if (digits.length < 9) return null;
+  const { data, error } = await db.from('members').select(MEMBER_FIELDS).contains('phone_normalized', [digits]).limit(1);
+  if (error) { console.error('[Member lookup]', error); return undefined; }
+  return (data && data[0]) || null;
+}
+
+async function openCustomer(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+  const token = ++detailToken;
+  detailCustomerId = id;
+  const i = view.customers.rows.findIndex(r => r.id === id);
+  if (i !== -1) selectRow('customers', i, true);
+  openDetail(c.full_name, '<div class="hint">กำลังโหลดประวัติของลูกค้า...</div>');
+  const [salesRes, member] = await Promise.all([
+    db.from('sales').select('id, sale_no, total, status, payment_method, created_at').eq('customer_id', id).order('created_at', { ascending: false }),
+    memberForPhone(c.phone),
+  ]);
+  if (token !== detailToken) return;
+  if (salesRes.error) { console.error('[Load customer sales]', salesRes.error); showFatalError('โหลดประวัติการซื้อไม่สำเร็จ: ' + salesRes.error.message); }
+  renderCustomerDetail(customers.find(x => x.id === id) || c, salesRes.data || [], !!salesRes.error, member);
+}
+
+function memberStatusHtml(c, member) {
+  if (member === undefined) return '<div class="alert alert-plain">ตรวจสอบสถานะสมาชิกไม่ได้ในขณะนี้</div>';
+  if (member) {
+    const label = member.is_member
+      ? '✓ เป็นสมาชิกร้าน' + (member.code ? ' (รหัส ' + escapeHtml(member.code) + ')' : '')
+      : 'มีในทะเบียนร้าน แต่ยังไม่ได้สมัครสมาชิก';
+    const other = (member.full_name || '').trim() !== (c.full_name || '').trim() ? '<br>ชื่อในทะเบียน: ' + escapeHtml(member.full_name) : '';
+    return '<div class="alert ' + (member.is_member ? 'alert-plain" style="border-color:var(--ok);color:var(--ok);background:var(--ok-soft);' : 'alert-plain') + '">' + label + other + '</div>';
+  }
+  if (normalizeThaiPhone(c.phone).length < 9) return '<div class="alert alert-plain">ยังไม่มีเบอร์โทรที่ใช้ตรวจสอบสถานะสมาชิกได้</div>';
+  return '<div class="alert alert-plain">ไม่พบเบอร์นี้ในทะเบียนสมาชิกร้าน</div>';
+}
+
+function renderCustomerDetail(c, custSales, salesFailed, member) {
+  const custBookings = bookingsForCustomer(c);
+  const done = custBookings.filter(b => b.status === 'done');
+  const totalHours = done.reduce((s, b) => s + (b.hours || 0), 0);
+  const threshold = settings.freeHourThreshold || 10;
+  const freeEarned = Math.floor(totalHours / threshold);
+  const remaining = threshold - (totalHours % threshold);
+  const paid = custSales.filter(s => s.status === 'completed');
+  const totalSpend = paid.reduce((s, x) => s + (parseFloat(x.total) || 0), 0);
+  const bookingSpend = done.reduce((s, b) => s + (parseFloat(b.cost) || 0), 0);
+
+  const salesHtml = salesFailed
+    ? '<div class="alert alert-red">โหลดประวัติการซื้อไม่สำเร็จ ลองเปิดใหม่อีกครั้ง</div>'
+    : (custSales.length === 0 ? '<div class="hint">ยังไม่มีประวัติการซื้อสินค้า</div>'
+      : custSales.map(s => '<div class="list-row"><div><button class="btn btn-sm btn-ghost" type="button" style="padding:0;min-height:0;" onclick="showSection(\'bills\'); openBill(\'' + s.id + '\')">' +
+          escapeHtml(s.sale_no) + '</button><div class="sub">' + formatDateTime(s.created_at) + ' · ' + escapeHtml(s.payment_method || '-') + '</div></div>' +
+          '<div class="lr-end">' + formatMoney(s.total) + billStatusHtml(s) + '</div></div>').join(''));
+  const bookingsHtml = custBookings.length === 0 ? '<div class="hint">ยังไม่มีประวัติการจองห้องซ้อม</div>'
+    : custBookings.slice(0, 50).map(b => '<div class="list-row"><div>' + fmtDate(b.date) + ' · ' + shortTime(b.start_time) +
+        '<div class="sub">' + b.hours + ' ชม. · ' + escapeHtml((b.room || '-').split(' (')[0]) + '</div></div>' +
+        '<div class="lr-end">' + formatMoney(b.cost) + bkStatusHtml(b) + '</div></div>').join('') +
+      (custBookings.length > 50 ? '<div class="hint">แสดง 50 รายการล่าสุดจากทั้งหมด ' + custBookings.length + ' รายการ</div>' : '');
+
+  openDetail(c.full_name,
+    ((c.tags || []).length ? '<div style="margin-bottom:10px;">' + c.tags.map(t => '<span class="st st-off" style="margin:0 6px 6px 0;">' + escapeHtml(t) + '</span>').join('') + '</div>' : '') +
+    memberStatusHtml(c, member) +
+    '<dl class="kv">' +
+      (c.phone ? '<dt>เบอร์โทร</dt><dd>' + escapeHtml(c.phone) + '</dd>' : '') +
+      (c.line_id ? '<dt>LINE ID</dt><dd>' + escapeHtml(c.line_id) + '</dd>' : '') +
+      (c.email ? '<dt>อีเมล</dt><dd>' + escapeHtml(c.email) + '</dd>' : '') +
+      (c.note ? '<dt>หมายเหตุ</dt><dd>' + escapeHtml(c.note) + '</dd>' : '') +
+      '<dt>เพิ่มเมื่อ</dt><dd>' + formatDateTime(c.created_at) + (c.admins ? ' · โดย ' + escapeHtml(c.admins.full_name) : '') + '</dd>' +
+    '</dl>' +
+    (!c.phone && !c.line_id && !c.email ? '<div class="alert alert-warn">⚠ ลูกค้ารายนี้ยังไม่มีช่องทางติดต่อ — แนะนำให้เพิ่มเบอร์โทรหรือ LINE ID</div>' : '') +
+    '<div class="actions">' +
+      '<button class="btn btn-sm" type="button" onclick="openCustomerForm(\'' + c.id + '\')">✎ แก้ไขข้อมูล</button>' +
+      (isManager() ? '<button class="btn btn-sm btn-danger" type="button" onclick="openCustomerDelete(\'' + c.id + '\')">ลบลูกค้า</button>' : '') +
+    '</div>' +
+    '<div class="sec-title">สรุปยอดสะสม</div>' +
+    '<div class="sum-row"><span>ยอดซื้อสินค้ารวม</span><strong>' + formatMoney(totalSpend) + ' บาท</strong></div>' +
+    '<div class="sum-row"><span>จำนวนบิลที่สำเร็จ</span><strong>' + paid.length + ' บิล</strong></div>' +
+    '<div class="sum-row"><span>ค่าห้องซ้อมรวม</span><strong>' + formatMoney(bookingSpend) + ' บาท</strong></div>' +
+    '<div class="sum-row"><span>ชั่วโมงซ้อมสะสม</span><strong>' + totalHours + ' ชม.</strong></div>' +
+    (freeEarned > 0
+      ? '<div class="alert alert-warn" style="margin-top:10px;">★ ได้รับสิทธิ์ซ้อมฟรี <strong>' + freeEarned + ' ครั้ง</strong> (' + freeEarned * (settings.freeHoursReward || 1) + ' ชม.)</div>'
+      : '<div class="alert alert-plain" style="margin-top:10px;">อีก <strong>' + remaining + ' ชม.</strong> จะได้รับสิทธิ์ซ้อมฟรี</div>') +
+    '<div class="sec-title">ประวัติการซื้อสินค้า</div>' + salesHtml +
+    '<div class="sec-title">ประวัติการจองห้องซ้อม</div>' +
+    '<div class="alert alert-plain">การจองยังไม่ได้ผูกกับข้อมูลลูกค้าโดยตรง รายการด้านล่างจับคู่จากชื่อหรือเบอร์โทรที่ตรงกันเท่านั้น</div>' +
+    bookingsHtml);
+}
+
+function openCustomerForm(id, forPos) {
+  editingCustomerId = id || null;
+  customerFormForPos = !!forPos;
+  const c = id ? customers.find(x => x.id === id) : null;
+  if (id && !c) { showToast('⚠️ ไม่พบข้อมูลลูกค้ารายนี้'); return; }
+  document.getElementById('customerFormTitle').textContent = c ? 'แก้ไขข้อมูลลูกค้า' : 'เพิ่มลูกค้าใหม่';
+  document.getElementById('cfName').value = c ? (c.full_name || '') : '';
+  document.getElementById('cfPhone').value = c ? (c.phone || '') : '';
+  document.getElementById('cfLineId').value = c ? (c.line_id || '') : '';
+  document.getElementById('cfEmail').value = c ? (c.email || '') : '';
+  document.getElementById('cfTags').value = c ? (c.tags || []).join(', ') : '';
+  document.getElementById('cfNote').value = c ? (c.note || '') : '';
+  document.getElementById('saveCustomerBtn').textContent = c ? 'บันทึกการแก้ไข' : 'บันทึกลูกค้าใหม่';
+  renderPhoneWarning();
+  document.getElementById('customerDialog').showModal();
+  document.getElementById('cfName').focus();
+}
+
+function renderPhoneWarning() {
+  const twin = findPhoneTwin(document.getElementById('cfPhone').value, editingCustomerId);
+  document.getElementById('cfPhoneWarn').innerHTML = twin
+    ? '<div class="alert alert-warn" style="margin:8px 0 0;">⚠ เบอร์นี้ตรงกับลูกค้า "' + escapeHtml(twin.full_name) + '" ที่มีอยู่แล้ว — ตรวจสอบก่อนบันทึกเพื่อไม่ให้มีรายชื่อซ้ำ</div>'
+    : '';
+}
+document.getElementById('cfPhone').addEventListener('input', renderPhoneWarning);
+
+function parseTags(str) { return (str || '').split(',').map(t => t.trim()).filter(t => t.length > 0); }
+
+async function saveCustomer() {
+  if (savingCustomer) return;
+  const full_name = document.getElementById('cfName').value.trim();
+  if (!full_name) { showToast('⚠️ กรุณากรอกชื่อลูกค้า'); return; }
+  const email = document.getElementById('cfEmail').value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ รูปแบบอีเมลไม่ถูกต้อง'); return; }
+  const payload = {
+    full_name,
+    phone: document.getElementById('cfPhone').value.trim() || null,
+    line_id: document.getElementById('cfLineId').value.trim() || null,
+    email: email || null,
+    note: document.getElementById('cfNote').value.trim() || null,
+    tags: parseTags(document.getElementById('cfTags').value),
+  };
+  savingCustomer = true;
+  const btn = document.getElementById('saveCustomerBtn');
+  btn.disabled = true;
+  let res;
+  try {
+    res = editingCustomerId
+      ? await db.from('customers').update(payload).eq('id', editingCustomerId)
+      : await db.from('customers').insert({ ...payload, created_by: currentUserId }).select().single();
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    return;
+  } finally {
+    savingCustomer = false;
+    btn.disabled = false;
+  }
+  if (res.error) {
+    console.error('[Save customer]', res.error);
+    showFatalError('บันทึกข้อมูลลูกค้าไม่สำเร็จ: ' + res.error.message);
+    return;
+  }
+  const wasEditing = editingCustomerId;
+  document.getElementById('customerDialog').close();
+  await loadCustomers();
+  renderCustomers();
+  renderCustomerOptions();
+  showToast(wasEditing ? '✅ บันทึกการแก้ไขเรียบร้อยแล้ว' : '✅ เพิ่มลูกค้าใหม่เรียบร้อยแล้ว');
+  if (customerFormForPos && !wasEditing && res.data) {
+    selectedCustomer = customers.find(x => x.id === res.data.id) || res.data;
+    renderSelectedCustomer();
+  }
+  if (wasEditing && detailOpen() && detailCustomerId === wasEditing) openCustomer(wasEditing);
+  editingCustomerId = null;
+}
+
+// ลูกค้าที่มีบิล แต้ม หรือการจองผูกอยู่ ลบไม่ได้ — ตรวจก่อนเพื่อบอกเหตุผล ไม่ปล่อยให้เจอ error ของฐานข้อมูล
+async function openCustomerDelete(id) {
+  if (!isManager()) { showToast('⚠️ ลบข้อมูลลูกค้าได้เฉพาะผู้จัดการหรือเจ้าของร้าน'); return; }
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  askConfirm('ลบลูกค้า', '<div class="hint">กำลังตรวจสอบข้อมูลที่ผูกอยู่...</div>', 'ยืนยันลบลูกค้ารายนี้', null);
+  const [salesRes, ledgerRes, bookingRes] = await Promise.all([
+    db.from('sales').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+    db.from('loyalty_points_ledger').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+    db.from('room_bookings').select('id', { count: 'exact', head: true }).eq('customer_id', c.id),
+  ]);
+  const failed = salesRes.error || ledgerRes.error || bookingRes.error;
+  if (failed) {
+    askConfirm('ลบลูกค้า', '<div class="alert alert-red">ตรวจสอบข้อมูลที่ผูกกับลูกค้ารายนี้ไม่สำเร็จ: ' + escapeHtml(failed.message) +
+      '<br>ยังไม่ได้ลบข้อมูลใด ๆ ลองใหม่อีกครั้ง</div>', '', null);
+    return;
+  }
+  const blockers = [];
+  if (salesRes.count) blockers.push('บิลขาย ' + salesRes.count + ' บิล');
+  if (ledgerRes.count) blockers.push('รายการแต้มสะสม ' + ledgerRes.count + ' รายการ');
+  if (bookingRes.count) blockers.push('การจองห้อง ' + bookingRes.count + ' รายการ');
+  if (blockers.length) {
+    askConfirm('ลบลูกค้าไม่ได้', '<div class="alert alert-red">ลบลูกค้า "' + escapeHtml(c.full_name) + '" ไม่ได้ เพราะมี' + blockers.join(' และ ') +
+      'ผูกอยู่ — การลบจะทำให้ประวัติการขายหาย ตรวจสอบย้อนหลังไม่ได้</div>' +
+      '<div class="alert alert-plain">หากต้องการเลิกใช้ลูกค้ารายนี้ ให้แก้ชื่อโดยเติม "(เลิกใช้)" หรือใส่แท็กไว้แทน</div>', '', null);
+    return;
+  }
+  const hint = bookingsForCustomer(c).length;
+  askConfirm('ลบลูกค้า', '<div class="alert alert-red">กำลังจะลบ "' + escapeHtml(c.full_name) + '" ออกจากระบบถาวร ไม่สามารถย้อนกลับได้</div>' +
+    (hint ? '<div class="alert alert-warn">มีประวัติการจองห้อง ' + hint + ' รายการที่จับคู่ด้วยชื่อ/เบอร์ รายการเหล่านั้นยังอยู่ในระบบจองห้อง แต่จะไม่ปรากฏในหน้าลูกค้าอีก</div>' : ''),
+    'ยืนยันลบลูกค้ารายนี้', async () => {
+      const { error } = await db.from('customers').delete().eq('id', c.id);
+      if (error) { console.error('[Delete customer]', error); showFatalError('ลบข้อมูลลูกค้าไม่สำเร็จ: ' + error.message); return; }
+      closeConfirm();
+      closeDetail();
+      await loadCustomers();
+      renderCustomers();
+      renderCustomerOptions();
+      showToast('✅ ลบข้อมูลลูกค้าเรียบร้อยแล้ว');
+    });
+}
+
+// ---- ทะเบียนสมาชิก (อ่านอย่างเดียว ต้นฉบับอยู่ที่ Google Sheet) ----
+const MEMBER_FIELDS = 'id, code, is_member, full_name, phone, phone_normalized, email, address, note, member_type, register_date, line_user_id';
+let memberSearchToken = 0, memberCache = {};
+
+function memberBadge(m) {
+  return m.is_member
+    ? '<span class="st st-ok">✓ สมาชิก' + (m.code ? ' #' + escapeHtml(m.code) : '') + '</span>'
+    : '<span class="st st-off">• ยังไม่ได้สมัครสมาชิก</span>';
+}
+
+// ค้นที่เซิร์ฟเวอร์ ไม่ดึงทะเบียนทั้ง 800 แถว (มีที่อยู่บ้าน) มาเก็บในเบราว์เซอร์
+async function searchMembers() {
+  const raw = document.getElementById('memberSearch').value.trim();
+  const el = document.getElementById('memberResults');
+  const token = ++memberSearchToken;
+  if (raw.length < 3) { el.innerHTML = ''; return; }
+  const term = raw.replace(/[,()*]/g, ' ').trim();       // PostgREST แยก or ด้วย , และ ()
+  if (!term) { el.innerHTML = ''; return; }
+  const filters = [`full_name.ilike.*${term}*`, `code.ilike.*${term}*`];
+  const digits = normalizeThaiPhone(raw);
+  if (digits.length >= 9) filters.push(`phone_normalized.cs.{${digits}}`);
+  el.innerHTML = '<div class="hint">กำลังค้นหา...</div>';
+  const { data, error } = await db.from('members').select(MEMBER_FIELDS).or(filters.join(',')).order('code', { nullsFirst: false }).limit(30);
+  if (token !== memberSearchToken) return;
+  if (error) {
+    console.error('[Search members]', error);
+    el.innerHTML = /relation .*members.* does not exist|schema cache/i.test(error.message)
+      ? '<div class="alert alert-warn">ยังไม่มีทะเบียนสมาชิกในระบบ — ต้องนำเข้าจาก Google Sheet ก่อน</div>'
+      : '<div class="alert alert-red">ค้นหาสมาชิกไม่สำเร็จ: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+  const rows = data || [];
+  if (!rows.length) { el.innerHTML = '<div class="hint">ไม่พบในทะเบียนสมาชิก</div>'; return; }
+  memberCache = {};
+  el.innerHTML = rows.map(m => {
+    memberCache[m.id] = m;
+    return '<div class="presult" onclick="openMemberDetail(\'' + m.id + '\')"><div><strong>' + escapeHtml(m.full_name) + '</strong>' +
+      '<div class="sub hint" style="margin:0;">' + escapeHtml(m.phone || 'ไม่มีเบอร์โทร') + '</div></div><div>' + memberBadge(m) + '</div></div>';
+  }).join('');
+}
+document.getElementById('memberSearch').addEventListener('input', searchMembers);
+
+function openMemberDetail(id) {
+  const m = memberCache[id];
+  if (!m) { showToast('⚠️ ไม่พบข้อมูลสมาชิกรายนี้'); return; }
+  detailToken++;
+  const row = (k, v) => v ? '<dt>' + k + '</dt><dd>' + escapeHtml(v) + '</dd>' : '';
+  openDetail(m.full_name,
+    '<div style="margin-bottom:12px;">' + memberBadge(m) + (m.member_type ? ' <span class="st st-off">' + escapeHtml(m.member_type) + '</span>' : '') + '</div>' +
+    '<dl class="kv">' + row('เบอร์โทร', m.phone) + row('อีเมล', m.email) + row('ที่อยู่', m.address) +
+      (m.register_date ? '<dt>สมัครเมื่อ</dt><dd>' + fmtDate(m.register_date) + '</dd>' : '') + row('หมายเหตุ', m.note) +
+      '<dt>LINE</dt><dd>' + (m.line_user_id ? '✓ ผูกบัญชี LINE แล้ว' : 'ยังไม่ได้ผูกบัญชี LINE') + '</dd></dl>' +
+    (m.line_user_id && isManager()
+      ? '<div class="alert alert-plain">ถ้าลูกค้าแจ้งว่าผูกผิดคน (เช่น มีคนอื่นกรอกเบอร์นี้ไปก่อน) ให้ยกเลิกการผูกเพื่อให้เจ้าตัวผูกใหม่ได้</div>' +
+        '<button class="btn btn-sm" id="unlinkBtn" type="button" onclick="unlinkMember(\'' + m.id + '\')">ยกเลิกการผูกบัญชี LINE</button>'
+      : '') +
+    '<div class="alert alert-plain" style="margin-top:12px;">ข้อมูลนี้มาจาก Google Sheet ทะเบียนสมาชิก แก้ไขในระบบนี้ไม่ได้</div>');
+}
+
+async function unlinkMember(id) {
+  const m = memberCache[id];
+  if (!m) return;
+  const btn = document.getElementById('unlinkBtn');
+  if (btn) btn.disabled = true;
+  let error;
+  try { ({ error } = await db.rpc('unlink_membership', { p_member_id: id })); }
+  catch (err) { showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message); if (btn) btn.disabled = false; return; }
+  if (error) {
+    console.error('[unlink_membership]', error);
+    showFatalError('ยกเลิกการผูกไม่สำเร็จ: ' + error.message);
+    if (btn) btn.disabled = false;
+    return;
+  }
+  m.line_user_id = null;
+  openMemberDetail(id);
+  showToast('✅ ยกเลิกการผูกบัญชี LINE แล้ว ลูกค้าผูกใหม่ได้ทันที');
+}
+
+// ---- ลิงก์สมัครสมาชิก ----
+const REGISTER_LIFF = 'https://liff.line.me/2010938781-5HXyGxm5';
+let codeCache = [];
+
+// รหัสในทะเบียนมี 3 ชุดปนกัน (23xxxx, 12xxxx, 25xxx) เดาจากปีไม่ได้ — ดูรหัสที่ออกล่าสุดแล้วเดินต่อจากชุดนั้น
+function suggestNextCode(rows) {
+  const withCode = rows.filter(r => r.code && /^\d+$/.test(r.code.trim()));
+  if (!withCode.length) return { latest: null, next: '', series: '' };
+  const dated = withCode.filter(r => r.register_date).sort((a, b) => b.register_date.localeCompare(a.register_date));
+  const newest = (dated[0] || withCode[withCode.length - 1]).code.trim();
+  const len = newest.length, prefix = newest.slice(0, 2);
+  const same = withCode.map(r => r.code.trim()).filter(c => c.length === len && c.slice(0, 2) === prefix);
+  const max = same.reduce((mx, c) => Math.max(mx, parseInt(c, 10)), 0);
+  return { latest: String(max), next: String(max + 1), series: prefix + '·' + len + ' หลัก' };
+}
+
+async function openCodeModal() {
+  const body = document.getElementById('codeLinkBody');
+  body.innerHTML = '<div class="hint">กำลังอ่านรหัสล่าสุด...</div>';
+  document.getElementById('codeLinkDialog').showModal();
+  const { data, error } = await db.from('members').select('code, register_date, full_name');
+  if (error) {
+    console.error('[Load codes]', error);
+    body.innerHTML = '<div class="alert alert-red">อ่านรหัสสมาชิกไม่สำเร็จ: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+  codeCache = data || [];
+  const sg = suggestNextCode(codeCache);
+  body.innerHTML =
+    (sg.next ? '' : '<div class="alert alert-warn">ยังไม่มีรหัสสมาชิกในระบบ กรุณากรอกรหัสที่ต้องการเอง</div>') +
+    '<div class="alert alert-plain">รหัสที่ออกล่าสุด: <strong>' + escapeHtml(sg.latest || '—') + '</strong>' + (sg.series ? ' (ชุด ' + escapeHtml(sg.series) + ')' : '') + '</div>' +
+    '<div class="field"><label class="lbl" for="codeInput">รหัสสมาชิกที่จะให้ลูกค้า</label>' +
+      '<input type="text" id="codeInput" class="input" value="' + escapeHtml(sg.next) + '" inputmode="numeric">' +
+      '<div class="hint">ระบบเดาเลขถัดไปจากชุดที่ใช้อยู่ แก้เองได้ถ้าร้านใช้เลขอื่น</div></div>' +
+    '<div id="codeStatus"></div>' +
+    '<div class="field"><label class="lbl" for="codeLink">ลิงก์ที่จะส่งให้ลูกค้า</label><input type="text" id="codeLink" class="input" readonly></div>' +
+    '<button class="btn btn-primary" type="button" onclick="copyRegisterLink()">คัดลอกลิงก์</button>' +
+    '<div class="alert alert-warn" style="margin-top:14px;"><strong>ก่อนส่งลิงก์ ต้องเพิ่มแถวในชีตก่อน</strong><br>' +
+      'เปิดชีต DJ LAB MEMBERSHIP แท็บ <strong>หมายเลข</strong> → แถวล่างสุด → เพิ่มแถวใหม่ใส่เฉพาะช่อง <strong>Code</strong> เป็นเลขนี้<br>' +
+      'ถ้าไม่เพิ่มก่อน ลูกค้าจะเห็นว่า "ไม่พบรหัสสมาชิกนี้"</div>';
+  document.getElementById('codeInput').addEventListener('input', refreshCodeLink);
+  refreshCodeLink();
+}
+
+function refreshCodeLink() {
+  const code = document.getElementById('codeInput').value.trim();
+  const statusEl = document.getElementById('codeStatus');
+  document.getElementById('codeLink').value = code ? REGISTER_LIFF + '?code=' + encodeURIComponent(code) : '';
+  if (!code) { statusEl.innerHTML = ''; return; }
+  const taken = codeCache.find(r => (r.code || '').trim() === code);
+  statusEl.innerHTML = !taken
+    ? '<div class="alert alert-plain">รหัสนี้ยังไม่มีในชีต — เพิ่มแถวก่อนส่งลิงก์</div>'
+    : ((taken.full_name || '').trim()
+      ? '<div class="alert alert-red">⚠ รหัสนี้มีคนใช้แล้ว: ' + escapeHtml(taken.full_name) + ' — เปลี่ยนเป็นเลขอื่น</div>'
+      : '<div class="alert alert-plain" style="border-color:var(--ok);color:var(--ok);background:var(--ok-soft);">✓ รหัสนี้มีแถวในชีตแล้วและยังว่าง พร้อมส่งลิงก์</div>');
+}
+
+async function copyRegisterLink() {
+  const link = document.getElementById('codeLink').value;
+  if (!link) { showToast('⚠️ กรุณากรอกรหัสสมาชิกก่อน'); return; }
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast('✅ คัดลอกลิงก์แล้ว วางในแชท LINE ของลูกค้าได้เลย');
+  } catch (err) {
+    const el = document.getElementById('codeLink');
+    el.focus(); el.select();
+    showToast('⚠️ คัดลอกอัตโนมัติไม่ได้ — เลือกข้อความให้แล้ว กด Ctrl+C เพื่อคัดลอก');
+  }
+}
+
+// ===========================================================================
+// สรุปรายวัน — ตรรกะเดียวกับ daily.html
+// ===========================================================================
+let incomeRows = [], expenseRows = [], totalIncome = 0, totalExpense = 0;
+let editingIncomeId = null, editingExpenseId = null;
+let pendingReceiptFile = null, existingReceiptPath = null, receiptCleared = false;
+
+function getSelectedDate() { return document.getElementById('reportDate').value; }
+function setDailyDate(d) { document.getElementById('reportDate').value = d; loadDaily(); }
+function shiftDailyDate(n) { setDailyDate(shiftDateStr(getSelectedDate(), n)); }
+document.getElementById('reportDate').value = todayBangkok();
+document.getElementById('reportDate').addEventListener('change', loadDaily);
+
+function formatTimeThai(iso) {
+  return new Date(iso).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+function formatDateThaiLong(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return d + ' ' + THAI_MONTHS_LONG[m - 1] + ' ' + (y + 543);
+}
+// เที่ยงคืนถึงเที่ยงคืนตามเวลาไทย (+07:00) ไม่ใช่ตัดวันที่เที่ยงคืน UTC ซึ่งคลาดไป 7 ชั่วโมง
+function dayRangeUtc(dateStr) {
+  const start = new Date(dateStr + 'T00:00:00+07:00');
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+function toDatetimeLocalValue(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+async function loadDaily() {
+  const dateStr = getSelectedDate();
+  if (!dateStr || !currentUserId) return;
+  document.getElementById('printDateLabel').textContent = formatDateThaiLong(dateStr);
+  const { startIso, endIso } = dayRangeUtc(dateStr);
+  const [inc, exp] = await Promise.all([
+    db.from('v_daily_income').select('*').gte('occurred_at', startIso).lt('occurred_at', endIso).order('occurred_at', { ascending: true }),
+    db.from('expenses').select('*').eq('spent_on', dateStr).order('seq', { ascending: true }),
+  ]);
+  if (getSelectedDate() !== dateStr) return;          // ผู้ใช้เปลี่ยนวันไปแล้วระหว่างโหลด
+  if (inc.error) { console.error('[Load income]', inc.error); showFatalError('โหลดรายรับไม่สำเร็จ: ' + inc.error.message); }
+  else incomeRows = inc.data || [];
+  if (exp.error) { console.error('[Load expenses]', exp.error); showFatalError('โหลดรายจ่ายไม่สำเร็จ: ' + exp.error.message); }
+  else expenseRows = exp.data || [];
+  renderDaily();
+}
+
+function renderDaily() {
+  totalIncome = incomeRows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+  totalExpense = expenseRows.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  document.getElementById('incomeTotal').textContent = formatMoney(totalIncome);
+  document.getElementById('expenseTotal').textContent = formatMoney(totalExpense);
+  const KIND = { sale: 'ขาย', booking: 'ห้องซ้อม', manual: 'กรอกมือ' };
+  document.getElementById('incomeTableBody').innerHTML = incomeRows.length
+    ? incomeRows.map(r => '<tr style="cursor:default;">' +
+        '<td class="nowrap">' + formatTimeThai(r.occurred_at) + '</td>' +
+        '<td>' + escapeHtml(r.source) + ' <span class="sub">(' + (KIND[r.kind] || r.kind) + ')</span></td>' +
+        '<td>' + escapeHtml(r.detail) + '</td>' +
+        '<td>' + escapeHtml(r.payment_method || '-') + '</td>' +
+        '<td class="num">' + formatMoney(r.amount) + '</td>' +
+        '<td class="no-print nowrap">' + (r.kind === 'manual'
+          ? '<button class="btn btn-sm" type="button" onclick="openIncomeModal(\'' + r.ref_id + '\')">แก้ไข</button> ' +
+            '<button class="btn btn-sm btn-danger" type="button" onclick="dailyDelete(\'income\', \'' + r.ref_id + '\')">ลบ</button>'
+          : '') + '</td></tr>').join('')
+    : '<tr><td colspan="6"><div class="empty">ยังไม่มีรายรับในวันนี้</div></td></tr>';
+  document.getElementById('expenseTableBody').innerHTML = expenseRows.length
+    ? expenseRows.map(e => '<tr style="cursor:default;">' +
+        '<td>' + e.seq + '</td>' +
+        '<td>' + escapeHtml(e.description) + '</td>' +
+        '<td>' + (e.receipt_path
+          ? '<button class="btn btn-sm no-print" type="button" onclick="viewReceipt(\'' + e.id + '\')">ดูบิล</button><span class="print-only">มีบิล</span>'
+          : '—') + '</td>' +
+        '<td class="num">' + formatMoney(e.amount) + '</td>' +
+        '<td class="no-print nowrap"><button class="btn btn-sm" type="button" onclick="openExpenseModal(\'' + e.id + '\')">แก้ไข</button> ' +
+          '<button class="btn btn-sm btn-danger" type="button" onclick="dailyDelete(\'expense\', \'' + e.id + '\')">ลบ</button></td></tr>').join('')
+    : '<tr><td colspan="5"><div class="empty">ยังไม่มีรายจ่ายในวันนี้</div></td></tr>';
+
+  const net = totalIncome - totalExpense;
+  document.getElementById('sumIncome').textContent = formatMoney(totalIncome);
+  document.getElementById('sumExpense').textContent = formatMoney(totalExpense);
+  document.getElementById('sumNet').textContent = formatMoney(net);
+  document.getElementById('sumNet').style.color = net < 0 ? 'var(--red)' : '';
+  document.getElementById('sumNetLabel').textContent = net < 0 ? '▼ ขาดทุนสุทธิ (บาท)' : 'คงเหลือสุทธิ (บาท)';
+
+  const labels = ['เงินสด', 'โอน', 'บัตรเครดิต', 'อื่นๆ', 'ไม่ระบุ'];
+  const buckets = { 'เงินสด': 0, 'โอน': 0, 'บัตรเครดิต': 0, 'อื่นๆ': 0, 'ไม่ระบุ': 0 };
+  incomeRows.forEach(r => {
+    const pm = (r.payment_method || '').trim();
+    const amt = parseFloat(r.amount) || 0;
+    if (!pm) buckets['ไม่ระบุ'] += amt;
+    else if (buckets.hasOwnProperty(pm)) buckets[pm] += amt;
+    else buckets['อื่นๆ'] += amt;
+  });
+  document.getElementById('paymentBreakdown').innerHTML = labels.map(l =>
+    '<div class="sum-row"><span>' + escapeHtml(l) + '</span><span>' + formatMoney(buckets[l]) + ' บาท</span></div>').join('');
+}
+
+function openIncomeModal(id) {
+  editingIncomeId = id;
+  if (id) {
+    const row = incomeRows.find(r => r.ref_id === id && r.kind === 'manual');
+    if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
+    document.getElementById('incomeModalTitle').textContent = 'แก้ไขรายรับ';
+    document.getElementById('ifSource').value = row.source || '';
+    document.getElementById('ifDescription').value = row.detail || '';
+    document.getElementById('ifAmount').value = row.amount;
+    document.getElementById('ifPaymentMethod').value = row.payment_method || '';
+    document.getElementById('ifReceivedAt').value = toDatetimeLocalValue(row.occurred_at);
+  } else {
+    document.getElementById('incomeModalTitle').textContent = 'เพิ่มรายรับ';
+    ['ifSource', 'ifDescription', 'ifAmount', 'ifPaymentMethod'].forEach(x => { document.getElementById(x).value = ''; });
+    document.getElementById('ifReceivedAt').value = toDatetimeLocalValue(new Date().toISOString());
+  }
+  document.getElementById('incomeDialog').showModal();
+  document.getElementById('ifSource').focus();
+}
+
+async function saveIncome() {
+  const source = document.getElementById('ifSource').value.trim();
+  const description = document.getElementById('ifDescription').value.trim();
+  const amount = parseFloat(document.getElementById('ifAmount').value);
+  const paymentMethod = document.getElementById('ifPaymentMethod').value || null;
+  const receivedAtRaw = document.getElementById('ifReceivedAt').value;
+  if (!source) { showToast('⚠️ กรุณากรอกที่มา'); return; }
+  if (!description) { showToast('⚠️ กรุณากรอกรายละเอียด'); return; }
+  if (isNaN(amount) || amount < 0) { showToast('⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง'); return; }
+  if (!receivedAtRaw) { showToast('⚠️ กรุณาระบุเวลา'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  const receivedAtIso = new Date(receivedAtRaw).toISOString();
+  const btn = document.getElementById('incomeSaveBtn');
+  btn.disabled = true;
+  const { error } = editingIncomeId
+    ? await db.from('income_entries').update({ source, description, amount, payment_method: paymentMethod,
+        received_at: receivedAtIso, updated_at: new Date().toISOString() }).eq('id', editingIncomeId)
+    : await db.from('income_entries').insert({ source, description, amount, payment_method: paymentMethod,
+        received_at: receivedAtIso, admin_id: currentUserId });
+  btn.disabled = false;
+  if (error) { console.error('[Save income]', error); showFatalError('บันทึกรายรับไม่สำเร็จ: ' + error.message); return; }
+  document.getElementById('incomeDialog').close();
+  showToast(editingIncomeId ? '✅ แก้ไขรายรับเรียบร้อยแล้ว' : '✅ เพิ่มรายรับเรียบร้อยแล้ว');
+  editingIncomeId = null;
+  loadDaily();
+}
+
+function openExpenseModal(id) {
+  editingExpenseId = id;
+  // สถานะรูปเริ่มใหม่ทุกครั้ง ไม่งั้นรูปที่เลือกค้างจากรายการก่อนจะติดไปกับรายการถัดไปโดยไม่มีใครเห็น
+  pendingReceiptFile = null;
+  receiptCleared = false;
+  document.getElementById('efReceiptFile').value = '';
+  document.getElementById('efReceiptPreview').style.display = 'none';
+  document.getElementById('efReceiptPreview').removeAttribute('src');
+  if (id) {
+    const row = expenseRows.find(r => r.id === id);
+    if (!row) { showToast('⚠️ ไม่พบรายการนี้'); return; }
+    document.getElementById('expenseModalTitle').textContent = 'แก้ไขรายจ่าย';
+    document.getElementById('efDescription').value = row.description || '';
+    document.getElementById('efAmount').value = row.amount;
+    existingReceiptPath = row.receipt_path || null;
+  } else {
+    document.getElementById('expenseModalTitle').textContent = 'เพิ่มรายจ่าย';
+    document.getElementById('efDescription').value = '';
+    document.getElementById('efAmount').value = '';
+    existingReceiptPath = null;
+  }
+  renderReceiptState();
+  document.getElementById('expenseDialog').showModal();
+  document.getElementById('efDescription').focus();
+}
+
+async function saveExpense() {
+  const description = document.getElementById('efDescription').value.trim();
+  const amount = parseFloat(document.getElementById('efAmount').value);
+  if (!description) { showToast('⚠️ กรุณากรอกรายการ'); return; }
+  if (isNaN(amount) || amount < 0) { showToast('⚠️ กรุณากรอกจำนวนเงินให้ถูกต้อง'); return; }
+  if (!currentUserId) { showToast('⚠️ ไม่พบข้อมูลผู้เข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่'); return; }
+  const btn = document.getElementById('expenseSaveBtn');
+  const label = btn.textContent;
+  btn.disabled = true;
+  // จัดการรูปก่อนเขียนแถว: อัปโหลดล้ม = ทั้งงานล้ม ดีกว่าบันทึกรายจ่ายแล้วรูปหายโดยจอขึ้นว่าสำเร็จ
+  let receiptPath = existingReceiptPath, pathToDelete = null, uploadedNow = null;
+  try {
+    if (pendingReceiptFile) {
+      btn.textContent = 'กำลังอัปโหลดรูป...';
+      const blob = await shrinkImage(pendingReceiptFile);
+      uploadedNow = await uploadReceipt(blob);
+      if (existingReceiptPath) pathToDelete = existingReceiptPath;
+      receiptPath = uploadedNow;
+    } else if (receiptCleared && existingReceiptPath) {
+      pathToDelete = existingReceiptPath;
+      receiptPath = null;
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = label;
+    console.error('[Upload receipt]', e);
+    showFatalError('อัปโหลดรูปบิลไม่สำเร็จ: ' + e.message + ' (ยังไม่ได้บันทึกรายจ่าย)');
+    return;
+  }
+  btn.textContent = 'กำลังบันทึก...';
+  let error;
+  if (editingExpenseId) {
+    ({ error } = await db.from('expenses').update({
+      description, amount, receipt_path: receiptPath, updated_at: new Date().toISOString(),
+    }).eq('id', editingExpenseId));
+  } else {
+    const nextSeq = expenseRows.reduce((mx, e) => Math.max(mx, e.seq || 0), 0) + 1;
+    ({ error } = await db.from('expenses').insert({
+      spent_on: getSelectedDate(), seq: nextSeq, description, amount, receipt_path: receiptPath, admin_id: currentUserId,
+    }));
+  }
+  btn.disabled = false;
+  btn.textContent = label;
+  if (error) {
+    if (uploadedNow) await removeReceipt(uploadedNow);    // ไม่ให้เหลือไฟล์กำพร้าในถัง
+    console.error('[Save expense]', error);
+    showFatalError('บันทึกรายจ่ายไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  if (pathToDelete) await removeReceipt(pathToDelete);     // ลบรูปเก่าหลังแถวชี้รูปใหม่แล้วเท่านั้น
+  document.getElementById('expenseDialog').close();
+  showToast(editingExpenseId ? '✅ แก้ไขรายจ่ายเรียบร้อยแล้ว' : '✅ เพิ่มรายจ่ายเรียบร้อยแล้ว');
+  editingExpenseId = null;
+  loadDaily();
+}
+
+function dailyDelete(type, id) {
+  askConfirm('ยืนยันการลบ', '<div class="alert alert-red">' + (type === 'income'
+      ? 'กำลังจะลบรายการรายรับนี้ออกจากระบบถาวร ไม่สามารถย้อนกลับได้'
+      : 'กำลังจะลบรายการรายจ่ายนี้ออกจากระบบถาวร ไม่สามารถย้อนกลับได้') + '</div>',
+    'ยืนยันลบรายการนี้', async () => {
+      const table = type === 'income' ? 'income_entries' : 'expenses';
+      // จำพาธรูปไว้ก่อน พอลบแถวแล้วจะไม่เหลืออะไรบอกว่าไฟล์ไหนเป็นของใคร
+      const receiptPath = type === 'expense' ? (expenseRows.find(r => r.id === id) || {}).receipt_path || null : null;
+      const { error } = await db.from(table).delete().eq('id', id);
+      if (error) { console.error('[Delete ' + table + ']', error); showFatalError('ลบรายการไม่สำเร็จ: ' + error.message); return; }
+      if (receiptPath) await removeReceipt(receiptPath);
+      closeConfirm();
+      showToast('✅ ลบรายการเรียบร้อยแล้ว');
+      loadDaily();
+    });
+}
+
+// ---- รูปบิล (ถัง receipts เป็นแบบปิด ต้องขอ signed URL ทุกครั้ง) ----
+const RECEIPT_MAX_EDGE = 1600, RECEIPT_QUALITY = 0.8;
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, RECEIPT_MAX_EDGE / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale)), h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('ย่อรูปไม่สำเร็จ')), 'image/jpeg', RECEIPT_QUALITY);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('เปิดไฟล์รูปนี้ไม่ได้ ลองเลือกไฟล์ JPG/PNG')); };
+    img.src = url;
+  });
+}
+async function uploadReceipt(blob) {
+  const month = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }).slice(0, 7);
+  const path = month + '/' + crypto.randomUUID() + '.jpg';
+  const { error } = await db.storage.from('receipts').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+  if (error) throw new Error(error.message);
+  return path;
+}
+async function removeReceipt(path) {
+  if (!path) return;
+  const { error } = await db.storage.from('receipts').remove([path]);
+  if (error) {
+    console.error('[Remove receipt]', error);
+    showToast('⚠️ ลบไฟล์รูปเก่าไม่สำเร็จ (ข้อมูลรายจ่ายบันทึกแล้ว): ' + error.message);
+  }
+}
+function renderReceiptState() {
+  const state = document.getElementById('efReceiptState');
+  const clearBtn = document.getElementById('efReceiptClearBtn');
+  if (pendingReceiptFile) { state.textContent = 'เลือกรูปใหม่ไว้แล้ว จะอัปโหลดตอนกดบันทึก'; clearBtn.style.display = 'inline-flex'; }
+  else if (existingReceiptPath && !receiptCleared) { state.textContent = 'มีรูปบิลอยู่แล้ว เลือกรูปใหม่เพื่อแทนที่'; clearBtn.style.display = 'inline-flex'; }
+  else if (receiptCleared) { state.textContent = 'จะเอารูปออกตอนกดบันทึก'; clearBtn.style.display = 'none'; }
+  else { state.textContent = 'ยังไม่มีรูปบิล'; clearBtn.style.display = 'none'; }
+}
+function onReceiptPicked() {
+  const input = document.getElementById('efReceiptFile');
+  const file = input.files && input.files[0];
+  if (!file) return;
+  pendingReceiptFile = file;
+  receiptCleared = false;
+  const preview = document.getElementById('efReceiptPreview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  renderReceiptState();
+}
+function clearReceiptChoice() {
+  const preview = document.getElementById('efReceiptPreview');
+  if (pendingReceiptFile) {
+    pendingReceiptFile = null;
+    document.getElementById('efReceiptFile').value = '';
+    preview.style.display = 'none';
+    preview.removeAttribute('src');
+  } else {
+    receiptCleared = true;
+  }
+  renderReceiptState();
+}
+async function viewReceipt(id) {
+  const row = expenseRows.find(r => r.id === id);
+  if (!row || !row.receipt_path) { showToast('⚠️ รายการนี้ไม่มีรูปบิล'); return; }
+  const { data, error } = await db.storage.from('receipts').createSignedUrl(row.receipt_path, 120);
+  if (error) { console.error('[Signed URL]', error); showFatalError('เปิดรูปบิลไม่สำเร็จ: ' + error.message); return; }
+  document.getElementById('receiptCaption').textContent = 'รูปบิล — ' + row.description;
+  document.getElementById('receiptImage').src = data.signedUrl;
+  document.getElementById('receiptDialog').showModal();
+}
+
+function csvEscape(val) {
+  const s = (val === null || val === undefined) ? '' : String(val);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function downloadCsv() {
+  const dateStr = getSelectedDate();
+  const lines = [];
+  const row = arr => lines.push(arr.map(csvEscape).join(','));
+  row(['DJ LAB SIAM']);
+  row(['รายงานสรุปรายรับ-รายจ่ายประจำวันที่ ' + formatDateThaiLong(dateStr)]);
+  lines.push('');
+  row(['รายรับ']);
+  row(['เวลา', 'ที่มา', 'รายละเอียด', 'วิธีชำระ', 'จำนวนเงิน']);
+  incomeRows.forEach(r => row([formatTimeThai(r.occurred_at), r.source, r.detail, r.payment_method || '', formatMoney(r.amount)]));
+  row(['', '', '', 'รวมรายรับ', formatMoney(totalIncome)]);
+  lines.push('');
+  row(['รายจ่าย']);
+  row(['ลำดับ', 'รายการ', 'บิล', 'จำนวนเงิน']);
+  expenseRows.forEach(e => row([e.seq, e.description, e.receipt_path ? 'มีบิล' : '', formatMoney(e.amount)]));
+  row(['', '', 'รวมรายจ่าย', formatMoney(totalExpense)]);
+  lines.push('');
+  row(['สรุปประจำวัน']);
+  row(['รายรับรวม', formatMoney(totalIncome)]);
+  row(['รายจ่ายรวม', formatMoney(totalExpense)]);
+  row(['คงเหลือสุทธิ', formatMoney(totalIncome - totalExpense)]);
+  // ต้องขึ้นต้นด้วย BOM ไม่งั้นภาษาไทยเพี้ยนตอนเปิดใน Excel
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'djlab-daily-' + dateStr + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===========================================================================
+// บันทึกการใช้งาน — อ่านอย่างเดียว เฉพาะเจ้าของร้าน/ผู้ดูแล (ตรรกะเดียวกับ activity.html)
+// ===========================================================================
+const ACT_PAGE = 200;
+const TABLE_LABELS = {
+  room_bookings: 'การจองห้องซ้อม', booking_settings: 'ตั้งค่าห้องซ้อม', loyalty_points_ledger: 'แต้มสะสม',
+  products: 'สินค้า', product_units: 'สินค้าแบบมีซีเรียล', stock_movements: 'การเคลื่อนไหวสต็อก',
+  sales: 'บิลขาย', sale_items: 'รายการในบิล', customers: 'ข้อมูลลูกค้า',
+  expenses: 'รายจ่าย', income_entries: 'รายรับกรอกมือ', members: 'ทะเบียนสมาชิก',
+};
+const ACTION_LABELS = { INSERT: 'เพิ่มใหม่', UPDATE: 'แก้ไข', DELETE: 'ลบ' };
+const ACTION_ST = { INSERT: 'st-ok">＋ ', UPDATE: 'st-warn">✎ ', DELETE: 'st-bad">✕ ' };
+const FIELD_LABELS = {
+  full_name: 'ชื่อ', phone: 'เบอร์โทร', line_id: 'LINE ID', email: 'อีเมล',
+  note: 'หมายเหตุ', tags: 'แท็ก', name: 'ชื่อสินค้า', sku: 'SKU', brand: 'แบรนด์',
+  category: 'หมวดหมู่', barcode_ean13: 'บาร์โค้ด', cost_price: 'ราคาต้นทุน',
+  sell_price: 'ราคาขาย', reorder_point: 'จุดสั่งซื้อซ้ำ', is_active: 'เปิดใช้งาน',
+  qty: 'จำนวน', type: 'ประเภท', reason: 'เหตุผล', serial_no: 'ซีเรียล',
+  status: 'สถานะ', sale_no: 'เลขที่บิล', subtotal: 'ยอดรวม', discount: 'ส่วนลด',
+  total: 'ยอดสุทธิ', payment_method: 'วิธีชำระเงิน', voided_reason: 'เหตุผลที่ยกเลิก',
+  unit_price: 'ราคาต่อหน่วย', line_total: 'รวมรายการ',
+  customer_name: 'ชื่อผู้จอง', contact: 'ข้อมูลติดต่อ', room: 'ห้อง / Setup',
+  room_model: 'รุ่นที่ระบุ', equip: 'อุปกรณ์เพิ่มเติม', date: 'วันที่', start_time: 'เวลาเริ่ม',
+  hours: 'จำนวนชั่วโมง', cost: 'ค่าใช้จ่าย', points_earned: 'แต้มที่ได้',
+  confirmed: 'ยืนยันแล้ว', source: 'ช่องทาง', line_user_id: 'LINE userId',
+  price_per_hour: 'ราคาต่อชั่วโมง', points_per_hour: 'แต้มต่อชั่วโมง',
+  free_hour_threshold: 'ชั่วโมงที่ต้องสะสม', free_hours_reward: 'ชั่วโมงฟรีที่ได้',
+  room_name: 'ชื่อห้อง', delta: 'แต้มที่เปลี่ยน',
+};
+// คีย์และเวลาที่ฐานข้อมูลดูแลเอง แสดงไปก็กลบฟิลด์ที่คนแก้จริง
+const HIDDEN_FIELDS = new Set([
+  'id', 'created_at', 'updated_at', 'admin_id', 'created_by', 'updated_by',
+  'customer_uid', 'confirmed_at', 'confirmed_by', 'voided_at', 'voided_by',
+  'sale_id', 'product_id', 'product_unit_id', 'customer_id', 'ref_sale_id',
+  'ref_booking_id', 'received_at', 'sold_at',
+]);
+let logs = [], logReachedEnd = false, logLoading = false, activityLoaded = false, actorsLoaded = false;
+
+function buildActivityFilters() {
+  const sel = document.getElementById('filterTable');
+  if (sel.options.length) return;
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    Object.keys(TABLE_LABELS).map(t => '<option value="' + t + '">' + escapeHtml(TABLE_LABELS[t]) + '</option>').join('');
+  ['filterTable', 'filterAction', 'filterActor', 'filterRange'].forEach(id => document.getElementById(id).addEventListener('change', reloadActivity));
+}
+
+async function loadActors() {
+  const { data, error } = await db.from('admins').select('id, full_name').order('full_name');
+  if (error) { console.error('[Load admins]', error); showToast('⚠️ โหลดรายชื่อทีมงานไม่สำเร็จ: ' + error.message); return; }
+  document.getElementById('filterActor').innerHTML = '<option value="">ทั้งหมด</option>' +
+    (data || []).map(a => '<option value="' + a.id + '">' + escapeHtml(a.full_name) + '</option>').join('') +
+    '<option value="__none__">ลูกค้า / ระบบ</option>';
+  actorsLoaded = true;
+}
+
+function buildActivityQuery() {
+  let q = db.from('activity_log')
+    .select('id, action, table_name, record_id, old_data, new_data, created_at, admin_id, actor_uid, admins:admin_id(full_name)')
+    .order('created_at', { ascending: false });
+  const table = document.getElementById('filterTable').value;
+  if (table) q = q.eq('table_name', table);
+  const action = document.getElementById('filterAction').value;
+  if (action) q = q.eq('action', action);
+  const actor = document.getElementById('filterActor').value;
+  if (actor === '__none__') q = q.is('admin_id', null);
+  else if (actor) q = q.eq('admin_id', actor);
+  const days = parseInt(document.getElementById('filterRange').value, 10);
+  if (days > 0) {
+    const since = new Date();
+    if (days === 1) since.setHours(0, 0, 0, 0); else since.setDate(since.getDate() - days);
+    q = q.gte('created_at', since.toISOString());
+  }
+  return q;
+}
+
+async function reloadActivity() {
+  if (!isManager()) return;      // RLS ก็กันอยู่แล้ว แต่ไม่ควรยิงคำขอที่รู้ว่าจะได้ว่างเปล่า
+  buildActivityFilters();
+  if (!actorsLoaded) await loadActors();
+  activityLoaded = true;
+  logs = [];
+  logReachedEnd = false;
+  await fetchActivityPage();
+}
+
+async function fetchActivityPage() {
+  if (logLoading || logReachedEnd) return;
+  logLoading = true;
+  const from = logs.length;
+  const { data, error } = await buildActivityQuery().range(from, from + ACT_PAGE - 1);
+  logLoading = false;
+  if (error) {
+    console.error('[Load activity log]', error);
+    showFatalError('โหลดบันทึกการใช้งานไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  const rows = data || [];
+  logs = logs.concat(rows);
+  if (rows.length < ACT_PAGE) logReachedEnd = true;
+  renderActivity();
+}
+
+function actWho(row) { return row.admins ? row.admins.full_name : (row.admin_id ? 'ทีมงาน' : 'ลูกค้า / ระบบ'); }
+function tableLabel(t) { return TABLE_LABELS[t] || t; }
+function entityLabel(row) {
+  const d = row.new_data || row.old_data || {};
+  const pick = [d.sale_no, d.full_name, d.customer_name, d.name, d.sku, d.serial_no, d.room_name, d.description]
+    .find(v => v !== undefined && v !== null && String(v).trim() !== '');
+  if (pick) return String(pick);
+  if (row.table_name === 'stock_movements' && d.qty !== undefined) {
+    return (d.type === 'in' ? 'รับเข้า ' : d.type === 'out' ? 'ตัดออก ' : 'ปรับยอด ') + d.qty + ' ชิ้น';
+  }
+  if (row.table_name === 'booking_settings') return 'ตั้งค่าราคาและแต้ม';
+  if (row.table_name === 'loyalty_points_ledger' && d.delta !== undefined) return 'แต้ม ' + d.delta;
+  return '(ไม่มีชื่อกำกับ)';
+}
+
+function renderActivity() {
+  document.getElementById('activityCount').textContent = !logs.length ? '' :
+    (logReachedEnd ? 'ทั้งหมด ' + logs.length + ' รายการ' : 'แสดง ' + logs.length + ' รายการล่าสุด');
+  document.getElementById('loadMoreBtn').hidden = logReachedEnd || !logs.length;
+  fillTable('activity', sortRows('activity', logs.slice()), row =>
+    '<td class="nowrap">' + formatDateTime(row.created_at) + '</td>' +
+    '<td>' + escapeHtml(tableLabel(row.table_name)) + '</td>' +
+    '<td><strong>' + escapeHtml(entityLabel(row)) + '</strong></td>' +
+    '<td><span class="st ' + (ACTION_ST[row.action] || 'st-off">• ') + escapeHtml(ACTION_LABELS[row.action] || row.action) + '</span></td>' +
+    '<td class="col-opt">' + escapeHtml(actWho(row)) + '</td>',
+    'ไม่พบรายการในช่วงเวลาและตัวกรองที่เลือก');
+}
+
+function formatLogValue(k, v) {
+  if (v === null || v === undefined || v === '') return '(ว่าง)';
+  if (typeof v === 'boolean') return v ? 'ใช่' : 'ไม่ใช่';
+  if (Array.isArray(v)) return v.length ? v.join(', ') : '(ว่าง)';
+  if (typeof v === 'object') return JSON.stringify(v);
+  const money = ['cost_price', 'sell_price', 'total', 'subtotal', 'discount', 'cost', 'unit_price', 'line_total', 'price_per_hour', 'amount'];
+  if (money.includes(k) && !isNaN(parseFloat(v))) return formatMoney(v) + ' บาท';
+  if (k === 'start_time') return String(v).slice(0, 5) + ' น.';
+  if (k === 'date' || k === 'spent_on') return fmtDate(v);
+  return String(v);
+}
+
+function diffRows(row) {
+  const oldD = row.old_data || {}, newD = row.new_data || {};
+  const keys = [...new Set([...Object.keys(oldD), ...Object.keys(newD)])].filter(k => !HIDDEN_FIELDS.has(k));
+  if (row.action === 'UPDATE') {
+    return keys.filter(k => JSON.stringify(oldD[k]) !== JSON.stringify(newD[k])).map(k => ({ field: k, from: oldD[k], to: newD[k] }));
+  }
+  const src = row.action === 'DELETE' ? oldD : newD;
+  return keys.filter(k => src[k] !== null && src[k] !== undefined && String(src[k]) !== '').map(k => ({ field: k, to: src[k] }));
+}
+
+function openActivity(id) {
+  const row = logs.find(r => r.id === id);
+  if (!row) return;
+  detailToken++;
+  const changes = diffRows(row);
+  const isUpdate = row.action === 'UPDATE';
+  openDetail(tableLabel(row.table_name) + ' — ' + entityLabel(row),
+    '<div style="margin-bottom:12px;"><span class="st ' + (ACTION_ST[row.action] || 'st-off">• ') + escapeHtml(ACTION_LABELS[row.action] || row.action) + '</span></div>' +
+    '<dl class="kv"><dt>เมื่อ</dt><dd>' + formatDateTime(row.created_at) + '</dd><dt>โดย</dt><dd>' + escapeHtml(actWho(row)) + '</dd></dl>' +
+    (row.action === 'DELETE' ? '<div class="alert alert-red">รายการนี้ถูกลบออกจากระบบแล้ว ด้านล่างคือข้อมูลก่อนถูกลบ</div>' : '') +
+    '<div class="sec-title">' + (isUpdate ? 'ค่าเดิม → ค่าใหม่' : 'ข้อมูล') + '</div>' +
+    (changes.length === 0 ? '<div class="hint">ไม่มีฟิลด์ที่เปลี่ยนแปลง (อาจเป็นการบันทึกซ้ำค่าเดิม)</div>'
+      : changes.map(c => '<div class="list-row"><div class="sub" style="min-width:110px;">' + escapeHtml(FIELD_LABELS[c.field] || c.field) + '</div><div style="text-align:right;">' +
+          (isUpdate ? '<span style="text-decoration:line-through;color:var(--text2);">' + escapeHtml(formatLogValue(c.field, c.from)) + '</span> → ' : '') +
+          '<strong>' + escapeHtml(formatLogValue(c.field, c.to)) + '</strong></div></div>').join('')));
+}
+
+// ===========================================================================
+// จัดการข้อมูล — ตรรกะเดียวกับ admin-data.html
+//
+// mode: 'full' ดู/เพิ่ม/แก้/ลบ · 'edit' แก้ได้อย่างเดียว · 'read' ดูอย่างเดียว
+// ⚠️ นี่คือรั้วกันพลาด ไม่ใช่ระบบสิทธิ์ ตัวที่กันจริงคือ RLS ในฐานข้อมูล
+// ===========================================================================
+const AD_TABLES = [
+  { name: 'products',              label: 'สินค้า',              mode: 'full', note: '' },
+  { name: 'customers',             label: 'ลูกค้า',              mode: 'full', note: '' },
+  { name: 'expenses',              label: 'รายจ่าย',             mode: 'full', note: '' },
+  { name: 'income_entries',        label: 'รายรับกรอกมือ',        mode: 'full', note: '' },
+  { name: 'booking_settings',      label: 'ตั้งค่าการจองห้อง',     mode: 'edit',
+    note: 'มีแถวเดียวตายตัว แก้ได้ แต่เพิ่มหรือลบไม่ได้ · ค่าที่นี่คุมราคาต่อชั่วโมงและแต้มของทั้งระบบ' },
+  { name: 'members',               label: 'สมาชิก',              mode: 'read',
+    note: 'ต้นฉบับคือ Google Sheet "DJ LAB MEMBERSHIP" แท็บ หมายเลข — ตารางนี้เป็นสำเนา แก้ที่นี่จะถูกเขียนทับตอนซิงก์รอบถัดไป ให้แก้ที่ชีตเสมอ' },
+  { name: 'room_bookings',         label: 'การจองห้องซ้อม',       mode: 'read',
+    note: 'เปลี่ยนสถานะที่นี่จะไปกระตุ้นการส่งข้อความ LINE หาลูกค้าโดยไม่ตั้งใจ — แก้ที่หมวดจองห้องซ้อม' },
+  { name: 'product_units',         label: 'ซีเรียลรายเครื่อง',     mode: 'read',
+    note: 'รับเข้าและผูกซีเรียลทำที่หมวดรับเข้า ซึ่งมีลำดับการบันทึกที่กันซีเรียลซ้ำไว้แล้ว' },
+  { name: 'sales',                 label: 'บิลขาย',              mode: 'read',
+    note: 'บิลแก้ไม่ได้ตามกติกาของระบบ ลงผิดให้ยกเลิกบิลที่หมวดประวัติบิล แล้วออกใบใหม่' },
+  { name: 'sale_items',            label: 'รายการในบิล',          mode: 'read',
+    note: 'ผูกกับบิลและยอดเงินที่คำนวณจากฐานข้อมูล แก้แยกจากบิลไม่ได้' },
+  { name: 'stock_movements',       label: 'ความเคลื่อนไหวสต็อก',   mode: 'read',
+    note: 'บันทึกอย่างเดียว แก้และลบไม่ได้ทั้งระบบ ลงผิดให้ลงรายการปรับยอดกลับ เพื่อให้ตรวจย้อนหลังได้ว่าของหายไปไหน' },
+  { name: 'loyalty_points_ledger', label: 'แต้มสะสม',            mode: 'read', note: '' },
+  { name: 'activity_log',          label: 'ประวัติการแก้ข้อมูล',   mode: 'read',
+    note: 'บันทึกอย่างเดียว ทุกการแก้ในหมวดนี้จะมาโผล่ที่นี่' },
+  { name: 'admins',                label: 'ทีมงาน',              mode: 'read',
+    note: 'เพิ่มหรือแก้สิทธิ์ต้องทำที่ Supabase โดยตรง เพื่อไม่ให้ใครยกระดับสิทธิ์ตัวเองจากหน้าเว็บได้' },
+];
+// ชื่อไทยของคอลัมน์ในตารางที่แก้ได้ (ตรวจกับ migrations 001 · 003 · 007 · 018 · 019)
+// ตารางอื่นและคอลัมน์ที่ไม่อยู่ในนี้ แสดงชื่อดิบตามฐานข้อมูล
+const AD_COMMON_LABELS = { id: 'รหัสอ้างอิง', created_at: 'สร้างเมื่อ', updated_at: 'แก้ไขล่าสุด',
+  admin_id: 'ผู้บันทึก', created_by: 'ผู้เพิ่ม', updated_by: 'ผู้แก้ไขล่าสุด' };
+const AD_LABELS = {
+  products: { sku: 'SKU', name: 'ชื่อสินค้า', brand: 'แบรนด์', category: 'หมวดหมู่', barcode_ean13: 'บาร์โค้ด EAN-13',
+    cost_price: 'ราคาต้นทุน (บาท)', sell_price: 'ราคาขาย (บาท)', reorder_point: 'จุดสั่งซื้อซ้ำ', is_active: 'เปิดขาย' },
+  customers: { full_name: 'ชื่อลูกค้า', phone: 'เบอร์โทร', line_id: 'LINE ID', email: 'อีเมล', note: 'หมายเหตุ', tags: 'แท็ก' },
+  expenses: { spent_on: 'วันที่จ่าย', seq: 'ลำดับในวัน', description: 'รายการ', amount: 'จำนวนเงิน (บาท)', receipt_path: 'ไฟล์รูปบิล' },
+  income_entries: { received_at: 'เวลาที่รับ', source: 'ที่มา', description: 'รายละเอียด', amount: 'จำนวนเงิน (บาท)',
+    payment_method: 'วิธีชำระ', customer_id: 'ลูกค้า (รหัส)' },
+  booking_settings: { price_per_hour: 'ราคาห้องต่อชั่วโมง (บาท)', points_per_hour: 'แต้มต่อชั่วโมง',
+    free_hour_threshold: 'ชั่วโมงสะสมเพื่อรับสิทธิ์ฟรี', free_hours_reward: 'ชั่วโมงฟรีที่ได้', room_name: 'ชื่อห้อง / ร้าน' },
+};
+function adLabel(col) {
+  const own = AD_LABELS[adTable.name];
+  if (!own) return col;                            // ตารางอ่านอย่างเดียว ใช้ชื่อดิบ
+  return own[col] || AD_COMMON_LABELS[col] || col;
+}
+const SYSTEM_COLUMNS = ['id', 'created_at', 'updated_at', 'imported_at', 'admin_id', 'created_by'];
+// expenses กับ income_entries ตั้ง admin_id เป็น not null ไม่มีค่าเริ่มต้น — เติมให้เอง ไม่ให้คนพิมพ์ UUID
+const ACTOR_COLUMNS = ['admin_id', 'created_by'];
+const COMPLEX_TYPES = ['ARRAY', 'jsonb', 'json'];
+const AD_PAGE = 25;
+let adTable = AD_TABLES[0], adColumns = [], adRows = [], adPage = 0, adTotal = 0, adSearchTerm = '', adEditingRow = null, adLoaded = false;
+
+function isSystemColumn(n) { return SYSTEM_COLUMNS.indexOf(n) !== -1; }
+function isComplexType(t) { return COMPLEX_TYPES.indexOf(t) !== -1; }
+function canEditTable() { return adTable.mode === 'full' || adTable.mode === 'edit'; }
+function canAddRow() { return adTable.mode === 'full'; }
+function canDeleteRow() { return adTable.mode === 'full'; }
+function displayValue(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'ใช่' : 'ไม่ใช่';
+  if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v);
+}
+
+function renderAdTableList() {
+  document.getElementById('adTableList').innerHTML = AD_TABLES.map(t =>
+    '<button type="button" class="' + (t === adTable ? 'active' : '') + '" onclick="adSelectTable(\'' + t.name + '\')">' +
+      '<span>' + escapeHtml(t.label) + '</span><span class="mode">' + (t.mode === 'read' ? '👁 ดู' : t.mode === 'edit' ? '✎ แก้' : '✎ เต็ม') + '</span></button>').join('');
+}
+
+async function adLoadColumns() {
+  const { data, error } = await db.rpc('admin_table_columns', { p_table: adTable.name });
+  if (error) {
+    console.error('[Load columns]', error);
+    showFatalError('อ่านโครงสร้างตาราง ' + adTable.name + ' ไม่สำเร็จ: ' + error.message);
+    adColumns = [];
+    return false;
+  }
+  adColumns = data || [];
+  return true;
+}
+
+// ถ้าไม่ระบุลำดับ ฐานข้อมูลไม่รับประกัน แล้วการแบ่งหน้าจะสลับแถวไปมาเอง
+function adOrderColumn() {
+  const names = adColumns.map(c => c.column_name);
+  for (const p of ['created_at', 'received_at', 'spent_on', 'date', 'imported_at']) if (names.indexOf(p) !== -1) return { col: p, asc: false };
+  if (names.indexOf('name') !== -1) return { col: 'name', asc: true };
+  return { col: names[0], asc: true };
+}
+
+async function adLoadRows() {
+  if (!adColumns.length) { adRows = []; adTotal = 0; return; }
+  const ord = adOrderColumn();
+  let q = db.from(adTable.name).select('*', { count: 'exact' }).order(ord.col, { ascending: ord.asc })
+    .range(adPage * AD_PAGE, adPage * AD_PAGE + AD_PAGE - 1);
+  if (adSearchTerm) {
+    // ค้นเฉพาะคอลัมน์ตัวหนังสือ — ilike กับ uuid หรือตัวเลขจะทำให้ทั้ง query พัง
+    const textCols = adColumns.filter(c => c.data_type === 'text' || c.data_type.indexOf('character') === 0).map(c => c.column_name);
+    if (textCols.length) {
+      const safe = adSearchTerm.replace(/[%,()]/g, ' ');
+      q = q.or(textCols.map(c => c + '.ilike.%' + safe + '%').join(','));
+    }
+  }
+  const { data, error, count } = await q;
+  if (error) {
+    console.error('[Load rows]', error);
+    showFatalError('โหลดข้อมูลไม่สำเร็จ: ' + error.message);
+    adRows = []; adTotal = 0;
+    return;
+  }
+  adRows = data || [];
+  adTotal = count || 0;
+}
+
+async function adLoadAll() {
+  adLoaded = true;
+  renderAdTableList();
+  const ok = await adLoadColumns();
+  if (ok) await adLoadRows();
+  renderAdmin();
+}
+
+function renderAdmin() {
+  renderAdTableList();
+  const note = adTable.mode === 'read'
+    ? '<div class="alert alert-warn"><strong>👁 ดูได้อย่างเดียว</strong>' + (adTable.note ? '<br>' + escapeHtml(adTable.note) : '') + '</div>'
+    : (adTable.note ? '<div class="alert alert-warn">' + escapeHtml(adTable.note) + '</div>' : '');
+  document.getElementById('adNote').innerHTML = note;
+  document.getElementById('adAddBtn').hidden = !canAddRow();
+  const pref = adColumns.filter(c => !isSystemColumn(c.column_name));
+  const cols = (pref.length ? pref : adColumns).slice(0, 7);
+  document.getElementById('adHead').innerHTML = cols.map((c, i) => {
+    const th = adLabel(c.column_name);
+    return '<th' + (i >= 4 ? ' class="col-opt"' : '') + ' style="padding:10px 14px;" title="' + escapeHtml(c.column_name) + '">' + escapeHtml(th) +
+      (th !== c.column_name ? '<span class="colname">' + escapeHtml(c.column_name) + '</span>' : '') + '</th>';
+  }).join('');
+  fillTable('admin', adRows, r => cols.map((c, i) =>
+    '<td' + (i >= 4 ? ' class="col-opt"' : '') + ' style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"' +
+    ' title="' + escapeHtml(displayValue(r[c.column_name])) + '">' + escapeHtml(displayValue(r[c.column_name])) + '</td>').join(''),
+    adSearchTerm ? 'ไม่พบข้อมูลที่ค้นหา' : 'ยังไม่มีข้อมูลในตารางนี้');
+  const from = adTotal === 0 ? 0 : adPage * AD_PAGE + 1;
+  const to = Math.min(adTotal, adPage * AD_PAGE + adRows.length);
+  document.getElementById('adPagerInfo').textContent = adTotal === 0 ? '0 แถว' : from + '–' + to + ' จาก ' + adTotal + ' แถว';
+  document.getElementById('adPrevBtn').disabled = adPage === 0;
+  document.getElementById('adNextBtn').disabled = (adPage + 1) * AD_PAGE >= adTotal;
+}
+
+function adSelectTable(name) {
+  adTable = AD_TABLES.find(t => t.name === name) || AD_TABLES[0];
+  adPage = 0;
+  adSearchTerm = '';
+  document.getElementById('adSearch').value = '';
+  closeDetail();
+  return adLoadAll();
+}
+document.getElementById('adSearch').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
+  adSearchTerm = this.value.trim();
+  adPage = 0;
+  adLoadRows().then(renderAdmin);
+});
+function adChangePage(delta) {
+  const next = adPage + delta;
+  if (next < 0 || next * AD_PAGE >= adTotal) return;
+  adPage = next;
+  adLoadRows().then(renderAdmin);
+}
+
+// เปิดแถวจากหมวดอื่น (แก้/เพิ่มสินค้าจากแผงสินค้า) — แถวอาจไม่อยู่ในหน้าที่แสดง จึงดึงตรงด้วย id
+async function adGotoRow(table, id) {
+  showSection('admin');
+  if (adTable.name !== table || !adColumns.length) await adSelectTable(table);
+  if (!id) { adOpenRow(null); return; }
+  let row = adRows.find(r => r.id === id);
+  if (!row) {
+    const { data, error } = await db.from(table).select('*').eq('id', id).maybeSingle();
+    if (error || !data) { showFatalError('เปิดแถวนี้ไม่สำเร็จ' + (error ? ': ' + error.message : ' — ไม่พบข้อมูล')); return; }
+    row = data;
+  }
+  adOpenRow(row);
+}
+
+function inputTypeFor(t) {
+  if (t === 'boolean') return 'boolean';
+  if (['integer', 'bigint', 'smallint', 'numeric', 'double precision', 'real'].indexOf(t) !== -1) return 'number';
+  if (t === 'date') return 'date';
+  if (t.indexOf('timestamp') === 0) return 'datetime-local';
+  if (t.indexOf('time without') === 0) return 'time';
+  return 'text';
+}
+
+function adOpenRow(row) {
+  adEditingRow = row || null;
+  const isNew = !row;
+  if (isNew && !canAddRow()) return;
+  detailToken++;
+  const fields = adColumns.map(c => {
+    const name = c.column_name;
+    const raw = isNew ? null : row[name];
+    const locked = !canEditTable() || isSystemColumn(name) || isComplexType(c.data_type);
+    const th = adLabel(name);
+    const label = '<label class="lbl" for="fld_' + escapeHtml(name) + '">' + escapeHtml(th) + (c.is_nullable ? '' : ' *') +
+      '<span class="colname">' + escapeHtml(th !== name ? name + ' · ' : '') + escapeHtml(c.data_type) + '</span></label>';
+    if (locked) return '<div class="field">' + label + '<div class="ro">' + escapeHtml(displayValue(raw)) + '</div></div>';
+    const kind = inputTypeFor(c.data_type);
+    const id = 'fld_' + name;
+    if (kind === 'boolean') {
+      const v = raw === true ? 'true' : raw === false ? 'false' : '';
+      return '<div class="field">' + label + '<select class="input" id="' + id + '" data-col="' + escapeHtml(name) + '" data-kind="boolean">' +
+        '<option value=""' + (v === '' ? ' selected' : '') + '>— ไม่ระบุ —</option>' +
+        '<option value="true"' + (v === 'true' ? ' selected' : '') + '>ใช่</option>' +
+        '<option value="false"' + (v === 'false' ? ' selected' : '') + '>ไม่ใช่</option></select></div>';
+    }
+    let value = raw === null || raw === undefined ? '' : String(raw);
+    if (kind === 'datetime-local' && value) value = toDatetimeLocalValue(raw);
+    return '<div class="field">' + label + '<input type="' + kind + '" class="input" id="' + id + '" data-col="' + escapeHtml(name) +
+      '" data-kind="' + kind + '"' + (kind === 'number' ? ' step="any"' : '') + ' value="' + escapeHtml(value) + '"></div>';
+  }).join('');
+  openDetail(isNew ? 'เพิ่มแถวใน ' + adTable.label : adTable.label,
+    (adTable.mode === 'read' ? '<div class="alert alert-warn">👁 ตารางนี้ดูได้อย่างเดียว</div>' : '') +
+    (adColumns.filter(c => !isSystemColumn(c.column_name)).length > 4 ? '<p class="hint" style="margin:0 0 14px;">ตารางซ่อนบางคอลัมน์ไว้ระหว่างเปิดแผงนี้ — ข้อมูลครบอยู่ในฟอร์มด้านล่าง</p>' : '') +
+    '<div id="adFields">' + fields + '</div>' +
+    '<div class="actions">' +
+      (canEditTable() && (!isNew || canAddRow()) ? '<button class="btn btn-primary" id="adSaveBtn" type="button" onclick="adSaveRow()">บันทึก</button>' : '') +
+      (!isNew && canDeleteRow() ? '<button class="btn btn-danger" type="button" onclick="adDeleteRow()">ลบแถวนี้</button>' : '') +
+    '</div>');
+}
+
+function adCollect() {
+  const payload = {};
+  document.querySelectorAll('#adFields [data-col]').forEach(el => {
+    const col = el.getAttribute('data-col'), kind = el.getAttribute('data-kind'), raw = el.value;
+    if (kind === 'boolean') { payload[col] = raw === '' ? null : raw === 'true'; return; }
+    if (raw === '') { payload[col] = null; return; }
+    if (kind === 'number') { const n = Number(raw); payload[col] = isNaN(n) ? null : n; return; }
+    if (kind === 'datetime-local') { payload[col] = new Date(raw).toISOString(); return; }
+    payload[col] = raw;
+  });
+  return payload;
+}
+
+async function adSaveRow() {
+  // รั้วชั้นแรกของตารางดูอย่างเดียว — ปุ่มไม่โผล่ก็จริง แต่ฟังก์ชันต้องไม่ยอมเขียนเองด้วย
+  if (!canEditTable()) { showToast('⚠️ ตาราง "' + adTable.label + '" ดูได้อย่างเดียว แก้ไขไม่ได้'); return; }
+  if (!adEditingRow && !canAddRow()) { showToast('⚠️ ตาราง "' + adTable.label + '" เพิ่มแถวไม่ได้'); return; }
+  const payload = adCollect();
+  if (!adEditingRow) {
+    adColumns.forEach(c => { if (ACTOR_COLUMNS.indexOf(c.column_name) !== -1 && currentUserId) payload[c.column_name] = currentUserId; });
+  }
+  const missing = adColumns.filter(c => !c.is_nullable && !c.has_default && !isSystemColumn(c.column_name) &&
+    !isComplexType(c.data_type) && (payload[c.column_name] === null || payload[c.column_name] === undefined)).map(c => c.column_name);
+  if (missing.length) { showToast('⚠️ ต้องกรอก: ' + missing.join(', ')); return; }
+  if (adColumns.some(c => c.column_name === 'updated_at')) payload.updated_at = new Date().toISOString();
+  const btn = document.getElementById('adSaveBtn');
+  if (btn) btn.disabled = true;
+  const { error } = adEditingRow
+    ? await db.from(adTable.name).update(payload).eq('id', adEditingRow.id)
+    : await db.from(adTable.name).insert(payload);
+  if (btn) btn.disabled = false;
+  if (error) { console.error('[Save row]', error); showFatalError('บันทึกไม่สำเร็จ: ' + error.message); return; }
+  closeDetail();
+  showToast('✅ บันทึกเรียบร้อยแล้ว');
+  await adLoadAll();
+  if (adTable.name === 'products' || adTable.name === 'customers' || adTable.name === 'booking_settings') loadAll();
+}
+
+function adDeleteRow() {
+  if (!adEditingRow || !canDeleteRow()) return;
+  const row = adEditingRow;
+  askConfirm('ยืนยันการลบ', '<div class="alert alert-red">ลบแถวนี้ออกจากตาราง ' + escapeHtml(adTable.label) +
+    ' อย่างถาวร กู้คืนไม่ได้ ถ้ามีข้อมูลอื่นอ้างถึงแถวนี้อยู่ ฐานข้อมูลจะปฏิเสธการลบเอง</div>', 'ยืนยันลบแถวนี้', async () => {
+      if (!canDeleteRow()) return;
+      const { error } = await db.from(adTable.name).delete().eq('id', row.id);
+      if (error) { console.error('[Delete row]', error); showFatalError('ลบไม่สำเร็จ: ' + error.message); return; }
+      closeConfirm();
+      closeDetail();
+      showToast('✅ ลบแถวเรียบร้อยแล้ว');
+      adLoadAll();
+    });
+}
+
 renderNav();
-showSection('products');
+pendingRoute = sectionFromHash();
+history.replaceState({ n: 0 }, '', location.hash || '#stock');
+showSection(pendingRoute && !SECTIONS.find(x => x.id === pendingRoute).manager ? pendingRoute : 'products', 'none');
+updateBackBtn();
 renderSerialList();
 renderCart();
+restoreTimer();
 initSupabaseSync();
 
 // ---------------------------------------------------------------------------
@@ -2066,7 +4375,7 @@ async function onWedgeScan(value) {
   const purpose = wedgeRoute();
   if (!purpose) return;                       // ยังไม่ได้ล็อกอิน เงียบไว้
   if (purpose === 'blocked') { showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง'); return; }
-  if (purpose === 'wrongpage') { showToast('⚠️ ไปที่หมวด "ขายหน้าร้าน" หรือ "สินค้า" ก่อนแล้วค่อยยิง'); return; }
+  if (purpose === 'wrongpage') { showToast('⚠️ เครื่องยิงบาร์โค้ดใช้ได้ในหมวดสต็อกสินค้าและขายหน้าร้าน — เปลี่ยนหมวดก่อนแล้วค่อยยิง'); return; }
   scanPurpose = purpose;
   await onScanned(value, true);
 }
