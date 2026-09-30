@@ -354,22 +354,27 @@
   .agenda-row.now { background: var(--surface2); padding-left: 8px; padding-right: 8px; margin: 0 -8px; }
   .agenda-row .state { font-size: 14px; font-weight: 700; }
   .agenda-row.now .state { color: var(--red); }
-  /* ไอคอนลัด 2 × 2 (แต่ละคนเลือกเองได้) · ตัวเลขแดงมุมขวาบน = ของที่รออยู่ เหมือนป้ายบนไอคอนแอปมือถือ */
-  .launcher { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px 18px 18px; }
-  .lt { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 148px;
-    background: var(--surface2); border: 1px solid var(--line); cursor: pointer; padding: 16px 10px; font-family: var(--font-head);
-    font-weight: 600; font-size: 17px; color: var(--text); transition: border-color .15s, background-color .15s; }
-  .lt:hover { border-color: var(--black); background: var(--surface); }
-  .lt:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
-  .lt svg { width: 48px; height: 48px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: square; stroke-linejoin: miter;
-    transition: transform .2s cubic-bezier(0.16, 1, 0.3, 1); }
-  .lt:hover svg { transform: translateY(-3px); }
-  .lt .badge { position: absolute; top: 10px; right: 10px; min-width: 28px; height: 28px; padding: 0 7px; display: inline-flex; align-items: center;
-    justify-content: center; background: var(--red); color: #fff; font-family: var(--font-head); font-size: 15px; font-weight: 700; }
-  .lt.empty { border-style: dashed; color: var(--text2); font-family: var(--font-body); font-weight: 400; font-size: 15px; }
-  .lt-edit { display: flex; flex-direction: column; gap: 8px; min-height: 148px; border: 1px dashed var(--line-strong); padding: 12px; background: var(--surface); }
-  .lt-edit .lt-prev { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-weight: 600; }
-  .lt-edit .lt-prev svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  /* ไอคอนลัด 2 × 2 แบบไอคอนแอป (เจ้าของเลือกแบบ A · 1 ต.ค. 69)
+     ⚠️ มุมโค้ง 20px คือ "ข้อยกเว้นที่เจ้าของสั่ง" เฉพาะไอคอนลัดเท่านั้น — ที่อื่นในคอนโซลยังเป็นมุมเหลี่ยมทั้งหมด
+     สีพื้นต่อไอคอนมาจาก LAUNCH_ITEMS · สีเส้นไอคอนขาว/ดำเลือกจากคอนทราสต์จริง (≥ 3:1 · launchInk) */
+  .launcher { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; padding: 22px 18px 20px; }
+  .lt { display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: 0; cursor: pointer; padding: 4px;
+    font-family: var(--font-head); font-weight: 600; font-size: 16px; color: var(--text); }
+  .lt:focus-visible { outline: 2px solid var(--black); outline-offset: 4px; }
+  .lt-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 84px;
+    border-radius: 20px; background: var(--tile); color: var(--glyph); flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(15,15,15,.14), 0 8px 18px rgba(15,15,15,.12); transition: transform .18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .18s; }
+  .lt-icon svg { width: 44px; height: 44px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .lt:hover .lt-icon { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(15,15,15,.16), 0 14px 26px rgba(15,15,15,.16); }
+  .lt-icon .badge { position: absolute; top: -8px; right: -8px; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 14px;
+    border: 2px solid #fff; display: inline-flex; align-items: center; justify-content: center; background: var(--red); color: #fff;
+    font-family: var(--font-head); font-size: 14px; font-weight: 700; box-sizing: border-box; }
+  .lt.empty .lt-icon { background: var(--surface2); border: 2px dashed var(--line-strong); box-shadow: none; color: var(--text2); }
+  .lt.empty { color: var(--text2); font-family: var(--font-body); font-weight: 400; font-size: 15px; }
+  .lt-edit { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--line-strong); padding: 12px; background: var(--surface); }
+  .lt-edit .lt-prev { display: flex; align-items: center; gap: 12px; font-family: var(--font-head); font-weight: 600; }
+  .lt-icon.sm { width: 52px; height: 52px; border-radius: 13px; }
+  .lt-icon.sm svg { width: 28px; height: 28px; }
 
   /* แอปที่ปักไว้ + เครื่องเล่นที่อยู่ติดจอข้ามทุกหมวด */
   .app-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
@@ -378,16 +383,44 @@
     font-family: var(--font-head); font-weight: 700; font-size: 14px; }
   .app-row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-row .name small { display: block; font-size: 14px; color: var(--text2); }
-  .player { position: fixed; right: 20px; bottom: 20px; width: 400px; z-index: 800; background: var(--black); color: #fff;
+  /* เครื่องเล่นกล่องเดียวทั้งหน้า (#player) — ⚠️ ห้ามย้าย iframe ไปอยู่ใต้ element อื่น (ย้ายใน DOM = โหลดวิดีโอใหม่)
+     อยู่หน้าแรก: "จอด" ทับช่อง #ytDock พอดี (docked · ตั้ง left/top/width/height ตามกรอบของช่องนั้น)
+     อยู่หมวดอื่น: หน้าต่างเล็กลอย ลากย้ายได้ (ตำแหน่งจำไว้ในเครื่อง) */
+  .player { position: fixed; left: 0; top: 0; width: 400px; z-index: 800; background: var(--black); color: #fff;
     box-shadow: 0 12px 40px rgba(15,15,15,.35); }
-  .player-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; font-size: 14px; }
+  .player.docked { z-index: 5; box-shadow: none; }
+  .player.docked .player-bar { display: none; }
+  .player.docked .player-body { height: 100%; }
+  .player-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; font-size: 14px; cursor: grab; touch-action: none; user-select: none; }
+  .player-bar:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+  .player.dragging .player-bar { cursor: grabbing; }
   .player-bar .ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
   .player-bar button { background: none; border: 1px solid #3A3A38; color: #fff; font-size: 14px; padding: 3px 10px; cursor: pointer; }
   .player-bar button:hover { border-color: #fff; }
-  .player-body { height: 225px; overflow: hidden; transition: height .2s cubic-bezier(0.16, 1, 0.3, 1); }
+  .player-body { position: relative; height: 225px; overflow: hidden; transition: height .2s cubic-bezier(0.16, 1, 0.3, 1); }
   .player-body.spotify { height: 152px; }
   .player.min .player-body { height: 0; }         /* ย่อ = ซ่อนภาพ แต่ iframe ยังอยู่ เสียงไม่หยุด */
-  .player iframe { display: block; width: 100%; height: 100%; border: 0; }
+  /* ระหว่างลาก: แผ่นใสทับ iframe ไม่งั้น iframe กลืน pointermove แล้วหน้าต่างค้างกลางทาง */
+  .player-shield { position: absolute; inset: 0; z-index: 2; cursor: grabbing; }
+  /* แผง YouTube บนหน้าแรก (ใต้กล่อง "วันนี้") */
+  .yt-search { display: flex; gap: 8px; margin: 12px 0 10px; }
+  .yt-search .input { flex: 1; }
+  .yt-dock { position: relative; aspect-ratio: 16 / 9; background: var(--black); color: #CFCCC3; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; font-size: 15px; }
+  .yt-bar { display: flex; align-items: center; gap: 8px; padding: 10px 0 4px; font-size: 15px; }
+  .yt-bar .ttl { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .yt-sub { font-family: var(--font-head); font-weight: 600; font-size: 15px; margin: 14px 0 8px; }
+  .yt-sub .hint { font-family: var(--font-body); font-weight: 400; margin: 0; }
+  .yt-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .yt-card { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 14px; }
+  .yt-card .pick { display: block; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: var(--text); }
+  .yt-card .pick:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+  .yt-card .thumb { position: relative; display: block; aspect-ratio: 16 / 9; background: var(--surface2) center / cover no-repeat; }
+  .yt-card .dur { position: absolute; right: 4px; bottom: 4px; background: rgba(15,15,15,.85); color: #fff; font-size: 14px; padding: 0 5px; }
+  .yt-card .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 600; margin-top: 4px; }
+  .yt-card .ch { color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .yt-card .q { align-self: flex-start; }
+  .yt-card.now .thumb { outline: 3px solid var(--red); outline-offset: -3px; }
   .frame-hint { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 850; background: var(--warn-soft); color: var(--warn);
     border: 1px solid #E8D1A0; padding: 8px 16px; font-size: 15px; font-weight: 600; box-shadow: var(--shadow); }
 
@@ -428,6 +461,14 @@
   .ev:hover { box-shadow: 0 2px 8px rgba(15,15,15,.25); transform: translateY(-1px); }
   .ev:focus-visible { outline: 2px solid var(--black); outline-offset: 1px; }
   .ev b { font-weight: 700; margin-right: 5px; }
+  /* ปฏิทินหลักรายเดือน: ชื่อคลาสยอมถูกตัด แต่ชื่ออาจารย์ต้องเห็นเป็นตัวหนังสือเสมอ (สีอย่างเดียวไม่พอ) */
+  .ev.has-who { display: flex; align-items: baseline; }
+  .ev.has-who b { flex: none; }
+  .ev-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .ev-who { flex: none; margin-left: .3em; font-weight: 600; }
+  .cal-week .ev.has-who { display: block; }
+  .cal-week .ev-t { overflow: visible; }
+  .cal-week .ev-who { margin-left: 0; }
   .ev-more { border: 0; background: none; font-size: 14px; color: var(--text2); cursor: pointer; padding: 2px 6px; text-decoration: underline; }
   .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: var(--text2); margin-top: 12px; }
   .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; white-space: nowrap; }
@@ -457,9 +498,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     /* ไม่มีอะไรเลื่อนหรือเด้ง — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
-    .lt, .lt svg, .ev, .player-body { transition: none !important; }
-    .lt:hover svg, .ev:hover { transform: none; }
-  }
+    .lt, .lt-icon, .ev, .player-body { transition: none !important; }
+    .lt:hover .lt-icon, .ev:hover { transform: none; }
   }
 
   .print-only { display: none; }
@@ -579,6 +619,35 @@
                   <button class="btn btn-sm btn-ghost" type="button" onclick="showSection('calendar')">เปิดปฏิทิน →</button>
                 </div>
                 <div class="panel-body" id="tileCal"></div>
+              </div>
+              <!-- แผง YouTube (เจ้าของร่างไว้ 1 ต.ค. 69: จอใหญ่ + แถว "ถัดไป" 4 อัน ใต้กล่องวันนี้)
+                   #ytDock เป็นแค่ "ช่องจอด" — ตัวเล่นจริงคือ #player ที่อยู่นอกทุกหมวด ถูกวางทับช่องนี้ด้วยตำแหน่ง ไม่ได้ย้ายมาใส่ -->
+              <div class="panel" id="ytPanel">
+                <div class="panel-head">
+                  <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="4" width="16" height="12" rx="3"/><path d="M8.5 7.5l4 2.5-4 2.5z"/></svg>YouTube</h3>
+                  <span class="hint" style="margin:0;" id="ytCount"></span>
+                </div>
+                <div class="panel-body">
+                  <form class="yt-search" onsubmit="event.preventDefault(); ytSubmit();">
+                    <input type="search" id="ytQuery" class="input" autocomplete="off" maxlength="200"
+                           placeholder="ค้นหาใน YouTube หรือวางลิงก์วิดีโอ/เพลย์ลิสต์" aria-label="ค้นหา YouTube หรือวางลิงก์">
+                    <button class="btn btn-primary" id="ytGoBtn" type="submit">ค้นหา</button>
+                  </form>
+                  <div id="ytNote"></div>
+                  <div class="yt-dock" id="ytDock"><span id="ytEmpty">ค้นหาแล้วกดวิดีโอเพื่อเล่น — ออกไปหมวดอื่นได้ วิดีโอย่อเป็นหน้าต่างเล็กมุมจอและเล่นต่อ</span></div>
+                  <div class="yt-bar" id="ytBar" hidden>
+                    <span class="ttl" id="ytNowTitle"></span>
+                    <button class="btn btn-sm" type="button" onclick="ytNext()">⏭ ถัดไป</button>
+                    <button class="btn btn-sm" type="button" onclick="closePlayer()">✕ ปิดวิดีโอ</button>
+                  </div>
+                  <div class="yt-sub">ถัดไป <span class="hint">— เล่นต่อเองเมื่อวิดีโอจบ · มาจากผลค้นหาที่เหลือ และที่กด “+ คิว” (YouTube ไม่มี “วิดีโอที่เกี่ยวข้อง” ให้แล้ว)</span></div>
+                  <div class="yt-row" id="ytNext"></div>
+                  <div id="ytResultsWrap" hidden>
+                    <div class="yt-sub" id="ytResultsHead"></div>
+                    <div class="yt-row" id="ytResults"></div>
+                  </div>
+                  <p class="hint">ถ้ามี YouTube Premium: เข้าสู่ระบบ youtube.com ในเบราว์เซอร์นี้ครั้งเดียว วิดีโอจะไม่มีโฆษณา</p>
+                </div>
               </div>
             </div>
             <div>
@@ -1171,6 +1240,7 @@
       <span><kbd>F9</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span><span>บันทึกการขาย (กดได้แม้อยู่ในช่องส่วนลด/หมายเหตุ)</span>
       <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน · เลื่อนเดือน/สัปดาห์ในปฏิทิน</span>
       <span><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd></span><span>กลับไปหมวดก่อนหน้า / ไปข้างหน้า (เหมือนปุ่ม ← ย้อนกลับ บนแถบบน และปุ่มย้อนของเมาส์)</span>
+      <span><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> (ที่แถบหน้าต่างวิดีโอ)</span><span>ย้ายหน้าต่างวิดีโอทีละ 20px · <kbd>Home</kbd> กลับมุมขวาล่าง · ลากด้วยเมาส์ก็ได้</span>
       <span><kbd>?</kbd></span><span>เปิดหน้านี้</span>
     </div>
     <p class="hint" style="margin-top:14px;">คีย์ลัดไม่ทำงานระหว่างพิมพ์ในช่องกรอก (ยกเว้น Esc, Ctrl+K, F9) และไม่รบกวนเครื่องยิงบาร์โค้ด</p>
@@ -1342,7 +1412,11 @@
       <span class="lbl" id="gsColorLbl">สีของกิจกรรมจาก Google บนปฏิทินร้าน</span>
       <div class="swatches" id="gsSwatches" role="group" aria-labelledby="gsColorLbl"></div>
       <label class="chk" style="margin-top:6px;">สีอื่น <input type="color" id="gsColor" aria-label="เลือกสีเอง" oninput="pickGcalColor(this.value)"></label>
-      <div class="hint">ไฟล์ iCal ของ Google ไม่ส่งสีมาด้วย — เลือกชื่อสีให้ตรงกับที่ตั้งไว้ใน Google Calendar (ชื่อเดียวกับในเมนูสีของ Google)</div>
+      <div class="hint">ไฟล์ iCal ของ Google ไม่ส่งสีมาด้วย — เลือกชื่อสีให้ตรงกับที่ตั้งไว้ใน Google Calendar (ชื่อเดียวกับในเมนูสีของ Google) · ใช้กับกิจกรรมที่ไม่ได้ลงชื่ออาจารย์</div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="gsTeacherLbl">สีของอาจารย์ (อ่านจากชื่อท้ายกิจกรรม เช่น “… — Nutty”)</span>
+      <div class="swatches" id="gsTeachers" role="group" aria-labelledby="gsTeacherLbl"></div>
     </div>
     <div class="alert alert-warn">ที่อยู่นี้เป็นความลับ ใครได้ไปก็เปิดดูปฏิทินได้ทั้งปฏิทิน — ระบบเก็บไว้ให้เจ้าของร้าน/ผู้ดูแลเห็นเท่านั้น พนักงานเห็นแค่กิจกรรม</div>
     <div class="dlg-foot" style="padding:0;">
@@ -1409,11 +1483,11 @@
     <div class="field">
       <label class="lbl" for="apKind">ชนิด</label>
       <select id="apKind" class="input" onchange="renderAppKindHint()">
-        <option value="youtube">YouTube — เล่นค้างไว้ได้ระหว่างเปลี่ยนหมวด</option>
         <option value="spotify">Spotify — เล่นค้างไว้ได้ระหว่างเปลี่ยนหมวด</option>
         <option value="link">เว็บอื่น (Netflix ฯลฯ) — เปิดเป็นหน้าต่างใหม่</option>
       </select>
       <div class="hint" id="apKindHint"></div>
+      <div class="hint">YouTube ใช้แผง YouTube บนหน้าแรกได้เลย (ค้นหา · คิว · เล่นต่อเอง)</div>
     </div>
     <div class="field"><label class="lbl" for="apUrl">ลิงก์ *</label><input type="url" id="apUrl" class="input" autocomplete="off" placeholder="https://"></div>
     <div class="field"><label class="lbl" for="apTitle">ชื่อที่แสดง</label><input type="text" id="apTitle" class="input" maxlength="60" placeholder="เช่น เพลงเปิดร้าน"></div>
@@ -1427,12 +1501,13 @@
 
 <!-- เครื่องเล่น: อยู่นอกทุกหมวด เปลี่ยนหมวดแล้วเสียงไม่หยุด (หน้าคอนโซลเป็นหน้าเดียว ไม่โหลดใหม่) -->
 <div class="player" id="player" hidden role="region" aria-label="เครื่องเล่น">
-  <div class="player-bar">
+  <div class="player-bar" id="playerBar" tabindex="0" aria-label="หน้าต่างเครื่องเล่น — ลากเพื่อย้าย หรือใช้ลูกศรย้ายทีละนิด · Home กลับมุมขวาล่าง">
     <span class="ttl" id="playerTitle"></span>
     <button type="button" id="playerMinBtn" onclick="togglePlayerMin()">ย่อ</button>
     <button type="button" onclick="closePlayer()" aria-label="ปิดเครื่องเล่น">✕ ปิด</button>
   </div>
   <div class="player-body" id="playerBody"></div>
+  <div class="player-shield" id="playerShield" hidden></div>
 </div>
 <div class="frame-hint" id="frameHint" hidden role="status">โฟกัสอยู่ในกรอบวิดีโอ/อีเมล — คลิกที่หน้าคอนโซลหนึ่งครั้งก่อนยิงบาร์โค้ด</div>
 
@@ -2703,6 +2778,7 @@ function showSection(id, mode) {
     if (id === 'calendar') loadCalendar();
   }
   if (id === 'home') renderHome();
+  playerLayout();                 // เครื่องเล่น: จอดบนหน้าแรก / ย่อเป็นหน้าต่างเล็กในหมวดอื่น (ไม่ย้าย iframe)
   document.getElementById('pageTitle').textContent = s.label;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === id));
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
@@ -4691,7 +4767,7 @@ let homeToday = { shop: [], google: [], googleErr: null };
 // box = แท็บที่เปิดอยู่ (inbox / starred / ชื่อป้าย) · counts = จำนวนต่อแท็บจากฟังก์ชัน (null = ป้ายยังไม่มีใน Gmail)
 const mailState = { status: null, unseen: null, error: '', page: 1, q: '', total: 0, pageSize: 25, box: 'inbox', counts: {},
                     noLabel: false, messages: [], open: null, listToken: 0, readToken: 0, reply: null };
-const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null, gcolor: null,
+const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null, gcolor: null, teacherColors: {},
                    layers: { shop: true, google: true, rooms: false }, token: 0 };
 
 const THAI_DAYS_LONG = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -4714,6 +4790,31 @@ const GCAL_PALETTE = [
   ['บลูเบอร์รี่ (Blueberry)', '#3F51B5'], ['ลาเวนเดอร์ (Lavender)', '#7986CB'], ['องุ่น (Grape)', '#8E24AA'], ['กราไฟต์ (Graphite)', '#616161'],
 ];
 function gcalColor() { return calState.gcolor || GCAL_DEFAULT; }
+
+// ทีมครู (แหล่งจริง: CLAUDE.md ของ workspace) — ปฏิทินหลัก (Google) ลงชื่ออาจารย์ไว้ท้ายชื่อกิจกรรม
+// เช่น "[ห้องใหญ่] BASIC SCRATCH/Kanid — Nutty" · สีตั้งต้นต่างจากหมวดของร้าน การจองห้อง และกันเอง
+// เจ้าของร้านเปลี่ยนสีได้ในหน้าตั้งค่า Google Calendar (staff_settings.teacher_colors · 029)
+const TEACHERS = ['Zlex', 'Leonie', 'Nutty', 'TiBass', 'Maniac', 'Alldayz'];
+const TEACHER_DEFAULT_COLORS = { Zlex: '#C2185B', Leonie: '#00897B', Nutty: '#F6BF26', TiBass: '#6D4C41', Maniac: '#C0CA33', Alldayz: '#00ACC1' };
+// แยก "[ห้อง] ชื่อคลาส — อาจารย์" · ตัวคั่นคือขีดตัวสุดท้ายที่มีช่องว่างสองข้าง (— – หรือ -)
+// ขีดในคำ (DJM-S11) ไม่นับ · ชื่อท้ายที่ไม่ใช่ครูในทีม = ไม่แยก (ชื่อกิจกรรมคงเดิมทั้งหมด)
+// แยกที่หน้าเว็บ ไม่ใช่ใน gcal: เป็นเรื่องการแสดงผลล้วน ใช้ร่วมกันทั้งปฏิทิน/หน้าแรก และรูปแบบชื่อเปลี่ยนเมื่อไหร่ไม่ต้อง deploy ฟังก์ชันใหม่
+function parseGcalTitle(raw) {
+  let s = String(raw || '').trim(), room = '';
+  const m = s.match(/^\[([^\]]{1,40})\]\s*/);
+  if (m) { room = m[1].trim(); s = s.slice(m[0].length); }
+  let teacher = null;
+  const d = s.match(/^(.*\S)\s+[—–-]\s+([^—–-]+?)\s*$/);
+  if (d) {
+    const t = TEACHERS.find(x => x.toLowerCase() === d[2].trim().toLowerCase());
+    if (t) { teacher = t; s = d[1].trim(); }
+  }
+  return { room, title: s || String(raw || '').trim(), teacher };
+}
+function teacherColor(t) {
+  const c = t && ((calState.teacherColors || {})[t] || TEACHER_DEFAULT_COLORS[t]);
+  return c || gcalColor();
+}
 
 // WCAG 2.x — ความสว่างสัมพัทธ์ และอัตราส่วนคอนทราสต์ของสีสองสี
 function relLum(hex) {
@@ -4878,7 +4979,8 @@ function renderHome() {
     const c = CAL_CATS[e.category] || CAL_CATS.other;
     return { k: e.all_day ? '' : shortTime(e.start_time), time: e.all_day ? 'ทั้งวัน' : shortTime(e.start_time), chip: chip(c.t, c.color), title: e.title, state: '' };
   }).concat(homeToday.google.map(g => ({
-    k: g.all_day ? '' : g.start.slice(11, 16), time: g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16), chip: chip('Google', gcalColor()), title: g.title, state: '',
+    k: g.all_day ? '' : g.start.slice(11, 16), time: g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16), ...(pt => ({
+      chip: chip(pt.teacher || 'ปฏิทินหลัก', teacherColor(pt.teacher)), title: pt.title + (pt.room ? ' · ' + pt.room : '') }))(parseGcalTitle(g.title)), state: '',
   }))).concat(bk.map(b => {
     const s0 = toMin(b.start_time), now = nowMin >= s0 && nowMin < s0 + b.hours * 60;
     return { k: shortTime(b.start_time), time: shortTime(b.start_time), chip: chip('ห้องซ้อม', ROOM_COLOR),
@@ -5005,18 +5107,19 @@ function iconSvg(k) { return '<svg viewBox="0 0 48 48" aria-hidden="true">' + (I
 
 // แคตตาล็อกสำเร็จรูป — เฉพาะหมวดที่พนักงานทุกคนเปิดได้ (หมวดของเจ้าของ/ผู้ดูแลไม่อยู่ในนี้)
 const LAUNCH_ITEMS = [
-  { key: 'pos',      t: 'ขายหน้าร้าน', icon: 'scan',   go: () => { showSection('pos'); focusScan(); } },
-  { key: 'mail',     t: 'อีเมล',       icon: 'mail',   go: () => openMailBox('inbox'),
+  { key: 'pos',      t: 'ขายหน้าร้าน', icon: 'scan',   color: '#CC001A', go: () => { showSection('pos'); focusScan(); } },
+  { key: 'mail',     t: 'อีเมล',       icon: 'mail',   color: '#3F51B5', go: () => openMailBox('inbox'),
     badge: () => mailState.status === 'ok' ? (mailState.unseen || 0) : 0 },
-  { key: 'booking',  t: 'ห้องซ้อม',    icon: 'room',   go: () => showSection('booking'),
+  { key: 'booking',  t: 'ห้องซ้อม',    icon: 'room',   color: '#8E24AA', go: () => showSection('booking'),
     badge: () => bookings.filter(b => !b.confirmed && b.status !== 'cancelled').length },
-  { key: 'calendar', t: 'ปฏิทิน',      icon: 'cal',    go: () => showSection('calendar') },
-  { key: 'stock',    t: 'ค้นหาสต็อก',  icon: 'search', go: () => { showSection('products'); const s = document.getElementById('productSearch'); s.focus(); s.select(); } },
-  { key: 'board',    t: 'กระดาน',      icon: 'board',  go: () => showSection('board'), badge: () => myUnread().length },
-  { key: 'customers',t: 'ลูกค้า',      icon: 'people', go: () => showSection('customers') },
-  { key: 'daily',    t: 'สรุปรายวัน',  icon: 'sum',    go: () => showSection('daily') },
+  { key: 'calendar', t: 'ปฏิทิน',      icon: 'cal',    color: '#0B8043', go: () => showSection('calendar') },
+  { key: 'stock',    t: 'ค้นหาสต็อก',  icon: 'search', color: '#F4511E', go: () => { showSection('products'); const s = document.getElementById('productSearch'); s.focus(); s.select(); } },
+  { key: 'board',    t: 'กระดาน',      icon: 'board',  color: '#F6BF26', go: () => showSection('board'), badge: () => myUnread().length },
+  { key: 'customers',t: 'ลูกค้า',      icon: 'people', color: '#039BE5', go: () => showSection('customers') },
+  { key: 'daily',    t: 'สรุปรายวัน',  icon: 'sum',    color: '#616161', go: () => showSection('daily') },
 ].concat(MAIL_BOXES.filter(b => b.key !== 'inbox').map(b => ({
   key: 'mail:' + b.key, t: b.key === 'starred' ? 'อีเมลติดดาว' : 'ป้าย ' + b.t, icon: b.key === 'starred' ? 'star' : 'tag',
+  color: b.key === 'starred' ? '#F9A825' : '#5C6BC0',     // ป้ายอีเมล = ฟ้าอมม่วงอ่อนของอีเมล · ติดดาว = เหลืองอำพัน
   go: () => openMailBox(b.key),
   badge: () => { const c = mailState.counts[b.key]; return c && b.key !== 'starred' ? c.unseen : 0; },
 })));
@@ -5024,6 +5127,12 @@ const LAUNCH_DEFAULT = ['pos', 'mail', 'booking', 'calendar'];
 let homePrefs = { launcher: LAUNCH_DEFAULT.slice(), apps: [], loaded: false, error: '' };
 let launchDraft = null;        // null = ไม่ได้แก้อยู่ · array = ค่าที่กำลังเลือกในโหมดแก้ไข
 
+// สีเส้นไอคอนบนพื้นสี: ขาวถ้าคอนทราสต์ถึง 3:1 (เกณฑ์ภาพ/ไอคอนของ WCAG) ไม่งั้นดำ (เช่นพื้นเหลืองของกระดาน)
+function launchInk(color) { return contrastRatio(color, '#FFFFFF') >= 3 ? '#FFFFFF' : '#0F0F0F'; }
+function launchIcon(it, n, sm) {
+  return '<span class="lt-icon' + (sm ? ' sm' : '') + '" style="--tile:' + it.color + ';--glyph:' + launchInk(it.color) + '">' + iconSvg(it.icon) +
+    (n ? '<span class="badge" aria-hidden="true">' + (n > 99 ? '99+' : n) + '</span>' : '') + '</span>';
+}
 function launchItem(key) { return LAUNCH_ITEMS.find(x => x.key === key) || null; }
 function launchGo(key) { const it = launchItem(key); if (it) it.go(); }
 function focusScan() {
@@ -5039,7 +5148,7 @@ function renderLauncher() {
   if (launchDraft) {
     box.innerHTML = [0, 1, 2, 3].map(i => {
       const it = launchItem(launchDraft[i]);
-      return '<div class="lt-edit"><div class="lt-prev">' + (it ? iconSvg(it.icon) + escapeHtml(it.t) : '<span class="hint" style="margin:0;">ว่าง</span>') + '</div>' +
+      return '<div class="lt-edit"><div class="lt-prev">' + (it ? launchIcon(it, 0, true) + escapeHtml(it.t) : '<span class="hint" style="margin:0;">ว่าง</span>') + '</div>' +
         '<label class="lbl" for="ltSel' + i + '" style="margin:0;">ช่องที่ ' + (i + 1) + '</label>' +
         '<select class="input" id="ltSel' + i + '" data-slot="' + i + '" onchange="pickLaunch(this)">' +
         '<option value="">— ว่าง —</option>' +
@@ -5054,11 +5163,10 @@ function renderLauncher() {
   const slots = homePrefs.launcher.filter(k => launchItem(k)).slice(0, 4);
   while (slots.length < 4) slots.push(null);
   box.innerHTML = slots.map(k => {
-    if (!k) return '<button class="lt empty" type="button" onclick="toggleLaunchEdit()">+ เพิ่มไอคอน</button>';
+    if (!k) return '<button class="lt empty" type="button" onclick="toggleLaunchEdit()"><span class="lt-icon">+</span><span>เพิ่มไอคอน</span></button>';
     const it = launchItem(k), n = it.badge ? it.badge() : 0;
     return '<button class="lt" type="button" data-key="' + escapeHtml(k) + '" onclick="launchGo(this.dataset.key)"' +
-      ' aria-label="' + escapeHtml(it.t + (n ? ' — รออยู่ ' + n : '')) + '">' + iconSvg(it.icon) + '<span>' + escapeHtml(it.t) + '</span>' +
-      (n ? '<span class="badge" aria-hidden="true">' + (n > 99 ? '99+' : n) + '</span>' : '') + '</button>';
+      ' aria-label="' + escapeHtml(it.t + (n ? ' — รออยู่ ' + n : '')) + '">' + launchIcon(it, n) + '<span class="lt-label">' + escapeHtml(it.t) + '</span></button>';
   }).join('');
   document.getElementById('launchNote').innerHTML = homePrefs.error
     ? '<p class="hint" style="margin:0 18px 14px;">⚠ โหลดไอคอนที่ตั้งไว้ไม่สำเร็จ ใช้ค่าเริ่มต้นแทน: ' + escapeHtml(homePrefs.error) + '</p>' : '';
@@ -5082,7 +5190,8 @@ async function saveLauncher() {
 async function loadHomePrefs() {
   const me = currentUserId;
   if (!me) return;
-  const { data, error } = await db.from('staff_home').select('launcher, apps').eq('admin_id', me).maybeSingle();
+  // select('*') — ต้องโหลดได้ทั้งก่อนและหลังรัน 029 (คอลัมน์ yt_state)
+  const { data, error } = await db.from('staff_home').select('*').eq('admin_id', me).maybeSingle();
   if (me !== currentUserId) return;
   if (error) console.error('[Load home prefs]', error);
   homePrefs = {
@@ -5092,14 +5201,17 @@ async function loadHomePrefs() {
   };
   renderLauncher();
   renderApps();
+  ytRestore(data && data.yt_state);
 }
-async function saveHomePrefs(patch) {
-  const row = Object.assign({ admin_id: currentUserId, launcher: homePrefs.launcher, apps: homePrefs.apps }, patch,
-                            { updated_at: new Date().toISOString() });
+// ส่งไปเฉพาะคอลัมน์ที่แก้ (upsert ของ PostgREST แก้เฉพาะคอลัมน์ที่ส่ง) — บันทึกไอคอนไม่ไปแตะแอป/คิววิดีโอ
+// quiet = บันทึกเบื้องหลัง (คิว YouTube) ไม่ได้ก็บอกด้วยข้อความสั้น ไม่ขึ้นแถบแดงกลางงาน
+async function saveHomePrefs(patch, quiet) {
+  const row = Object.assign({ admin_id: currentUserId }, patch, { updated_at: new Date().toISOString() });
   const { data, error } = await db.from('staff_home').upsert(row, { onConflict: 'admin_id' }).select('admin_id');
   if (error || !data || !data.length) {
     console.error('[Save home prefs]', error);
-    showFatalError('บันทึกหน้าแรกของคุณไม่สำเร็จ: ' + (error ? error.message : 'ไม่มีสิทธิ์บันทึก'));
+    const msg = 'บันทึกหน้าแรกของคุณไม่สำเร็จ: ' + (error ? error.message : 'ไม่มีสิทธิ์บันทึก');
+    if (quiet) showToast('⚠️ ' + msg); else showFatalError(msg);
     return false;
   }
   homePrefs = Object.assign(homePrefs, patch, { error: '' });
@@ -5114,8 +5226,8 @@ async function saveHomePrefs(patch) {
 //    (Netflix และเว็บส่วนใหญ่ห้ามฝังด้วย X-Frame-Options/CSP อยู่แล้ว ฝังไปก็ได้กรอบว่าง)
 // ---------------------------------------------------------------------------
 const APP_KINDS = {
-  youtube: { t: 'YouTube', icon: 'play',  color: '#0F0F0F',
-    hint: 'วางลิงก์วิดีโอหรือเพลย์ลิสต์ของ YouTube · กด "เล่น" แล้วเปลี่ยนไปหมวดอื่นได้ เสียงไม่หยุด' },
+  // YouTube ย้ายไปแผง YouTube บนหน้าแรกแล้ว (รอบ 4) — ชนิดนี้เหลือไว้ให้แอปเก่าที่เคยปักไว้ กดแล้วเล่นในแผง
+  youtube: { t: 'YouTube', icon: 'play',  color: '#0F0F0F', hint: '' },
   spotify: { t: 'Spotify', icon: 'music', color: '#1DB954',
     hint: 'วางลิงก์เพลง อัลบั้ม หรือเพลย์ลิสต์ของ Spotify · ฟังเต็มเพลงได้เฉพาะเมื่อเบราว์เซอร์เครื่องนี้ล็อกอิน Spotify อยู่ ไม่งั้นได้ตัวอย่าง 30 วินาที' },
   link:    { t: 'เว็บ',     icon: 'out',   color: '#616161',
@@ -5133,11 +5245,7 @@ function parseYouTube(s) {
   const okL = list && /^[A-Za-z0-9_-]{10,64}$/.test(list) ? list : null;
   return okV || okL ? { v: okV, list: okL } : null;
 }
-function youtubeEmbed(y) {
-  const q = new URLSearchParams({ autoplay: '1', rel: '0' });
-  if (y.list) q.set('list', y.list);
-  return 'https://www.youtube-nocookie.com/embed/' + (y.v || 'videoseries') + '?' + q.toString();
-}
+
 function parseSpotify(s) {
   const u = safeUrl(s);
   if (!u || u.hostname !== 'open.spotify.com') return null;
@@ -5151,7 +5259,7 @@ function renderAppKindHint() {
 }
 function openAppDialog() {
   if (homePrefs.apps.length >= 8) { showToast('⚠️ ปักแอปได้สูงสุด 8 อัน — เอาอันเก่าออกก่อน'); return; }
-  document.getElementById('apKind').value = 'youtube';
+  document.getElementById('apKind').value = 'spotify';
   document.getElementById('apUrl').value = '';
   document.getElementById('apTitle').value = '';
   document.getElementById('apMsg').innerHTML = '';
@@ -5163,11 +5271,9 @@ async function saveApp() {
   const kind = document.getElementById('apKind').value;
   const url = document.getElementById('apUrl').value.trim();
   const msg = t => { document.getElementById('apMsg').innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(t) + '</div>'; };
-  const ok = kind === 'youtube' ? parseYouTube(url) : kind === 'spotify' ? parseSpotify(url) : safeUrl(url);
-  if (!ok) {
-    return msg(kind === 'youtube' ? 'ไม่ใช่ลิงก์วิดีโอหรือเพลย์ลิสต์ของ YouTube'
-      : kind === 'spotify' ? 'ไม่ใช่ลิงก์เพลง/อัลบั้ม/เพลย์ลิสต์ของ Spotify (open.spotify.com/…)' : 'ลิงก์ต้องขึ้นต้นด้วย https://');
-  }
+  if (parseYouTube(url)) return msg('ลิงก์ YouTube ใช้ที่แผง YouTube บนหน้าแรกได้เลย (วางในช่องค้นหาแล้วกด “ค้นหา”)');
+  const ok = kind === 'spotify' ? parseSpotify(url) : safeUrl(url);
+  if (!ok) return msg(kind === 'spotify' ? 'ไม่ใช่ลิงก์เพลง/อัลบั้ม/เพลย์ลิสต์ของ Spotify (open.spotify.com/…)' : 'ลิงก์ต้องขึ้นต้นด้วย https://');
   const title = document.getElementById('apTitle').value.trim() || (kind === 'link' ? ok.hostname.replace(/^www\./, '') : APP_KINDS[kind].t);
   const app = { id: 'a' + Date.now().toString(36), kind, title: title.slice(0, 60), url };
   const btn = document.getElementById('apSaveBtn');
@@ -5193,12 +5299,13 @@ function renderApps() {
     const k = APP_KINDS[a.kind] || APP_KINDS.link, c = chipColors(k.color);
     const act = a.kind === 'link'
       ? '<button class="btn btn-sm" type="button" data-id="' + escapeHtml(a.id) + '" onclick="openLinkApp(this.dataset.id)">เปิด ↗</button>'
-      : '<button class="btn btn-sm btn-primary" type="button" data-id="' + escapeHtml(a.id) + '" onclick="playApp(this.dataset.id)">' + (playerApp === a.id ? '■ กำลังเล่น' : '▶ เล่น') + '</button>';
+      : '<button class="btn btn-sm btn-primary" type="button" data-id="' + escapeHtml(a.id) + '" onclick="playApp(this.dataset.id)">' +
+        (a.kind === 'youtube' ? '▶ เล่นในแผง YouTube' : playerApp === a.id ? '■ กำลังเล่น' : '▶ เล่น') + '</button>';
     return '<div class="app-row"><span class="kind" style="background:' + c.bg + ';color:' + c.ink + '"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:3">' +
       ICON_PATHS[k.icon] + '</svg></span><span class="name">' + escapeHtml(a.title) + '<small>' + escapeHtml(k.t) +
       (a.kind === 'link' ? ' · เปิดเป็นหน้าต่างใหม่' : '') + '</small></span>' + act +
       '<button class="btn btn-sm btn-ghost" type="button" data-id="' + escapeHtml(a.id) + '" onclick="removeApp(this.dataset.id)" aria-label="เอา ' + escapeHtml(a.title) + ' ออก">✕</button></div>';
-  }).join('') : '<p class="hint" style="margin:10px 0;">ปักเพลงหรือวิดีโอไว้เปิดในร้านได้ (YouTube · Spotify) — เล่นค้างไว้ได้ระหว่างใช้หมวดอื่น</p>';
+  }).join('') : '<p class="hint" style="margin:10px 0;">ปัก Spotify หรือเว็บอื่นไว้เปิดได้ — วิดีโอ YouTube ใช้แผง YouTube ด้านซ้าย</p>';
 }
 function openLinkApp(id) {
   const a = homePrefs.apps.find(x => x.id === id), u = a && safeUrl(a.url);
@@ -5206,46 +5313,333 @@ function openLinkApp(id) {
   window.open(u.href, '_blank', 'noopener,noreferrer');
 }
 
-let playerApp = null;
+// ---------------------------------------------------------------------------
+// เครื่องเล่นกล่องเดียวทั้งหน้า (#player) — YouTube (แผงบนหน้าแรก) หรือ Spotify (แอปที่ปักไว้)
+//
+// ⚠️ ห้ามย้าย #player หรือ iframe ข้างในไปอยู่ใต้ element อื่น — ย้าย iframe ใน DOM = เบราว์เซอร์โหลดใหม่
+//    วิดีโอเริ่มใหม่ตั้งแต่ต้น · อยู่หน้าแรก "จอด" ทับช่อง #ytDock ด้วยตำแหน่ง (playerLayout)
+//    ออกไปหมวดอื่นกลายเป็นหน้าต่างเล็กลอยที่ลากย้ายได้ · เทสต์ตรวจว่าเป็น element ตัวเดิมและไม่โหลดซ้ำ
+// ---------------------------------------------------------------------------
+let playerApp = null;          // แอป Spotify ที่เล่นอยู่ (id)
+let playerMode = null;         // null · 'youtube' · 'spotify'
+let ytPlayer = null;           // YT.Player (IFrame Player API)
+
 function playApp(id) {
   const a = homePrefs.apps.find(x => x.id === id);
   if (!a) return;
-  let src = null, spotify = false;
-  if (a.kind === 'youtube') { const y = parseYouTube(a.url); if (y) src = youtubeEmbed(y); }
-  if (a.kind === 'spotify') { const sp = parseSpotify(a.url); if (sp) { src = spotifyEmbed(sp); spotify = true; } }
-  if (!src) { showToast('⚠️ ลิงก์ของแอปนี้ใช้ไม่ได้ — เอาออกแล้วเพิ่มใหม่'); return; }
+  if (a.kind === 'youtube') { showSection(HOME); ytPlayUrl(a.url, a.title); return; }   // แอป YouTube รุ่นเก่า → เล่นในแผง
+  const sp = a.kind === 'spotify' && parseSpotify(a.url);
+  if (!sp) { showToast('⚠️ ลิงก์ของแอปนี้ใช้ไม่ได้ — เอาออกแล้วเพิ่มใหม่'); return; }
+  resetPlayerBody();
   const body = document.getElementById('playerBody');
-  body.className = 'player-body' + (spotify ? ' spotify' : '');
-  body.innerHTML = '';
+  body.className = 'player-body spotify';
   const f = document.createElement('iframe');
   f.id = 'playerFrame';
   f.title = a.title;
-  // กดเล่นจากปุ่มในหน้า (ผู้ใช้กดเอง) + allow="autoplay" = เบราว์เซอร์ยอมให้เล่นทันที
-  f.allow = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
-  f.referrerPolicy = 'strict-origin-when-cross-origin';   // YouTube ไม่ยอมเล่นในกรอบที่ไม่ส่ง referrer
-  f.setAttribute('allowfullscreen', '');
-  f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox');
-  f.src = src;
+  f.allow = 'autoplay; encrypted-media; clipboard-write';
+  f.referrerPolicy = 'strict-origin-when-cross-origin';
+  f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+  f.src = spotifyEmbed(sp);
   body.appendChild(f);
+  playerMode = 'spotify';
   playerApp = a.id;
-  document.getElementById('playerTitle').textContent = '▶ ' + a.title;
+  showPlayer('♫ ' + a.title);
+  renderApps();
+}
+function resetPlayerBody() {
+  if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) { /* ปิดไปแล้ว */ } ytPlayer = null; }
+  document.getElementById('playerBody').innerHTML = '';
+  playerMode = null;
+  playerApp = null;
+}
+function showPlayer(title) {
+  document.getElementById('playerTitle').textContent = title;
   const p = document.getElementById('player');
   p.hidden = false;
   p.classList.remove('min');
   document.getElementById('playerMinBtn').textContent = 'ย่อ';
-  renderApps();
+  playerLayout();
 }
 function togglePlayerMin() {
   const p = document.getElementById('player');
   p.classList.toggle('min');
   document.getElementById('playerMinBtn').textContent = p.classList.contains('min') ? 'ขยาย' : 'ย่อ';
+  playerLayout();
 }
 function closePlayer() {
-  document.getElementById('playerBody').innerHTML = '';
+  resetPlayerBody();
+  ytState.cur = -1;
   document.getElementById('player').hidden = true;
-  playerApp = null;
   checkFrameFocus();
   renderApps();
+  renderYt();
+}
+
+// ---------------------------------------------------------------------------
+// ตำแหน่งของเครื่องเล่น: จอดบนหน้าแรก / ลอยเล็ก ๆ ที่ลากย้ายได้
+// ---------------------------------------------------------------------------
+const MINI_KEY = 'djlab.desk.miniPos.v1';     // จำตำแหน่งไว้ในเครื่อง (เรื่องสะดวก ไม่ต้องตามไปทุกเครื่อง)
+let miniPos = (() => { try { const v = JSON.parse(localStorage.getItem(MINI_KEY) || 'null'); return v && isFinite(v.x) && isFinite(v.y) ? v : null; } catch (e) { return null; } })();
+function saveMiniPos() { try { if (miniPos) localStorage.setItem(MINI_KEY, JSON.stringify(miniPos)); else localStorage.removeItem(MINI_KEY); } catch (e) { /* เบราว์เซอร์ไม่ให้เก็บ ก็แค่จำไม่ได้ */ } }
+// ไม่ให้หลุดนอกจอ — ทั้งตอนลาก ตอนย่อ/ขยายหน้าต่างเบราว์เซอร์ และตอนเปิดหน้าใหม่บนจอที่เล็กกว่าเดิม
+function clampMini(x, y) {
+  const p = document.getElementById('player');
+  const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
+  return { x: Math.round(Math.min(Math.max(0, x), Math.max(0, window.innerWidth - w))),
+           y: Math.round(Math.min(Math.max(0, y), Math.max(0, window.innerHeight - h))) };
+}
+function placeMini() {
+  const p = document.getElementById('player');
+  const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
+  const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };
+  const c = clampMini(want.x, want.y);
+  p.style.left = c.x + 'px';
+  p.style.top = c.y + 'px';
+}
+function playerLayout() {
+  const p = document.getElementById('player');
+  if (p.hidden) return;
+  const dock = document.getElementById('ytDock');
+  const docked = playerMode === 'youtube' && current === HOME && !document.getElementById('sec-home').hidden && dock.getClientRects().length > 0;
+  p.classList.toggle('docked', docked);
+  if (docked) {
+    p.classList.remove('min');
+    const r = dock.getBoundingClientRect(), ws = document.querySelector('.workspace').getBoundingClientRect();
+    Object.assign(p.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px',
+      // ช่องจอดเลื่อนพ้นพื้นที่ทำงาน (เลื่อนหน้าลง) — ตัดส่วนที่เกินออก ไม่ให้วิดีโอลอยทับแถบบน
+      clipPath: 'inset(' + Math.max(0, ws.top - r.top) + 'px 0 ' + Math.max(0, r.bottom - ws.bottom) + 'px 0)' });
+  } else {
+    Object.assign(p.style, { width: '', height: '', clipPath: '' });
+    placeMini();
+  }
+}
+window.addEventListener('resize', playerLayout);
+document.querySelector('.workspace').addEventListener('scroll', playerLayout, { passive: true });
+if (window.ResizeObserver) new ResizeObserver(playerLayout).observe(document.getElementById('sec-home'));
+
+// ลากด้วยแถบหัว (เมาส์/ปากกา/นิ้ว) — pointer capture + แผ่นใสทับ iframe ระหว่างลาก
+// ไม่ขโมยโฟกัส: กดที่แถบแล้วโฟกัสยังอยู่ที่เดิม (เช่นช่องยิงบาร์โค้ดของหน้าขาย) คืนให้อีกครั้งตอนปล่อย
+let miniDrag = null;
+(function () {
+  const bar = document.getElementById('playerBar'), p = document.getElementById('player');
+  bar.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('button') || p.classList.contains('docked')) return;
+    e.preventDefault();
+    const r = p.getBoundingClientRect();
+    miniDrag = { dx: e.clientX - r.left, dy: e.clientY - r.top, focus: document.activeElement };
+    try { bar.setPointerCapture(e.pointerId); } catch (err) { /* pointer จำลอง (เทสต์) จับไม่ได้ ก็ลากต่อได้ */ }
+    p.classList.add('dragging');
+    document.getElementById('playerShield').hidden = false;
+  });
+  bar.addEventListener('pointermove', e => {
+    if (!miniDrag) return;
+    miniPos = clampMini(e.clientX - miniDrag.dx, e.clientY - miniDrag.dy);
+    p.style.left = miniPos.x + 'px';
+    p.style.top = miniPos.y + 'px';
+  });
+  const end = () => {
+    if (!miniDrag) return;
+    const f = miniDrag.focus;
+    miniDrag = null;
+    p.classList.remove('dragging');
+    document.getElementById('playerShield').hidden = true;
+    saveMiniPos();
+    if (f && f !== document.activeElement && f.isConnected && typeof f.focus === 'function') f.focus({ preventScroll: true });
+  };
+  bar.addEventListener('pointerup', end);
+  bar.addEventListener('pointercancel', end);
+  // คีย์บอร์ด: ลูกศรย้ายทีละ 20px · Home กลับมุมขวาล่าง — หยุดไม่ให้ไปเลื่อนวันที่/ตารางของหมวดที่เปิดอยู่
+  bar.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || p.classList.contains('docked')) return;
+    const step = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[e.key];
+    if (!step && e.key !== 'Home') return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.key === 'Home') miniPos = null;
+    else { const r = p.getBoundingClientRect(); miniPos = clampMini(r.left + step[0], r.top + step[1]); }
+    saveMiniPos();
+    placeMini();
+  });
+})();
+
+// ---------------------------------------------------------------------------
+// แผง YouTube บนหน้าแรก — ค้นหาผ่าน Edge Function `yt` (คีย์ API อยู่ที่เซิร์ฟเวอร์) · เล่นด้วย IFrame Player API
+// "ถัดไป" = ผลค้นหาที่เหลือต่อจากที่กดเล่น + ที่กด "+ คิว" (YouTube เลิกให้ค้น "วิดีโอที่เกี่ยวข้อง" ตั้งแต่ปี 2566)
+// เล่นจบแล้วเล่นอันถัดไปเอง (onStateChange = ENDED) · คิว/คำค้นล่าสุดเก็บใน staff_home.yt_state (029) ของใครของมัน
+// ---------------------------------------------------------------------------
+const ytState = { status: null, error: '', q: '', results: [], queue: [], cur: -1, loading: false };
+let ytApiPromise = null;
+function loadYtApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+  if (!ytApiPromise) {
+    ytApiPromise = new Promise((resolve, reject) => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { if (prev) prev(); resolve(window.YT); };
+      const s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = () => { ytApiPromise = null; reject(new Error('โหลดตัวเล่น YouTube ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ต')); };
+      document.head.appendChild(s);
+    });
+  }
+  return ytApiPromise;
+}
+function ytItem(x) {
+  return { id: String(x.id || ''), list: x.list || null, title: String(x.title || 'วิดีโอ YouTube').slice(0, 200),
+           channel: String(x.channel || '').slice(0, 100), thumb: String(x.thumb || ''), duration: String(x.duration || '') };
+}
+function ytCurItem() { return ytState.queue[ytState.cur] || null; }
+function ytNote(html, kind) { document.getElementById('ytNote').innerHTML = html ? '<div class="alert ' + (kind || 'alert-plain') + '" role="status">' + html + '</div>' : ''; }
+
+async function ytSubmit() {
+  const text = document.getElementById('ytQuery').value.trim();
+  if (!text) return;
+  const y = parseYouTube(text);
+  if (y) { ytPlayUrl(text); return; }                      // วางลิงก์ = เล่นเลย ไม่เสียโควตาค้นหา
+  ytState.q = text;
+  ytState.loading = true;
+  ytNote('กำลังค้นหา “' + escapeHtml(text) + '” …');
+  const btn = document.getElementById('ytGoBtn');
+  btn.disabled = true;
+  const r = await callFn('yt', { action: 'search', q: text });
+  btn.disabled = false;
+  ytState.loading = false;
+  if (r.error) {
+    if (r.error.code === 'not_configured') {
+      ytState.status = 'setup';
+      ytNote('<strong>ยังไม่ได้ตั้งค่าการค้นหา YouTube</strong> — เจ้าของร้านใส่ <code>YOUTUBE_API_KEY</code> ตามคู่มือ <code>docs/STAFF-HOME.md</code> ' +
+        '· ระหว่างนี้วางลิงก์วิดีโอหรือเพลย์ลิสต์ในช่องนี้แล้วกด “ค้นหา” เพื่อเล่นได้เลย', 'alert-warn');
+    } else {
+      ytState.status = 'error';
+      ytNote(escapeHtml(r.error.message || 'ค้นหาไม่สำเร็จ'), 'alert-red');
+    }
+    return;
+  }
+  ytState.status = 'ok';
+  ytState.results = (r.items || []).map(ytItem);
+  ytNote(ytState.results.length ? '' : 'ไม่พบวิดีโอที่ตรงกับ “' + escapeHtml(text) + '”');
+  renderYt();
+  ytSaveSoon();
+}
+
+// กดผลค้นหา = เล่นอันนั้น แล้วคิวต่อด้วยผลที่เหลือ (ของที่กด "+ คิว" ไว้ต่อท้าย)
+function ytPlayResult(i) {
+  const extra = ytState.queue.slice(ytState.cur + 1).filter(x => x.queued);
+  ytState.queue = ytState.results.slice(i).concat(extra);
+  ytState.cur = 0;
+  ytPlayCurrent();
+}
+function ytEnqueue(i) {
+  const it = Object.assign({}, ytState.results[i], { queued: true });
+  ytState.queue.push(it);
+  if (ytState.cur < 0 || !ytPlayer) { ytState.cur = ytState.queue.length - 1; ytPlayCurrent(); return; }
+  renderYt();
+  ytSaveSoon();
+  showToast('+ เพิ่ม “' + it.title + '” เข้าคิวแล้ว');
+}
+function ytJump(i) { ytState.cur = i; ytPlayCurrent(); }
+function ytNext() {
+  if (ytState.cur + 1 < ytState.queue.length) { ytState.cur++; ytPlayCurrent(); return; }
+  ytNote('เล่นครบคิวแล้ว — ค้นหาหรือกด “+ คิว” เพื่อเล่นต่อ');
+  renderYt();
+}
+async function ytPlayUrl(url, title) {
+  const y = parseYouTube(url);
+  if (!y) { ytNote('ไม่ใช่ลิงก์วิดีโอหรือเพลย์ลิสต์ของ YouTube', 'alert-red'); return; }
+  const item = ytItem({ id: y.v || '', list: y.v ? null : y.list, title: title || (y.v ? 'วิดีโอจากลิงก์' : 'เพลย์ลิสต์จากลิงก์'),
+    thumb: y.v ? 'https://i.ytimg.com/vi/' + y.v + '/mqdefault.jpg' : '' });
+  ytState.queue = ytState.queue.slice(0, ytState.cur + 1).concat([item], ytState.queue.slice(ytState.cur + 1));
+  ytState.cur = ytState.cur + 1;
+  ytNote('');
+  ytPlayCurrent();
+  // ขอชื่อจริงของวิดีโอ (1 หน่วยโควตา) — ไม่ได้ก็เล่นต่อด้วยชื่อ "วิดีโอจากลิงก์"
+  if (y.v && !title) {
+    const r = await callFn('yt', { action: 'video', id: y.v });
+    if (r.items && r.items[0] && item === ytCurItem()) { Object.assign(item, ytItem(r.items[0])); renderYt(); document.getElementById('playerTitle').textContent = '▶ ' + item.title; }
+  }
+}
+
+async function ytPlayCurrent() {
+  const it = ytCurItem();
+  if (!it) return;
+  let YTns;
+  try { YTns = await loadYtApi(); }
+  catch (e) { ytNote(escapeHtml(e.message), 'alert-red'); return; }
+  if (ytPlayer && playerMode === 'youtube') {
+    if (it.list) ytPlayer.loadPlaylist({ list: it.list, listType: 'playlist' }); else ytPlayer.loadVideoById(it.id);
+  } else {
+    resetPlayerBody();
+    const target = document.createElement('div');
+    target.id = 'ytTarget';
+    document.getElementById('playerBody').appendChild(target);
+    document.getElementById('playerBody').className = 'player-body';
+    playerMode = 'youtube';
+    const vars = { autoplay: 1, rel: 0, playsinline: 1 };
+    // origin ของหน้าเว็บ (IFrame API ต้องใช้คุยกลับ) · เล่นจาก youtube.com ปกติ ไม่ใช่ nocookie
+    // เพราะร้านใช้ YouTube Premium — nocookie ไม่ส่ง cookie ที่ล็อกอิน Premium ไว้ โฆษณาจึงยังขึ้น
+    if (/^https?:/.test(location.origin)) vars.origin = location.origin;
+    if (it.list) Object.assign(vars, { listType: 'playlist', list: it.list });
+    ytPlayer = new YTns.Player('ytTarget', {
+      host: 'https://www.youtube.com', width: '100%', height: '100%', videoId: it.list ? undefined : it.id, playerVars: vars,
+      events: {
+        onReady: () => { const f = ytPlayer && ytPlayer.getIframe && ytPlayer.getIframe(); if (f) { f.title = 'YouTube'; f.referrerPolicy = 'strict-origin-when-cross-origin'; } },
+        onStateChange: e => { if (e.data === YTns.PlayerState.ENDED && !(ytCurItem() && ytCurItem().list)) ytNext(); },
+        // 101/150 = เจ้าของคลิปไม่ให้เล่นนอก YouTube — บอกแล้วข้ามไปอันถัดไป ไม่ค้างจอดำ
+        onError: e => { ytNote('“' + escapeHtml((ytCurItem() || {}).title || '') + '” เล่นในคอนโซลไม่ได้ (' + e.data + ') — ข้ามไปอันถัดไป', 'alert-warn'); ytNext(); },
+      },
+    });
+  }
+  showPlayer('▶ ' + it.title);
+  renderYt();
+  renderApps();
+  ytSaveSoon();
+}
+
+function ytCard(it, i, where) {
+  const thumb = it.thumb && /^https:\/\/i\d?\.ytimg\.com\//.test(it.thumb) ? ' style="background-image:url(&quot;' + escapeHtml(it.thumb) + '&quot;)"' : '';
+  const act = where === 'result' ? 'ytPlayResult(' + i + ')' : 'ytJump(' + i + ')';
+  return '<div class="yt-card"><button class="pick" type="button" onclick="' + act + '" title="' + escapeHtml(it.title + (it.channel ? ' · ' + it.channel : '')) + '">' +
+    '<span class="thumb"' + thumb + '>' + (it.duration ? '<span class="dur">' + escapeHtml(it.duration) + '</span>' : '') + '</span>' +
+    '<span class="t">' + escapeHtml(it.title) + '</span></button>' +
+    (it.channel ? '<span class="ch">' + escapeHtml(it.channel) + '</span>' : '') +
+    (where === 'result' ? '<button class="btn btn-sm q" type="button" onclick="ytEnqueue(' + i + ')" aria-label="เพิ่ม ' + escapeHtml(it.title) + ' เข้าคิว">+ คิว</button>' : '') +
+    '</div>';
+}
+function renderYt() {
+  const it = ytCurItem();
+  const playing = playerMode === 'youtube' && !!ytPlayer;
+  document.getElementById('ytBar').hidden = !playing;
+  document.getElementById('ytEmpty').hidden = playing;
+  document.getElementById('ytNowTitle').textContent = playing && it ? '▶ ' + it.title + (it.channel ? ' · ' + it.channel : '') : '';
+  const next = ytState.queue.slice(ytState.cur + 1, ytState.cur + 5);
+  document.getElementById('ytNext').innerHTML = next.length
+    ? next.map((x, k) => ytCard(x, ytState.cur + 1 + k, 'next')).join('')
+    : '<p class="hint" style="margin:0;grid-column:1 / -1;">ยังไม่มีคิว — ค้นหาแล้วกดวิดีโอ หรือกด “+ คิว”</p>';
+  const more = ytState.queue.length - (ytState.cur + 1) - next.length;
+  document.getElementById('ytCount').textContent = more > 0 ? 'คิวอีก ' + more + ' รายการ' : '';
+  document.getElementById('ytResultsWrap').hidden = !ytState.results.length;
+  document.getElementById('ytResultsHead').textContent = 'ผลการค้นหา “' + ytState.q + '” — กดเพื่อเล่น (คิวต่อด้วยผลที่เหลือ)';
+  document.getElementById('ytResults').innerHTML = ytState.results.map((x, i) => ytCard(x, i, 'result')).join('');
+  if (document.getElementById('ytQuery') !== document.activeElement && ytState.q && !document.getElementById('ytQuery').value) document.getElementById('ytQuery').value = ytState.q;
+  playerLayout();
+}
+
+let ytSaveTimer = null;
+function ytSaveSoon() {
+  clearTimeout(ytSaveTimer);
+  ytSaveTimer = setTimeout(() => {
+    if (!currentUserId || !homePrefs.loaded) return;
+    const keep = ytState.queue.slice(Math.max(0, ytState.cur), Math.max(0, ytState.cur) + 20).map(x => ytItem(x));
+    saveHomePrefs({ yt_state: { q: ytState.q, queue: keep } }, true);
+  }, 1500);
+}
+function ytRestore(st) {
+  if (playerMode === 'youtube') return;                    // กำลังเล่นอยู่ ไม่เอาของเก่ามาทับ
+  const s = st && typeof st === 'object' ? st : {};
+  ytState.q = typeof s.q === 'string' ? s.q.slice(0, 200) : '';
+  ytState.queue = Array.isArray(s.queue) ? s.queue.slice(0, 20).map(ytItem).filter(x => /^[A-Za-z0-9_-]{11}$/.test(x.id) || x.list) : [];
+  ytState.cur = -1;
+  ytState.results = [];
+  renderYt();
 }
 
 // เครื่องยิงบาร์โค้ด "พิมพ์" ลงที่ที่โฟกัสอยู่ — ถ้าโฟกัสอยู่ในกรอบวิดีโอ/อีเมล (iframe) ปุ่มไม่มาถึงหน้านี้เลย
@@ -5503,6 +5897,7 @@ async function loadHomeToday() {
   ]);
   if (ev.error) { console.error('[Load today events]', ev.error); showFatalError('โหลดกิจกรรมวันนี้ไม่สำเร็จ: ' + ev.error.message); }
   if (g.color) calState.gcolor = g.color;
+  if (g.teacher_colors) calState.teacherColors = g.teacher_colors;
   homeToday = { shop: ev.data || [], google: g.events || [], googleErr: g.error || null };
   renderHome();
 }
@@ -6031,7 +6426,7 @@ async function loadCalendar() {
   if (token !== calState.token) return;
   if (ev.error) { console.error('[Load calendar]', ev.error); showFatalError('โหลดปฏิทินร้านไม่สำเร็จ: ' + ev.error.message); }
   else calState.events = ev.data || [];
-  if (g) { calState.google = g.events || []; calState.googleNote = g.error || null; if (g.color) calState.gcolor = g.color; }
+  if (g) { calState.google = g.events || []; calState.googleNote = g.error || null; if (g.color) calState.gcolor = g.color; if (g.teacher_colors) calState.teacherColors = g.teacher_colors; }
   renderCalendar();
 }
 
@@ -6045,8 +6440,10 @@ function calItems(d) {
   if (calState.layers.google) calState.google.forEach((g, i) => {
     if (g.start.slice(0, 10) > d || g.end.slice(0, 10) < d) return;
     const first = g.start.slice(0, 10) === d;
+    const pt = parseGcalTitle(g.title);
     out.push({ kind: 'google', ref: String(i), allDay: g.all_day || !first, time: g.all_day || !first ? '' : g.start.slice(11, 16),
-               end: g.all_day ? '' : g.end.slice(11, 16), title: g.title, label: 'Google', color: gcalColor() });
+               end: g.all_day ? '' : g.end.slice(11, 16), title: pt.title, teacher: pt.teacher, room: pt.room,
+               label: pt.teacher || 'ปฏิทินหลัก', color: teacherColor(pt.teacher) });
   });
   if (calState.layers.rooms) bookings.filter(b => b.date === d && b.status !== 'cancelled').forEach(b => {
     out.push({ kind: 'room', ref: b.id, allDay: false, time: shortTime(b.start_time), end: addHours(b.start_time, b.hours),
@@ -6055,11 +6452,19 @@ function calItems(d) {
   return out.sort((a, b) => (Number(b.allDay) - Number(a.allDay)) || cmp(a.time, b.time));
 }
 
-function chipHtml(it) {
+// ป้ายในปฏิทิน · ของปฏิทินหลัก (Google) ขึ้นต้นด้วยเวลา ไม่มีคำว่า Google (เจ้าของสั่ง) และมีชื่ออาจารย์เป็นตัวหนังสือเสมอ
+// ส่วนหมวดของร้าน/การจองห้องยังขึ้นต้นด้วยชื่อหมวดเหมือนเดิม
+function chipHtml(it, week) {
   const when = it.allDay ? 'ทั้งวัน' : it.time + (it.end ? '–' + it.end : '');
+  const open = ' onclick="openCalItem(\'' + it.kind + '\', \'' + it.ref + '\')"';
+  if (it.kind === 'google') {
+    const tip = when + (it.room ? ' · [' + it.room + ']' : '') + ' · ' + it.title + (it.teacher ? ' · ' + it.teacher : '') + ' (ปฏิทินหลัก · อ่านอย่างเดียว)';
+    return '<button class="ev' + (it.teacher ? ' has-who' : '') + '" type="button" style="' + chipStyle(it.color) + '" data-kind="google" title="' + escapeHtml(tip) + '"' + open + '>' +
+      '<b>' + escapeHtml(it.allDay ? 'ทั้งวัน' : it.time) + '</b><span class="ev-t">' + (week && it.room ? escapeHtml('[' + it.room + '] ') : '') +
+      escapeHtml(it.title) + '</span>' + (it.teacher ? '<span class="ev-who"> · ' + escapeHtml(it.teacher) + '</span>' : '') + '</button>';
+  }
   return '<button class="ev" type="button" style="' + chipStyle(it.color) + '"' +
-    ' data-kind="' + it.kind + '" title="' + escapeHtml(it.label + ' · ' + when + ' · ' + it.title) + '"' +
-    ' onclick="openCalItem(\'' + it.kind + '\', \'' + it.ref + '\')"><b>' + escapeHtml(it.label) + '</b>' +
+    ' data-kind="' + it.kind + '" title="' + escapeHtml(it.label + ' · ' + when + ' · ' + it.title) + '"' + open + '><b>' + escapeHtml(it.label) + '</b>' +
     (it.time ? escapeHtml(it.time) + ' ' : '') + escapeHtml(it.title) + '</button>';
 }
 
@@ -6092,14 +6497,14 @@ function renderCalendar() {
     html += '<div class="cal-cell' + (out ? ' out' : '') + (d === today ? ' today' : '') + '" data-date="' + d + '">' +
       '<button class="cal-day" type="button" title="เพิ่มกิจกรรมวันที่ ' + fmtDate(d) + '" onclick="openEventForm(null, \'' + d + '\')">' +
         dt.getDate() + (week ? ' ' + THAI_MONTHS[dt.getMonth()] : '') + (d === today ? ' · วันนี้' : '') + '</button>' +
-      items.slice(0, max).map(chipHtml).join('') +
+      items.slice(0, max).map(x => chipHtml(x, week)).join('') +
       (items.length > max ? '<button class="ev-more" type="button" onclick="calState.anchor = \'' + d + '\'; setCalView(\'week\')">+ อีก ' + (items.length - max) + ' รายการ</button>' : '') +
       '</div>';
   }
   document.getElementById('calGrid').innerHTML = html + '</div>';
-  document.getElementById('calLegend').innerHTML = '<span>สีตามแหล่ง:</span>' +
-    Object.values(CAL_CATS).map(c => chip(c.t, c.color)).join('') +
-    chip('Google (อ่านอย่างเดียว)', gcalColor()) + chip('ห้องซ้อม', ROOM_COLOR) +
+  document.getElementById('calLegend').innerHTML = '<span>ร้าน:</span>' +
+    Object.values(CAL_CATS).map(c => chip(c.t, c.color)).join('') + chip('ห้องซ้อม', ROOM_COLOR) +
+    '<span>· ปฏิทินหลัก (อาจารย์):</span>' + TEACHERS.map(t => chip(t, teacherColor(t))).join('') + chip('อื่น ๆ', gcalColor()) +
     '<span>· คลิกเลขวันที่เพื่อเพิ่มกิจกรรมวันนั้น</span>';
 }
 
@@ -6122,9 +6527,12 @@ function openCalItem(kind, ref) {
   if (kind === 'google') {
     const g = calState.google[Number(ref)];
     if (!g) return;
-    openDetail(g.title,
-      '<div class="alert alert-plain">มาจาก Google Calendar — ดูได้อย่างเดียว แก้ไขที่ Google Calendar</div>' +
+    const pt = parseGcalTitle(g.title);
+    openDetail(pt.title,
+      '<div class="alert alert-plain">มาจากปฏิทินหลัก (Google Calendar) — ดูได้อย่างเดียว แก้ไขที่ Google Calendar</div>' +
       '<dl class="kv"><dt>เวลา</dt><dd>' + whenText(g.all_day, g.start.slice(0, 10), g.end.slice(0, 10), g.start.slice(11, 16), g.end.slice(11, 16)) + '</dd>' +
+      (pt.teacher ? '<dt>อาจารย์</dt><dd>' + chip(pt.teacher, teacherColor(pt.teacher)) + '</dd>' : '') +
+      (pt.room ? '<dt>ห้อง</dt><dd>' + escapeHtml(pt.room) + '</dd>' : '') +
       (g.location ? '<dt>สถานที่</dt><dd>' + escapeHtml(g.location) + '</dd>' : '') + '</dl>' +
       (g.description ? '<div class="card pre" style="box-shadow:none;">' + escapeHtml(g.description) + '</div>' : '') +
       (g.recurrence_unsupported ? '<p class="hint">กิจกรรมนี้ซ้ำแบบที่ระบบยังอ่านไม่ได้ แสดงเฉพาะครั้งแรก</p>' : ''));
@@ -6206,6 +6614,13 @@ function deleteEvent(id) {
 }
 
 let gcalPicked = null;
+let teacherPicked = {};
+function renderTeacherPickers() {
+  document.getElementById('gsTeachers').innerHTML = TEACHERS.map(t =>
+    '<label class="swatch" style="--c:' + (teacherPicked[t] || TEACHER_DEFAULT_COLORS[t]) + '"><i aria-hidden="true"></i>' + escapeHtml(t) +
+    ' <input type="color" data-t="' + escapeHtml(t) + '" value="' + (teacherPicked[t] || TEACHER_DEFAULT_COLORS[t]).toLowerCase() + '"' +
+    ' aria-label="สีของอาจารย์ ' + escapeHtml(t) + '" oninput="teacherPicked[this.dataset.t] = this.value.toUpperCase(); renderTeacherPickers()"></label>').join('');
+}
 function renderGcalSwatches() {
   document.getElementById('gsSwatches').innerHTML = GCAL_PALETTE.map(([name, hex]) =>
     '<button class="swatch" type="button" style="--c:' + hex + '" aria-pressed="' + (gcalPicked === hex) + '"' +
@@ -6221,7 +6636,9 @@ async function openGcalSettings() {
   if (error) { console.error('[Load staff settings]', error); showFatalError('อ่านการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
   document.getElementById('gsUrl').value = (data && data.gcal_ics_url) || '';
   gcalPicked = ((data && data.gcal_color) || GCAL_DEFAULT).toUpperCase();
+  teacherPicked = Object.assign({}, TEACHER_DEFAULT_COLORS, (data && data.teacher_colors) || {});
   renderGcalSwatches();
+  renderTeacherPickers();
   document.getElementById('gcalDialog').showModal();
 }
 
@@ -6231,11 +6648,12 @@ async function saveGcalSettings() {
   const btn = document.getElementById('gsSaveBtn');
   btn.disabled = true;
   const { data, error } = await db.from('staff_settings')
-    .update({ gcal_ics_url: v || null, gcal_color: gcalPicked, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+    .update({ gcal_ics_url: v || null, gcal_color: gcalPicked, teacher_colors: teacherPicked, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
   btn.disabled = false;
   if (error) { console.error('[Save staff settings]', error); showFatalError('บันทึกการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
   if (!data || !data.length) { showFatalError('บันทึกการตั้งค่าไม่สำเร็จ — บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 023'); return; }
   calState.gcolor = gcalPicked;
+  calState.teacherColors = Object.assign({}, teacherPicked);
   document.getElementById('gcalDialog').close();
   showToast(v ? '✅ เชื่อม Google Calendar แล้ว' : '✅ เลิกเชื่อม Google Calendar แล้ว');
   loadCalendar();

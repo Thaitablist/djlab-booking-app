@@ -343,14 +343,19 @@ async function runTests() {
 
   // ── 10. แอปบนหน้าแรก + เครื่องเล่น ────────────────────────────────────────
   openAppDialog();
-  document.getElementById('apUrl').value = 'https://example.com/not-youtube';
+  ok('หน้าต่างเพิ่มแอปไม่มีชนิด YouTube แล้ว (ย้ายไปแผง YouTube)', ![...document.getElementById('apKind').options].some(o => o.value === 'youtube'));
+  document.getElementById('apUrl').value = 'https://example.com/not-spotify';
   CALLS.length = 0;
   await saveApp();
-  ok('ลิงก์ที่ไม่ใช่ YouTube ถูกปฏิเสธ ไม่มีการบันทึก', txt('apMsg').indexOf('ไม่ใช่ลิงก์') !== -1 && !CALLS.some(c => c.op === 'upsert'));
-  document.getElementById('apUrl').value = 'https://www.youtube.com/watch?v=jNQXAC9IVRw&t=3s';
+  ok('ลิงก์ที่ไม่ใช่ Spotify ถูกปฏิเสธ ไม่มีการบันทึก', txt('apMsg').indexOf('ไม่ใช่ลิงก์') !== -1 && !CALLS.some(c => c.op === 'upsert'));
+  document.getElementById('apUrl').value = 'https://www.youtube.com/watch?v=jNQXAC9IVRw';
+  await saveApp();
+  ok('วางลิงก์ YouTube ในหน้าต่างเพิ่มแอป → บอกให้ใช้แผง YouTube', txt('apMsg').indexOf('แผง YouTube') !== -1 && !CALLS.some(c => c.op === 'upsert'));
+  document.getElementById('apUrl').value = 'https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd';
   document.getElementById('apTitle').value = 'เพลงเปิดร้าน';
   await saveApp();
-  ok('เพิ่มแอป YouTube: บันทึกลง staff_home.apps', homePrefs.apps.length === 1 && FAKE.staff_home[0].apps[0].kind === 'youtube');
+  ok('เพิ่มแอป Spotify: บันทึกลง staff_home.apps เฉพาะคอลัมน์ apps', homePrefs.apps.length === 1 && FAKE.staff_home[0].apps[0].kind === 'spotify' &&
+    !('launcher' in CALLS.filter(c => c.op === 'upsert').pop().payload));
   openAppDialog();
   document.getElementById('apKind').value = 'link';
   document.getElementById('apUrl').value = 'javascript:alert(1)';
@@ -370,8 +375,8 @@ async function runTests() {
 
   playApp(homePrefs.apps[0].id);
   const frame = document.getElementById('playerFrame');
-  ok('กดเล่น: เครื่องเล่นขึ้น ใช้ youtube-nocookie พร้อม autoplay', vis('player') && !!frame &&
-    frame.src === 'https://www.youtube-nocookie.com/embed/jNQXAC9IVRw?autoplay=1&rel=0' && /autoplay/.test(frame.allow), frame && frame.src);
+  ok('กดเล่น Spotify: เครื่องเล่นขึ้น ใช้ที่อยู่ embed ที่ประกอบเอง พร้อม autoplay', vis('player') && !!frame &&
+    frame.src === 'https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd' && /autoplay/.test(frame.allow), frame && frame.src);
   showSection('products');
   ok('เปลี่ยนไปหมวดสินค้า: เครื่องเล่นยังอยู่ เป็นกรอบเดิม (เสียงไม่สะดุด)', vis('player') && document.getElementById('playerFrame') === frame && frame.isConnected);
   showSection('bills');

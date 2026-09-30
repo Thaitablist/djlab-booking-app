@@ -193,7 +193,7 @@ async function runTests() {
     txt('tileCal').indexOf('คลาส Scratch 1-on-1') !== -1 && txt('tileCal').indexOf('ประชุมกับตัวแทน Pioneer') !== -1, txt('tileCal'));
   ok('วันนี้บนหน้าแรกรวมการจองห้องด้วย', txt('tileCal').indexOf('ลูกค้าซ้อมบ่าย') !== -1, txt('tileCal'));
   const homeChips = [...document.querySelectorAll('#tileCal .chip')];
-  ok('ป้ายสีบนหน้าแรกมีชื่อแหล่งกำกับ (คลาสเรียน · Google · ห้องซ้อม)', ['คลาสเรียน', 'Google', 'ห้องซ้อม'].every(t => homeChips.some(c => c.textContent === t)),
+  ok('ป้ายสีบนหน้าแรกมีชื่อแหล่งกำกับ (คลาสเรียน · ปฏิทินหลัก · ห้องซ้อม — ไม่มีคำว่า Google)', ['คลาสเรียน', 'ปฏิทินหลัก', 'ห้องซ้อม'].every(t => homeChips.some(c => c.textContent === t)),
     homeChips.map(c => c.textContent));
   ok('ป้ายสีบนหน้าแรก ตัวอักษรคอนทราสต์ ≥ 4.5:1 ทุกอัน', homeChips.length === 3 && worstContrast(homeChips) >= 4.5, worstContrast(homeChips).toFixed(2));
 
@@ -281,7 +281,8 @@ async function runTests() {
     JSON.stringify(g && g.body));
   const chip = kind => [...document.querySelectorAll('#calGrid .ev[data-kind="' + kind + '"]')];
   ok('ชั้น Google แสดงจากคำตอบของฟังก์ชัน', chip('google').some(b => b.textContent.indexOf('ประชุมกับตัวแทน Pioneer') !== -1));
-  ok('ป้าย Google มีข้อความกำกับ ไม่ใช่สีอย่างเดียว', chip('google')[0].textContent.indexOf('Google') === 0, chip('google')[0].textContent);
+  ok('ป้ายของปฏิทินหลักขึ้นต้นด้วยเวลา ไม่มีคำว่า Google (เจ้าของสั่ง)', chip('google')[0].textContent.indexOf('10:00') === 0 &&
+    chip('google')[0].textContent.indexOf('Google') === -1, chip('google')[0].textContent);
   ok('กิจกรรมร้านมีชื่อหมวดในป้าย', chip('shop').some(b => b.textContent.indexOf('คลาสเรียน') === 0 && b.textContent.indexOf('14:00') !== -1));
   ok('ชั้นการจองห้องปิดอยู่ตอนเริ่ม', chip('room').length === 0);
   const g0 = chip('google')[0];
@@ -296,7 +297,7 @@ async function runTests() {
   const allChips = [...document.querySelectorAll('#calGrid .ev')];
   ok('รายเดือน: ตัวอักษรในป้ายทุกอันคอนทราสต์ ≥ 4.5:1', worstContrast(allChips) >= 4.5, worstContrast(allChips).toFixed(2));
   const legend = [...document.querySelectorAll('#calLegend .chip')];
-  ok('คำอธิบายสีมีครบทุกแหล่งพร้อมชื่อ (5 หมวด + Google + ห้องซ้อม)', legend.length === 7 && legend.some(c => c.textContent.indexOf('Google') === 0) &&
+  ok('คำอธิบายสีมีครบทุกแหล่งพร้อมชื่อ (5 หมวด + ห้องซ้อม + อาจารย์ 6 คน + อื่น ๆ)', legend.length === 13 && legend.some(c => c.textContent === 'Nutty') &&
     worstContrast(legend) >= 4.5, legend.map(c => c.textContent));
   setCalView('week');
   await sleep(150);
