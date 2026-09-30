@@ -325,11 +325,11 @@ async function runTests() {
     current !== 'admin' && document.getElementById('sec-admin').hidden && txt('toast').indexOf('เฉพาะเจ้าของร้าน') !== -1, current + ' / ' + txt('toast'));
   location.hash = '#admin';
   await sleep(200);
-  ok('พนักงานพิมพ์ #admin เองก็ถูกส่งกลับหมวดเริ่มต้น', current === 'products' && location.hash === '#stock' &&
+  ok('พนักงานพิมพ์ #admin เองก็ถูกส่งกลับหมวดเริ่มต้น (หน้าแรก)', current === 'home' && location.hash === '#home' &&
     document.getElementById('sec-admin').hidden, current + ' ' + location.hash);
   location.hash = '#activity';
   await sleep(200);
-  ok('พนักงานพิมพ์ #activity เองก็ถูกส่งกลับหมวดเริ่มต้น', current === 'products' && document.getElementById('sec-activity').hidden, current);
+  ok('พนักงานพิมพ์ #activity เองก็ถูกส่งกลับหมวดเริ่มต้น (หน้าแรก)', current === 'home' && document.getElementById('sec-activity').hidden, current);
   openProduct('p1');
   await sleep(100);
   ok('พนักงานไม่เห็นปุ่มแก้ไขข้อมูลสินค้า', !/แก้ไขข้อมูลสินค้า/.test(txt('detailBody')));
@@ -368,8 +368,8 @@ const onBooking = loadWith('#booking', 'u1', `
   ok('URL ยังเป็น #booking', location.hash === '#booking', location.hash);`);
 
 const staffAdmin = loadWith('#admin', 'u2', `
-  ok('พนักงานเปิดหน้าด้วย #admin ถูกส่งไปหมวดเริ่มต้น', current === 'products' && document.getElementById('sec-admin').hidden, current);
-  ok('URL ถูกแก้เป็น #stock ไม่ค้าง #admin', location.hash === '#stock', location.hash);
+  ok('พนักงานเปิดหน้าด้วย #admin ถูกส่งไปหมวดเริ่มต้น (หน้าแรก)', current === 'home' && document.getElementById('sec-admin').hidden, current);
+  ok('URL ถูกแก้เป็น #home ไม่ค้าง #admin', location.hash === '#home', location.hash);
   ok('บอกเหตุผลว่าเฉพาะเจ้าของร้าน/ผู้ดูแล', document.getElementById('toast').textContent.indexOf('เฉพาะเจ้าของร้าน') !== -1,
     document.getElementById('toast').textContent);`);
 

@@ -273,6 +273,57 @@
   table.data th .colname { font-weight: 400; }
   .ro { background: var(--surface2); border: 1px solid var(--line); padding: 8px 12px; min-height: 40px; word-break: break-word; }
 
+  /* ---------- หน้าแรกพนักงาน ---------- */
+  .nav-item .nbadge { background: var(--red); color: #fff; font-size: 14px; font-weight: 700; min-width: 22px; padding: 0 6px; text-align: center; }
+  .hello { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+  .hello h2 { font-size: 24px; }
+  .unread-box { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--red); box-shadow: var(--shadow); padding: 16px 20px; margin-bottom: 20px; }
+  .unread-box h3 { font-size: 16px; margin-bottom: 8px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .content.has-detail .tiles { grid-template-columns: repeat(2, 1fr); }
+  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; min-height: 150px;
+    background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 18px 20px; cursor: pointer; }
+  .tile:hover:not(:disabled) { border-color: var(--black); }
+  .tile .t-ico { font-size: 22px; }
+  .tile .t-name { font-family: var(--font-head); font-weight: 600; font-size: 17px; }
+  .tile .t-val { font-size: 15px; color: var(--text2); }
+  .tile .t-val strong { color: var(--text); font-family: var(--font-head); font-size: 22px; }
+  .tile:disabled { cursor: not-allowed; background: repeating-linear-gradient(45deg, var(--surface2) 0 8px, var(--surface) 8px 16px); color: var(--text3); }
+  .btn-lg { min-height: 52px; padding: 12px 28px; font-size: 17px; }
+  .pre { white-space: pre-wrap; word-break: break-word; }
+  code { font-family: Consolas, Menlo, monospace; font-size: 14px; }   /* monospace ของเบราว์เซอร์ตั้งต้นที่ 13px — ต่ำกว่ากฎข้อ 6 */
+
+  /* ปฏิทิน: สีบอกหมวด แต่ชื่อหมวดเขียนกำกับในป้ายเสมอ (ไม่ใช้สีอย่างเดียว) */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--surface); }
+  .cal-grid .dow { font-size: 14px; color: var(--text2); padding: 6px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface2); }
+  .cal-cell { min-height: 118px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px; min-width: 0; }
+  .cal-cell.out { background: var(--surface2); }
+  .cal-cell.out .cal-day { color: var(--text3); }
+  .cal-week .cal-cell { min-height: 420px; }
+  .cal-day { border: 0; background: none; cursor: pointer; font-size: 14px; font-weight: 600; padding: 2px 6px; width: 100%; text-align: left; }
+  .cal-day:hover { background: var(--sel); }
+  .cal-cell.today .cal-day { color: var(--red); }
+  .ev { display: block; width: 100%; text-align: left; font-size: 14px; line-height: 1.35; margin-top: 3px; padding: 2px 6px; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--line); border-left: 4px solid var(--cat, var(--black));
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-week .ev { white-space: normal; }
+  .ev:hover { border-color: var(--black); }
+  .ev b { font-weight: 700; margin-right: 4px; }
+  .ev.g { border-style: dashed; border-left-style: solid; background: var(--surface); }
+  .ev.room { background: repeating-linear-gradient(45deg, var(--surface2) 0 6px, var(--surface) 6px 12px); }
+  .ev-more { border: 0; background: none; font-size: 14px; color: var(--text2); cursor: pointer; padding: 2px 6px; text-decoration: underline; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 14px; color: var(--text2); margin-top: 10px; }
+  .legend span { border-left: 4px solid var(--cat); padding-left: 6px; }
+  .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+
+  /* กล่องจดหมาย: รายการซ้าย อ่านขวา */
+  .mail-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
+  .mail-reader { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-height: 300px; }
+  .mail-reader .mr-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .mail-reader .mr-head h2 { font-size: 18px; margin-bottom: 6px; word-break: break-word; }
+  .mail-reader iframe { display: block; width: 100%; height: calc(100vh - 380px); min-height: 320px; border: 0; background: #fff; }
+  table.data tr.unread td { font-weight: 700; }
+
   .print-only { display: none; }
   @media print {
     .sidebar, .topbar, .detail, .no-print, .toast, #fatalError { display: none !important; }
@@ -346,8 +397,117 @@
     <div class="content">
       <main class="workspace">
 
+        <!-- ============ หน้าแรกพนักงาน ============ -->
+        <section class="section" id="sec-home">
+          <div class="hello">
+            <h2 id="homeHello">สวัสดี</h2>
+            <span class="hint" id="homeDate" style="margin:0;"></span>
+          </div>
+          <div id="homeUnread"></div>
+          <div class="tiles">
+            <button class="tile" type="button" onclick="showSection('board')">
+              <span class="t-ico" aria-hidden="true">✎</span><span class="t-name">กระดานข้อความ</span>
+              <span class="t-val" id="tileBoard">—</span>
+            </button>
+            <button class="tile" type="button" onclick="showSection('mail')">
+              <span class="t-ico" aria-hidden="true">✉</span><span class="t-name">กล่องจดหมายร้าน</span>
+              <span class="t-val" id="tileMail">—</span>
+            </button>
+            <button class="tile" type="button" onclick="showSection('calendar')">
+              <span class="t-ico" aria-hidden="true">▤</span><span class="t-name">ปฏิทินวันนี้</span>
+              <span class="t-val" id="tileCal">—</span>
+            </button>
+            <!-- ตอกบัตรเข้างาน: เจ้าของสั่งเว้นไว้ก่อน รอปรึกษา — ไม่มีอะไรอยู่ข้างหลังปุ่มนี้ -->
+            <button class="tile" type="button" id="tileClock" disabled aria-disabled="true" title="ยังไม่เปิดใช้ — รอปรึกษา">
+              <span class="t-ico" aria-hidden="true">◴</span><span class="t-name">ตอกบัตรเข้างาน</span>
+              <span class="t-val">เร็ว ๆ นี้ · รอปรึกษา</span>
+            </button>
+          </div>
+          <button class="btn btn-primary btn-lg" id="homeConsoleBtn" type="button" onclick="showSection('products')">เข้าสู่คอนโซลร้าน →</button>
+          <p class="hint">สต็อก · ขายหน้าร้าน · จองห้องซ้อม · ลูกค้า · สรุปรายวัน อยู่ในเมนูซ้ายเหมือนเดิม (Alt+1…9, Alt+0)</p>
+        </section>
+
+        <!-- ============ กระดานข้อความ ============ -->
+        <section class="section" id="sec-board" hidden>
+          <div class="toolbar">
+            <input type="search" id="boardSearch" class="input grow" placeholder="ค้นหาหัวข้อ / ข้อความ / ชื่อผู้เขียน" autocomplete="off" aria-label="ค้นหาข้อความ">
+            <select id="fBoard" class="input" aria-label="แสดงข้อความ">
+              <option value="">ทุกข้อความ</option>
+              <option value="unread">● ยังไม่ได้อ่าน (ของฉัน)</option>
+              <option value="pinned">ปักหมุด</option>
+              <option value="mine">ที่ฉันเขียน</option>
+            </select>
+            <button class="btn btn-primary" type="button" onclick="openBoardForm(null)">+ เขียนข้อความ</button>
+          </div>
+          <div class="tablewrap" id="tw-board" tabindex="0" aria-label="ตารางข้อความ — ใช้ลูกศรขึ้นลงเลือก Enter เปิดอ่าน">
+            <table class="data">
+              <thead><tr>
+                <th class="pad">สถานะของฉัน</th>
+                <th class="pad">วันที่</th>
+                <th class="pad">หัวข้อ</th>
+                <th class="pad col-opt">ผู้เขียน</th>
+                <th class="pad num">อ่านแล้ว</th>
+              </tr></thead>
+              <tbody id="boardRows"></tbody>
+            </table>
+          </div>
+          <p class="hint">เปิดอ่านแล้วระบบนับว่าคุณอ่านแล้วเอง · ข้อความปักหมุดอยู่บนสุดเสมอ</p>
+        </section>
+
+        <!-- ============ กล่องจดหมายร้าน ============ -->
+        <section class="section" id="sec-mail" hidden>
+          <div id="mailSetup" hidden></div>
+          <div id="mailMain">
+            <div class="toolbar">
+              <input type="search" id="mailSearch" class="input grow" placeholder="ค้นหาอีเมล แล้วกด Enter (ใช้คำค้นแบบ Gmail ได้ เช่น from:pioneer)" autocomplete="off" aria-label="ค้นหาอีเมล">
+              <button class="btn" type="button" onclick="loadMailList()">↻ รีเฟรช</button>
+              <button class="btn btn-primary" type="button" onclick="openCompose(null)">+ เขียนอีเมลใหม่</button>
+            </div>
+            <div id="mailNote"></div>
+            <div class="mail-split">
+              <div>
+                <div class="tablewrap" id="tw-mail" tabindex="0" aria-label="รายการอีเมล — ใช้ลูกศรขึ้นลงเลือก Enter เปิดอ่าน">
+                  <table class="data">
+                    <thead><tr><th class="pad">จาก</th><th class="pad">เรื่อง</th><th class="pad">เวลา</th></tr></thead>
+                    <tbody id="mailRows"></tbody>
+                  </table>
+                </div>
+                <div class="toolbar" style="margin-top:10px;">
+                  <button class="btn btn-sm" id="mailPrev" type="button" onclick="mailPage(-1)">‹ ใหม่กว่า</button>
+                  <span class="hint" id="mailPager" style="margin:0;">—</span>
+                  <button class="btn btn-sm" id="mailNext" type="button" onclick="mailPage(1)">เก่ากว่า ›</button>
+                </div>
+              </div>
+              <div class="mail-reader" id="mailReader"><div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ปฏิทิน ============ -->
+        <section class="section" id="sec-calendar" hidden>
+          <div class="toolbar">
+            <button class="btn btn-sm" type="button" onclick="shiftCal(-1)" aria-label="ก่อนหน้า" title="ก่อนหน้า (←)">‹</button>
+            <button class="btn btn-sm" type="button" onclick="setCalAnchor(todayBangkok())">วันนี้</button>
+            <button class="btn btn-sm" type="button" onclick="shiftCal(1)" aria-label="ถัดไป" title="ถัดไป (→)">›</button>
+            <strong id="calTitle" style="font-family:var(--font-head);font-size:18px;min-width:180px;"></strong>
+            <select id="calView" class="input" aria-label="มุมมอง" onchange="setCalView(this.value)">
+              <option value="month">รายเดือน</option>
+              <option value="week">รายสัปดาห์</option>
+            </select>
+            <label class="chk"><input type="checkbox" id="layerShop" checked onchange="toggleLayer('shop', this.checked)"> ปฏิทินร้าน</label>
+            <label class="chk"><input type="checkbox" id="layerGoogle" checked onchange="toggleLayer('google', this.checked)"> Google Calendar</label>
+            <label class="chk"><input type="checkbox" id="layerRooms" onchange="toggleLayer('rooms', this.checked)"> การจองห้องซ้อม</label>
+            <span style="flex:1;"></span>
+            <button class="btn btn-sm" id="gcalSetupBtn" type="button" onclick="openGcalSettings()" hidden>ตั้งค่า Google Calendar</button>
+            <button class="btn btn-primary" type="button" onclick="openEventForm(null)">+ เพิ่มกิจกรรม</button>
+          </div>
+          <div id="calNote"></div>
+          <div id="calGrid"></div>
+          <div class="legend" id="calLegend"></div>
+        </section>
+
         <!-- ============ สินค้า ============ -->
-        <section class="section" id="sec-products">
+        <section class="section" id="sec-products" hidden>
           <div class="stats">
             <div class="stat"><div class="stat-value" id="statTotalProducts">0</div><div class="stat-label">สินค้าทั้งหมด</div></div>
             <div class="stat"><div class="stat-value" id="statLowStock">0</div><div class="stat-label">⚠ ใกล้หมด (คงเหลือ ≤ จุดสั่งซื้อซ้ำ)</div></div>
@@ -817,7 +977,9 @@
   <div class="dlg-body">
     <div class="help-grid">
       <span><kbd>/</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>K</kbd></span><span>ค้นหาทั้งร้าน</span>
-      <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd>, <kbd>0</kbd></span><span>สลับหมวดตามลำดับในเมนูซ้าย (ตัวเลขแสดงข้างชื่อหมวด)</span>
+      <span><kbd>Alt</kbd>+<kbd>H</kbd></span><span>หน้าแรก</span>
+      <span><kbd>Alt</kbd>+<kbd>B</kbd> · <kbd>M</kbd> · <kbd>C</kbd></span><span>กระดานข้อความ · กล่องจดหมายร้าน · ปฏิทิน</span>
+      <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd>, <kbd>0</kbd></span><span>หมวดคอนโซลร้าน (สินค้า … จัดการข้อมูล) ตามเลขข้างชื่อในเมนูซ้าย</span>
       <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>เลื่อนแถวที่เลือกในตาราง</span>
       <span><kbd>Enter</kbd></span><span>เปิดรายละเอียดแถวที่เลือก</span>
       <span><kbd>Esc</kbd></span><span>ปิดแผงรายละเอียด / หน้าต่าง / ออกจากช่องพิมพ์</span>
@@ -825,7 +987,7 @@
       <span><kbd>+</kbd> <kbd>−</kbd></span><span>เพิ่ม/ลดจำนวนบรรทัดที่เลือกในตะกร้า</span>
       <span><kbd>Delete</kbd></span><span>ลบบรรทัดที่เลือกออกจากตะกร้า</span>
       <span><kbd>F9</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span><span>บันทึกการขาย (กดได้แม้อยู่ในช่องส่วนลด/หมายเหตุ)</span>
-      <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน</span>
+      <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน · เลื่อนเดือน/สัปดาห์ในปฏิทิน</span>
       <span><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd></span><span>กลับไปหมวดก่อนหน้า / ไปข้างหน้า (เหมือนปุ่ม ← ย้อนกลับ บนแถบบน และปุ่มย้อนของเมาส์)</span>
       <span><kbd>?</kbd></span><span>เปิดหน้านี้</span>
     </div>
@@ -948,6 +1110,75 @@
   <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('receiptDialog').close()">ปิด (Esc)</button></div>
 </dialog>
 
+<dialog id="boardDialog" aria-labelledby="boardFormTitle">
+  <div class="dlg-head"><h2 id="boardFormTitle">เขียนข้อความ</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveBoard();">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="bfDate">เรื่องของวันที่ *</label><input type="date" id="bfDate" class="input"></div>
+      <div class="field"><label class="lbl" for="bfTarget">ถึง</label><select id="bfTarget" class="input"></select></div>
+    </div>
+    <div class="field"><label class="lbl" for="bfTitle">หัวข้อ *</label><input type="text" id="bfTitle" class="input" maxlength="200" placeholder="เช่น ของเข้าพรุ่งนี้ช่วงบ่าย"></div>
+    <div class="field"><label class="lbl" for="bfBody">ข้อความ</label><textarea id="bfBody" class="input" rows="6" placeholder="รายละเอียดที่ต้องการฝากไว้"></textarea></div>
+    <label class="chk" style="margin-bottom:16px;"><input type="checkbox" id="bfPinned"> ปักหมุดไว้บนสุด</label>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('boardDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="bfSaveBtn" type="submit">บันทึกข้อความ</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="eventDialog" aria-labelledby="eventFormTitle">
+  <div class="dlg-head"><h2 id="eventFormTitle">เพิ่มกิจกรรม</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveEvent();">
+    <div class="field"><label class="lbl" for="ceTitle">ชื่อกิจกรรม *</label><input type="text" id="ceTitle" class="input" maxlength="200" placeholder="เช่น คลาส Scratch 1-on-1"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="ceDate">วันที่ *</label><input type="date" id="ceDate" class="input"></div>
+      <div class="field"><label class="lbl" for="ceCategory">หมวด</label><select id="ceCategory" class="input"></select></div>
+    </div>
+    <label class="chk" style="margin-bottom:12px;"><input type="checkbox" id="ceAllDay" checked onchange="syncEventTimes()"> ทั้งวัน</label>
+    <div class="row2" id="ceTimes" hidden>
+      <div class="field"><label class="lbl" for="ceStart">เริ่ม *</label><input type="time" id="ceStart" class="input" value="12:00"></div>
+      <div class="field"><label class="lbl" for="ceEnd">ถึง *</label><input type="time" id="ceEnd" class="input" value="13:00"></div>
+    </div>
+    <div class="field"><label class="lbl" for="ceNote">หมายเหตุ</label><textarea id="ceNote" class="input" rows="3"></textarea></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('eventDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="ceSaveBtn" type="submit">บันทึกกิจกรรม</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="gcalDialog" aria-labelledby="gcalTitle">
+  <div class="dlg-head"><h2 id="gcalTitle">เชื่อม Google Calendar (อ่านอย่างเดียว)</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); saveGcalSettings();">
+    <div class="field">
+      <label class="lbl" for="gsUrl">ที่อยู่ลับในรูปแบบ iCal</label>
+      <input type="url" id="gsUrl" class="input" placeholder="https://calendar.google.com/calendar/ical/.../private-.../basic.ics" autocomplete="off">
+      <div class="hint">Google Calendar → การตั้งค่าของปฏิทินนั้น → ผสานรวมปฏิทิน → “ที่อยู่ลับในรูปแบบ iCal” · เว้นว่างแล้วบันทึก = เลิกเชื่อม</div>
+    </div>
+    <div class="alert alert-warn">ที่อยู่นี้เป็นความลับ ใครได้ไปก็เปิดดูปฏิทินได้ทั้งปฏิทิน — ระบบเก็บไว้ให้เจ้าของร้าน/ผู้ดูแลเห็นเท่านั้น พนักงานเห็นแค่กิจกรรม</div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('gcalDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="gsSaveBtn" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="composeDialog" aria-labelledby="composeTitle" style="max-width:720px;">
+  <div class="dlg-head"><h2 id="composeTitle">เขียนอีเมลใหม่</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); sendMail();">
+    <div class="field"><label class="lbl" for="mcTo">ถึง *</label><input type="text" id="mcTo" class="input" placeholder="customer@email.com (หลายคนคั่นด้วย , )" autocomplete="off"></div>
+    <div class="field"><label class="lbl" for="mcSubject">เรื่อง</label><input type="text" id="mcSubject" class="input" maxlength="300"></div>
+    <div class="field"><label class="lbl" for="mcBody">ข้อความ *</label><textarea id="mcBody" class="input" rows="12"></textarea></div>
+    <div id="mcError"></div>
+    <p class="hint">ส่งในนาม DJ LAB SIAM จากกล่องจดหมายของร้าน · สำเนาไปอยู่ใน “จดหมายที่ส่งแล้ว” ของ Gmail</p>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('composeDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="mcSendBtn" type="submit">ส่งอีเมล</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1000,21 +1231,29 @@ const BRAND_OPTIONS = ['Pioneer DJ', 'AlphaTheta', 'NEO by OYAIDE', 'Other'];
 const TYPE_LABEL = { in: '▲ รับเข้า', out: '▼ ตัดออก', adjustment: '◆ ปรับยอด' };
 const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold: 'ขายแล้ว', reserved: 'จองไว้', defective: 'มีตำหนิ' };
 
-// ลำดับในเมนูซ้าย = ลำดับของ Alt+1..9 แล้ว Alt+0 · manager: true = เฉพาะเจ้าของร้าน/ผู้ดูแล
+// ลำดับในเมนูซ้าย · key = คีย์ลัด Alt+key — ตัวเลขยังเป็นของหมวดคอนโซลเดิมตามเดิมทุกตัว (พนักงานกดจนติดมือแล้ว)
+// หมวดพนักงานที่มาทีหลังใช้ตัวอักษรแทนการเลื่อนเลขทั้งแถว: H หน้าแรก · B กระดาน · M จดหมาย · C ปฏิทิน
+// อ่านจาก event.code (KeyH / Digit1) เหมือนเครื่องยิง — แป้นภาษาไทยก็กดได้
+// manager: true = เฉพาะเจ้าของร้าน/ผู้ดูแล
 // (activity ตาม activity.html · admin เจ้าของร้านสั่งปิดจากพนักงานในคอนโซล — admin-data.html เดิมไม่ได้กั้น)
 // hash = ชื่อใน URL (#stock, #pos ...) ทำให้ปุ่มย้อนกลับ/เปิดหน้าใหม่แล้วกลับหมวดเดิมได้
 const SECTIONS = [
-  { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: '▦', label: 'สินค้า' },
-  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: '⇅', label: 'รับเข้า / ตัดออก / ปรับยอด' },
-  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: '☰', label: 'ประวัติการเคลื่อนไหว' },
-  { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: '＋', label: 'ขายหน้าร้าน' },
-  { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: '≡', label: 'ประวัติบิล' },
-  { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: '◷', label: 'จองห้องซ้อม' },
-  { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: '☺', label: 'ข้อมูลลูกค้า' },
-  { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: '∑', label: 'สรุปรายวัน' },
-  { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: '⌕', label: 'บันทึกการใช้งาน', manager: true },
-  { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: '⚙', label: 'จัดการข้อมูล', manager: true },
+  { id: 'home',     hash: 'home',          group: 'พนักงาน',     icon: '⌂', label: 'หน้าแรก', key: 'H' },
+  { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: '✎', label: 'กระดานข้อความ', key: 'B' },
+  { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: '✉', label: 'กล่องจดหมายร้าน', key: 'M' },
+  { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: '▤', label: 'ปฏิทิน', key: 'C' },
+  { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: '▦', label: 'สินค้า', key: '1' },
+  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: '⇅', label: 'รับเข้า / ตัดออก / ปรับยอด', key: '2' },
+  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: '☰', label: 'ประวัติการเคลื่อนไหว', key: '3' },
+  { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: '＋', label: 'ขายหน้าร้าน', key: '4' },
+  { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: '≡', label: 'ประวัติบิล', key: '5' },
+  { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: '◷', label: 'จองห้องซ้อม', key: '6' },
+  { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: '☺', label: 'ข้อมูลลูกค้า', key: '7' },
+  { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: '∑', label: 'สรุปรายวัน', key: '8' },
+  { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: '⌕', label: 'บันทึกการใช้งาน', manager: true, key: '9' },
+  { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: '⚙', label: 'จัดการข้อมูล', manager: true, key: '0' },
 ];
+const HOME = 'home';   // หมวดเริ่มต้นหลังล็อกอิน และที่ที่ถูกส่งกลับเมื่อเปิดหมวดที่ไม่มีสิทธิ์
 
 let products = [];
 let stockLevelMap = {};
@@ -1024,7 +1263,7 @@ let sales = [];
 let statsData = [];
 let currentAdmin = null;
 let currentUserId = null;
-let current = 'products';
+let current = HOME;
 let cart = [];
 let cartSel = -1;
 let selectedCustomer = null;
@@ -1041,6 +1280,8 @@ const view = {
   customers:{ sort: 'name', dir: 1, rows: [], sel: -1, tbody: 'customerRows' },
   activity: { sort: 'created_at', dir: -1, rows: [], sel: -1, tbody: 'activityRows' },
   admin:    { sort: null, dir: 1, rows: [], sel: -1, tbody: 'adRows' },     // เรียงที่ฐานข้อมูล (แบ่งหน้า)
+  board:    { sort: null, dir: 1, rows: [], sel: -1, tbody: 'boardRows' },  // ปักหมุดก่อน แล้วใหม่ก่อน (boardSorted)
+  mail:     { sort: null, dir: 1, rows: [], sel: -1, tbody: 'mailRows' },   // เรียงที่ Gmail (ใหม่ก่อน แบ่งหน้า)
 };
 
 // ---------------------------------------------------------------------------
@@ -1138,11 +1379,12 @@ async function handleAuthState(session) {
   if (pendingRoute) {
     const r = pendingRoute;
     pendingRoute = null;
-    if (!showSection(r, 'replace')) showSection('products', 'replace');
-  } else if (sec && sec.manager && !isManager()) showSection('products', 'replace');
-  else if (current === 'daily' || current === 'activity' || current === 'admin') showSection(current, 'none');
+    if (!showSection(r, 'replace')) showSection(HOME, 'replace');
+  } else if (sec && sec.manager && !isManager()) showSection(HOME, 'replace');
+  else if (['daily', 'activity', 'admin', 'mail', 'calendar'].includes(current)) showSection(current, 'none');
 
   loadAll();
+  loadStaffHome();
 }
 
 async function initSupabaseSync() {
@@ -1176,6 +1418,16 @@ async function initSupabaseSync() {
   db.channel('desk-daily')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'income_entries' }, () => { if (current === 'daily') loadDaily(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => { if (current === 'daily') loadDaily(); })
+    .subscribe();
+  db.channel('desk-board')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'board_messages' }, () => refreshBoard())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'board_reads' }, () => refreshBoard())
+    .subscribe();
+  db.channel('desk-calendar')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_events' }, () => {
+      loadHomeToday();
+      if (current === 'calendar') loadCalendar();
+    })
     .subscribe();
 }
 
@@ -1258,6 +1510,7 @@ function renderAll() {
   renderCart();
   renderBookings();
   renderCustomers();
+  renderHome();          // ไทล์ปฏิทินนับการจองห้องของวันนี้
 }
 
 // ---------------------------------------------------------------------------
@@ -1347,7 +1600,8 @@ function openRow(t) {
   const v = view[t], r = v.rows[v.sel];
   if (!r) return;
   ({ products: openProduct, moves: openMove, bills: openBill, bookings: openBooking,
-     customers: openCustomer, activity: openActivity, admin: () => adOpenRow(r) })[t](r.id);
+     customers: openCustomer, activity: openActivity, admin: () => adOpenRow(r),
+     board: openBoardMsg, mail: openMail })[t](r.id);
 }
 
 function pickRow(t, i) { selectRow(t, i); openRow(t); }
@@ -2104,16 +2358,19 @@ function renderNav() {
       group = s.group;
       html += '<div class="nav-group"><div class="nav-group-title">' + escapeHtml(group) + '</div>';
     }
-    const key = sectionKey(i);
+    const key = sectionKey(s);
+    // ตัวเลขแดงข้างเมนู = ข้อความที่ "ฉัน" ยังไม่ได้อ่าน (กระดาน) / อีเมลที่ยังไม่ได้เปิด (กล่องจดหมาย)
+    const badge = s.id === 'board' || s.id === 'mail' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
       '<span class="ico" aria-hidden="true">' + s.icon + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
-      (key ? '<span class="kbd">' + key + '</span>' : '') + '</button>';
+      badge + (key ? '<span class="kbd">' + key + '</span>' : '') + '</button>';
   });
   document.getElementById('navList').innerHTML = html + '</div>';
+  updateNavBadges();
 }
 
-function sectionKey(i) { return i < 9 ? 'Alt+' + (i + 1) : (i === 9 ? 'Alt+0' : ''); }
+function sectionKey(s) { return s.key ? 'Alt+' + s.key : ''; }
 
 // ---------------------------------------------------------------------------
 // ประวัติการเปลี่ยนหมวด — เจ้าของเปิดคอนโซลเป็นหน้าต่างแอป (--app=) ซึ่งไม่มีปุ่ม back ของเบราว์เซอร์
@@ -2135,8 +2392,8 @@ window.addEventListener('popstate', e => {
   if (e.state && typeof e.state.n === 'number') navN = e.state.n;
   else { navN += 1; history.replaceState({ n: navN }, '', location.hash); }
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
-  const id = sectionFromHash() || 'products';
-  if (!showSection(id, 'none')) showSection('products', 'replace');
+  const id = sectionFromHash() || HOME;
+  if (!showSection(id, 'none')) showSection(HOME, 'replace');
   updateBackBtn();
 });
 
@@ -2162,12 +2419,16 @@ function showSection(id, mode) {
     if (id === 'daily') loadDaily();
     if (id === 'activity' && !activityLoaded) reloadActivity();
     if (id === 'admin' && !adLoaded) adLoadAll();
+    if (id === 'mail') loadMailList();
+    if (id === 'calendar') loadCalendar();
   }
+  if (id === 'home') renderHome();
   document.getElementById('pageTitle').textContent = s.label;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === id));
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
   const focusEl = { products: 'tw-products', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
-    booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin' }[id];
+    booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
+    home: 'homeConsoleBtn', board: 'tw-board', mail: 'tw-mail' }[id];
   if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
   return true;
 }
@@ -2272,11 +2533,9 @@ document.addEventListener('keydown', e => {
     return;
   }
 
-  if (e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[0-9]$/.test(e.code)) {
-    const n = parseInt(e.code.slice(5), 10);
-    const s = SECTIONS[n === 0 ? 9 : n - 1];
-    if (s) { e.preventDefault(); showSection(s.id); }
-    return;
+  if (e.altKey && !e.ctrlKey && !e.metaKey && /^(Digit[0-9]|Key[A-Z])$/.test(e.code)) {
+    const s = SECTIONS.find(x => x.key === e.code.replace(/^(Digit|Key)/, ''));
+    if (s) { e.preventDefault(); showSection(s.id); return; }
   }
 
   if (inField || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -2286,10 +2545,10 @@ document.addEventListener('keydown', e => {
   if (e.key === '/') { e.preventDefault(); focusGlobal(); return; }
   if (e.key === '?') { e.preventDefault(); openHelp(); return; }
 
-  if ((current === 'booking' || current === 'daily') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+  if ((current === 'booking' || current === 'daily' || current === 'calendar') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
     e.preventDefault();
     const n = e.key === 'ArrowLeft' ? -1 : 1;
-    if (current === 'booking') shiftBkDate(n); else shiftDailyDate(n);
+    if (current === 'booking') shiftBkDate(n); else if (current === 'daily') shiftDailyDate(n); else shiftCal(n);
     return;
   }
 
@@ -4136,10 +4395,786 @@ function adDeleteRow() {
     });
 }
 
+// ===========================================================================
+// หน้าแรกพนักงาน · กระดานข้อความ · กล่องจดหมายร้าน · ปฏิทิน
+// ตาราง: migration 023 ในรีโป schema · อีเมลและปฏิทิน Google ผ่าน Edge Function `mail` / `gcal`
+// (ซอร์สของฟังก์ชันอยู่ที่ DJ LAB SIAM Stock App/supabase/functions/ ไม่ได้อยู่ในรีโปนี้)
+// ===========================================================================
+let staff = [];              // admins ทุกแถว (รวมคนที่เลิกใช้งานแล้ว — ชื่อบนข้อความเก่าต้องยังขึ้น)
+let boardMsgs = [];
+let boardReads = [];
+let boardOpenId = null;
+let editingBoardId = null;
+let editingEventId = null;
+let homeToday = { shop: [], google: [], googleErr: null };
+// status: null = ยังไม่รู้ · 'ok' · 'setup' = ยังไม่ได้ตั้งค่า/ยังไม่ได้ติดตั้งฟังก์ชัน · 'error'
+const mailState = { status: null, unseen: null, error: '', page: 1, q: '', total: 0, pageSize: 25,
+                    messages: [], open: null, listToken: 0, readToken: 0, reply: null };
+const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null,
+                   layers: { shop: true, google: true, rooms: false }, token: 0 };
+
+const THAI_DAYS_LONG = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+const GCAL_PREFIX = 'https://calendar.google.com/calendar/ical/';   // ต้องตรงกับ check ใน migration 023
+// สีเป็นตัวช่วยหา — ชื่อหมวดเขียนกำกับในป้ายของทุกกิจกรรมเสมอ
+const CAL_CATS = {
+  shop:  { t: 'ร้าน',      color: '#0F0F0F' },
+  class: { t: 'คลาสเรียน', color: '#1F6B3A' },
+  event: { t: 'อีเวนต์',    color: '#8A5A00' },
+  staff: { t: 'ทีมงาน',     color: '#2B5C8A' },
+  other: { t: 'อื่น ๆ',     color: '#807D75' },
+};
+
+// เรียก Edge Function — ฟังก์ชันตอบ { error: { code, message } } ทั้งตอนสำเร็จบางกรณี (200) และตอนล้ม (4xx/5xx)
+// ตัวนี้แปลงทุกทางให้เป็นรูปเดียว หน้าเว็บจะได้ไม่ต้องแยกกรณีเอง
+async function callFn(name, body) {
+  let data, error;
+  try {
+    ({ data, error } = await db.functions.invoke(name, { body }));
+  } catch (err) {
+    return { error: { code: 'network', message: 'ติดต่อเซิร์ฟเวอร์ไม่ได้: ' + err.message } };
+  }
+  if (!error) return data || {};
+  let payload = null;
+  try { payload = error.context && typeof error.context.json === 'function' ? await error.context.json() : null; } catch (e) { /* ไม่ใช่ JSON */ }
+  if (payload && payload.error) return payload;
+  // ยังไม่ได้ติดตั้งฟังก์ชันเลย (404) = ยังไม่ได้ตั้งค่า ให้ขึ้นหน้าบอกวิธีตั้งค่า ไม่ใช่แถบ error
+  if (error.context && error.context.status === 404) return { error: { code: 'not_configured', message: 'ยังไม่ได้ติดตั้งฟังก์ชัน ' + name } };
+  return { error: { code: 'network', message: error.message || String(error) } };
+}
+
+function staffName(id) { const a = staff.find(x => x.id === id); return a ? a.full_name : 'ทีมงาน'; }
+function activeStaff() { return staff.filter(a => a.is_active); }
+
+async function loadStaffHome() {
+  await loadStaff();
+  await loadBoard();
+  renderBoardAll();
+  const n = myUnread().length;
+  if (n && current !== HOME) showToast('✉ มีข้อความบนกระดานที่คุณยังไม่ได้อ่าน ' + n + ' ข้อความ');
+  loadMailStatus();
+  loadHomeToday();
+}
+
+async function loadStaff() {
+  const { data, error } = await db.from('admins').select('id, full_name, role, is_active').order('full_name');
+  if (error) { console.error('[Load staff]', error); showFatalError('โหลดรายชื่อทีมงานไม่สำเร็จ: ' + error.message); return; }
+  staff = data || [];
+}
+
+function updateNavBadges() {
+  const set = (id, n) => {
+    const el = document.getElementById('navBadge-' + id);
+    if (!el) return;
+    el.hidden = !n;
+    el.textContent = n || '';
+    el.setAttribute('aria-label', 'ยังไม่ได้อ่าน ' + (n || 0));
+  };
+  set('board', myUnread().length);
+  set('mail', mailState.status === 'ok' ? mailState.unseen : 0);
+}
+
+// ---------------------------------------------------------------------------
+// หน้าแรก
+// ---------------------------------------------------------------------------
+function thaiLongDate(d) {
+  const dt = new Date(d + 'T12:00:00');
+  return 'วัน' + THAI_DAYS_LONG[dt.getDay()] + 'ที่ ' + dt.getDate() + ' ' + THAI_MONTHS_LONG[dt.getMonth()] + ' ' + (dt.getFullYear() + 543);
+}
+
+function renderHome() {
+  const today = todayBangkok();
+  document.getElementById('homeHello').textContent = currentAdmin ? 'สวัสดี คุณ' + currentAdmin.full_name : 'สวัสดี';
+  document.getElementById('homeDate').textContent = thaiLongDate(today);
+
+  const unread = myUnread();
+  document.getElementById('homeUnread').innerHTML = unread.length
+    ? '<div class="unread-box" role="alert"><h3>● มีข้อความที่คุณยังไม่ได้อ่าน ' + unread.length + ' ข้อความ</h3>' +
+      unread.slice(0, 8).map(m => '<div class="list-row"><div><strong>' + escapeHtml(m.title) + '</strong>' +
+        '<div class="sub">' + escapeHtml(staffName(m.author_id)) + ' · เรื่องของวันที่ ' + fmtDate(m.refers_to) +
+        (m.target_admin_id ? ' · ถึงคุณโดยตรง' : '') + '</div></div>' +
+        '<div class="lr-end"><button class="btn btn-sm" type="button" onclick="openFromHome(\'' + m.id + '\')">เปิดอ่าน</button></div></div>').join('') +
+      (unread.length > 8 ? '<p class="hint">และอีก ' + (unread.length - 8) + ' ข้อความ — ดูทั้งหมดที่กระดานข้อความ</p>' : '') +
+      '</div>'
+    : '';
+
+  document.getElementById('tileBoard').innerHTML = unread.length
+    ? '<strong>' + unread.length + '</strong> ข้อความที่ยังไม่ได้อ่าน'
+    : (boardMsgs.length ? 'อ่านครบทุกข้อความแล้ว' : 'ยังไม่มีข้อความ');
+
+  const ms = mailState.status;
+  document.getElementById('tileMail').innerHTML =
+    ms === 'ok' ? (mailState.unseen ? '<strong>' + mailState.unseen + '</strong> ฉบับที่ยังไม่ได้เปิด' : 'ไม่มีอีเมลใหม่')
+    : ms === 'setup' ? 'ยังไม่ได้เชื่อมกล่องจดหมาย'
+    : ms === 'error' ? '⚠ เชื่อมต่อ Gmail ไม่สำเร็จ'
+    : 'กำลังตรวจสอบ…';
+
+  const items = homeToday.shop.map(e => ({ k: e.all_day ? '' : shortTime(e.start_time), t: (e.all_day ? 'ทั้งวัน' : shortTime(e.start_time)) + ' ' + e.title }))
+    .concat(homeToday.google.map(g => ({ k: g.all_day ? '' : g.start.slice(11, 16), t: (g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16)) + ' ' + g.title + ' (Google)' })))
+    .sort((a, b) => cmp(a.k, b.k));
+  const rooms = bookings.filter(b => b.date === today && b.status !== 'cancelled').length;
+  document.getElementById('tileCal').innerHTML =
+    (items.length ? items.slice(0, 3).map(x => escapeHtml(x.t)).join('<br>') + (items.length > 3 ? '<br>และอีก ' + (items.length - 3) + ' รายการ' : '')
+                  : 'วันนี้ยังไม่มีกิจกรรมในปฏิทิน') +
+    (homeToday.googleErr && homeToday.googleErr.code !== 'not_configured' ? '<br>⚠ ปฏิทิน Google โหลดไม่สำเร็จ' : '') +
+    '<br>จองห้องซ้อมวันนี้ ' + rooms + ' รายการ';
+}
+
+function openFromHome(id) { showSection('board'); openBoardMsg(id); }
+
+async function loadHomeToday() {
+  if (!currentUserId) return;
+  const d = todayBangkok();
+  const [ev, g] = await Promise.all([
+    db.from('calendar_events').select('*').eq('event_date', d),
+    callFn('gcal', { from: d, to: d }),
+  ]);
+  if (ev.error) { console.error('[Load today events]', ev.error); showFatalError('โหลดกิจกรรมวันนี้ไม่สำเร็จ: ' + ev.error.message); }
+  homeToday = { shop: ev.data || [], google: g.events || [], googleErr: g.error || null };
+  renderHome();
+}
+
+// ---------------------------------------------------------------------------
+// กระดานข้อความ — อ่านแล้ว/ยังไม่อ่านแยกต่อคน (board_reads)
+// ---------------------------------------------------------------------------
+async function loadBoard() {
+  const { data, error } = await db.from('board_messages')
+    .select('id, author_id, refers_to, title, body, pinned, target_admin_id, created_at, updated_at')
+    .order('created_at', { ascending: false }).limit(200);
+  if (error) { console.error('[Load board]', error); showFatalError('โหลดกระดานข้อความไม่สำเร็จ: ' + error.message); return; }
+  boardMsgs = data || [];
+  if (!boardMsgs.length) { boardReads = []; return; }
+  const r = await db.from('board_reads').select('message_id, admin_id, read_at').in('message_id', boardMsgs.map(m => m.id));
+  if (r.error) { console.error('[Load board reads]', r.error); showFatalError('โหลดสถานะการอ่านไม่สำเร็จ: ' + r.error.message); return; }
+  boardReads = r.data || [];
+}
+
+async function refreshBoard() {
+  await loadBoard();
+  renderBoardAll();
+  if (current === 'board' && detailOpen() && boardOpenId) {
+    const m = boardMsgs.find(x => x.id === boardOpenId);
+    if (m) renderBoardDetail(m); else closeDetail();
+  }
+}
+
+function renderBoardAll() { renderBoard(); renderHome(); updateNavBadges(); }
+
+// ผู้รับ: ถึงคนเดียว = คนนั้น · ถึงทุกคน = ทีมงานที่ยังใช้งานทุกคน ยกเว้นคนเขียน
+function boardRecipients(m) {
+  return m.target_admin_id ? staff.filter(a => a.id === m.target_admin_id)
+                           : activeStaff().filter(a => a.id !== m.author_id);
+}
+function hasRead(m, adminId) { return boardReads.some(r => r.message_id === m.id && r.admin_id === adminId); }
+function isForMe(m) {
+  return !!currentUserId && m.author_id !== currentUserId && (!m.target_admin_id || m.target_admin_id === currentUserId);
+}
+// ข้อความที่ "ฉัน" ต้องถูกเตือนให้อ่าน — ไม่นับที่ฉันเขียนเอง และไม่นับข้อความส่วนตัวถึงคนอื่น
+// (เจ้าของร้าน/ผู้ดูแลเห็นข้อความส่วนตัวของคนอื่นได้ตาม RLS เพื่อดูแลกระดาน แต่ไม่ใช่ของที่ต้องมาเตือน)
+function isUnreadForMe(m) { return isForMe(m) && !hasRead(m, currentUserId); }
+function myUnread() { return boardMsgs.filter(isUnreadForMe); }
+function canEditBoard(m) { return !!m && (m.author_id === currentUserId || isManager()); }
+
+function boardStatusHtml(m) {
+  if (m.author_id === currentUserId) return '<span class="st st-off">✎ ฉันเขียน</span>';
+  if (!isForMe(m)) return '<span class="st st-off">— ไม่ได้ถึงฉัน</span>';
+  return hasRead(m, currentUserId) ? '<span class="st st-ok">✓ อ่านแล้ว</span>' : '<span class="st st-warn">● ยังไม่ได้อ่าน</span>';
+}
+
+function boardSorted() {
+  const q = document.getElementById('boardSearch').value.trim().toLowerCase();
+  const f = document.getElementById('fBoard').value;
+  return boardMsgs.filter(m => {
+    if (f === 'unread' && !isUnreadForMe(m)) return false;
+    if (f === 'pinned' && !m.pinned) return false;
+    if (f === 'mine' && m.author_id !== currentUserId) return false;
+    return !q || [m.title, m.body, staffName(m.author_id)].some(x => (x || '').toLowerCase().includes(q));
+  }).sort((a, b) => (Number(b.pinned) - Number(a.pinned)) || cmp(b.refers_to, a.refers_to) || cmp(b.created_at, a.created_at));
+}
+
+function renderBoard() {
+  fillTable('board', boardSorted(), m => {
+    const rec = boardRecipients(m), n = rec.filter(a => hasRead(m, a.id)).length;
+    return '<td>' + boardStatusHtml(m) + '</td>' +
+      '<td class="nowrap">' + fmtDate(m.refers_to) + '</td>' +
+      '<td>' + (m.pinned ? '<span class="st st-off">📌 ปักหมุด</span> ' : '') + '<strong>' + escapeHtml(m.title) + '</strong>' +
+        (m.target_admin_id ? '<div class="sub">ถึง ' + escapeHtml(staffName(m.target_admin_id)) + ' เท่านั้น</div>' : '') + '</td>' +
+      '<td class="col-opt">' + escapeHtml(staffName(m.author_id)) + '</td>' +
+      '<td class="num nowrap" title="อ่านแล้ว ' + n + ' จาก ' + rec.length + ' คน">อ่านแล้ว ' + n + '/' + rec.length + '</td>';
+  }, boardMsgs.length ? 'ไม่พบข้อความที่ตรงกับตัวกรอง' : 'ยังไม่มีข้อความบนกระดาน — กด “+ เขียนข้อความ” เพื่อฝากข้อความถึงทีม');
+}
+document.getElementById('boardSearch').addEventListener('input', renderBoard);
+document.getElementById('fBoard').addEventListener('change', renderBoard);
+
+async function openBoardMsg(id) {
+  const m = boardMsgs.find(x => x.id === id);
+  if (!m) { showToast('⚠️ ไม่พบข้อความนี้แล้ว — อาจถูกลบไป'); return; }
+  boardOpenId = id;
+  renderBoardDetail(m);
+  if (!isUnreadForMe(m)) return;
+  // เปิดอ่าน = อ่านแล้ว (ของฉันคนเดียว)
+  const { error } = await db.from('board_reads').insert({ message_id: id, admin_id: currentUserId });
+  if (error && error.code !== '23505') {            // 23505 = เคยบันทึกไว้แล้วจากอีกเครื่อง ถือว่าอ่านแล้ว
+    console.error('[Mark read]', error);
+    showFatalError('บันทึกว่าอ่านแล้วไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  if (!hasRead(m, currentUserId)) boardReads.push({ message_id: id, admin_id: currentUserId, read_at: new Date().toISOString() });
+  renderBoardAll();
+  if (detailOpen() && boardOpenId === id) renderBoardDetail(m);
+}
+
+function renderBoardDetail(m) {
+  const rec = boardRecipients(m);
+  const read = rec.filter(a => hasRead(m, a.id)), notYet = rec.filter(a => !hasRead(m, a.id));
+  const readAt = a => { const r = boardReads.find(x => x.message_id === m.id && x.admin_id === a.id); return r ? formatDateTime(r.read_at) : ''; };
+  const canEdit = canEditBoard(m);
+  openDetail(m.title,
+    '<dl class="kv">' +
+      '<dt>ผู้เขียน</dt><dd>' + escapeHtml(staffName(m.author_id)) + '</dd>' +
+      '<dt>เรื่องของวันที่</dt><dd>' + fmtDateDow(m.refers_to) + '</dd>' +
+      '<dt>ถึง</dt><dd>' + (m.target_admin_id ? escapeHtml(staffName(m.target_admin_id)) + ' เท่านั้น' : 'ทุกคน') + '</dd>' +
+      '<dt>เขียนเมื่อ</dt><dd>' + formatDateTime(m.created_at) +
+        (m.updated_at && m.updated_at !== m.created_at ? '<div class="sub">แก้ไขล่าสุด ' + formatDateTime(m.updated_at) + '</div>' : '') + '</dd>' +
+      (m.pinned ? '<dt>ปักหมุด</dt><dd>📌 อยู่บนสุดของกระดาน</dd>' : '') +
+    '</dl>' +
+    '<div class="card pre" style="box-shadow:none;">' + (escapeHtml(m.body) || '<span class="hint">(ไม่มีรายละเอียดเพิ่มเติม)</span>') + '</div>' +
+    '<div class="sec-title">อ่านแล้ว ' + read.length + '/' + rec.length + ' คน</div>' +
+    (read.length ? read.map(a => '<div class="list-row"><div>✓ ' + escapeHtml(a.full_name) + '</div><div class="sub">' + readAt(a) + '</div></div>').join('')
+                 : '<p class="hint">ยังไม่มีใครอ่าน</p>') +
+    '<div class="sec-title">ยังไม่ได้อ่าน ' + notYet.length + ' คน</div>' +
+    (notYet.length ? notYet.map(a => '<div class="list-row"><div>○ ' + escapeHtml(a.full_name) + '</div></div>').join('')
+                   : '<p class="hint">ทุกคนอ่านแล้ว</p>') +
+    '<div class="actions" style="margin-top:18px;">' +
+      (isForMe(m) && hasRead(m, currentUserId)
+        ? '<button class="btn btn-sm" type="button" onclick="markBoardUnread(\'' + m.id + '\')">ทำเป็นยังไม่ได้อ่าน</button>' : '') +
+      (canEdit
+        ? '<button class="btn btn-sm" type="button" id="bdEditBtn" onclick="openBoardForm(\'' + m.id + '\')">แก้ไขข้อความ</button>' +
+          '<button class="btn btn-sm btn-danger" type="button" id="bdDeleteBtn" onclick="deleteBoard(\'' + m.id + '\')">ลบข้อความ</button>' : '') +
+    '</div>' +
+    (canEdit ? '' : '<p class="hint">แก้ไขหรือลบได้เฉพาะคนเขียน หรือเจ้าของร้าน/ผู้ดูแลระบบ</p>'));
+}
+
+async function markBoardUnread(id) {
+  const { error } = await db.from('board_reads').delete().eq('message_id', id).eq('admin_id', currentUserId);
+  if (error) { console.error('[Mark unread]', error); showFatalError('เปลี่ยนเป็นยังไม่ได้อ่านไม่สำเร็จ: ' + error.message); return; }
+  boardReads = boardReads.filter(r => !(r.message_id === id && r.admin_id === currentUserId));
+  renderBoardAll();
+  const m = boardMsgs.find(x => x.id === id);
+  if (m) renderBoardDetail(m);
+  showToast('↺ ทำเป็นยังไม่ได้อ่านแล้ว');
+}
+
+function openBoardForm(id) {
+  const m = id ? boardMsgs.find(x => x.id === id) : null;
+  // หน้าจอซ่อนปุ่มแก้อยู่แล้ว ตัวนี้กันการเรียกตรง ๆ ด้วย — ตัวกันจริงคือ RLS ใน 023
+  if (id && !canEditBoard(m)) { showToast('⚠️ แก้ไขได้เฉพาะคนเขียนข้อความ หรือเจ้าของร้าน/ผู้ดูแลระบบ'); return; }
+  editingBoardId = m ? m.id : null;
+  document.getElementById('boardFormTitle').textContent = m ? 'แก้ไขข้อความ' : 'เขียนข้อความ';
+  document.getElementById('bfTarget').innerHTML = '<option value="">ทุกคน</option>' +
+    activeStaff().filter(a => a.id !== currentUserId || (m && m.target_admin_id === a.id))
+      .map(a => '<option value="' + a.id + '">' + escapeHtml(a.full_name) + '</option>').join('');
+  document.getElementById('bfDate').value = m ? m.refers_to : todayBangkok();
+  document.getElementById('bfTitle').value = m ? m.title : '';
+  document.getElementById('bfBody').value = m ? m.body : '';
+  document.getElementById('bfTarget').value = m && m.target_admin_id ? m.target_admin_id : '';
+  document.getElementById('bfPinned').checked = !!(m && m.pinned);
+  document.getElementById('boardDialog').showModal();
+  document.getElementById('bfTitle').focus();
+}
+
+async function saveBoard() {
+  const m = editingBoardId ? boardMsgs.find(x => x.id === editingBoardId) : null;
+  if (editingBoardId && !canEditBoard(m)) { showToast('⚠️ แก้ไขได้เฉพาะคนเขียนข้อความ หรือเจ้าของร้าน/ผู้ดูแลระบบ'); return; }
+  const title = document.getElementById('bfTitle').value.trim();
+  const refersTo = document.getElementById('bfDate').value;
+  if (!title) { showToast('⚠️ กรุณาใส่หัวข้อ'); document.getElementById('bfTitle').focus(); return; }
+  if (!refersTo) { showToast('⚠️ กรุณาเลือกวันที่'); return; }
+  const payload = {
+    refers_to: refersTo, title,
+    body: document.getElementById('bfBody').value.trim(),
+    pinned: document.getElementById('bfPinned').checked,
+    target_admin_id: document.getElementById('bfTarget').value || null,
+  };
+  const btn = document.getElementById('bfSaveBtn');
+  btn.disabled = true;
+  const res = m
+    ? await db.from('board_messages').update(Object.assign(payload, { updated_at: new Date().toISOString() })).eq('id', m.id).select('id')
+    : await db.from('board_messages').insert(Object.assign(payload, { author_id: currentUserId })).select('id');
+  btn.disabled = false;
+  if (res.error) { console.error('[Save board]', res.error); showFatalError('บันทึกข้อความไม่สำเร็จ: ' + res.error.message); return; }
+  // RLS ที่ไม่ให้แก้ จะไม่ตอบ error แต่แก้ได้ 0 แถว — ต้องบอกตรง ๆ ไม่ใช่ขึ้นว่าสำเร็จ
+  if (!res.data || !res.data.length) { showFatalError('บันทึกข้อความไม่สำเร็จ — ไม่มีสิทธิ์แก้ข้อความนี้ หรือข้อความถูกลบไปแล้ว'); return; }
+  document.getElementById('boardDialog').close();
+  showToast('✅ บันทึกข้อความแล้ว');
+  refreshBoard();
+}
+
+function deleteBoard(id) {
+  const m = boardMsgs.find(x => x.id === id);
+  if (!canEditBoard(m)) { showToast('⚠️ ลบได้เฉพาะคนเขียนข้อความ หรือเจ้าของร้าน/ผู้ดูแลระบบ'); return; }
+  askConfirm('ลบข้อความนี้?', '<p>“' + escapeHtml(m.title) + '” จะหายจากกระดานของทุกคน และย้อนกลับไม่ได้</p>', 'ลบข้อความ', async () => {
+    const { data, error } = await db.from('board_messages').delete().eq('id', id).select('id');
+    if (error) { console.error('[Delete board]', error); showFatalError('ลบข้อความไม่สำเร็จ: ' + error.message); return; }
+    if (!data || !data.length) { showFatalError('ลบข้อความไม่สำเร็จ — ไม่มีสิทธิ์ลบ หรือข้อความถูกลบไปแล้ว'); return; }
+    closeConfirm();
+    closeDetail();
+    showToast('✅ ลบข้อความแล้ว');
+    refreshBoard();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// กล่องจดหมายร้าน — ทุกอย่างผ่าน Edge Function `mail` (Gmail IMAP/SMTP ฝั่งเซิร์ฟเวอร์)
+// ---------------------------------------------------------------------------
+function mailFailed(r) {
+  if (!r.error) return false;
+  if (r.error.code === 'not_configured') mailState.status = 'setup';
+  else { mailState.status = 'error'; mailState.error = r.error.message || 'ไม่ทราบสาเหตุ'; }
+  return true;
+}
+
+async function loadMailStatus() {
+  const r = await callFn('mail', { action: 'status' });
+  if (!mailFailed(r)) { mailState.status = 'ok'; mailState.unseen = r.unseen; }
+  renderHome();
+  updateNavBadges();
+}
+
+async function loadMailList() {
+  const token = ++mailState.listToken;
+  document.getElementById('mailNote').innerHTML = '<div class="alert alert-plain">กำลังโหลดกล่องจดหมาย…</div>';
+  const r = await callFn('mail', { action: 'list', page: mailState.page, q: mailState.q });
+  if (token !== mailState.listToken) return;       // มีคำขอใหม่กว่าแล้ว (เปลี่ยนหน้า/ค้นหาต่อกัน)
+  if (!mailFailed(r)) {
+    Object.assign(mailState, { status: 'ok', messages: r.messages || [], total: r.total || 0, unseen: r.unseen,
+                               pageSize: r.page_size || 25 });
+  }
+  renderMail();
+  renderHome();
+  updateNavBadges();
+}
+
+function fromLabel(a) { return a ? (a.name || a.address || '') : '(ไม่ทราบผู้ส่ง)'; }
+function mailDate(iso) { return iso ? formatDateTime(iso) : ''; }
+
+function renderMail() {
+  const setup = mailState.status === 'setup';
+  document.getElementById('mailSetup').hidden = !setup;
+  document.getElementById('mailMain').hidden = setup;
+  if (setup) {
+    document.getElementById('mailSetup').innerHTML =
+      '<div class="card" style="max-width:760px;">' +
+        '<h3>ยังไม่ได้เชื่อมกล่องจดหมายของร้าน</h3>' +
+        '<p>หน้านี้จะแสดงอีเมลของ <strong>djlabsiam@gmail.com</strong> ให้ทีมงานอ่านและตอบได้จากคอนโซล หลังเจ้าของร้านตั้งค่าเสร็จ</p>' +
+        '<ol style="padding-left:22px;margin:12px 0;">' +
+          '<li>เปิด “การยืนยันแบบ 2 ขั้นตอน” ของบัญชี Google ของร้าน</li>' +
+          '<li>สร้าง “รหัสผ่านสำหรับแอป” ของบัญชีนั้น</li>' +
+          '<li>ใส่ <code>GMAIL_USER</code> และ <code>GMAIL_APP_PASSWORD</code> ใน Supabase → Edge Functions → Secrets</li>' +
+          '<li>ติดตั้งฟังก์ชัน <code>mail</code></li>' +
+        '</ol>' +
+        '<p class="hint">ขั้นตอนละเอียดอยู่ในคู่มือ <code>docs/STAFF-HOME.md</code> ของรีโประบบฐานข้อมูล · พนักงานไม่ต้องทำอะไร แจ้งเจ้าของร้านได้เลย</p>' +
+        '<button class="btn" type="button" style="margin-top:12px;" onclick="loadMailList()">ตรวจสอบอีกครั้ง</button>' +
+      '</div>';
+    return;
+  }
+  document.getElementById('mailNote').innerHTML = mailState.status === 'error'
+    ? '<div class="alert alert-red" role="alert">' + escapeHtml(mailState.error) +
+      ' <button class="btn btn-sm" type="button" onclick="loadMailList()">ลองอีกครั้ง</button></div>'
+    : '';
+  fillTable('mail', mailState.messages.map(x => Object.assign({ id: String(x.uid) }, x)), m =>
+    '<td>' + (m.seen ? '' : '<span class="st st-warn">● ใหม่</span> ') + escapeHtml(fromLabel(m.from)) + '</td>' +
+    '<td>' + escapeHtml(m.subject || '(ไม่มีหัวเรื่อง)') + '</td>' +
+    '<td class="nowrap">' + mailDate(m.date) + '</td>',
+    mailState.status === 'error' ? 'โหลดอีเมลไม่สำเร็จ' : mailState.q ? 'ไม่พบอีเมลที่ตรงกับคำค้น' : 'ไม่มีอีเมลในกล่องจดหมาย');
+  const first = mailState.total ? (mailState.page - 1) * mailState.pageSize + 1 : 0;
+  const last = Math.min(mailState.total, mailState.page * mailState.pageSize);
+  document.getElementById('mailPager').textContent = mailState.total ? first + '–' + last + ' จาก ' + mailState.total + ' ฉบับ' : '—';
+  document.getElementById('mailPrev').disabled = mailState.page <= 1;
+  document.getElementById('mailNext').disabled = last >= mailState.total;
+}
+
+function mailPage(delta) {
+  const pages = Math.max(1, Math.ceil(mailState.total / mailState.pageSize));
+  const p = Math.max(1, Math.min(pages, mailState.page + delta));
+  if (p === mailState.page) return;
+  mailState.page = p;
+  loadMailList();
+}
+document.getElementById('mailSearch').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  mailState.q = e.target.value.trim();
+  mailState.page = 1;
+  loadMailList();
+});
+
+async function openMail(id) {
+  const uid = Number(id);
+  const token = ++mailState.readToken;
+  const reader = document.getElementById('mailReader');
+  reader.innerHTML = '<div class="empty">กำลังเปิดอีเมล…</div>';
+  const r = await callFn('mail', { action: 'get', uid });
+  if (token !== mailState.readToken) return;
+  if (r.error) {
+    reader.innerHTML = '<div class="alert alert-red" role="alert" style="margin:16px;">เปิดอีเมลไม่สำเร็จ: ' + escapeHtml(r.error.message) + '</div>';
+    return;
+  }
+  mailState.open = r.message;
+  const row = mailState.messages.find(x => x.uid === uid);
+  if (row && !row.seen) {                            // ฟังก์ชันทำเป็นอ่านแล้วที่ Gmail ให้แล้ว ตามให้ตรงบนจอ
+    row.seen = true;
+    if (mailState.unseen) mailState.unseen--;
+    renderMail(); renderHome(); updateNavBadges();
+  }
+  renderMailReader(r.message);
+}
+
+// เนื้ออีเมลเป็น HTML จากคนนอก — วางใน iframe ที่ sandbox ไม่มี allow-scripts และไม่มี allow-same-origin
+// สคริปต์ในอีเมลจึงไม่มีทางทำงาน และแตะหน้าคอนโซล (ซึ่งถือ session ของทีมงาน) ไม่ได้เลย
+// allow-popups ให้ลิงก์ในอีเมลเปิดแท็บใหม่ได้ (base target=_blank) แท็บนั้นหลุดจาก sandbox เป็นหน้าเว็บปกติ
+function mailDoc(msg) {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><base target="_blank">' +
+    '<style>body{margin:16px;font:15px/1.6 "Noto Sans Thai",sans-serif;color:#0F0F0F;word-break:break-word}' +
+    'img{max-width:100%;height:auto}pre{white-space:pre-wrap;font:inherit;margin:0}</style></head><body>' +
+    (msg.html ? msg.html : '<pre>' + escapeHtml(msg.text || '(อีเมลนี้ไม่มีเนื้อหา)') + '</pre>');
+  // ไม่ปิดแท็ก body/html เอง — srcdoc ไม่ต้องมี และตัวรันเทสต์ (tests/lib/page-test.mjs) แทรกสคริปต์ที่แท็กปิด body ตัวแรกของไฟล์
+}
+
+function renderMailReader(msg) {
+  const reader = document.getElementById('mailReader');
+  const from = msg.from ? escapeHtml(fromLabel(msg.from)) + (msg.from.address && msg.from.name ? ' &lt;' + escapeHtml(msg.from.address) + '&gt;' : '') : '(ไม่ทราบผู้ส่ง)';
+  reader.innerHTML =
+    '<div class="mr-head">' +
+      '<h2>' + escapeHtml(msg.subject || '(ไม่มีหัวเรื่อง)') + '</h2>' +
+      '<div class="sub">จาก <strong>' + from + '</strong></div>' +
+      '<div class="sub">ถึง ' + escapeHtml((msg.to || []).map(a => a.address || a.name).join(', ')) + ' · ' + mailDate(msg.date) + '</div>' +
+      (msg.attachments && msg.attachments.length
+        ? '<div class="sub">ไฟล์แนบ: ' + msg.attachments.map(a => escapeHtml(a.filename)).join(', ') + ' (เปิดไฟล์แนบได้ที่ Gmail)</div>' : '') +
+      (msg.truncated ? '<div class="alert alert-warn" style="margin:8px 0 0;">อีเมลนี้ใหญ่เกิน 3 MB แสดงเฉพาะส่วนต้น — ดูฉบับเต็มที่ Gmail</div>' : '') +
+      '<div class="actions" style="margin:12px 0 0;">' +
+        '<button class="btn btn-sm btn-primary" type="button" onclick="replyMail()">↩ ตอบกลับ</button>' +
+        '<button class="btn btn-sm" type="button" onclick="flagMail(' + (msg.seen ? 'false' : 'true') + ')">' + (msg.seen ? 'ทำเป็นยังไม่ได้อ่าน' : 'ทำเป็นอ่านแล้ว') + '</button>' +
+        '<button class="btn btn-sm" type="button" onclick="archiveMail()">เก็บเข้าคลัง</button>' +
+      '</div>' +
+    '</div>';
+  const f = document.createElement('iframe');
+  f.id = 'mailBody';
+  f.title = 'เนื้อหาอีเมล';
+  f.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+  f.setAttribute('referrerpolicy', 'no-referrer');
+  f.srcdoc = mailDoc(msg);
+  reader.appendChild(f);
+}
+
+async function flagMail(seen) {
+  const m = mailState.open;
+  if (!m) return;
+  const r = await callFn('mail', { action: 'flag', uid: m.uid, seen });
+  if (r.error) { showFatalError('เปลี่ยนสถานะอีเมลไม่สำเร็จ: ' + r.error.message); return; }
+  if (m.seen !== seen && mailState.unseen !== null) mailState.unseen += seen ? -1 : 1;
+  m.seen = seen;
+  const row = mailState.messages.find(x => x.uid === m.uid);
+  if (row) row.seen = seen;
+  renderMail(); renderHome(); updateNavBadges();
+  renderMailReader(m);
+  showToast(seen ? '✓ ทำเป็นอ่านแล้ว' : '↺ ทำเป็นยังไม่ได้อ่านแล้ว');
+}
+
+async function archiveMail() {
+  const m = mailState.open;
+  if (!m) return;
+  const r = await callFn('mail', { action: 'archive', uid: m.uid });
+  if (r.error) { showFatalError('เก็บเข้าคลังไม่สำเร็จ: ' + r.error.message); return; }
+  mailState.messages = mailState.messages.filter(x => x.uid !== m.uid);
+  mailState.total = Math.max(0, mailState.total - 1);
+  if (!m.seen && mailState.unseen) mailState.unseen--;
+  mailState.open = null;
+  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div>';
+  renderMail(); renderHome(); updateNavBadges();
+  showToast('✅ เก็บเข้าคลังแล้ว — ยังค้นเจอใน Gmail ที่ “จดหมายทั้งหมด”');
+}
+
+function replyMail() {
+  const m = mailState.open;
+  if (!m) return;
+  const to = (m.reply_to && m.reply_to[0] && m.reply_to[0].address) || (m.from && m.from.address) || '';
+  const quoted = (m.text || '').split('\n').map(l => '> ' + l).join('\n');
+  openCompose({
+    to,
+    subject: /^re:/i.test(m.subject || '') ? m.subject : 'Re: ' + (m.subject || ''),
+    body: '\n\nเมื่อ ' + mailDate(m.date) + ' ' + fromLabel(m.from) + ' เขียนว่า:\n' + quoted,
+    in_reply_to: m.message_id,
+    references: ((m.references || '') + ' ' + (m.message_id || '')).trim(),
+  });
+}
+
+function openCompose(pre) {
+  mailState.reply = pre && pre.in_reply_to ? { in_reply_to: pre.in_reply_to, references: pre.references } : null;
+  document.getElementById('composeTitle').textContent = pre ? 'ตอบกลับอีเมล' : 'เขียนอีเมลใหม่';
+  document.getElementById('mcTo').value = pre ? pre.to : '';
+  document.getElementById('mcSubject').value = pre ? pre.subject : '';
+  document.getElementById('mcBody').value = pre ? pre.body : '';
+  document.getElementById('mcError').innerHTML = '';
+  document.getElementById('composeDialog').showModal();
+  const body = document.getElementById('mcBody');
+  if (pre) { body.focus(); body.setSelectionRange(0, 0); body.scrollTop = 0; } else document.getElementById('mcTo').focus();
+}
+
+async function sendMail() {
+  const to = document.getElementById('mcTo').value.trim();
+  const subject = document.getElementById('mcSubject').value.trim();
+  const text = document.getElementById('mcBody').value;
+  const err = msg => { document.getElementById('mcError').innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(msg) + '</div>'; };
+  if (!to) return err('กรุณาใส่อีเมลผู้รับ');
+  if (!text.trim()) return err('กรุณาพิมพ์ข้อความ');
+  const btn = document.getElementById('mcSendBtn');
+  btn.disabled = true;
+  const r = await callFn('mail', Object.assign({ action: 'send', to, subject, text }, mailState.reply || {}));
+  btn.disabled = false;
+  if (r.error) return err('ส่งไม่สำเร็จ: ' + r.error.message);
+  document.getElementById('composeDialog').close();
+  showToast('✅ ส่งอีเมลถึง ' + to + ' แล้ว');
+}
+
+// ---------------------------------------------------------------------------
+// ปฏิทิน — ชั้นปฏิทินร้าน (calendar_events) · ชั้น Google (อ่านอย่างเดียว ผ่าน gcal) · ชั้นการจองห้อง
+// ---------------------------------------------------------------------------
+function calRange() {
+  const a = new Date(calState.anchor + 'T12:00:00');
+  const start = calState.view === 'month' ? new Date(a.getFullYear(), a.getMonth(), 1, 12) : new Date(a);
+  start.setDate(start.getDate() - start.getDay());          // เริ่มวันอาทิตย์
+  const from = start.toLocaleDateString('en-CA');
+  const days = calState.view === 'month' ? 42 : 7;
+  return { from, to: shiftDateStr(from, days - 1), days };
+}
+
+function shiftCal(n) {
+  if (calState.view === 'week') { setCalAnchor(shiftDateStr(calState.anchor, 7 * n)); return; }
+  const a = new Date(calState.anchor + 'T12:00:00');
+  a.setDate(1);
+  a.setMonth(a.getMonth() + n);
+  setCalAnchor(a.toLocaleDateString('en-CA'));
+}
+function setCalAnchor(d) { calState.anchor = d; loadCalendar(); }
+function setCalView(v) { calState.view = v; loadCalendar(); }
+function toggleLayer(k, on) {
+  calState.layers[k] = on;
+  if (k === 'google' && on) loadCalendar(); else renderCalendar();
+}
+
+async function loadCalendar() {
+  const token = ++calState.token;
+  const { from, to } = calRange();
+  renderCalendar();
+  const [ev, g] = await Promise.all([
+    db.from('calendar_events').select('*').gte('event_date', from).lte('event_date', to).order('event_date'),
+    calState.layers.google ? callFn('gcal', { from, to }) : Promise.resolve(null),
+  ]);
+  if (token !== calState.token) return;
+  if (ev.error) { console.error('[Load calendar]', ev.error); showFatalError('โหลดปฏิทินร้านไม่สำเร็จ: ' + ev.error.message); }
+  else calState.events = ev.data || [];
+  if (g) { calState.google = g.events || []; calState.googleNote = g.error || null; }
+  renderCalendar();
+}
+
+function calItems(d) {
+  const out = [];
+  if (calState.layers.shop) calState.events.filter(e => e.event_date === d).forEach(e => {
+    const c = CAL_CATS[e.category] || CAL_CATS.other;
+    out.push({ kind: 'shop', ref: e.id, allDay: e.all_day, time: e.all_day ? '' : shortTime(e.start_time),
+               end: e.all_day ? '' : shortTime(e.end_time), title: e.title, label: c.t, color: c.color });
+  });
+  if (calState.layers.google) calState.google.forEach((g, i) => {
+    if (g.start.slice(0, 10) > d || g.end.slice(0, 10) < d) return;
+    const first = g.start.slice(0, 10) === d;
+    out.push({ kind: 'google', ref: String(i), allDay: g.all_day || !first, time: g.all_day || !first ? '' : g.start.slice(11, 16),
+               end: g.all_day ? '' : g.end.slice(11, 16), title: g.title, label: 'Google', color: '#5B5953' });
+  });
+  if (calState.layers.rooms) bookings.filter(b => b.date === d && b.status !== 'cancelled').forEach(b => {
+    out.push({ kind: 'room', ref: b.id, allDay: false, time: shortTime(b.start_time), end: addHours(b.start_time, b.hours),
+               title: b.customer_name, label: 'ห้องซ้อม', color: '#0F0F0F' });
+  });
+  return out.sort((a, b) => (Number(b.allDay) - Number(a.allDay)) || cmp(a.time, b.time));
+}
+
+function chipHtml(it) {
+  const when = it.allDay ? 'ทั้งวัน' : it.time + (it.end ? '–' + it.end : '');
+  return '<button class="ev' + (it.kind === 'google' ? ' g' : it.kind === 'room' ? ' room' : '') + '" type="button" style="--cat:' + it.color + '"' +
+    ' data-kind="' + it.kind + '" title="' + escapeHtml(it.label + ' · ' + when + ' · ' + it.title) + '"' +
+    ' onclick="openCalItem(\'' + it.kind + '\', \'' + it.ref + '\')"><b>' + escapeHtml(it.label) + '</b>' +
+    (it.time ? escapeHtml(it.time) + ' ' : '') + escapeHtml(it.title) + '</button>';
+}
+
+function renderCalendar() {
+  const { from, to, days } = calRange();
+  const week = calState.view === 'week';
+  const a = new Date(calState.anchor + 'T12:00:00');
+  const today = todayBangkok();
+  document.getElementById('calTitle').textContent = week
+    ? fmtDate(from) + ' – ' + fmtDate(to)
+    : THAI_MONTHS_LONG[a.getMonth()] + ' ' + (a.getFullYear() + 543);
+  document.getElementById('calView').value = calState.view;
+  document.getElementById('gcalSetupBtn').hidden = !isManager();
+
+  const note = calState.layers.google && calState.googleNote;
+  document.getElementById('calNote').innerHTML =
+    (!note ? '' : note.code === 'not_configured'
+      ? '<div class="alert alert-plain">ยังไม่ได้เชื่อม Google Calendar' +
+        (isManager() ? ' — กด “ตั้งค่า Google Calendar” เพื่อใส่ที่อยู่ลับแบบ iCal' : ' — แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้เชื่อมให้') + '</div>'
+      : '<div class="alert alert-warn" role="alert">โหลดปฏิทิน Google ไม่สำเร็จ: ' + escapeHtml(note.message) + '</div>') +
+    (calState.layers.google && calState.google.some(g => g.recurrence_unsupported)
+      ? '<div class="alert alert-plain">กิจกรรมซ้ำบางรายการใน Google ใช้รูปแบบที่ระบบยังอ่านไม่ได้ จึงแสดงเฉพาะครั้งแรก — ดูครบได้ที่ Google Calendar</div>' : '');
+
+  const max = week ? 99 : 4;
+  let html = '<div class="cal-grid' + (week ? ' cal-week' : '') + '">' + THAI_DAYS_LONG.map(x => '<div class="dow">' + x + '</div>').join('');
+  for (let i = 0; i < days; i++) {
+    const d = shiftDateStr(from, i), dt = new Date(d + 'T12:00:00');
+    const items = calItems(d);
+    const out = !week && dt.getMonth() !== a.getMonth();
+    html += '<div class="cal-cell' + (out ? ' out' : '') + (d === today ? ' today' : '') + '" data-date="' + d + '">' +
+      '<button class="cal-day" type="button" title="เพิ่มกิจกรรมวันที่ ' + fmtDate(d) + '" onclick="openEventForm(null, \'' + d + '\')">' +
+        dt.getDate() + (week ? ' ' + THAI_MONTHS[dt.getMonth()] : '') + (d === today ? ' · วันนี้' : '') + '</button>' +
+      items.slice(0, max).map(chipHtml).join('') +
+      (items.length > max ? '<button class="ev-more" type="button" onclick="calState.anchor = \'' + d + '\'; setCalView(\'week\')">+ อีก ' + (items.length - max) + ' รายการ</button>' : '') +
+      '</div>';
+  }
+  document.getElementById('calGrid').innerHTML = html + '</div>';
+  document.getElementById('calLegend').innerHTML = 'หมวด: ' +
+    Object.values(CAL_CATS).map(c => '<span style="--cat:' + c.color + '">' + c.t + '</span>').join('') +
+    '<span style="--cat:#5B5953">Google (กรอบประ · อ่านอย่างเดียว)</span><span style="--cat:#0F0F0F">ห้องซ้อม (ลายเส้น)</span>' +
+    ' · คลิกเลขวันที่เพื่อเพิ่มกิจกรรมวันนั้น';
+}
+
+function whenText(allDay, dateFrom, dateTo, t1, t2) {
+  if (allDay) return fmtDateDow(dateFrom) + (dateTo && dateTo !== dateFrom ? ' – ' + fmtDateDow(dateTo) : '') + ' · ทั้งวัน';
+  return fmtDateDow(dateFrom) + ' · ' + t1 + (t2 ? '–' + t2 : '') + (dateTo && dateTo !== dateFrom ? ' (ถึง ' + fmtDate(dateTo) + ')' : '');
+}
+
+function openCalItem(kind, ref) {
+  if (kind === 'room') {
+    const b = bookings.find(x => x.id === ref);
+    if (!b) return;
+    openDetail('การจองห้องซ้อม',
+      '<dl class="kv"><dt>ผู้จอง</dt><dd>' + escapeHtml(b.customer_name) + '</dd>' +
+      '<dt>เวลา</dt><dd>' + whenText(false, b.date, null, shortTime(b.start_time), addHours(b.start_time, b.hours)) + '</dd>' +
+      '<dt>ห้อง</dt><dd>' + escapeHtml(b.room) + '</dd><dt>สถานะ</dt><dd>' + bkStatusHtml(b) + '</dd></dl>' +
+      '<div class="actions"><button class="btn btn-sm" type="button" onclick="showSection(\'booking\'); openBooking(\'' + b.id + '\')">เปิดในหมวดจองห้องซ้อม</button></div>');
+    return;
+  }
+  if (kind === 'google') {
+    const g = calState.google[Number(ref)];
+    if (!g) return;
+    openDetail(g.title,
+      '<div class="alert alert-plain">มาจาก Google Calendar — ดูได้อย่างเดียว แก้ไขที่ Google Calendar</div>' +
+      '<dl class="kv"><dt>เวลา</dt><dd>' + whenText(g.all_day, g.start.slice(0, 10), g.end.slice(0, 10), g.start.slice(11, 16), g.end.slice(11, 16)) + '</dd>' +
+      (g.location ? '<dt>สถานที่</dt><dd>' + escapeHtml(g.location) + '</dd>' : '') + '</dl>' +
+      (g.description ? '<div class="card pre" style="box-shadow:none;">' + escapeHtml(g.description) + '</div>' : '') +
+      (g.recurrence_unsupported ? '<p class="hint">กิจกรรมนี้ซ้ำแบบที่ระบบยังอ่านไม่ได้ แสดงเฉพาะครั้งแรก</p>' : ''));
+    return;
+  }
+  const e = calState.events.find(x => x.id === ref);
+  if (!e) return;
+  const c = CAL_CATS[e.category] || CAL_CATS.other;
+  openDetail(e.title,
+    '<dl class="kv"><dt>เวลา</dt><dd>' + whenText(e.all_day, e.event_date, null, shortTime(e.start_time), shortTime(e.end_time)) + '</dd>' +
+    '<dt>หมวด</dt><dd><span class="ev" style="--cat:' + c.color + ';display:inline-block;width:auto;cursor:default;">' + c.t + '</span></dd>' +
+    (e.note ? '<dt>หมายเหตุ</dt><dd class="pre">' + escapeHtml(e.note) + '</dd>' : '') +
+    '<dt>บันทึกโดย</dt><dd>' + escapeHtml(staffName(e.created_by)) + '</dd></dl>' +
+    '<div class="actions"><button class="btn btn-sm" type="button" onclick="openEventForm(\'' + e.id + '\')">แก้ไขกิจกรรม</button>' +
+    '<button class="btn btn-sm btn-danger" type="button" onclick="deleteEvent(\'' + e.id + '\')">ลบกิจกรรม</button></div>');
+}
+
+function syncEventTimes() { document.getElementById('ceTimes').hidden = document.getElementById('ceAllDay').checked; }
+
+function openEventForm(id, date) {
+  const e = id ? calState.events.find(x => x.id === id) : null;
+  editingEventId = e ? e.id : null;
+  document.getElementById('eventFormTitle').textContent = e ? 'แก้ไขกิจกรรม' : 'เพิ่มกิจกรรม';
+  document.getElementById('ceCategory').innerHTML = Object.keys(CAL_CATS).map(k => '<option value="' + k + '">' + CAL_CATS[k].t + '</option>').join('');
+  document.getElementById('ceTitle').value = e ? e.title : '';
+  document.getElementById('ceDate').value = e ? e.event_date : (date || calState.anchor);
+  document.getElementById('ceCategory').value = e ? e.category : 'shop';
+  document.getElementById('ceAllDay').checked = e ? e.all_day : true;
+  document.getElementById('ceStart').value = e && !e.all_day ? shortTime(e.start_time) : '12:00';
+  document.getElementById('ceEnd').value = e && !e.all_day ? shortTime(e.end_time) : '13:00';
+  document.getElementById('ceNote').value = e && e.note ? e.note : '';
+  syncEventTimes();
+  document.getElementById('eventDialog').showModal();
+  document.getElementById('ceTitle').focus();
+}
+
+async function saveEvent() {
+  const title = document.getElementById('ceTitle').value.trim();
+  const date = document.getElementById('ceDate').value;
+  const allDay = document.getElementById('ceAllDay').checked;
+  const start = document.getElementById('ceStart').value, end = document.getElementById('ceEnd').value;
+  if (!title) { showToast('⚠️ กรุณาใส่ชื่อกิจกรรม'); document.getElementById('ceTitle').focus(); return; }
+  if (!date) { showToast('⚠️ กรุณาเลือกวันที่'); return; }
+  if (!allDay && !(start && end && end > start)) { showToast('⚠️ เวลาจบต้องอยู่หลังเวลาเริ่ม'); return; }
+  const payload = {
+    title, event_date: date, all_day: allDay,
+    start_time: allDay ? null : start, end_time: allDay ? null : end,
+    category: document.getElementById('ceCategory').value,
+    note: document.getElementById('ceNote').value.trim() || null,
+  };
+  const btn = document.getElementById('ceSaveBtn');
+  btn.disabled = true;
+  const res = editingEventId
+    ? await db.from('calendar_events').update(Object.assign(payload, { updated_at: new Date().toISOString() })).eq('id', editingEventId).select('id')
+    : await db.from('calendar_events').insert(Object.assign(payload, { created_by: currentUserId })).select('id');
+  btn.disabled = false;
+  if (res.error) { console.error('[Save event]', res.error); showFatalError('บันทึกกิจกรรมไม่สำเร็จ: ' + res.error.message); return; }
+  if (!res.data || !res.data.length) { showFatalError('บันทึกกิจกรรมไม่สำเร็จ — กิจกรรมนี้อาจถูกลบไปแล้ว'); return; }
+  document.getElementById('eventDialog').close();
+  closeDetail();
+  showToast('✅ บันทึกกิจกรรมแล้ว');
+  loadCalendar();
+  loadHomeToday();
+}
+
+function deleteEvent(id) {
+  const e = calState.events.find(x => x.id === id);
+  if (!e) return;
+  askConfirm('ลบกิจกรรมนี้?', '<p>“' + escapeHtml(e.title) + '” วันที่ ' + fmtDate(e.event_date) + ' จะหายจากปฏิทินร้านของทุกคน</p>', 'ลบกิจกรรม', async () => {
+    const { data, error } = await db.from('calendar_events').delete().eq('id', id).select('id');
+    if (error) { console.error('[Delete event]', error); showFatalError('ลบกิจกรรมไม่สำเร็จ: ' + error.message); return; }
+    if (!data || !data.length) { showFatalError('ลบกิจกรรมไม่สำเร็จ — กิจกรรมนี้อาจถูกลบไปแล้ว'); return; }
+    closeConfirm();
+    closeDetail();
+    showToast('✅ ลบกิจกรรมแล้ว');
+    loadCalendar();
+    loadHomeToday();
+  });
+}
+
+async function openGcalSettings() {
+  if (!isManager()) { showToast('⚠️ ตั้งค่าได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  const { data, error } = await db.from('staff_settings').select('gcal_ics_url').eq('id', true).maybeSingle();
+  if (error) { console.error('[Load staff settings]', error); showFatalError('อ่านการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
+  document.getElementById('gsUrl').value = (data && data.gcal_ics_url) || '';
+  document.getElementById('gcalDialog').showModal();
+}
+
+async function saveGcalSettings() {
+  const v = document.getElementById('gsUrl').value.trim();
+  if (v && !v.startsWith(GCAL_PREFIX)) { showToast('⚠️ ต้องเป็น “ที่อยู่ลับในรูปแบบ iCal” ของ Google ซึ่งขึ้นต้นด้วย ' + GCAL_PREFIX); return; }
+  const btn = document.getElementById('gsSaveBtn');
+  btn.disabled = true;
+  const { data, error } = await db.from('staff_settings')
+    .update({ gcal_ics_url: v || null, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+  btn.disabled = false;
+  if (error) { console.error('[Save staff settings]', error); showFatalError('บันทึกการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
+  if (!data || !data.length) { showFatalError('บันทึกการตั้งค่าไม่สำเร็จ — บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 023'); return; }
+  document.getElementById('gcalDialog').close();
+  showToast(v ? '✅ เชื่อม Google Calendar แล้ว' : '✅ เลิกเชื่อม Google Calendar แล้ว');
+  loadCalendar();
+  loadHomeToday();
+}
+
 renderNav();
 pendingRoute = sectionFromHash();
-history.replaceState({ n: 0 }, '', location.hash || '#stock');
-showSection(pendingRoute && !SECTIONS.find(x => x.id === pendingRoute).manager ? pendingRoute : 'products', 'none');
+history.replaceState({ n: 0 }, '', location.hash || '#home');
+showSection(pendingRoute && !SECTIONS.find(x => x.id === pendingRoute).manager ? pendingRoute : HOME, 'none');
 updateBackBtn();
 renderSerialList();
 renderCart();
@@ -4367,7 +5402,8 @@ function wedgeRoute() {
         document.getElementById('movProduct').value) return 'serial';
     return 'movement';
   }
-  if (current === 'products' || current === 'moves') return 'search';
+  // หน้าแรกคือหน้าที่เปิดค้างไว้หน้าเคาน์เตอร์ — ยิงแล้วพาไปหาสินค้าเลย ไม่ต้องบอกให้เปลี่ยนหมวดก่อน
+  if (current === 'products' || current === 'moves' || current === 'home') return 'search';
   return 'wrongpage';
 }
 

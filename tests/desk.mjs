@@ -126,6 +126,10 @@ async function runTests() {
   await sleep(300);
   ok('ทีมงานล็อกอินแล้วเข้าได้', document.getElementById('loginOverlay').style.display === 'none');
   ok('แสดงชื่อผู้ใช้บนแถบบน', document.getElementById('currentUserInfo').textContent.indexOf('เจ้าของร้าน') !== -1);
+  // หน้าแรกพนักงานเป็นหมวดเริ่มต้นแล้ว (30 ก.ย. 69) — ชุดนี้ทดสอบหมวดสต็อก จึงกดปุ่มเข้าคอนโซลก่อน
+  ok('ล็อกอินแล้วเริ่มที่หน้าแรก', current === 'home' && vis('sec-home'), current);
+  document.getElementById('homeConsoleBtn').click();
+  ok('ปุ่ม "เข้าสู่คอนโซลร้าน" พาไปหมวดสินค้า', current === 'products' && vis('sec-products'), current);
 
   // ── 2. ตารางสินค้า ─────────────────────────────────────────────────────
   const rows = () => [...document.querySelectorAll('#productRows tr[data-i]')];
