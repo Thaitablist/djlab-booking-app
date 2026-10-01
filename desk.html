@@ -509,6 +509,79 @@
   .star-on { color: #8A5A00; }
   table.data tr.unread td { font-weight: 700; }
 
+  /* ---------- Discord ทีมงาน (#discord · ห้อง staff-only) ----------
+     แผงเดียวเต็มความสูง: หัวแบบ B · รายการข้อความ (เก่าบน ใหม่ล่าง เลื่อนในตัว) · ช่องพิมพ์ติดล่าง
+     พื้นที่ทำงานไม่เลื่อนทั้งหน้า (เหมือนผนังสต็อก) · ขอบล่าง 84px = ช่องพิมพ์อยู่เหนือปุ่มเครื่องคิดเลขมุมขวาล่าง */
+  .workspace.is-chat { display: flex; flex-direction: column; overflow: hidden; padding: 18px 28px 84px; }
+  #sec-discord { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .dc-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 0; box-shadow: var(--shadow); }
+  .dc-panel .panel-head .hint { margin: 0 0 0 auto; }
+  .dc-log { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 0 14px; scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--surface2); }
+  .dc-log:focus-visible { outline-offset: -2px; }
+  .dc-older { display: flex; justify-content: center; padding: 10px 0 2px; font-size: 14px; color: var(--text2); }
+  .dc-day, .dc-new { display: flex; align-items: center; gap: 12px; margin: 14px 20px 4px; font-size: 14px; font-weight: 600; color: var(--text2); }
+  .dc-day::before, .dc-day::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+  .dc-new { color: var(--red); font-weight: 700; margin-top: 8px; }
+  .dc-new::before { content: ''; flex: 1; border-top: 2px solid var(--red); }
+  .dc-msg { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; padding: 8px 20px 3px; }
+  .dc-msg.cont { padding-top: 1px; }
+  .dc-msg:hover, .dc-msg:focus-within { background: var(--surface2); }
+  .dc-msg:focus { outline: none; box-shadow: inset 3px 0 0 var(--black); background: var(--sel); }
+  .dc-msg.hit { background: var(--sel); }
+  .dc-side { display: flex; justify-content: center; padding-top: 2px; }
+  .dc-ava { width: 36px; height: 36px; flex-shrink: 0; object-fit: cover; background: var(--surface2); display: inline-flex; align-items: center;
+    justify-content: center; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .dc-stamp { font-size: 14px; color: var(--text2); font-variant-numeric: tabular-nums; line-height: 1.5; visibility: hidden; }
+  .dc-msg:hover .dc-stamp, .dc-msg:focus-within .dc-stamp { visibility: visible; }
+  .dc-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; }
+  .dc-name { font-family: var(--font-head); font-weight: 600; font-size: 16px; }
+  .dc-via { font-size: 14px; font-weight: 600; color: var(--text2); }
+  .dc-tag { font-size: 14px; font-weight: 600; color: var(--text2); border: 1px solid var(--line-strong); padding: 0 6px; line-height: 1.4; }
+  .dc-time { font-size: 14px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .dc-text { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 75ch; font-size: 15px; }
+  .dc-text code { font-family: Consolas, 'Noto Sans Thai', monospace; font-size: 14px; background: var(--sel); padding: 0 4px; }
+  .dc-text .dc-pre { font-family: Consolas, 'Noto Sans Thai', monospace; font-size: 14px; background: var(--surface2); border: 1px solid var(--line);
+    padding: 8px 12px; margin: 4px 0; white-space: pre-wrap; max-width: 75ch; }
+  .dc-text a, .dc-embed a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+  .dc-text a:hover, .dc-embed a:hover { text-decoration-thickness: 2px; }
+  .dc-edited { font-size: 14px; color: var(--text2); }
+  .dc-sysline { font-size: 14px; color: var(--text2); }
+  .dc-quote { display: flex; align-items: center; gap: 6px; max-width: 75ch; font-size: 14px; color: var(--text2); background: none; border: 0;
+    padding: 0 0 2px; cursor: pointer; text-align: left; min-width: 0; }
+  .dc-quote .ico-svg { width: 16px; height: 16px; }
+  .dc-quote > strong { color: var(--text); font-weight: 600; white-space: nowrap; }
+  .dc-quote span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .dc-quote:hover span { color: var(--text); }
+  .dc-atts { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 2px; }
+  .dc-img { display: block; border: 1px solid var(--line); background: var(--surface); padding: 4px; line-height: 0; }
+  .dc-img:hover { border-color: var(--black); }
+  .dc-img img { display: block; max-width: 320px; max-height: 220px; object-fit: contain; }
+  .dc-file { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); background: var(--surface); padding: 6px 12px;
+    font-size: 14px; color: var(--text); text-decoration: none; max-width: 360px; }
+  .dc-file:hover { border-color: var(--black); }
+  .dc-file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dc-file small { font-size: 14px; color: var(--text2); white-space: nowrap; }
+  .dc-embed { margin: 6px 0 2px; border: 1px solid var(--line); background: var(--surface2); padding: 8px 12px; max-width: 520px; font-size: 14px; }
+  .dc-embed strong { display: block; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .dc-acts { position: absolute; top: -14px; right: 20px; display: none; }
+  .dc-msg:hover .dc-acts, .dc-msg:focus-within .dc-acts { display: flex; }
+  .dc-acts .btn { background: var(--surface); box-shadow: var(--shadow); }
+  .dc-acts .btn:hover { background: var(--sel); }
+  .dc-compose { border-top: 2px solid var(--black); padding: 12px 18px; background: var(--surface); }
+  .dc-replying { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 4px 4px 4px 12px; background: var(--surface2);
+    border: 1px solid var(--line); font-size: 14px; color: var(--text2); min-width: 0; }
+  .dc-replying span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dc-replying strong { color: var(--text); }
+  .dc-row { display: flex; gap: 10px; align-items: flex-end; }
+  #dcInput { resize: none; min-height: 44px; max-height: 168px; line-height: 1.5; overflow-y: auto; }
+  #dcInput[readonly] { background: var(--surface2); color: var(--text2); }
+  .dc-row .btn { min-height: 44px; min-width: 96px; }
+  .dc-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 6px; font-size: 14px; color: var(--text2); }
+  .dc-foot strong { color: var(--text); font-weight: 600; }
+  .dc-count { font-family: var(--font-head); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text2); white-space: nowrap; }
+  .dc-count.over { color: #8A0012; }
+  .dc-empty { padding: 48px 20px; text-align: center; color: var(--text2); }
+
   /* ---------- ผนังสต็อก (หมวดสินค้า · Brand Wings — เจ้าของเคาะ 1 ต.ค. 69) ----------
      สต็อกอ่านเหมือนผนังโชว์ของร้าน: ทุกรุ่น = รูป + ตัวเลขใหญ่ตัวเดียว เรียงเป็นปีก
      สลับได้ระหว่างปีกแบรนด์ (มีชั้นย่อยตามหมวด) กับปีกหมวด (เลื่อนแนวนอน · แบรนด์เป็นตัวกรอง)
@@ -1029,6 +1102,34 @@
           </div>
         </section>
 
+        <!-- ============ Discord (ห้อง staff-only ของทีมงาน) ============ -->
+        <section class="section" id="sec-discord" hidden>
+          <div id="dcSetup" hidden></div>
+          <div class="panel dc-panel" id="dcMain">
+            <div class="panel-head">
+              <h3><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 3.5h11v8H7.5l-3 2.75V11.5h-2z"/><path d="M13.5 7.5h4v7.5h-1.5v2.5L13 15H8.5v-3.5"/></svg><span id="dcTitle">staff-only</span></h3>
+              <span class="hint" id="dcState">อัปเดตเองทุก 10 วินาที</span>
+              <button class="btn btn-sm" type="button" onclick="dcPoll('latest')">↻ รีเฟรช</button>
+            </div>
+            <div id="dcNote"></div>
+            <div class="dc-log" id="dcLog" tabindex="0" role="log" aria-label="ข้อความในห้อง staff-only — ลูกศรขึ้นลงเลือกข้อความ R ตอบกลับ">
+              <div class="dc-older" id="dcOlder"></div>
+              <div id="dcList"></div>
+            </div>
+            <div class="dc-compose">
+              <div class="dc-replying" id="dcReplying" hidden></div>
+              <div class="dc-row">
+                <textarea id="dcInput" class="input" rows="1" maxlength="4000" placeholder="พิมพ์ข้อความถึงทีมงาน — Enter ส่ง · Shift+Enter ขึ้นบรรทัดใหม่" aria-label="ข้อความถึงห้อง staff-only" aria-describedby="dcPrefixNote"></textarea>
+                <button class="btn btn-primary" id="dcSendBtn" type="button" onclick="dcSend()">ส่ง</button>
+              </div>
+              <div class="dc-foot">
+                <span id="dcPrefixNote">ส่งในนามบอทของร้าน ขึ้นต้นด้วยชื่อคุณ <strong id="dcPrefix"></strong></span>
+                <span class="dc-count" id="dcCount" aria-live="polite" hidden></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ============ ปฏิทิน ============ -->
         <section class="section" id="sec-calendar" hidden>
           <div class="toolbar">
@@ -1534,6 +1635,7 @@
       <span><kbd>/</kbd> หรือ <kbd>Ctrl</kbd>+<kbd>K</kbd></span><span>ค้นหาทั้งร้าน · ในหมวดสินค้าไปที่ช่องยิงของผนังก่อน (กด <kbd>Ctrl</kbd>+<kbd>K</kbd> ซ้ำ = ค้นหาทั้งร้าน)</span>
       <span><kbd>Alt</kbd>+<kbd>H</kbd></span><span>หน้าแรก</span>
       <span><kbd>Alt</kbd>+<kbd>B</kbd> · <kbd>M</kbd> · <kbd>C</kbd></span><span>กระดานข้อความ · กล่องจดหมายร้าน · ปฏิทิน</span>
+      <span><kbd>Alt</kbd>+<kbd>S</kbd></span><span>ห้อง staff-only ของทีมงานใน Discord · <kbd>Enter</kbd> ส่ง · <kbd>Shift</kbd>+<kbd>Enter</kbd> ขึ้นบรรทัดใหม่ · ในรายการข้อความ <kbd>↑</kbd> <kbd>↓</kbd> เลือก · <kbd>R</kbd> หรือ <kbd>Enter</kbd> ตอบกลับ · <kbd>Esc</kbd> ยกเลิกการตอบกลับ</span>
       <span><kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd>, <kbd>0</kbd></span><span>หมวดคอนโซลร้าน (สินค้า … จัดการข้อมูล) ตามเลขข้างชื่อในเมนูซ้าย</span>
       <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>เลื่อนแถวที่เลือกในตาราง</span>
       <span><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> (ผนังสินค้า)</span><span>เลื่อนในปีก · ข้ามไปปีกข้าง ๆ ที่ระดับเดียวกัน · <kbd>Enter</kbd> เปิดแผงสินค้า · <kbd>Esc</kbd> ปิด</span>
@@ -1967,6 +2069,8 @@ const SECTIONS = [
   { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: 'board', label: 'กระดานข้อความ', key: 'B' },
   { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: 'mail', label: 'กล่องจดหมายร้าน', key: 'M' },
   { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: 'calendar', label: 'ปฏิทิน', key: 'C' },
+  // S = staff-only (ห้อง Discord) · ไม่ใช้ D เพราะ Alt+D ของ Chrome บนวินโดวส์คือไปที่แถบที่อยู่
+  { id: 'discord',  hash: 'discord',       group: 'พนักงาน',     icon: 'discord', label: 'Discord', key: 'S' },
   { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: 'products', label: 'สินค้า', key: '1' },
   { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: 'movement', label: 'รับเข้า / ตัดออก / ปรับยอด', key: '2' },
   { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', key: '3' },
@@ -1985,6 +2089,7 @@ const NAV_ICONS = {
   board:     '<path d="M3 3.5h14v10H8.5L5 16.5v-3H3z"/><path d="M6.5 7.5h7M6.5 10.5h4.5"/>',
   mail:      '<rect x="2.5" y="4.5" width="15" height="11"/><path d="M2.5 5.5l7.5 6 7.5-6"/>',
   calendar:  '<rect x="2.5" y="4" width="15" height="13.5"/><path d="M2.5 8h15M6.5 2v4M13.5 2v4"/>',
+  discord:   '<path d="M2.5 3.5h11v8H7.5l-3 2.75V11.5h-2z"/><path d="M13.5 7.5h4v7.5h-1.5v2.5L13 15H8.5v-3.5"/>',
   products:  '<path d="M3 6.5L10 3l7 3.5v8L10 18l-7-3.5z"/><path d="M3 6.5l7 3.5 7-3.5M10 10v8"/>',
   movement:  '<path d="M6.5 16.5V4M3.5 7l3-3 3 3M13.5 3.5V16M10.5 13l3 3 3-3"/>',
   moves:     '<path d="M3 5h9M3 9.5h6M3 14h5"/><circle cx="14" cy="13" r="3.75"/><path d="M14 11v2.2l1.4 1"/>',
@@ -2084,6 +2189,7 @@ function loginVisible() {
 
 async function handleAuthState(session) {
   if (!session) {
+    dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
     document.getElementById('loginOverlay').style.display = 'flex';
     currentAdmin = null;
     currentUserId = null;
@@ -2143,6 +2249,7 @@ async function handleAuthState(session) {
 
   loadAll();
   loadStaffHome();
+  dcStart();
 }
 
 async function initSupabaseSync() {
@@ -4181,8 +4288,8 @@ function renderNav() {
       html += '<div class="nav-group"><div class="nav-group-title">' + escapeHtml(group) + '</div>';
     }
     const key = sectionKey(s);
-    // ตัวเลขแดงข้างเมนู = ข้อความที่ "ฉัน" ยังไม่ได้อ่าน (กระดาน) / อีเมลที่ยังไม่ได้เปิด (กล่องจดหมาย)
-    const badge = s.id === 'board' || s.id === 'mail' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
+    // ตัวเลขแดงข้างเมนู = ข้อความที่ "ฉัน" ยังไม่ได้อ่าน (กระดาน · Discord) / อีเมลที่ยังไม่ได้เปิด (กล่องจดหมาย)
+    const badge = s.id === 'board' || s.id === 'mail' || s.id === 'discord' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
       '<span class="ico" aria-hidden="true">' + navIcon(s.icon) + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
@@ -4238,6 +4345,7 @@ function showSection(id, mode) {
   document.getElementById('sec-' + id).hidden = false;
   // ผนังสต็อกเต็มความสูงจอ แต่ละปีกเลื่อนของตัวเอง — พื้นที่ทำงานต้องไม่เลื่อนทั้งหน้าซ้อนอีกชั้น
   document.querySelector('.workspace').classList.toggle('is-wall', id === 'products');
+  document.querySelector('.workspace').classList.toggle('is-chat', id === 'discord');   // ห้อง Discord: รายการเลื่อนในตัว ช่องพิมพ์ติดล่าง
   // หมวดที่ข้อมูลผูกกับตัวกรองของตัวเอง โหลดตอนเปิด ไม่ต้องโหลดทุกอย่างตั้งแต่ล็อกอิน
   if (currentUserId) {
     if (id === 'daily') loadDaily();
@@ -4246,6 +4354,7 @@ function showSection(id, mode) {
     if (id === 'mail') loadMailList();
     if (id === 'pos') renderSellers();
     if (id === 'calendar') loadCalendar();
+    if (id === 'discord') dcOpen();
   }
   if (id === 'home') renderHome();
   playerLayout();                 // เครื่องเล่น: จอดบนหน้าแรก / ย่อเป็นหน้าต่างเล็กในหมวดอื่น (ไม่ย้าย iframe)
@@ -4254,7 +4363,7 @@ function showSection(id, mode) {
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
   const focusEl = { products: 'wall', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
     booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
-    home: 'sec-home', board: 'tw-board', mail: 'tw-mail' }[id];
+    home: 'sec-home', board: 'tw-board', mail: 'tw-mail', discord: dc.state === 'setup' ? null : 'dcInput' }[id];
   if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
   return true;
 }
@@ -6396,6 +6505,7 @@ function updateNavBadges() {
   };
   set('board', myUnread().length);
   set('mail', mailState.status === 'ok' ? mailState.unseen : 0);
+  set('discord', dc.unread);
 }
 
 // ---------------------------------------------------------------------------
@@ -6588,6 +6698,7 @@ async function savePin() {
 // ไอคอนลัด 2 × 2 — แต่ละคนเลือกเองได้ (staff_home.launcher · migration 028)
 // ---------------------------------------------------------------------------
 const ICON_PATHS = {
+  chat:   '<path d="M6 8h26v18H17l-7 6v-6H6z"/><path d="M12 15h14M12 20h9"/><path d="M36 16h6v18h-4v6l-7-6H20v-4"/>',
   scan:   '<path d="M6 13V6h8M34 6h8v7M42 35v7h-8M14 42H6v-7"/><path d="M13 15v18M18 15v18M22 15v18M27 15v18M31 15v18M35 15v18"/><path d="M4 24h40" stroke-dasharray="3 3"/>',
   mail:   '<rect x="6" y="11" width="36" height="26"/><path d="M6 13l18 14 18-14"/>',
   room:   '<rect x="5" y="9" width="38" height="30"/><circle cx="21" cy="24" r="10"/><circle cx="21" cy="24" r="2.5"/><path d="M37 13v14l-6 6"/>',
@@ -6623,6 +6734,8 @@ const LAUNCH_ITEMS = [
   { key: 'receive',  t: 'สินค้ารับเข้า', icon: 'inbox', color: '#00897B', go: () => openReceive(), badge: () => rcvTotal() },
   { key: 'register', t: 'สร้างลิงก์สมัครสมาชิก', icon: 'adduser', color: '#7986CB', go: () => openCodeModal() },
   { key: 'payqr',    t: 'QR รับเงิน',  icon: 'qr',     color: '#33B679', go: () => openPayQr(null) },
+  // ห้อง staff-only ของ Discord — สีเทาอมฟ้าเป็นกลาง (ไม่ใช้สีหรือโลโก้ของ Discord) · ตัวเลขมุม = ข้อความที่ฉันยังไม่ได้อ่าน
+  { key: 'discord',  t: 'Discord',     icon: 'chat',   color: '#455A64', go: () => showSection('discord'), badge: () => dc.unread },
 ].concat(MAIL_BOXES.filter(b => b.key !== 'inbox').map(b => ({
   key: 'mail:' + b.key, t: b.key === 'starred' ? 'อีเมลติดดาว' : 'ป้าย ' + b.t, icon: b.key === 'starred' ? 'star' : 'tag',
   color: b.key === 'starred' ? '#F9A825' : '#5C6BC0',     // ป้ายอีเมล = ฟ้าอมม่วงอ่อนของอีเมล · ติดดาว = เหลืองอำพัน
@@ -7914,6 +8027,569 @@ async function sendMail() {
 }
 
 // ---------------------------------------------------------------------------
+// Discord ทีมงาน (#discord) — ห้อง 🪴｜staff-only ของเซิร์ฟเวอร์ร้าน ผ่าน Edge Function `discord`
+// อ่าน/ส่งในนามบอทของร้าน · ชื่อหน้าข้อความ (**[ชื่อ]**) ฟังก์ชันใส่เองจากตาราง admins — หน้าเว็บส่งแค่เนื้อความ
+// ⚠️ เนื้อข้อความมาจากใครก็ได้ในห้อง Discord — **ห้ามเอาไปใส่ innerHTML** ทุกชิ้นสร้างเป็น DOM ด้วย dcEl/dcMd
+//    (ตัวหนา · ตัวเอียง · โค้ด · ลิงก์ http/https เปิดแท็บใหม่) เทสต์ยิง <script> / <img onerror> ไว้แล้ว
+// อ่านถึงไหนแล้วจำต่อคนใน localStorage `djlab.discord.seen.v1:<admin id>` — เป็นแค่ความสะดวกของหน้าจอ
+// ไม่ใช่ข้อมูลร้าน (หายก็แค่นับใหม่ ไม่มีอะไรเสีย) และคอมหน้าร้านเครื่องเดียวใช้หลายคน จึงต้องแยกตามคน
+// ไม่เพิ่มตาราง/คอลัมน์เพื่อค่าเดียว (เหตุผลเดียวกับ djlab.stockGroup.v1) · ข้อเสีย: เปิดอ่านที่เครื่องอื่นไม่ถูกนับว่าอ่านที่นี่
+// ---------------------------------------------------------------------------
+const DC_SEEN_KEY = 'djlab.discord.seen.v1:';
+const DC_POLL_MS = 10000, DC_POLL_HIDDEN_MS = 60000, DC_POLL_ERROR_MS = 60000;
+const DC_GROUP_MS = 7 * 60 * 1000;                       // ข้อความติดกันของคนเดียวกันภายใน 7 นาที = กลุ่มเดียว
+const DC_CONSOLE_RE = /^\*\*\[([^\]\n]{1,40})\]\*\* ?/;  // หัวข้อความที่ฟังก์ชัน discord ใส่ให้ตอนส่งจากคอนโซล
+const DC_MEDIA = /^https:\/\/(cdn\.discordapp\.com|media\.discordapp\.net)\//;
+const DC_SYS = { 6: 'ปักหมุดข้อความในห้องนี้', 7: 'เข้าร่วมเซิร์ฟเวอร์', 18: 'เริ่มเธรดใหม่' };
+// state: idle = ยังไม่ได้เริ่ม · setup = ยังไม่ได้ตั้งค่า (ไม่ดึงซ้ำ) · live = ตั้งค่าแล้ว (error ชั่วคราวเก็บใน error)
+const dc = { state: 'idle', error: '', channel: '', prefix: '', botId: null, max: 2000, msgs: [], ids: new Set(), loaded: false,
+  hasOlder: false, olderBusy: false, timer: null, busy: false, gen: 0, user: null, seen: null, unread: 0, newFrom: null,
+  replyTo: null, sending: false };
+
+function dcIdCmp(a, b) { return a.length - b.length || (a < b ? -1 : a > b ? 1 : 0); }     // snowflake เป็นเลขทศนิยมไม่มี 0 นำหน้า
+function dcLoadSeen() { try { return localStorage.getItem(DC_SEEN_KEY + currentUserId) || null; } catch (e) { return null; } }
+function dcSaveSeen(id) {
+  dc.seen = id;
+  try { localStorage.setItem(DC_SEEN_KEY + currentUserId, id); } catch (e) { /* เก็บไม่ได้ก็แค่จำไม่ได้ */ }
+}
+// กฎเดียวกับ consoleName ในฟังก์ชัน — ใช้นับว่าข้อความไหน "ของฉัน" (ไม่นับเป็นยังไม่ได้อ่าน)
+function dcConsoleName(n) { return String(n || '').replace(/[*_~`|\\[\]<>@#:]/g, '').replace(/\s+/g, ' ').trim().slice(0, 32).trim() || 'ทีมงาน'; }
+// ความยาวที่ Discord จะเห็นจริง: ชื่อหน้า + เนื้อความ + อักขระที่ฟังก์ชันแทรกกัน @everyone/@here/<@id> (neutralizeMentions)
+function dcSendLength(t) {
+  const s = String(t).trim();
+  return dc.prefix.length + s.length + (s.match(/@(everyone|here)/gi) || []).length + (s.match(/<@[!&]?\d+>/g) || []).length;
+}
+function dcConsole(m) {
+  if (!m.author.bot || (dc.botId && m.author.id !== dc.botId)) return null;
+  const x = DC_CONSOLE_RE.exec(m.content || '');
+  return x ? { name: x[1], text: m.content.slice(x[0].length) } : null;
+}
+function dcMine(m) { const c = dcConsole(m); return !!c && !!currentAdmin && c.name === dcConsoleName(currentAdmin.full_name); }
+
+function dcRecount() {
+  dc.unread = dc.seen ? dc.msgs.filter(m => dcIdCmp(m.id, dc.seen) > 0 && !dcMine(m)).length : 0;
+  updateNavBadges();
+  if (current === HOME && !launchDraft) renderLauncher();
+}
+function dcMarkSeen() {
+  const last = dc.msgs[dc.msgs.length - 1];
+  if (last && (!dc.seen || dcIdCmp(last.id, dc.seen) > 0)) dcSaveSeen(last.id);
+  dcRecount();
+}
+
+async function dcStart() {
+  if (!currentUserId) return;
+  if (dc.user !== currentUserId) {
+    // คนใหม่บนเครื่องนี้ (ล็อกอิน / สลับบัญชี) — อ่านถึงไหนเป็นของแต่ละคน · ชื่อหน้าข้อความก็เปลี่ยนตามคน
+    dc.user = currentUserId;
+    dc.seen = dcLoadSeen();
+    dc.prefix = currentAdmin ? '**[' + dcConsoleName(currentAdmin.full_name) + ']** ' : '';
+    if (dc.loaded && !dc.seen && dc.msgs.length) dcSaveSeen(dc.msgs[dc.msgs.length - 1].id);
+    dcRecount();
+    if (current === 'discord') dcRenderShell();
+    if (dc.state !== 'idle') { await dcStatus(); return; }
+  }
+  if (dc.state === 'idle') await dcStatus();
+}
+function dcStop() {
+  dc.gen++;                       // คำขอที่ยังค้างอยู่ของคนเดิม ตอบกลับมาแล้วไม่ถูกใช้
+  clearTimeout(dc.timer);
+  Object.assign(dc, { state: 'idle', error: '', channel: '', prefix: '', botId: null, msgs: [], ids: new Set(), loaded: false,
+    hasOlder: false, olderBusy: false, timer: null, busy: false, user: null, seen: null, unread: 0, newFrom: null, replyTo: null, sending: false });
+  document.getElementById('dcList').replaceChildren();
+  document.getElementById('dcNote').replaceChildren();
+  const t = document.getElementById('dcInput');
+  t.value = '';
+  t.readOnly = false;                              // ออกจากระบบกลางการส่ง — ช่องต้องไม่ค้างเป็นอ่านอย่างเดียวให้คนถัดไป
+  t.removeAttribute('aria-busy');
+  dcRenderReplying();
+  dcComposerSync();
+  updateNavBadges();
+}
+function dcSchedule(slow) {
+  clearTimeout(dc.timer);
+  dc.timer = null;
+  if (!currentUserId || dc.state !== 'live') return;
+  dc.timer = setTimeout(() => dcPoll(), slow ? DC_POLL_ERROR_MS : document.hidden ? DC_POLL_HIDDEN_MS : DC_POLL_MS);
+}
+document.addEventListener('visibilitychange', () => {
+  // กลับมาดูแท็บ = ดึงทันที (ระหว่างซ่อนดึงช้าลงเป็นนาทีละครั้ง) · อยู่ในห้องอยู่แล้ว = ข้อความที่เพิ่งเห็นนับว่าอ่านแล้ว
+  if (document.hidden || !currentUserId || dc.state !== 'live') return;
+  if (current === 'discord') dcMarkSeen();
+  dcPoll();
+});
+
+function dcFail(err) {
+  if (err.code === 'not_configured') { dc.state = 'setup'; clearTimeout(dc.timer); dc.timer = null; }
+  dc.error = err.code === 'not_configured' ? '' : (err.message || 'ไม่ทราบสาเหตุ');
+  if (current === 'discord') { dcRenderShell(); dcRenderNote(); }
+}
+async function dcStatus() {
+  const gen = dc.gen;
+  const r = await callFn('discord', { action: 'status' });
+  if (gen !== dc.gen) return;
+  if (r.error) {
+    if (r.error.code !== 'not_configured') dc.state = 'live';        // ตั้งค่าแล้วแต่ขัดข้อง — ลองใหม่เป็นระยะ
+    dcFail(r.error);
+    dcSchedule(true);
+    return;
+  }
+  Object.assign(dc, { state: 'live', error: '', channel: (r.channel && r.channel.name) || '', botId: r.bot_id || null,
+    prefix: r.prefix || dc.prefix, max: r.max_len || 2000 });
+  if (current === 'discord') dcRenderShell();
+  await dcPoll('latest');
+}
+
+function dcMerge(list) {
+  const added = [];
+  for (const m of list) {
+    if (dc.ids.has(m.id)) { const i = dc.msgs.findIndex(x => x.id === m.id); if (i !== -1) dc.msgs[i] = m; }   // แก้ไขแล้ว = แทนของเดิม
+    else { dc.ids.add(m.id); dc.msgs.push(m); added.push(m); }
+  }
+  dc.msgs.sort((a, b) => dcIdCmp(a.id, b.id));
+  return added;
+}
+// mode 'latest' = ขอชุดล่าสุด (ตอนเริ่ม/เปิดห้อง/รีเฟรช — เก็บการแก้ไขของข้อความที่มีอยู่ด้วย)
+// ไม่ใส่ = ขอเฉพาะที่ใหม่กว่าข้อความล่าสุดที่มี (after) ทุก 10 วินาที
+async function dcPoll(mode) {
+  if (!currentUserId) return;
+  if (dc.state === 'idle' || dc.state === 'setup') { await dcStatus(); return; }
+  if (dc.busy) return;
+  clearTimeout(dc.timer);
+  dc.busy = true;
+  const gen = dc.gen, wasEmpty = !dc.msgs.length;
+  let added = [], err = null, reset = false;
+  for (let page = 0; page < 5; page++) {              // หายไปนานแล้วมีข้อความใหม่เกิน 50 = ขอต่อจนครบ (ไม่เกิน 250)
+    const after = mode !== 'latest' && dc.msgs.length ? dc.msgs[dc.msgs.length - 1].id : null;
+    const r = await callFn('discord', after ? { action: 'list', after } : { action: 'list' });
+    if (gen !== dc.gen) return;
+    if (r.error) { err = r.error; break; }
+    if (r.channel && r.channel.name) dc.channel = r.channel.name;
+    if (r.bot_id) dc.botId = r.bot_id;
+    const list = r.messages || [];
+    if (!after) {
+      // ชุดล่าสุดไม่ต่อกับที่มีอยู่ (หายไปนานมาก) = เริ่มใหม่จากชุดนี้ ไม่ให้มีรูโหว่กลางห้อง
+      const last = dc.msgs[dc.msgs.length - 1];
+      if (last && r.has_more && list.length && dcIdCmp(list[0].id, last.id) > 0) {
+        Object.assign(dc, { msgs: [], ids: new Set() });
+        reset = true;
+      }
+      if (!dc.loaded || reset) dc.hasOlder = !!r.has_more;
+      added = added.concat(dcMerge(list));
+      dc.loaded = true;
+      break;
+    }
+    added = added.concat(dcMerge(list));
+    if (!r.has_more) break;
+  }
+  dc.busy = false;
+  if (err) dcFail(err); else dc.error = '';
+  // เปิดคอนโซลครั้งแรกของคนนี้บนเครื่องนี้: ถือว่าอ่านถึงข้อความล่าสุดแล้ว ไม่ขึ้น "ยังไม่ได้อ่าน 50"
+  if (!err && !dc.seen && dc.msgs.length) dcSaveSeen(dc.msgs[dc.msgs.length - 1].id);
+  if (current === 'discord' && !document.hidden) dcMarkSeen(); else dcRecount();
+  if (current === 'discord') {
+    if (mode === 'latest' || reset || wasEmpty) dcRenderList(wasEmpty); else if (added.length) dcAppend(added);
+    dcRenderNote();
+  }
+  dcSchedule(!!err);
+}
+
+async function dcLoadOlder() {
+  if (dc.olderBusy || !dc.hasOlder || !dc.msgs.length || dc.state !== 'live') return;
+  dc.olderBusy = true;
+  dcRenderOlder();
+  const gen = dc.gen;
+  const r = await callFn('discord', { action: 'list', before: dc.msgs[0].id });
+  if (gen !== dc.gen) return;
+  dc.olderBusy = false;
+  if (r.error) { dcFail(r.error); dcRenderOlder(); return; }
+  dc.hasOlder = !!r.has_more;
+  const log = document.getElementById('dcLog'), keep = log.scrollHeight - log.scrollTop;
+  dcMerge(r.messages || []);
+  if (current === 'discord') {
+    dcRenderList(false);
+    log.scrollTop = log.scrollHeight - keep;          // ข้อความที่อ่านอยู่ไม่กระโดดหนี
+  }
+}
+
+function dcOpen() {
+  if (!currentUserId) return;
+  // เส้นแดง "ข้อความใหม่" อยู่เหนือข้อความแรกที่ยังไม่ได้อ่าน (เห็นจนกว่าจะออกจากห้อง)
+  const first = dc.seen ? dc.msgs.find(m => dcIdCmp(m.id, dc.seen) > 0 && !dcMine(m)) : null;
+  dc.newFrom = first ? first.id : null;
+  dcRenderShell();
+  dcRenderList(true);
+  dcRenderNote();
+  dcComposerSync();
+  dcMarkSeen();
+  if (dc.state === 'live') dcPoll('latest'); else dcStatus();
+}
+
+// ---- วาด ----
+function dcEl(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+function dcSafeUrl(u) {
+  try { const x = new URL(u); return x.protocol === 'https:' || x.protocol === 'http:' ? x.href : null; } catch (e) { return null; }
+}
+// markdown ชุดเล็กของ Discord → DOM (ไม่มี HTML จากข้อความเลย: ตัวอักษรทั้งหมดเข้าเป็น Text node)
+// ```บล็อก``` · `โค้ด` · **หนา** · *เอียง* / _เอียง_ · [ชื่อ](ลิงก์) · ลิงก์เปล่า — ลิงก์รับแค่ http/https
+const DC_MD = /```(?:[a-z0-9_+-]*\n)?([\s\S]*?)```|`([^`\n]+)`|\*\*([\s\S]+?)\*\*|\*(?![\s*])([^*\n]+?)(?<!\s)\*|(?<![\p{L}\p{N}_])_([^_\n]+)_(?![\p{L}\p{N}_])|\[([^\]\n]{1,200})\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>"]+[^\s<>".,:;!?)\]'*_])/gu;
+function dcLink(href, label) {
+  const a = dcEl('a', null, label);
+  a.href = href;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.title = href;                                   // ลิงก์ที่มีชื่อ: ชี้แล้วเห็นที่อยู่จริงก่อนกด
+  return a;
+}
+function dcMd(text) {
+  const frag = document.createDocumentFragment(), s = String(text || '');
+  const re = new RegExp(DC_MD.source, DC_MD.flags);
+  let last = 0, m;
+  while ((m = re.exec(s))) {
+    if (m.index > last) frag.append(s.slice(last, m.index));
+    let node;
+    if (m[1] !== undefined) node = dcEl('pre', 'dc-pre', m[1]);
+    else if (m[2] !== undefined) node = dcEl('code', null, m[2]);
+    else if (m[3] !== undefined) { node = dcEl('strong'); node.append(dcMd(m[3])); }
+    else if (m[4] !== undefined || m[5] !== undefined) { node = dcEl('em'); node.append(dcMd(m[4] !== undefined ? m[4] : m[5])); }
+    else if (m[6] !== undefined) { const h = dcSafeUrl(m[7]); node = h ? dcLink(h, m[6]) : document.createTextNode(m[0]); }
+    else { const h = dcSafeUrl(m[8]); node = h ? dcLink(h, m[8]) : document.createTextNode(m[8]); }
+    frag.append(node);
+    last = re.lastIndex;
+  }
+  if (last < s.length) frag.append(s.slice(last));
+  return frag;
+}
+function dcIcon(path) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'ico-svg');
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.setAttribute('aria-hidden', 'true');
+  for (const d of path) { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); svg.append(p); }
+  return svg;
+}
+const DC_ICO_REPLY = ['M8 4.5L3.5 9 8 13.5', 'M3.5 9h8a5 5 0 0 1 5 5v1.5'];
+const DC_ICO_FILE = ['M5 2.5h6.5l3.5 3.5v11.5H5z', 'M11.5 2.5V6H15'];
+function dcAva(id, name) {
+  // ตัวอักษรแรกบนพื้นสี (ชุดเดียวกับ avatarHtml ของหน้าแรก) — สร้างด้วย DOM เพราะชื่อมาจากข้อความใน Discord
+  let h = 0;
+  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const k = chipColors(AVA_COLORS[h % AVA_COLORS.length]);
+  const s = dcEl('span', 'dc-ava', initialOf(name));
+  s.style.background = k.bg;
+  s.style.color = k.ink;
+  s.setAttribute('aria-hidden', 'true');
+  return s;
+}
+function dcDay(ts) { return new Date(ts).toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }); }
+function dcTime(ts) { return new Date(ts).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }); }
+function dcDayLabel(d) {
+  const today = todayBangkok();
+  return d === today ? 'วันนี้' : d === shiftDateStr(today, -1) ? 'เมื่อวาน' : thaiLongDate(d);
+}
+function dcBytes(n) { return !n ? '' : n < 1024 * 1024 ? Math.max(1, Math.round(n / 1024)) + ' KB' : (n / 1024 / 1024).toFixed(1) + ' MB'; }
+function dcAuthorKey(m) { const c = dcConsole(m); return c ? 'c:' + c.name : 'u:' + m.author.id; }
+function dcView(m) {
+  const c = dcConsole(m);
+  return { name: c ? c.name : m.author.name, text: c ? c.text : m.content, via: !!c };
+}
+
+function dcMsgNode(m, cont) {
+  const v = dcView(m);
+  const row = dcEl('div', 'dc-msg' + (cont ? ' cont' : ''));
+  row.tabIndex = -1;
+  row.dataset.id = m.id;
+  row.setAttribute('role', 'article');
+  row.setAttribute('aria-label', v.name + (v.via ? ' ผ่านคอนโซล' : '') + ' ' + dcTime(m.timestamp));
+  const side = dcEl('div', 'dc-side');
+  if (cont) side.append(dcEl('span', 'dc-stamp', dcTime(m.timestamp)));
+  else if (v.via) { const a = staff.find(x => dcConsoleName(x.full_name) === v.name); side.append(dcAva(a ? a.id : 'console:' + v.name, v.name)); }
+  else if (DC_MEDIA.test(m.author.avatar || '')) {
+    const img = dcEl('img', 'dc-ava');
+    img.src = m.author.avatar;
+    img.alt = '';
+    img.width = 36;
+    img.height = 36;
+    img.loading = 'lazy';
+    side.append(img);
+  } else side.append(dcAva(m.author.id, v.name));
+  const main = dcEl('div', 'dc-main');
+  if (!cont) {
+    const meta = dcEl('div', 'dc-meta');
+    meta.append(dcEl('strong', 'dc-name', v.name));
+    if (v.via) meta.append(dcEl('span', 'dc-via', '· ผ่านคอนโซล'));
+    else if (m.author.bot) meta.append(dcEl('span', 'dc-tag', 'บอท'));
+    const t = dcEl('time', 'dc-time', dcTime(m.timestamp));
+    t.dateTime = m.timestamp;
+    t.title = formatDateTime(m.timestamp);
+    meta.append(t);
+    main.append(meta);
+  }
+  if (m.reference) {
+    const q = dcEl('button', 'dc-quote');
+    q.type = 'button';
+    if (m.reference.deleted) q.append(dcIcon(DC_ICO_REPLY), dcEl('span', null, 'ข้อความต้นทางถูกลบไปแล้ว'));
+    else {
+      const qc = DC_CONSOLE_RE.exec(m.reference.snippet || '');
+      const sn = dcEl('span');
+      sn.append(dcMd(qc ? m.reference.snippet.slice(qc[0].length) : m.reference.snippet));     // ตัวหนาในข้อความต้นทางไม่โผล่เป็น **
+      q.append(dcIcon(DC_ICO_REPLY), dcEl('strong', null, qc ? qc[1] : m.reference.author), sn);
+      q.title = 'ไปที่ข้อความต้นทาง';
+      q.dataset.ref = m.reference.id;
+    }
+    main.append(q);
+  }
+  if (m.system) main.append(dcEl('div', 'dc-sysline', DC_SYS[m.type] || 'ข้อความระบบของ Discord'));
+  if (v.text) {
+    const body = dcEl('div', 'dc-text');
+    body.append(dcMd(v.text));
+    if (m.edited) body.append(dcEl('span', 'dc-edited', ' (แก้ไขแล้ว)'));
+    main.append(body);
+  }
+  const atts = (m.attachments || []).filter(a => DC_MEDIA.test(a.url || ''));
+  if (atts.length || (m.stickers || []).length) {
+    const box = dcEl('div', 'dc-atts');
+    for (const a of atts) {
+      if (/^image\//.test(a.content_type || '') && a.width) {
+        const link = dcLink(a.url, '');
+        link.className = 'dc-img';
+        link.title = a.filename + ' — เปิดรูปเต็มในแท็บใหม่';
+        const img = dcEl('img');
+        img.src = a.url;
+        img.alt = a.filename;
+        img.loading = 'lazy';
+        if (a.width && a.height) { const k = Math.min(1, 320 / a.width, 220 / a.height); img.width = Math.round(a.width * k); img.height = Math.round(a.height * k); }
+        link.append(img);
+        box.append(link);
+      } else {
+        const link = dcLink(a.url, '');
+        link.className = 'dc-file';
+        link.append(dcIcon(DC_ICO_FILE), dcEl('span', null, a.filename));
+        if (a.size) link.append(dcEl('small', null, dcBytes(a.size)));
+        box.append(link);
+      }
+    }
+    for (const s of m.stickers || []) box.append(dcEl('span', 'dc-tag', 'สติกเกอร์: ' + s));
+    main.append(box);
+  }
+  for (const e of m.embeds || []) {
+    const box = dcEl('div', 'dc-embed');
+    const h = e.url && dcSafeUrl(e.url);
+    if (e.title) { const t = dcEl('strong'); t.append(h ? dcLink(h, e.title) : document.createTextNode(e.title)); box.append(t); }
+    else if (h) box.append(dcLink(h, h));
+    if (e.description) { const d = dcEl('div'); d.append(dcMd(e.description)); box.append(d); }
+    main.append(box);
+  }
+  row.append(side, main);
+  if (!m.system) {
+    const acts = dcEl('div', 'dc-acts');
+    const b = dcEl('button', 'btn btn-sm');
+    b.type = 'button';
+    b.dataset.reply = m.id;
+    b.append(dcIcon(DC_ICO_REPLY), document.createTextNode('ตอบกลับ'));
+    b.setAttribute('aria-label', 'ตอบกลับ ' + v.name);
+    acts.append(b);
+    row.append(acts);
+  }
+  return row;
+}
+function dcCont(prev, m) {
+  return !!prev && !prev.system && !m.system && !m.reference && dcAuthorKey(prev) === dcAuthorKey(m) &&
+    dcDay(prev.timestamp) === dcDay(m.timestamp) && new Date(m.timestamp) - new Date(prev.timestamp) < DC_GROUP_MS;
+}
+function dcPut(list, m, prev) {
+  let cut = false;
+  if (!prev || dcDay(prev.timestamp) !== dcDay(m.timestamp)) { list.append(dcEl('div', 'dc-day', dcDayLabel(dcDay(m.timestamp)))); cut = true; }
+  if (m.id === dc.newFrom) { list.append(dcEl('div', 'dc-new', 'ข้อความใหม่')); cut = true; }
+  list.append(dcMsgNode(m, !cut && dcCont(prev, m)));
+}
+function dcAtBottom(log) { return log.scrollHeight - log.scrollTop - log.clientHeight < 60; }
+function dcRenderList(toBottom) {
+  const log = document.getElementById('dcLog'), list = document.getElementById('dcList');
+  const stick = toBottom || dcAtBottom(log);
+  list.replaceChildren();
+  if (!dc.msgs.length) list.append(dcEl('div', 'dc-empty', dc.loaded ? 'ยังไม่มีข้อความในห้องนี้' : 'กำลังโหลดข้อความ…'));
+  let prev = null;
+  for (const m of dc.msgs) { dcPut(list, m, prev); prev = m; }
+  dcRenderOlder();
+  if (stick) log.scrollTop = log.scrollHeight;
+}
+function dcAppend(added) {
+  const log = document.getElementById('dcLog'), list = document.getElementById('dcList');
+  const first = dc.msgs.indexOf(added[0]);
+  // ใหม่ทั้งหมดอยู่ท้ายห้อง = ต่อท้ายทีละชิ้น (โปรแกรมอ่านจอประกาศเฉพาะที่เพิ่ม) · นอกนั้นวาดใหม่ทั้งห้อง
+  if (first !== dc.msgs.length - added.length || list.querySelector('.dc-empty')) { dcRenderList(false); return; }
+  const stick = dcAtBottom(log);
+  let prev = dc.msgs[first - 1] || null;
+  for (const m of added) { dcPut(list, m, prev); prev = m; }
+  if (stick) log.scrollTop = log.scrollHeight;
+}
+function dcRenderOlder() {
+  const box = document.getElementById('dcOlder');
+  box.replaceChildren();
+  if (!dc.loaded || !dc.msgs.length) return;
+  if (dc.olderBusy) box.textContent = 'กำลังโหลดข้อความเก่ากว่า…';
+  else if (dc.hasOlder) {
+    const b = dcEl('button', 'btn btn-sm btn-ghost', 'โหลดข้อความเก่ากว่า');
+    b.type = 'button';
+    b.onclick = dcLoadOlder;
+    box.append(b);
+  } else box.textContent = 'ต้นห้องแล้ว — ไม่มีข้อความเก่ากว่านี้';
+}
+function dcRenderShell() {
+  const setup = dc.state === 'setup';
+  document.getElementById('dcSetup').hidden = !setup;
+  document.getElementById('dcMain').hidden = setup;
+  document.getElementById('dcTitle').textContent = dc.channel || 'staff-only';
+  document.getElementById('dcPrefix').textContent = dc.prefix ? dc.prefix.replace(/^\*\*|\*\* $/g, '') : '';
+  dcComposerSync();
+  if (!setup) return;
+  const box = document.getElementById('dcSetup');
+  if (box.childElementCount) return;
+  // ข้อความคงที่ของเราเอง ไม่มีอะไรจาก Discord — ใช้ HTML ได้
+  box.innerHTML =
+    '<div class="card" style="max-width:760px;">' +
+      '<h3>ยังไม่ได้เชื่อมห้อง Discord ของทีมงาน</h3>' +
+      '<p>หน้านี้จะแสดงห้อง <strong>🪴｜staff-only</strong> ในเซิร์ฟเวอร์ Discord ของร้าน ให้ทีมงานอ่านและตอบได้จากคอนโซล ' +
+        'ข้อความที่ส่งจากที่นี่ขึ้นในนามบอทของร้าน พร้อมชื่อคนส่งนำหน้า หลังเจ้าของร้านตั้งค่าเสร็จ</p>' +
+      '<ol style="padding-left:22px;margin:12px 0;">' +
+        '<li>คัดลอกโทเคนของบอทร้านจาก Railway → บริการของบอท → <strong>Variables</strong> → <code>DISCORD_TOKEN</code></li>' +
+        '<li>ใส่เป็น <code>DISCORD_BOT_TOKEN</code> ใน Supabase → Edge Functions → Secrets</li>' +
+        '<li>ติดตั้งฟังก์ชัน <code>discord</code> (วางไฟล์ <code>discord-index.ts</code> · ปิด JWT verification)</li>' +
+        '<li>ตรวจว่าบอทมีสิทธิ์ <strong>Read Message History</strong> และ <strong>Send Messages</strong> ในห้อง staff-only</li>' +
+      '</ol>' +
+      '<p class="hint">ขั้นตอนละเอียดอยู่ในคู่มือ <code>docs/STAFF-HOME.md</code> ขั้นที่ 8 ของรีโประบบฐานข้อมูล · พนักงานไม่ต้องทำอะไร แจ้งเจ้าของร้านได้เลย</p>' +
+      '<button class="btn" type="button" style="margin-top:12px;" onclick="dcStatus()">ตรวจสอบอีกครั้ง</button>' +
+    '</div>';
+}
+function dcRenderNote() {
+  const box = document.getElementById('dcNote');
+  box.replaceChildren();
+  document.getElementById('dcState').textContent = dc.error ? 'ลองใหม่เองทุก 1 นาที' : 'อัปเดตเองทุก 10 วินาที';
+  if (!dc.error) return;
+  const a = dcEl('div', 'alert alert-red', dc.error + ' ');
+  a.setAttribute('role', 'alert');
+  a.style.margin = '12px 18px 0';
+  const b = dcEl('button', 'btn btn-sm', 'ลองอีกครั้ง');
+  b.type = 'button';
+  b.onclick = () => dcPoll('latest');
+  a.append(b);
+  box.append(a);
+}
+
+// ---- ตอบกลับ · ช่องพิมพ์ ----
+function dcReply(id) {
+  const m = dc.msgs.find(x => x.id === id);
+  if (!m || m.system) return;
+  const v = dcView(m);
+  dc.replyTo = { id: m.id, name: v.name, snippet: (v.text || (m.attachments.length ? '[ไฟล์แนบ]' : '')).replace(/\s+/g, ' ').slice(0, 120) };
+  dcRenderReplying();
+  document.getElementById('dcInput').focus();
+}
+function dcCancelReply() { dc.replyTo = null; dcRenderReplying(); }
+function dcRenderReplying() {
+  const box = document.getElementById('dcReplying');
+  box.hidden = !dc.replyTo;
+  box.replaceChildren();
+  if (!dc.replyTo) return;
+  const s = dcEl('span');
+  s.append(dcIcon(DC_ICO_REPLY), document.createTextNode(' กำลังตอบกลับ '), dcEl('strong', null, dc.replyTo.name), document.createTextNode(' — ' + dc.replyTo.snippet));
+  const b = dcEl('button', 'btn btn-sm btn-ghost', 'ยกเลิก (Esc)');
+  b.type = 'button';
+  b.onclick = () => { dcCancelReply(); document.getElementById('dcInput').focus(); };
+  box.append(s, b);
+}
+function dcComposerSync() {
+  const t = document.getElementById('dcInput');
+  if (t.offsetParent) {                                      // ซ่อนอยู่ = scrollHeight เป็น 0 อย่าไปย่อช่องเหลือ 2px
+    t.style.height = 'auto';
+    t.style.height = Math.min(168, t.scrollHeight + 2) + 'px';
+  }
+  const room = dc.max - dcSendLength(t.value), c = document.getElementById('dcCount');
+  c.hidden = room > 200;                                     // นับให้เห็นเฉพาะตอนใกล้เพดาน
+  c.classList.toggle('over', room < 0);
+  c.textContent = room < 0 ? 'เกิน ' + (-room).toLocaleString('th-TH') + ' ตัวอักษร' : 'เหลือ ' + room.toLocaleString('th-TH') + ' ตัวอักษร';
+  document.getElementById('dcSendBtn').disabled = dc.sending || room < 0 || !t.value.trim() || dc.state !== 'live';
+}
+async function dcSend() {
+  const t = document.getElementById('dcInput'), text = t.value.trim();
+  if (dc.sending || !text || dc.state !== 'live') return;
+  const over = dcSendLength(text) - dc.max;
+  if (over > 0) { showToast('⚠️ ข้อความยาวเกินที่ Discord รับ ' + over + ' ตัวอักษร — ตัดให้สั้นลงก่อนส่ง'); return; }
+  dc.sending = true;
+  t.readOnly = true;
+  t.setAttribute('aria-busy', 'true');
+  dcComposerSync();
+  const gen = dc.gen, reply = dc.replyTo;
+  const r = await callFn('discord', Object.assign({ action: 'send', content: text }, reply ? { reply_to: reply.id } : {}));
+  if (gen !== dc.gen) return;
+  dc.sending = false;
+  t.readOnly = false;
+  t.removeAttribute('aria-busy');
+  if (r.error) {
+    // ข้อความที่พิมพ์ไว้ยังอยู่ในช่องครบ — แก้แล้วกดส่งใหม่ได้
+    dc.error = 'ส่งข้อความไม่สำเร็จ: ' + (r.error.message || 'ไม่ทราบสาเหตุ');
+    dcRenderNote();
+    showToast('⚠️ ส่งเข้า Discord ไม่สำเร็จ — ข้อความยังอยู่ในช่องพิมพ์');
+    dcComposerSync();
+    return;
+  }
+  t.value = '';
+  dc.error = '';
+  dcCancelReply();
+  dcRenderNote();
+  dcComposerSync();
+  if (r.message) {
+    const added = dcMerge([r.message]);
+    if (current === 'discord') { if (added.length) dcAppend(added); document.getElementById('dcLog').scrollTop = 1e9; }
+    dcMarkSeen();
+  }
+  t.focus();
+}
+(function () {
+  const t = document.getElementById('dcInput'), log = document.getElementById('dcLog');
+  t.addEventListener('input', dcComposerSync);
+  t.addEventListener('keydown', e => {
+    // ตัวที่ฟังตอน capture (เครื่องยิงบาร์โค้ด) หยุด Enter ของการยิงไว้ก่อนถึงตรงนี้แล้ว — Enter ที่มาถึงคือคนกด
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); dcSend(); return; }
+    if (e.key === 'Escape' && dc.replyTo) { e.preventDefault(); e.stopPropagation(); dcCancelReply(); }
+  });
+  log.addEventListener('click', e => {
+    const b = e.target.closest('button[data-reply]');
+    if (b) { dcReply(b.dataset.reply); return; }
+    const q = e.target.closest('button[data-ref]');
+    if (q) {
+      const row = log.querySelector('.dc-msg[data-id="' + q.dataset.ref + '"]');
+      if (!row) { showToast('ข้อความต้นทางเก่ากว่าที่โหลดไว้ — เลื่อนขึ้นเพื่อโหลดข้อความเก่ากว่า'); return; }
+      row.scrollIntoView({ block: 'center' });
+      row.focus({ preventScroll: true });
+    }
+  });
+  // คีย์บอร์ด: ↑ ↓ เลือกข้อความ · R / Enter ตอบกลับ (R อ่านจาก event.code — แป้นไทยกดได้)
+  log.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || isField(e.target)) return;
+    const rows = [...log.querySelectorAll('.dc-msg')];
+    const at = rows.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!rows.length) return;
+      e.preventDefault();
+      const i = at === -1 ? rows.length - 1 : Math.max(0, Math.min(rows.length - 1, at + (e.key === 'ArrowDown' ? 1 : -1)));
+      rows[i].focus();
+      if (i === 0 && e.key === 'ArrowUp') dcLoadOlder();
+    } else if (at !== -1 && (e.code === 'KeyR' || e.key === 'Enter') && e.target === rows[at]) {
+      e.preventDefault();
+      dcReply(rows[at].dataset.id);
+    }
+  });
+  log.addEventListener('scroll', () => { if (log.scrollTop < 80) dcLoadOlder(); }, { passive: true });
+})();
+
+// ---------------------------------------------------------------------------
 // ปฏิทิน — ชั้นปฏิทินร้าน (calendar_events) · ชั้น Google (อ่านอย่างเดียว ผ่าน gcal) · ชั้นการจองห้อง
 // ---------------------------------------------------------------------------
 function calRange() {
@@ -9141,12 +9817,15 @@ function wedgeRoute() {
   // ผนังสต็อก: โหมดรับเข้า/นับ ยิงแล้วเข้าถาด · โหมดหา ยิงแล้วกระโดดไปรุ่นนั้น
   if (current === 'products') return wall.mode === 'find' ? 'search' : wall.mode;
   // หน้าแรกคือหน้าที่เปิดค้างไว้หน้าเคาน์เตอร์ — ยิงแล้วพาไปหาสินค้าเลย ไม่ต้องบอกให้เปลี่ยนหมวดก่อน
-  if (current === 'moves' || current === 'home') return 'search';
+  // ห้อง Discord: ช่องพิมพ์ข้อความโฟกัสอยู่เกือบตลอด — การยิงต้องไม่กลายเป็นข้อความที่ส่งเข้าห้อง
+  // ไปหาสินค้าแทน (เหมือนหน้าแรก) · Enter ของการยิงถูกหยุดตอน capture ไม่ถึงตัวส่งของช่องพิมพ์ · wedgeRestore คืนข้อความเดิมในช่อง
+  if (current === 'moves' || current === 'home' || current === 'discord') return 'search';
   return 'wrongpage';
 }
 
 async function onWedgeScan(value) {
   calcUndoScan();                             // ตัวอักษรของการยิงที่หล่นเข้าเครื่องคิดเลข — คืนสถานะเดิมทั้งก้อน แล้วส่งต่อตามหมวดเหมือนเดิม
+  dcComposerSync();                           // ช่องพิมพ์ Discord ถูกคืนค่าเดิมแล้ว (wedgeRestore) — ตัวนับ/ความสูงตามให้ตรง
   const purpose = wedgeRoute();
   if (!purpose) return;                       // ยังไม่ได้ล็อกอิน เงียบไว้
   if (purpose === 'blocked') { showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง'); return; }

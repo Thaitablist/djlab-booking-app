@@ -37,6 +37,7 @@ colors:
   launcher-receive: "#00897B"
   launcher-register: "#7986CB"
   launcher-payqr: "#33B679"
+  launcher-discord: "#455A64"
 typography:
   display:
     fontFamily: "Prompt, Noto Sans Thai, sans-serif"
@@ -298,7 +299,7 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 - **Drawer head:** opening a calendar item tints the drawer head with that item's colour (teacher, category or bookings layer) and measured white/black ink. Every other drawer keeps the `head` paper.
 - **Google layer:** read-only Google Calendar events use the owner's pick from Google's own 11-colour menu (Tomato #D50000 · Flamingo #E67C73 · Tangerine #F4511E · Banana #F6BF26 · Sage #33B679 · Basil #0B8043 · Peacock #039BE5 · Blueberry #3F51B5 · Lavender #7986CB · Grape #8E24AA · Graphite #616161), defaulting to Peacock (`cal-google-default`).
 - **Teacher colours:** Google events whose title ends in " — <teacher>" take that teacher's colour. The owner can change these; the defaults are Zlex #C2185B · Leonie #00897B · Nutty #F6BF26 · TiBass #6D4C41 · Maniac #C0CA33 · Alldayz #00ACC1. The teacher's name is always shown as text too.
-- **Launcher tiles:** per-item colours come from the launcher catalogue (ขายหน้าร้าน uses Signal Red; the rest reuse calendar and Google hues: สินค้ารับเข้า teal `launcher-receive`, สร้างลิงก์สมัครสมาชิก lavender `launcher-register`, QR รับเงิน sage `launcher-payqr`).
+- **Launcher tiles:** per-item colours come from the launcher catalogue (ขายหน้าร้าน uses Signal Red; the rest reuse calendar and Google hues: สินค้ารับเข้า teal `launcher-receive`, สร้างลิงก์สมัครสมาชิก lavender `launcher-register`, QR รับเงิน sage `launcher-payqr`). Discord uses a neutral blue-grey (`launcher-discord`) with a drawn chat glyph; never Discord's own blurple or logo.
 - **QR codes:** always pure black modules on pure white with a 4-module quiet zone, whatever the theme. They are data, not decoration.
 
 ### Named Rules
@@ -420,6 +421,9 @@ A square black 52px button at the bottom-right (Alt+K) opens a non-modal 320px p
 
 ### QR รับเงิน (payment QR)
 A dialog with two modes in a segmented control: **พร้อมเพย์ — ใส่ยอด** (amount field + a 340px black-on-white QR inside a 2px black frame, the amount in Prompt 34px, the display name, and the PromptPay ID masked to its last four digits) and **QR บัญชีของร้าน** (pick a labelled account, show its uploaded image). Unconfigured modes show a dashed setup panel, never an error. The POS payment card has a full-width "QR พร้อมเพย์ — ยอดบิลนี้" button.
+
+### Discord room (desk `#discord`)
+One full-height panel: a header-B head with the channel name, a scrolling message list (oldest at top, newest at bottom, day rules, a red "ข้อความใหม่" rule above the first unread), and a composer docked under a 2px black rule, kept 84px above the bottom so the calculator corner stays clear. Messages are square 36px avatars, Prompt 16px names, Thai 24-hour times in `text2`, and text capped at 75ch. Consecutive messages from one author within 7 minutes group under one name. Console posts read "Name · ผ่านคอนโซล". Image attachments are framed white tiles (max 320×220) and other files are bordered chips. The reply action appears on hover or focus; the selected message gets the 3px black inset edge.
 
 ### Launcher (home)
 2 × 2 app-icon tiles: coloured 84px rounded tiles (the One Curve exception), 2.4-stroke glyphs with ink chosen at ≥3:1, a Prompt 16px label, and a round red count badge with a 2px white ring. With reduced motion there is no lift.
