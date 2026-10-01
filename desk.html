@@ -26,7 +26,9 @@
     --line-strong: #CFCCC3;
     --text: #0F0F0F;
     --text2: #5B5953;
-    --text3: #807D75;
+    --text3: #6E6B64;        /* ข้อความจาง — ≥ 4.5:1 บนขาว (5.3) · surface2 (5.1) · sel (4.6) · bg (4.8) */
+    --ash: #807D75;          /* เส้นลายแทนรูป/ขีดที่ไม่ใช่ตัวหนังสือ (4.1:1 บนขาว — ห้ามใช้กับข้อความ) */
+    --head: #E3DFD5;         /* พื้นหัวแผง/หัวตาราง (เจ้าของเลือกแบบ B · 1 ต.ค. 69) — text2 บนพื้นนี้ 5.3:1 */
     --ok: #1F6B3A;
     --ok-soft: #E8F2EB;
     --warn: #8A5A00;
@@ -54,9 +56,12 @@
   /* ---------- โครงหน้า ---------- */
   .app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; min-width: 1200px; }
   .sidebar { background: var(--black); color: #fff; display: flex; flex-direction: column; overflow-y: auto; }
-  .brand { padding: 20px 20px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #262626; }
+  /* โลโก้ทางการ (ตัวอักษรขาวทำมาสำหรับพื้นมืด) + คำว่า Console — เจ้าของสั่งแทนกล่องแดง "DJ LAB" (1 ต.ค. 69)
+     ต้นฉบับ: WEBSITE DJ LAB/logo_full.png (ใช้บน djlabsiam.com อยู่แล้ว) ตัดขอบแล้วย่อ 1×/2× */
+  .brand { padding: 18px 20px 16px; display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid #262626; }
+  .brand-logo { display: block; width: 122px; height: 40px; flex-shrink: 0; }
+  .brand-console { font-family: var(--font-head); font-weight: 600; font-size: 19px; line-height: 1; color: #fff; letter-spacing: .01em; padding-bottom: 1px; }
   .brand-box { background: var(--red); color: #fff; font-family: var(--font-head); font-weight: 700; font-size: 14px; padding: 4px 8px; letter-spacing: .5px; }
-  .brand-text { font-family: var(--font-head); font-weight: 600; font-size: 16px; }
   .nav-group { padding: 16px 12px 4px; }
   .nav-group-title { font-size: 14px; color: #9A978F; padding: 0 8px 6px; letter-spacing: .3px; }
   .nav-item {
@@ -66,7 +71,9 @@
   }
   .nav-item:hover { background: #1C1C1C; }
   .nav-item.active { background: #1F1F1F; border-left-color: var(--red); color: #fff; font-weight: 600; }
-  .nav-item .ico { width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-item .ico { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: #CFCCC3; }
+  .nav-item .ico .ico-svg { width: 18px; height: 18px; }
+  .nav-item:hover .ico, .nav-item.active .ico { color: #fff; }
   .nav-item .lbl { flex: 1; }
   .nav-item .kbd { font-size: 14px; color: #8A877F; }
   .nav-item .soon { font-size: 14px; color: #8A877F; }
@@ -78,7 +85,7 @@
   .main { display: flex; flex-direction: column; min-width: 0; height: 100vh; }
   .topbar {
     display: flex; align-items: center; gap: 20px; padding: 14px 28px;
-    background: var(--surface); border-bottom: 1px solid var(--line);
+    background: var(--surface); border-bottom: 2px solid var(--black);
   }
   .topbar h1 { font-size: 20px; flex-shrink: 0; min-width: 200px; }
   #backBtn:disabled { opacity: .4; }
@@ -102,7 +109,13 @@
     width: 420px; flex-shrink: 0; background: var(--surface); border-left: 1px solid var(--line);
     overflow-y: auto; box-shadow: -8px 0 24px rgba(15,15,15,.04);
   }
-  .detail-head { position: sticky; top: 0; background: var(--surface); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 24px 14px; border-bottom: 1px solid var(--line); z-index: 1; }
+  .detail-head { position: sticky; top: 0; background: var(--head); color: var(--text); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 24px 14px; border-bottom: 2px solid var(--black); z-index: 1; }
+  /* หัวแผงของกิจกรรมในปฏิทิน = สีของสิ่งที่เปิด (อาจารย์ · หมวด · การจองห้อง) · ตัวอักษรขาว/ดำจาก chipColors() ≥ 4.5:1 */
+  .detail-head.tinted { background: var(--dh-bg); color: var(--dh-ink); }
+  .detail-head.tinted .btn { color: inherit; }
+  .detail-head.tinted .btn:hover { background: color-mix(in srgb, currentColor 16%, transparent); }
+  .detail-head.tinted kbd { background: transparent; color: inherit; border-color: currentColor; }
+  .detail-head.tinted :focus-visible { outline-color: currentColor; }
   .detail-head h2 { font-size: 18px; }
   .detail-body { padding: 18px 24px 32px; }
 
@@ -153,7 +166,7 @@
   .tablewrap { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); overflow: auto; max-height: calc(100vh - 290px); }
   .tablewrap:focus-visible { outline-offset: 0; }
   table.data { width: 100%; border-collapse: collapse; font-size: 15px; }
-  table.data th { position: sticky; top: 0; background: var(--surface2); z-index: 1; text-align: left; font-weight: 600; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--line-strong); padding: 0; white-space: nowrap; }
+  table.data th { position: sticky; top: 0; background: var(--head); z-index: 1; text-align: left; font-weight: 600; font-size: 14px; color: var(--text2); border-bottom: 2px solid var(--black); padding: 0; white-space: nowrap; }
   table.data th .th { display: block; width: 100%; text-align: inherit; background: none; border: 0; padding: 10px 14px; cursor: pointer; font-weight: 600; color: inherit; }
   table.data th .th:hover { color: var(--text); background: var(--sel); }
   table.data th.num, table.data td.num { text-align: right; }
@@ -187,9 +200,9 @@
   .badges { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 
-  .alert { padding: 10px 14px; border-left: 3px solid; font-size: 14px; margin-bottom: 14px; }
-  .alert-red { background: var(--red-soft); border-color: var(--red); color: #8A0012; }
-  .alert-warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .alert { padding: 10px 14px; border: 1px solid; font-size: 14px; margin-bottom: 14px; }   /* กรอบ 1px รอบตัว (ไม่ใช้แถบสีข้างซ้าย) — ชุดเดียวกับ stock.html */
+  .alert-red { background: var(--red-soft); border-color: #F0B8C1; color: #8A0012; }
+  .alert-warn { background: var(--warn-soft); border-color: #E8D1A0; color: var(--warn); }
   .alert-plain { background: var(--surface2); border-color: var(--line-strong); color: var(--text2); }
 
   /* POS */
@@ -207,7 +220,7 @@
   .serial button { border: 0; background: none; cursor: pointer; padding: 2px 8px; font-size: 14px; }
   .sum-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
   .sum-net { font-family: var(--font-head); font-size: 24px; font-weight: 600; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
-  .chip { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line-strong); padding: 8px 12px; background: var(--surface2); }
+  .cust-box { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line-strong); padding: 8px 12px; background: var(--surface2); }
 
   /* หน้าต่างซ้อน (dialog ของเบราว์เซอร์ — Esc ปิดได้ในตัว) */
   /* margin:auto คืนการจัดกลางของ dialog ที่ * { margin: 0 } ด้านบนลบทิ้ง (ทุกหน้าต่างเคยไปติดมุมซ้ายบน) */
@@ -270,7 +283,7 @@
   .tlist button:hover { background: var(--sel); }
   .tlist button.active { border-left-color: var(--black); background: var(--sel); font-weight: 600; }
   .tlist .mode { color: var(--text2); }
-  .colname { display: block; font-size: 14px; font-weight: 400; color: var(--text3); }
+  .colname { display: block; font-size: 14px; font-weight: 400; color: var(--text2); }   /* อยู่บนหัวตาราง (--head) — text3 ได้แค่ 4:1 */
   table.data th .colname { font-weight: 400; }
   .ro { background: var(--surface2); border: 1px solid var(--line); padding: 8px 12px; min-height: 40px; word-break: break-word; }
 
@@ -335,7 +348,7 @@
   .home-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 22px; align-items: start; }
   .content.has-detail .home-grid { grid-template-columns: 1fr; }
   .panel { background: var(--surface); border: 1px solid var(--line); margin-bottom: 22px; }
-  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: var(--head); border-bottom: 2px solid var(--black); }
   .panel-head h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; }
   .panel-body { padding: 6px 18px 12px; }
   .row-link { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line);
@@ -446,7 +459,7 @@
 
   /* ปฏิทิน */
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--surface); }
-  .cal-grid .dow { font-size: 14px; color: var(--text2); padding: 6px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface2); }
+  .cal-grid .dow { font-size: 14px; color: var(--text2); padding: 6px 8px; border-right: 1px solid var(--line); border-bottom: 2px solid var(--black); background: var(--head); }
   .cal-cell { min-height: 118px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px; min-width: 0; }
   .cal-cell.out { background: var(--surface2); }
   .cal-cell.out .cal-day { color: var(--text3); }
@@ -488,7 +501,7 @@
   .mail-tab.missing { color: var(--text3); }
   .mail-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
   .mail-reader { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-height: 300px; }
-  .mail-reader .mr-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .mail-reader .mr-head { padding: 16px 20px; background: var(--head); border-bottom: 2px solid var(--black); }
   .mail-reader .mr-head h2 { font-size: 18px; margin-bottom: 6px; word-break: break-word; }
   .mail-reader iframe { display: block; width: 100%; height: calc(100vh - 430px); min-height: 320px; border: 0; background: #fff; }
   .lbl-toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; color: var(--text2); }
@@ -567,7 +580,7 @@
   .wall-step.next { right: -27px; }
   .wall-step:hover { background: #2A2A2A; }
   .wall-step .ico-svg { width: 18px; height: 18px; stroke-width: 2; }
-  .wing-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 14px 10px; border-bottom: 3px solid var(--black); flex-shrink: 0; }
+  .wing-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 14px 10px; background: var(--head); border-bottom: 3px solid var(--black); flex-shrink: 0; }
   .wing-h h2 { font-size: 19px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wing-h span { font-size: 14px; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .wing-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--surface2); }
@@ -589,7 +602,7 @@
   /* กระเบื้องรูป: พื้นขาว ขอบบาง ระยะในเท่ากันทุกรูป — รูปพื้นมืดจึงอ่านเป็นภาพในกรอบ ไม่ใช่รูโหว่บนผนัง */
   .ph { width: 76px; height: 57px; padding: 4px; background: var(--surface); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
   .ph img { width: 100%; height: 100%; object-fit: contain; }
-  .sil { width: 100%; height: 100%; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+  .sil { width: 100%; height: 100%; stroke: var(--ash); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   /* ช่องเพิ่มรูป (เจ้าของร้าน/ผู้ดูแล): ปกติเงียบเหมือนช่องว่าง — 100+ รุ่นที่ยังไม่มีรูปจะไม่กลายเป็นปุ่มเต็มผนัง
      ชี้/เลือกแถวแล้วค่อยกลายเป็นปุ่ม "+ เพิ่มรูป" */
@@ -621,7 +634,7 @@
   /* ถาดล่าง — รับเข้า / นับ: ผนังหดขึ้นให้ ไม่ลอยทับ */
   .tray { flex: 0 0 clamp(250px, 34vh, 330px); display: flex; flex-direction: column; min-height: 0; background: var(--surface);
     border: 2px solid var(--black); box-shadow: 0 -4px 18px rgba(15,15,15,.08); }
-  .tray-h { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap; }
+  .tray-h { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--head); border-bottom: 2px solid var(--black); flex-shrink: 0; flex-wrap: wrap; }
   .tray-h h2 { font-size: 18px; font-weight: 700; }
   /* ข้อความล่าสุด + ปุ่ม เป็นก้อนเดียวชิดขวา — แถบหัวแคบแล้วทั้งก้อนลงบรรทัดใหม่ด้วยกัน ไม่แตกกลางก้อน */
   .tray-acts { display: flex; align-items: center; gap: 12px; margin-left: auto; }
@@ -663,7 +676,7 @@
   .stepbtn .ico-svg { width: 16px; height: 16px; }
   .tray-count .tray-b { flex-direction: column; gap: 0; overflow-x: hidden; overflow-y: auto; padding-top: 0; }
   .c-line { display: grid; grid-template-columns: 60px minmax(0, 1fr) 96px 150px 150px; gap: 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
-  .c-head { position: sticky; top: 0; z-index: 1; background: var(--surface); font-size: 14px; font-weight: 600; color: var(--text2); padding: 10px 0 6px; }
+  .c-head { position: sticky; top: 0; z-index: 1; background: var(--head); font-size: 14px; font-weight: 600; color: var(--text2); padding: 10px 14px 6px; margin: 0 -14px; border-bottom: 2px solid var(--black); }
   .c-line .ph { width: 60px; height: 45px; }
   .c-name { font-family: var(--font-head); font-weight: 600; font-size: 15px; min-width: 0; }
   .c-miss { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text2); margin-top: 2px; }
@@ -714,6 +727,75 @@
   .sn.reserved { background: var(--warn-soft); border-color: #E8D1A0; color: var(--warn); }
   .sn.hit { background: var(--black); border-color: var(--black); color: #fff; }
 
+
+  /* ---------- เครื่องคิดเลขลอย (ทุกหมวด · มุมขวาล่าง) ----------
+     ปุ่มเหลี่ยม (กฎมุมเหลี่ยม — ข้อยกเว้นมีแค่ไอคอนลัด) · มุมนี้ "จองไว้" — หน้าต่างวิดีโอลอยหลบ (clampMini)
+     แผงไม่ใช่ <dialog>: เปิดค้างไว้แล้วยังยิงบาร์โค้ดเข้าหมวดที่เปิดอยู่ได้ (wedgeRoute ปฏิเสธเฉพาะ dialog) */
+  .calc-btn { position: fixed; right: 20px; bottom: 20px; z-index: 820; width: 52px; height: 52px; display: inline-flex; align-items: center; justify-content: center;
+    border: 0; background: var(--black); color: #fff; cursor: pointer; box-shadow: 0 6px 18px rgba(15,15,15,.28); }
+  .calc-btn .ico-svg { width: 24px; height: 24px; }
+  .calc-btn:hover { background: #2A2A2A; }
+  .calc-btn[aria-expanded="true"] { background: var(--surface); color: var(--black); box-shadow: inset 0 0 0 2px var(--black), 0 6px 18px rgba(15,15,15,.28); }
+  .calc-btn:focus-visible { outline: 2px solid var(--black); outline-offset: 3px; }
+  .calc { position: fixed; right: 20px; bottom: 84px; z-index: 820; width: 320px; background: var(--surface); border: 2px solid var(--black);
+    box-shadow: 0 12px 40px rgba(15,15,15,.3); display: flex; flex-direction: column; }
+  .calc:focus { outline: none; }
+  .calc:focus-visible { outline: 3px solid rgba(15,15,15,.25); outline-offset: 2px; }
+  .calc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 14px; background: var(--head); border-bottom: 2px solid var(--black); }
+  .calc-head h2 { font-size: 16px; }
+  .calc-screen { padding: 10px 14px 12px; text-align: right; border-bottom: 1px solid var(--line); min-height: 94px; }
+  .calc-expr { font-size: 15px; color: var(--text2); min-height: 23px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  .calc-out { font-family: var(--font-head); font-weight: 600; font-size: 34px; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .calc-out.preview { color: var(--text2); }
+  .calc-out.err { font-family: var(--font-body); font-size: 17px; font-weight: 700; color: #8A0012; padding-top: 6px; }
+  .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+  .calc-keys button { min-height: 48px; border: 0; background: var(--surface); font-family: var(--font-head); font-weight: 600; font-size: 20px; cursor: pointer; color: var(--text);
+    font-variant-numeric: tabular-nums; }
+  .calc-keys button:hover { background: var(--sel); }
+  .calc-keys .op { background: var(--surface2); font-family: var(--font-body); font-size: 24px; font-weight: 500; }   /* Prompt วาด ÷ × − + ตัวเล็กมาก */
+  .calc-keys .fn { font-size: 16px; }
+  .calc-keys [data-k="±"] { font-family: var(--font-body); font-size: 22px; font-weight: 500; }
+  .calc-keys .eq { background: var(--black); color: #fff; }
+  .calc-keys .eq:hover { background: #2A2A2A; }
+  .calc-keys button:focus-visible { outline: 2px solid var(--black); outline-offset: -4px; }
+  .calc-keys .eq:focus-visible { outline-color: #fff; }
+  .calc-foot { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+  .calc-hist { padding: 0 12px 10px; }
+  .calc-hist h3 { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 2px; font-family: var(--font-body); }
+  .calc-h { display: flex; justify-content: space-between; gap: 10px; width: 100%; border: 0; border-top: 1px solid var(--line); background: none; padding: 4px 2px;
+    font-size: 14px; cursor: pointer; text-align: left; font-variant-numeric: tabular-nums; }
+  .calc-h:hover { background: var(--surface2); }
+  .calc-h span:first-child { color: var(--text2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .calc-h b { font-family: var(--font-head); font-weight: 600; white-space: nowrap; }
+  /* พื้นที่ทำงานเลื่อนลงจนสุดแล้ว เนื้อหาบรรทัดท้ายต้องโผล่พ้นปุ่มเครื่องคิดเลข */
+  .workspace { padding-bottom: 96px; }
+  .detail-body { padding-bottom: 88px; }
+  .wing-b::after, .tray-b::after { content: ''; display: block; flex: none; width: 1px; height: 56px; }
+  .tray-b::after { height: 1px; width: 64px; }
+  .tray-count .tray-b::after { width: 1px; height: 56px; }
+
+  /* ---------- QR รับเงิน ---------- */
+  .pay-modes { margin-bottom: 16px; }
+  .pay-modes button { min-height: 40px; }
+  .pay-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .pay-stage { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 2px solid var(--black); padding: 16px 16px 14px; text-align: center; }
+  .qr-svg { display: block; width: 340px; height: 340px; max-width: 100%; }
+  .pay-img { display: block; width: 340px; height: 340px; object-fit: contain; background: #fff; }
+  .pay-amount { font-family: var(--font-head); font-weight: 700; font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .pay-amount.none { font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text2); }
+  .pay-name { font-family: var(--font-head); font-weight: 600; font-size: 19px; }
+  .pay-meta { font-size: 14px; color: var(--text2); }
+  .pay-amt-in { font-family: var(--font-head); font-size: 26px; min-height: 54px; text-align: right; font-variant-numeric: tabular-nums; }
+  .pay-pick { display: flex; flex-direction: column; gap: 6px; }
+  .pay-pick button { text-align: left; justify-content: flex-start; white-space: normal; }
+  .pay-pick button[aria-pressed="true"] { background: var(--black); color: #fff; }
+  .pay-setup { border: 1px dashed var(--line-strong); background: var(--surface2); padding: 18px 20px; }
+  .pay-setup h3 { font-size: 17px; margin-bottom: 6px; }
+  .pq-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .pq-thumb { width: 56px; height: 56px; border: 1px solid var(--line); background: #fff; flex: none; display: flex; }
+  .pq-thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .pq-row .t { flex: 1; min-width: 0; font-weight: 600; }
+
   @media (prefers-reduced-motion: reduce) {
     /* ไม่มีอะไรเลื่อนหรือเด้ง — สถานะยังบอกด้วยข้อความและสีเหมือนเดิมครบ */
     .lt, .lt-icon, .ev, .player-body { transition: none !important; }
@@ -723,7 +805,7 @@
 
   .print-only { display: none; }
   @media print {
-    .sidebar, .topbar, .detail, .no-print, .toast, #fatalError { display: none !important; }
+    .sidebar, .topbar, .detail, .no-print, .toast, #fatalError, .calc-btn, .calc { display: none !important; }
     .app { display: block; height: auto; min-width: 0; }
     .main, .content, .workspace { display: block; height: auto; overflow: visible; padding: 0; }
     .split { display: block; }
@@ -739,7 +821,7 @@
 
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px);
-    background: var(--black); color: #fff; padding: 12px 20px; font-size: 15px; border-left: 3px solid var(--red);
+    background: var(--black); color: #fff; padding: 12px 20px; font-size: 15px;
     z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; max-width: 640px; box-shadow: var(--shadow);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -770,7 +852,7 @@
 
 <div class="app">
   <nav class="sidebar" aria-label="เมนูหลัก">
-    <div class="brand"><span class="brand-box">DJ LAB</span><span class="brand-text">คอนโซลร้าน</span></div>
+    <div class="brand"><img class="brand-logo" src="logo-full-dark.png" srcset="logo-full-dark.png 1x, logo-full-dark@2x.png 2x" width="122" height="40" alt="DJ LAB SIAM"><span class="brand-console" lang="en">Console</span></div>
     <div id="navList"></div>
     <div class="sidebar-foot">
       <button type="button" onclick="openHelp()" title="คีย์ลัดทั้งหมด (?)"><kbd>?</kbd> ดูคีย์ลัดทั้งหมด</button>
@@ -962,7 +1044,7 @@
             <label class="chk"><input type="checkbox" id="layerGoogle" checked onchange="toggleLayer('google', this.checked)"> Google Calendar</label>
             <label class="chk"><input type="checkbox" id="layerRooms" onchange="toggleLayer('rooms', this.checked)"> การจองห้องซ้อม</label>
             <span style="flex:1;"></span>
-            <button class="btn btn-sm" id="gcalSetupBtn" type="button" onclick="openGcalSettings()" hidden>ตั้งค่า Google Calendar</button>
+            <button class="btn btn-sm" id="gcalSetupBtn" type="button" onclick="openGcalSettings()" hidden>ตั้งค่าสีปฏิทิน</button>
             <button class="btn btn-primary" type="button" onclick="openEventForm(null)">+ เพิ่มกิจกรรม</button>
           </div>
           <div id="calNote"></div>
@@ -1130,6 +1212,8 @@
                 <textarea id="saleNoteInput" class="input" rows="2" placeholder="ไม่บังคับ เช่น ลูกค้าขอใบกำกับภาษี"></textarea>
               </div>
               <div id="cartSummary"></div>
+              <button class="btn btn-block" id="posPayQrBtn" type="button" style="margin-top:12px;" onclick="openPayQr('promptpay', cartTotals().net)"
+                      title="เปิด QR พร้อมเพย์ที่ใส่ยอดสุทธิของบิลนี้ให้แล้ว">QR พร้อมเพย์ — ยอดบิลนี้</button>
               <button class="btn btn-accent btn-block" id="saveSaleBtn" type="button" onclick="submitSale()" style="margin-top:16px;min-height:48px;"
                       title="บันทึกการขาย (F9 หรือ Ctrl+Enter)">บันทึกการขาย <kbd style="background:transparent;color:#fff;border-color:rgba(255,255,255,.5);">F9</kbd></button>
             </div>
@@ -1463,6 +1547,7 @@
       <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน · เลื่อนเดือน/สัปดาห์ในปฏิทิน</span>
       <span><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd></span><span>กลับไปหมวดก่อนหน้า / ไปข้างหน้า (เหมือนปุ่ม ← ย้อนกลับ บนแถบบน และปุ่มย้อนของเมาส์)</span>
       <span><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> (ที่แถบหน้าต่างวิดีโอ)</span><span>ย้ายหน้าต่างวิดีโอทีละ 20px · <kbd>Home</kbd> กลับมุมขวาล่าง · ลากด้วยเมาส์ก็ได้</span>
+      <span><kbd>Alt</kbd>+<kbd>K</kbd></span><span>เปิด/ปิดเครื่องคิดเลข (ปุ่มดำมุมขวาล่าง) · พิมพ์ตัวเลขจากแป้นได้เลย · <kbd>Enter</kbd> = ผลลัพธ์ · <kbd>Esc</kbd> ปิด · ยิงบาร์โค้ดตอนเครื่องคิดเลขเปิดอยู่ = เข้าหมวดที่เปิดอยู่ตามปกติ ไม่เข้าเครื่องคิดเลข</span>
       <span><kbd>?</kbd></span><span>เปิดหน้านี้</span>
     </div>
     <p class="hint" style="margin-top:14px;">คีย์ลัดไม่ทำงานระหว่างพิมพ์ในช่องกรอก (ยกเว้น Esc, Ctrl+K, F9) และไม่รบกวนเครื่องยิงบาร์โค้ด</p>
@@ -1622,11 +1707,16 @@
   </form>
 </dialog>
 
-<dialog id="gcalDialog" aria-labelledby="gcalTitle">
-  <div class="dlg-head"><h2 id="gcalTitle">เชื่อม Google Calendar (อ่านอย่างเดียว)</h2></div>
+<dialog id="gcalDialog" aria-labelledby="gcalTitle" style="max-width:680px;">
+  <div class="dlg-head"><h2 id="gcalTitle">ตั้งค่าสีปฏิทิน</h2></div>
   <form class="dlg-body" onsubmit="event.preventDefault(); saveGcalSettings();">
     <div class="field">
-      <label class="lbl" for="gsUrl">ที่อยู่ลับในรูปแบบ iCal</label>
+      <span class="lbl" id="gsCatLbl">สีของปฏิทินร้าน — ตามหมวด และชั้นการจองห้องซ้อม</span>
+      <div class="swatches" id="gsCats" role="group" aria-labelledby="gsCatLbl"></div>
+      <div class="hint">ตั้งได้เฉพาะสีของหมวด (ไม่มีสีรายกิจกรรม) · ตัวอย่างข้างช่องคือป้ายจริง — ตัวอักษรขาว/ดำเลือกให้เองให้อ่านชัด ≥ 4.5:1 ถ้าสีกลางเกินไประบบหรี่พื้นลงให้</div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="gsUrl">ปฏิทินหลัก (Google Calendar · อ่านอย่างเดียว) — ที่อยู่ลับในรูปแบบ iCal</label>
       <input type="url" id="gsUrl" class="input" placeholder="https://calendar.google.com/calendar/ical/.../private-.../basic.ics" autocomplete="off">
       <div class="hint">Google Calendar → การตั้งค่าของปฏิทินนั้น → ผสานรวมปฏิทิน → “ที่อยู่ลับในรูปแบบ iCal” · เว้นว่างแล้วบันทึก = เลิกเชื่อม</div>
     </div>
@@ -1721,6 +1811,87 @@
   </form>
 </dialog>
 
+<dialog id="payDialog" aria-labelledby="payTitle" style="max-width:760px;">
+  <div class="dlg-head"><h2 id="payTitle">QR รับเงิน</h2>
+    <button class="btn btn-sm" id="paySetBtn" type="button" onclick="openPaySettings()" hidden>ตั้งค่าการรับเงิน</button></div>
+  <div class="dlg-body">
+    <div class="seg pay-modes" role="group" aria-label="ชนิดของ QR">
+      <button type="button" data-mode="promptpay" aria-pressed="true" onclick="setPayMode('promptpay')">พร้อมเพย์ — ใส่ยอด</button>
+      <button type="button" data-mode="image" aria-pressed="false" onclick="setPayMode('image')">QR บัญชีของร้าน</button>
+    </div>
+    <div id="payBody"></div>
+  </div>
+  <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('payDialog').close()">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="paySetDialog" aria-labelledby="paySetTitle" style="max-width:640px;">
+  <div class="dlg-head"><h2 id="paySetTitle">ตั้งค่าการรับเงิน</h2></div>
+  <form class="dlg-body" onsubmit="event.preventDefault(); savePaySettings();">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="psId">เลขพร้อมเพย์ของร้าน</label>
+        <input type="text" id="psId" class="input" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="เบอร์มือถือ 10 หลัก หรือเลขประจำตัว 13 หลัก" oninput="renderPayIdHint()">
+        <div class="hint" id="psIdHint">เว้นว่าง = ยังไม่ใช้พร้อมเพย์</div></div>
+      <div class="field"><label class="lbl" for="psName">ชื่อที่ขึ้นใต้ QR</label>
+        <input type="text" id="psName" class="input" maxlength="80" placeholder="เช่น ชื่อบัญชีของร้าน"></div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="psModeLbl">เปิดหน้า QR รับเงินมาที่</span>
+      <div class="seg" role="radiogroup" aria-labelledby="psModeLbl" id="psMode">
+        <button type="button" role="radio" data-mode="promptpay" aria-checked="true" onclick="pickPayDefault('promptpay')">พร้อมเพย์ — ใส่ยอด</button>
+        <button type="button" role="radio" data-mode="image" aria-checked="false" onclick="pickPayDefault('image')">QR บัญชีของร้าน</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">รูป QR บัญชีของร้าน (อัปโหลดจากแอปธนาคาร · ทีมงานเปิดให้ลูกค้าสแกนได้ คนนอกเปิดไม่ได้)</span>
+      <div id="psImages"></div>
+      <div class="row2" style="margin-top:10px;">
+        <div><label class="lbl" for="psImgLabel">ชื่อกำกับรูป</label><input type="text" id="psImgLabel" class="input" maxlength="60" placeholder="เช่น กสิกร · บัญชีร้าน"></div>
+        <div><label class="lbl" for="psImgFile">ไฟล์รูป</label><input type="file" id="psImgFile" class="input" accept="image/*"></div>
+      </div>
+      <button class="btn btn-sm" id="psImgBtn" type="button" style="margin-top:8px;" onclick="uploadPayQr()">+ อัปโหลดรูป QR</button>
+    </div>
+    <div class="alert alert-plain">ค่าพวกนี้ทีมงานทุกคนเห็นในหน้า QR รับเงิน (ลูกค้าเห็นอยู่แล้วตอนสแกน) แต่คนนอกที่ไม่ได้ล็อกอินอ่านไม่ได้ · แก้ได้เฉพาะเจ้าของร้าน/ผู้ดูแลระบบ</div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" onclick="document.getElementById('paySetDialog').close()">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="psSaveBtn" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- เครื่องคิดเลขลอย — อยู่นอกทุกหมวด · มุมขวาล่าง (หน้าต่างวิดีโอหลบมุมนี้) -->
+<button class="calc-btn" id="calcBtn" type="button" onclick="toggleCalc(true)" aria-expanded="false" aria-controls="calcPanel"
+        title="เครื่องคิดเลข (Alt+K)" aria-label="เครื่องคิดเลข (Alt+K)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="2.5" width="12" height="15"/><path d="M6.5 5.5h7v3h-7z"/><path d="M7 11.5h.01M10 11.5h.01M13 11.5h.01M7 14.5h.01M10 14.5h.01M13 14.5h.01" stroke-width="2"/></svg></button>
+<div class="calc" id="calcPanel" role="dialog" aria-modal="false" aria-labelledby="calcTitle" tabindex="-1" hidden>
+  <div class="calc-head"><h2 id="calcTitle">เครื่องคิดเลข</h2>
+    <button class="btn btn-sm btn-ghost" type="button" onclick="closeCalc(true)" aria-label="ปิดเครื่องคิดเลข">✕ <kbd>Esc</kbd></button></div>
+  <div class="calc-screen" aria-live="polite">
+    <div class="calc-expr" id="calcExpr"></div>
+    <div class="calc-out" id="calcOut">0</div>
+  </div>
+  <div class="calc-keys" id="calcKeys">
+    <button type="button" class="fn" data-k="AC" title="ล้างทั้งหมด (AC)">AC</button>
+    <button type="button" class="fn" data-k="C" title="ล้างตัวเลขที่กำลังพิมพ์ (Delete)">C</button>
+    <button type="button" class="fn" data-k="⌫" title="ลบทีละตัว (Backspace)" aria-label="ลบทีละตัว">⌫</button>
+    <button type="button" class="op" data-k="÷" aria-label="หาร">÷</button>
+    <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+    <button type="button" class="op" data-k="×" aria-label="คูณ">×</button>
+    <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+    <button type="button" class="op" data-k="−" aria-label="ลบ">−</button>
+    <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+    <button type="button" class="op" data-k="+" aria-label="บวก">+</button>
+    <button type="button" class="fn" data-k="±" title="สลับบวก/ลบของตัวเลขล่าสุด" aria-label="สลับบวกลบ">±</button>
+    <button type="button" data-k="0">0</button>
+    <button type="button" data-k="." aria-label="จุดทศนิยม">.</button>
+    <button type="button" class="fn" data-k="%" title="เปอร์เซ็นต์: 200 + 10% = 220 · 200 × 10% = 20" aria-label="เปอร์เซ็นต์">%</button>
+    <button type="button" class="eq" data-k="=" style="grid-column: 1 / -1;" aria-label="เท่ากับ">= <span style="font-family:var(--font-body);font-size:14px;font-weight:500;">Enter</span></button>
+  </div>
+  <div class="calc-foot">
+    <button class="btn btn-sm" id="calcCopyBtn" type="button" onclick="copyCalc()">คัดลอกผลลัพธ์</button>
+    <span class="hint" style="margin:0;">พิมพ์จากแป้นได้เลย</span>
+  </div>
+  <div class="calc-hist" id="calcHist" hidden></div>
+</div>
+
 <!-- เครื่องเล่น: อยู่นอกทุกหมวด เปลี่ยนหมวดแล้วเสียงไม่หยุด (หน้าคอนโซลเป็นหน้าเดียว ไม่โหลดใหม่) -->
 <div class="player" id="player" hidden role="region" aria-label="เครื่องเล่น">
   <div class="player-bar" id="playerBar" tabindex="0" aria-label="หน้าต่างเครื่องเล่น — ลากเพื่อย้าย หรือใช้ลูกศรย้ายทีละนิด · Home กลับมุมขวาล่าง">
@@ -1792,21 +1963,40 @@ const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold:
 // (activity ตาม activity.html · admin เจ้าของร้านสั่งปิดจากพนักงานในคอนโซล — admin-data.html เดิมไม่ได้กั้น)
 // hash = ชื่อใน URL (#stock, #pos ...) ทำให้ปุ่มย้อนกลับ/เปิดหน้าใหม่แล้วกลับหมวดเดิมได้
 const SECTIONS = [
-  { id: 'home',     hash: 'home',          group: 'พนักงาน',     icon: '⌂', label: 'หน้าแรก', key: 'H' },
-  { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: '✎', label: 'กระดานข้อความ', key: 'B' },
-  { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: '✉', label: 'กล่องจดหมายร้าน', key: 'M' },
-  { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: '▤', label: 'ปฏิทิน', key: 'C' },
-  { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: '▦', label: 'สินค้า', key: '1' },
-  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: '⇅', label: 'รับเข้า / ตัดออก / ปรับยอด', key: '2' },
-  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: '☰', label: 'ประวัติการเคลื่อนไหว', key: '3' },
-  { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: '＋', label: 'ขายหน้าร้าน', key: '4' },
-  { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: '≡', label: 'ประวัติบิล', key: '5' },
-  { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: '◷', label: 'จองห้องซ้อม', key: '6' },
-  { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: '☺', label: 'ข้อมูลลูกค้า', key: '7' },
-  { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: '∑', label: 'สรุปรายวัน', key: '8' },
-  { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: '⌕', label: 'บันทึกการใช้งาน', manager: true, key: '9' },
-  { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: '⚙', label: 'จัดการข้อมูล', manager: true, key: '0' },
+  { id: 'home',     hash: 'home',          group: 'พนักงาน',     icon: 'home', label: 'หน้าแรก', key: 'H' },
+  { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: 'board', label: 'กระดานข้อความ', key: 'B' },
+  { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: 'mail', label: 'กล่องจดหมายร้าน', key: 'M' },
+  { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: 'calendar', label: 'ปฏิทิน', key: 'C' },
+  { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: 'products', label: 'สินค้า', key: '1' },
+  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: 'movement', label: 'รับเข้า / ตัดออก / ปรับยอด', key: '2' },
+  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', key: '3' },
+  { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: 'pos', label: 'ขายหน้าร้าน', key: '4' },
+  { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: 'bills', label: 'ประวัติบิล', key: '5' },
+  { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: 'booking', label: 'จองห้องซ้อม', key: '6' },
+  { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: 'customers', label: 'ข้อมูลลูกค้า', key: '7' },
+  { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: 'daily', label: 'สรุปรายวัน', key: '8' },
+  { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: 'activity', label: 'บันทึกการใช้งาน', manager: true, key: '9' },
+  { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: 'admin', label: 'จัดการข้อมูล', manager: true, key: '0' },
 ];
+// ไอคอนเมนูซ้าย — เส้น 1.75 ปลายเหลี่ยม มุมแหลม ชุดเดียวกับ .ico-svg ทั้งคอนโซล (เลิกใช้อักขระ Unicode แทนไอคอน · 1 ต.ค. 69)
+// ตกแต่งล้วน: ชื่อหมวดอยู่ข้าง ๆ เป็นตัวหนังสือเสมอ จึง aria-hidden
+const NAV_ICONS = {
+  home:      '<path d="M3 9.5L10 3.5l7 6V17h-4.5v-5h-5v5H3z"/>',
+  board:     '<path d="M3 3.5h14v10H8.5L5 16.5v-3H3z"/><path d="M6.5 7.5h7M6.5 10.5h4.5"/>',
+  mail:      '<rect x="2.5" y="4.5" width="15" height="11"/><path d="M2.5 5.5l7.5 6 7.5-6"/>',
+  calendar:  '<rect x="2.5" y="4" width="15" height="13.5"/><path d="M2.5 8h15M6.5 2v4M13.5 2v4"/>',
+  products:  '<path d="M3 6.5L10 3l7 3.5v8L10 18l-7-3.5z"/><path d="M3 6.5l7 3.5 7-3.5M10 10v8"/>',
+  movement:  '<path d="M6.5 16.5V4M3.5 7l3-3 3 3M13.5 3.5V16M10.5 13l3 3 3-3"/>',
+  moves:     '<path d="M3 5h9M3 9.5h6M3 14h5"/><circle cx="14" cy="13" r="3.75"/><path d="M14 11v2.2l1.4 1"/>',
+  pos:       '<path d="M2 3.5h2.5l2 9.5h9l1.5-7H5.5"/><path d="M7.5 16.5h1M14 16.5h1"/>',
+  bills:     '<path d="M4.5 2.5h11v15l-2.75-1.75L10 17.5l-2.75-1.75L4.5 17.5z"/><path d="M7.5 7h5M7.5 10.5h5"/>',
+  booking:   '<rect x="2.5" y="3.5" width="15" height="13"/><circle cx="9" cy="10" r="4"/><path d="M9 10h.01M15 6v5l-2 2"/>',
+  customers: '<circle cx="8" cy="7" r="3"/><path d="M2.5 17c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><path d="M13 4.2a3 3 0 0 1 0 5.6M14.5 11.8c1.9.7 3 2.6 3 5.2"/>',
+  daily:     '<path d="M3 17h14M5.5 14V9M10 14V5M14.5 14v-3"/>',
+  activity:  '<rect x="4" y="3" width="12" height="14.5"/><path d="M7.5 3V1.8h5V3M7 8h6M7 11h6M7 14h3.5"/>',
+  admin:     '<ellipse cx="10" cy="5" rx="6.5" ry="2.5"/><path d="M3.5 5v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V5M3.5 10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"/>',
+};
+function navIcon(k) { return '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' + (NAV_ICONS[k] || '') + '</svg>'; }
 const HOME = 'home';   // หมวดเริ่มต้นหลังล็อกอิน และที่ที่ถูกส่งกลับเมื่อเปิดหมวดที่ไม่มีสิทธิ์
 
 let products = [];
@@ -2170,9 +2360,16 @@ function openRow(t) {
 
 function pickRow(t, i) { selectRow(t, i); openRow(t); }
 
-function openDetail(title, html) {
+// color (ไม่บังคับ) = สีหัวแผงตามสิ่งที่เปิด (กิจกรรมในปฏิทิน) · ตัวอักษรขาว/ดำจากคอนทราสต์จริง (chipColors ≥ 4.5:1)
+// ไม่ส่ง = หัวแผงสีปกติ — ทุกครั้งที่เปิดแผงใหม่ล้างสีเดิมทิ้งเสมอ ไม่ให้สีของกิจกรรมก่อนค้างไปถึงแผงบิล/ลูกค้า
+function openDetail(title, html, color) {
   document.getElementById('detail').classList.remove('stock-drawer');   // openProduct ใส่กลับเองเมื่อเป็นแผงสินค้า
   drawerId = null;
+  const head = document.querySelector('#detail .detail-head');
+  const k = color && HEX_RE.test(color) ? chipColors(color) : null;
+  head.classList.toggle('tinted', !!k);
+  head.style.setProperty('--dh-bg', k ? k.bg : '');
+  head.style.setProperty('--dh-ink', k ? k.ink : '');
   document.getElementById('detailTitle').textContent = title;
   document.getElementById('detailBody').innerHTML = html;
   document.getElementById('detail').hidden = false;
@@ -3726,12 +3923,15 @@ function removeFromCart(idx) {
   renderCart();
 }
 
-function renderCartSummary() {
+// ยอดที่หน้าจอ (ยอดจริงคำนวณที่ฐานข้อมูลตอนบันทึก) — ใช้ทั้งสรุปตะกร้าและปุ่ม QR พร้อมเพย์ของบิลนี้
+function cartTotals() {
   const subtotal = cart.reduce((s, c) => s + c.qty * c.unit_price, 0);
   let discount = parseFloat(document.getElementById('discountInput').value);
   if (isNaN(discount) || discount < 0) discount = 0;
-  let net = subtotal - discount;
-  if (net < 0) net = 0;
+  return { subtotal, discount, net: Math.max(0, subtotal - discount) };
+}
+function renderCartSummary() {
+  const { subtotal, discount, net } = cartTotals();
   document.getElementById('cartSummary').innerHTML =
     '<div class="sum-row"><span>ยอดรวม</span><span>' + formatMoney(subtotal) + ' บาท</span></div>' +
     '<div class="sum-row"><span>ส่วนลด</span><span>' + formatMoney(discount) + ' บาท</span></div>' +
@@ -3758,7 +3958,7 @@ function renderSelectedCustomer() {
   input.hidden = !!selectedCustomer;
   input.value = '';
   box.innerHTML = selectedCustomer
-    ? '<div class="chip"><div><strong>' + escapeHtml(selectedCustomer.full_name) + '</strong><div class="hint" style="margin:0;">' +
+    ? '<div class="cust-box"><div><strong>' + escapeHtml(selectedCustomer.full_name) + '</strong><div class="hint" style="margin:0;">' +
       escapeHtml(selectedCustomer.phone || 'ไม่มีเบอร์โทร') + '</div></div>' +
       '<button class="btn btn-sm" type="button" onclick="clearSelectedCustomer()">เปลี่ยน</button></div>'
     : '';
@@ -3985,7 +4185,7 @@ function renderNav() {
     const badge = s.id === 'board' || s.id === 'mail' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
-      '<span class="ico" aria-hidden="true">' + s.icon + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
+      '<span class="ico" aria-hidden="true">' + navIcon(s.icon) + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
       badge + (key ? '<span class="kbd">' + key + '</span>' : '') + '</button>';
   });
   document.getElementById('navList').innerHTML = html + '</div>';
@@ -4165,6 +4365,9 @@ document.addEventListener('keydown', e => {
     if (current === 'pos') { e.preventDefault(); submitSale(); }
     return;
   }
+
+  // Alt+K = เครื่องคิดเลข (อ่าน event.code — แป้นไทยกดได้ · ไม่ชนกับ Alt+H/B/M/C และ Alt+เลข)
+  if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyK') { e.preventDefault(); toggleCalc(); return; }
 
   if (e.altKey && !e.ctrlKey && !e.metaKey && /^(Digit[0-9]|Key[A-Z])$/.test(e.code)) {
     const s = SECTIONS.find(x => x.key === e.code.replace(/^(Digit|Key)/, ''));
@@ -6056,7 +6259,7 @@ let homeToday = { shop: [], google: [], googleErr: null };
 // box = แท็บที่เปิดอยู่ (inbox / starred / ชื่อป้าย) · counts = จำนวนต่อแท็บจากฟังก์ชัน (null = ป้ายยังไม่มีใน Gmail)
 const mailState = { status: null, unseen: null, error: '', page: 1, q: '', total: 0, pageSize: 25, box: 'inbox', counts: {},
                     noLabel: false, messages: [], open: null, listToken: 0, readToken: 0, reply: null };
-const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null, gcolor: null, teacherColors: {},
+const calState = { view: 'month', anchor: todayBangkok(), events: [], google: [], googleNote: null, gcolor: null, teacherColors: {}, calColors: {},
                    layers: { shop: true, google: true, rooms: false }, token: 0 };
 
 const THAI_DAYS_LONG = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
@@ -6070,7 +6273,13 @@ const CAL_CATS = {
   staff: { t: 'ทีมงาน',     color: '#3F51B5' },
   other: { t: 'อื่น ๆ',     color: '#616161' },
 };
-const ROOM_COLOR = '#8E24AA';           // ชั้นการจองห้องซ้อม (ใช้ทั้งปฏิทิน · หน้าแรก · เส้นคลื่นของวัน)
+const ROOM_COLOR = '#8E24AA';           // สีตั้งต้นของชั้นการจองห้องซ้อม (ปฏิทิน · หน้าแรก) — เจ้าของเปลี่ยนได้ (031 cal_colors.rooms)
+// สีที่เจ้าของตั้งไว้ (staff_settings.cal_colors · 031) — มีแต่สีของหมวดกับชั้นการจอง ไม่มีสีรายกิจกรรม (เจ้าของเคาะ)
+// ไม่มีคีย์/ค่าไม่ใช่ #RRGGBB = ใช้สีตั้งต้นเดิม · ตัวอักษรในป้ายยังเลือกจากคอนทราสต์จริงด้วย chipColors() เสมอ
+const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+function calColor(key, fallback) { const c = (calState.calColors || {})[key]; return HEX_RE.test(c || '') ? c.toUpperCase() : fallback; }
+function catColor(k) { return CAL_CATS[k] ? calColor(k, CAL_CATS[k].color) : calColor('other', CAL_CATS.other.color); }
+function roomColor() { return calColor('rooms', ROOM_COLOR); }
 const GCAL_DEFAULT = '#039BE5';         // สีตั้งต้นของปฏิทิน Google ("นกยูง") — ใช้เมื่อเจ้าของยังไม่ได้เลือก (025)
 // สีชุดเดียวกับเมนูสีของ Google Calendar — ไฟล์ iCal ไม่ส่งสีมา เจ้าของจึงเลือกชื่อสีให้ตรงกับที่ตั้งใน Google
 const GCAL_PALETTE = [
@@ -6082,7 +6291,7 @@ function gcalColor() { return calState.gcolor || GCAL_DEFAULT; }
 
 // ทีมครู (แหล่งจริง: CLAUDE.md ของ workspace) — ปฏิทินหลัก (Google) ลงชื่ออาจารย์ไว้ท้ายชื่อกิจกรรม
 // เช่น "[ห้องใหญ่] BASIC SCRATCH/Kanid — Nutty" · สีตั้งต้นต่างจากหมวดของร้าน การจองห้อง และกันเอง
-// เจ้าของร้านเปลี่ยนสีได้ในหน้าตั้งค่า Google Calendar (staff_settings.teacher_colors · 029)
+// เจ้าของร้านเปลี่ยนสีได้ในหน้าตั้งค่าสีปฏิทิน (staff_settings.teacher_colors · 029)
 const TEACHERS = ['Zlex', 'Leonie', 'Nutty', 'TiBass', 'Maniac', 'Alldayz'];
 const TEACHER_DEFAULT_COLORS = { Zlex: '#C2185B', Leonie: '#00897B', Nutty: '#F6BF26', TiBass: '#6D4C41', Maniac: '#C0CA33', Alldayz: '#00ACC1' };
 // แยก "[ห้อง] ชื่อคลาส — อาจารย์" · ตัวคั่นคือขีดตัวสุดท้ายที่มีช่องว่างสองข้าง (— – หรือ -)
@@ -6168,6 +6377,7 @@ async function loadStaffHome() {
   if (n && current !== HOME) showToast('✉ มีข้อความบนกระดานที่คุณยังไม่ได้อ่าน ' + n + ' ข้อความ');
   loadMailStatus();
   loadHomeToday();
+  loadDisplaySettings();
 }
 
 async function loadStaff() {
@@ -6266,13 +6476,13 @@ function renderHome() {
   const nextBk = bk.find(b => toMin(b.start_time) > nowMin);
   const rows = homeToday.shop.map(e => {
     const c = CAL_CATS[e.category] || CAL_CATS.other;
-    return { k: e.all_day ? '' : shortTime(e.start_time), time: e.all_day ? 'ทั้งวัน' : shortTime(e.start_time), chip: chip(c.t, c.color), title: e.title, state: '' };
+    return { k: e.all_day ? '' : shortTime(e.start_time), time: e.all_day ? 'ทั้งวัน' : shortTime(e.start_time), chip: chip(c.t, catColor(e.category)), title: e.title, state: '' };
   }).concat(homeToday.google.map(g => ({
     k: g.all_day ? '' : g.start.slice(11, 16), time: g.all_day ? 'ทั้งวัน' : g.start.slice(11, 16), ...(pt => ({
       chip: chip(pt.teacher || 'ปฏิทินหลัก', teacherColor(pt.teacher)), title: pt.title + (pt.room ? ' · ' + pt.room : '') }))(parseGcalTitle(g.title)), state: '',
   }))).concat(bk.map(b => {
     const s0 = toMin(b.start_time), now = nowMin >= s0 && nowMin < s0 + b.hours * 60;
-    return { k: shortTime(b.start_time), time: shortTime(b.start_time), chip: chip('ห้องซ้อม', ROOM_COLOR),
+    return { k: shortTime(b.start_time), time: shortTime(b.start_time), chip: chip('ห้องซ้อม', roomColor()),
       title: b.customer_name + ' · ' + b.hours + ' ชม.', state: now ? 'กำลังใช้ห้อง' : b === nextBk ? 'ถัดไป' : '', now };
   })).sort((a, b) => cmp(a.k, b.k));
   document.getElementById('tileCal').innerHTML = (rows.length
@@ -6391,6 +6601,9 @@ const ICON_PATHS = {
   play:   '<path d="M15 10l24 14-24 14z"/>',
   music:  '<path d="M18 36V10l20-4v26"/><circle cx="13" cy="36" r="5"/><circle cx="33" cy="32" r="5"/>',
   out:    '<path d="M26 8h14v14M40 8L22 26"/><path d="M34 28v12H8V14h12"/>',
+  inbox:  '<path d="M6 28h10l3 5h10l3-5h10"/><path d="M6 28l5-11h5M42 28l-5-11h-5M6 28v12h36V28"/><path d="M24 5v19M17.5 17.5L24 24l6.5-6.5"/>',
+  adduser:'<circle cx="19" cy="15" r="7"/><path d="M5 40c0-8 6-13 14-13 3 0 5.6.8 7.6 2.1"/><path d="M36 26v14M29 33h14"/>',
+  qr:     '<rect x="7" y="7" width="13" height="13"/><rect x="28" y="7" width="13" height="13"/><rect x="7" y="28" width="13" height="13"/><path d="M13.5 13.5h.01M34.5 13.5h.01M13.5 34.5h.01" stroke-width="5"/><path d="M28 28h6v6M41 28v6M28 41h6M37 37v4h4"/>',
 };
 function iconSvg(k) { return '<svg viewBox="0 0 48 48" aria-hidden="true">' + (ICON_PATHS[k] || '') + '</svg>'; }
 
@@ -6406,6 +6619,10 @@ const LAUNCH_ITEMS = [
   { key: 'board',    t: 'กระดาน',      icon: 'board',  color: '#F6BF26', go: () => showSection('board'), badge: () => myUnread().length },
   { key: 'customers',t: 'ลูกค้า',      icon: 'people', color: '#039BE5', go: () => showSection('customers') },
   { key: 'daily',    t: 'สรุปรายวัน',  icon: 'sum',    color: '#616161', go: () => showSection('daily') },
+  // รอบ 5 (1 ต.ค. 69): ตัวเลขมุม = เครื่องที่ยิงค้างในถาดรับเข้า (ยังไม่ได้ยืนยัน)
+  { key: 'receive',  t: 'สินค้ารับเข้า', icon: 'inbox', color: '#00897B', go: () => openReceive(), badge: () => rcvTotal() },
+  { key: 'register', t: 'สร้างลิงก์สมัครสมาชิก', icon: 'adduser', color: '#7986CB', go: () => openCodeModal() },
+  { key: 'payqr',    t: 'QR รับเงิน',  icon: 'qr',     color: '#33B679', go: () => openPayQr(null) },
 ].concat(MAIL_BOXES.filter(b => b.key !== 'inbox').map(b => ({
   key: 'mail:' + b.key, t: b.key === 'starred' ? 'อีเมลติดดาว' : 'ป้าย ' + b.t, icon: b.key === 'starred' ? 'star' : 'tag',
   color: b.key === 'starred' ? '#F9A825' : '#5C6BC0',     // ป้ายอีเมล = ฟ้าอมม่วงอ่อนของอีเมล · ติดดาว = เหลืองอำพัน
@@ -6424,6 +6641,8 @@ function launchIcon(it, n, sm) {
 }
 function launchItem(key) { return LAUNCH_ITEMS.find(x => x.key === key) || null; }
 function launchGo(key) { const it = launchItem(key); if (it) it.go(); }
+// สินค้ารับเข้า: ผนังสต็อกในโหมดรับเข้า โฟกัสช่องยิง (setWallMode โฟกัสให้)
+function openReceive() { showSection('products'); setWallMode('receive'); checkFrameFocus(); }
 function focusScan() {
   const s = document.getElementById('posSearch');
   s.focus();
@@ -6671,16 +6890,32 @@ const MINI_KEY = 'djlab.desk.miniPos.v1';     // จำตำแหน่งไ�
 let miniPos = (() => { try { const v = JSON.parse(localStorage.getItem(MINI_KEY) || 'null'); return v && isFinite(v.x) && isFinite(v.y) ? v : null; } catch (e) { return null; } })();
 function saveMiniPos() { try { if (miniPos) localStorage.setItem(MINI_KEY, JSON.stringify(miniPos)); else localStorage.removeItem(MINI_KEY); } catch (e) { /* เบราว์เซอร์ไม่ให้เก็บ ก็แค่จำไม่ได้ */ } }
 // ไม่ให้หลุดนอกจอ — ทั้งตอนลาก ตอนย่อ/ขยายหน้าต่างเบราว์เซอร์ และตอนเปิดหน้าใหม่บนจอที่เล็กกว่าเดิม
+// มุมขวาล่างจองไว้ให้เครื่องคิดเลข (ปุ่ม + แผงตอนเปิด) — หน้าต่างลอยไม่ทับ ทั้งตำแหน่งตั้งต้น ตอนลาก และตอนย่อจอ
+// ทับเมื่อไหร่ขยับออกให้น้อยที่สุด: ขึ้นไปเหนือมุมนั้น หรือไปทางซ้ายของมัน (ตำแหน่งที่จำไว้ไม่ถูกแก้ ปิดแผงแล้วกลับที่เดิม)
+const CALC_GAP = 12;
+function calcZones() {
+  return ['calcBtn', 'calcPanel'].map(id => document.getElementById(id))
+    .filter(el => el && !el.hidden && el.getClientRects().length).map(el => el.getBoundingClientRect());
+}
 function clampMini(x, y) {
   const p = document.getElementById('player');
   const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
-  return { x: Math.round(Math.min(Math.max(0, x), Math.max(0, window.innerWidth - w))),
-           y: Math.round(Math.min(Math.max(0, y), Math.max(0, window.innerHeight - h))) };
+  const fit = (a, b) => ({ x: Math.round(Math.min(Math.max(0, a), Math.max(0, window.innerWidth - w))),
+                           y: Math.round(Math.min(Math.max(0, b), Math.max(0, window.innerHeight - h))) });
+  const zones = calcZones();
+  const hits = q => zones.some(r => q.x < r.right + CALC_GAP && q.x + w > r.left - CALC_GAP && q.y < r.bottom + CALC_GAP && q.y + h > r.top - CALC_GAP);
+  const c = fit(x, y);
+  if (!zones.length || !hits(c)) return c;
+  const up = fit(c.x, Math.min(...zones.map(r => r.top)) - CALC_GAP - h);
+  const left = fit(Math.min(...zones.map(r => r.left)) - CALC_GAP - w, c.y);
+  const ok = [up, left].filter(q => !hits(q))
+    .sort((a, b) => (Math.abs(a.x - c.x) + Math.abs(a.y - c.y)) - (Math.abs(b.x - c.x) + Math.abs(b.y - c.y)));
+  return ok[0] || fit(left.x, up.y);
 }
 function placeMini() {
   const p = document.getElementById('player');
   const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
-  const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };
+  const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };   // มุมขวาล่าง — clampMini ยกขึ้นเหนือปุ่มเครื่องคิดเลขให้
   const c = clampMini(want.x, want.y);
   p.style.left = c.x + 'px';
   p.style.top = c.y + 'px';
@@ -7724,7 +7959,7 @@ function calItems(d) {
   if (calState.layers.shop) calState.events.filter(e => e.event_date === d).forEach(e => {
     const c = CAL_CATS[e.category] || CAL_CATS.other;
     out.push({ kind: 'shop', ref: e.id, allDay: e.all_day, time: e.all_day ? '' : shortTime(e.start_time),
-               end: e.all_day ? '' : shortTime(e.end_time), title: e.title, label: c.t, color: c.color });
+               end: e.all_day ? '' : shortTime(e.end_time), title: e.title, label: c.t, color: catColor(e.category) });
   });
   if (calState.layers.google) calState.google.forEach((g, i) => {
     if (g.start.slice(0, 10) > d || g.end.slice(0, 10) < d) return;
@@ -7736,7 +7971,7 @@ function calItems(d) {
   });
   if (calState.layers.rooms) bookings.filter(b => b.date === d && b.status !== 'cancelled').forEach(b => {
     out.push({ kind: 'room', ref: b.id, allDay: false, time: shortTime(b.start_time), end: addHours(b.start_time, b.hours),
-               title: b.customer_name, label: 'ห้องซ้อม', color: ROOM_COLOR });
+               title: b.customer_name, label: 'ห้องซ้อม', color: roomColor() });
   });
   return out.sort((a, b) => (Number(b.allDay) - Number(a.allDay)) || cmp(a.time, b.time));
 }
@@ -7772,7 +8007,7 @@ function renderCalendar() {
   document.getElementById('calNote').innerHTML =
     (!note ? '' : note.code === 'not_configured'
       ? '<div class="alert alert-plain">ยังไม่ได้เชื่อม Google Calendar' +
-        (isManager() ? ' — กด “ตั้งค่า Google Calendar” เพื่อใส่ที่อยู่ลับแบบ iCal' : ' — แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้เชื่อมให้') + '</div>'
+        (isManager() ? ' — กด “ตั้งค่าสีปฏิทิน” เพื่อใส่ที่อยู่ลับแบบ iCal' : ' — แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้เชื่อมให้') + '</div>'
       : '<div class="alert alert-warn" role="alert">โหลดปฏิทิน Google ไม่สำเร็จ: ' + escapeHtml(note.message) + '</div>') +
     (calState.layers.google && calState.google.some(g => g.recurrence_unsupported)
       ? '<div class="alert alert-plain">กิจกรรมซ้ำบางรายการใน Google ใช้รูปแบบที่ระบบยังอ่านไม่ได้ จึงแสดงเฉพาะครั้งแรก — ดูครบได้ที่ Google Calendar</div>' : '');
@@ -7792,7 +8027,7 @@ function renderCalendar() {
   }
   document.getElementById('calGrid').innerHTML = html + '</div>';
   document.getElementById('calLegend').innerHTML = '<span>ร้าน:</span>' +
-    Object.values(CAL_CATS).map(c => chip(c.t, c.color)).join('') + chip('ห้องซ้อม', ROOM_COLOR) +
+    Object.keys(CAL_CATS).map(k => chip(CAL_CATS[k].t, catColor(k))).join('') + chip('ห้องซ้อม', roomColor()) +
     '<span>· ปฏิทินหลัก (อาจารย์):</span>' + TEACHERS.map(t => chip(t, teacherColor(t))).join('') + chip('อื่น ๆ', gcalColor()) +
     '<span>· คลิกเลขวันที่เพื่อเพิ่มกิจกรรมวันนั้น</span>';
 }
@@ -7810,7 +8045,8 @@ function openCalItem(kind, ref) {
       '<dl class="kv"><dt>ผู้จอง</dt><dd>' + escapeHtml(b.customer_name) + '</dd>' +
       '<dt>เวลา</dt><dd>' + whenText(false, b.date, null, shortTime(b.start_time), addHours(b.start_time, b.hours)) + '</dd>' +
       '<dt>ห้อง</dt><dd>' + escapeHtml(b.room) + '</dd><dt>สถานะ</dt><dd>' + bkStatusHtml(b) + '</dd></dl>' +
-      '<div class="actions"><button class="btn btn-sm" type="button" onclick="showSection(\'booking\'); openBooking(\'' + b.id + '\')">เปิดในหมวดจองห้องซ้อม</button></div>');
+      '<div class="actions"><button class="btn btn-sm" type="button" onclick="showSection(\'booking\'); openBooking(\'' + b.id + '\')">เปิดในหมวดจองห้องซ้อม</button></div>',
+      roomColor());
     return;
   }
   if (kind === 'google') {
@@ -7824,7 +8060,8 @@ function openCalItem(kind, ref) {
       (pt.room ? '<dt>ห้อง</dt><dd>' + escapeHtml(pt.room) + '</dd>' : '') +
       (g.location ? '<dt>สถานที่</dt><dd>' + escapeHtml(g.location) + '</dd>' : '') + '</dl>' +
       (g.description ? '<div class="card pre" style="box-shadow:none;">' + escapeHtml(g.description) + '</div>' : '') +
-      (g.recurrence_unsupported ? '<p class="hint">กิจกรรมนี้ซ้ำแบบที่ระบบยังอ่านไม่ได้ แสดงเฉพาะครั้งแรก</p>' : ''));
+      (g.recurrence_unsupported ? '<p class="hint">กิจกรรมนี้ซ้ำแบบที่ระบบยังอ่านไม่ได้ แสดงเฉพาะครั้งแรก</p>' : ''),
+      teacherColor(pt.teacher));         // มีอาจารย์ = สีอาจารย์ · ไม่มี = สีของชั้นปฏิทินหลัก (สีเดียวกับป้ายที่กด)
     return;
   }
   const e = calState.events.find(x => x.id === ref);
@@ -7832,11 +8069,12 @@ function openCalItem(kind, ref) {
   const c = CAL_CATS[e.category] || CAL_CATS.other;
   openDetail(e.title,
     '<dl class="kv"><dt>เวลา</dt><dd>' + whenText(e.all_day, e.event_date, null, shortTime(e.start_time), shortTime(e.end_time)) + '</dd>' +
-    '<dt>หมวด</dt><dd>' + chip(c.t, c.color) + '</dd>' +
+    '<dt>หมวด</dt><dd>' + chip(c.t, catColor(e.category)) + '</dd>' +
     (e.note ? '<dt>หมายเหตุ</dt><dd class="pre">' + escapeHtml(e.note) + '</dd>' : '') +
     '<dt>บันทึกโดย</dt><dd>' + escapeHtml(staffName(e.created_by)) + '</dd></dl>' +
     '<div class="actions"><button class="btn btn-sm" type="button" onclick="openEventForm(\'' + e.id + '\')">แก้ไขกิจกรรม</button>' +
-    '<button class="btn btn-sm btn-danger" type="button" onclick="deleteEvent(\'' + e.id + '\')">ลบกิจกรรม</button></div>');
+    '<button class="btn btn-sm btn-danger" type="button" onclick="deleteEvent(\'' + e.id + '\')">ลบกิจกรรม</button></div>',
+    catColor(e.category));
 }
 
 function syncEventTimes() { document.getElementById('ceTimes').hidden = document.getElementById('ceAllDay').checked; }
@@ -7904,6 +8142,17 @@ function deleteEvent(id) {
 
 let gcalPicked = null;
 let teacherPicked = {};
+let calPicked = {};
+// ช่องสีของปฏิทินร้าน: ชั้นการจองห้องซ้อม + หมวดทั้งห้า (ค่าตั้งต้น = สีชุดเดิมก่อน 031)
+const CAL_COLOR_KEYS = [['rooms', 'การจองห้องซ้อม', ROOM_COLOR]].concat(Object.keys(CAL_CATS).map(k => [k, CAL_CATS[k].t, CAL_CATS[k].color]));
+function renderCalPickers() {
+  document.getElementById('gsCats').innerHTML = CAL_COLOR_KEYS.map(([k, t, def]) => {
+    const v = calPicked[k] || def;
+    return '<label class="swatch" style="--c:' + v + '"><i aria-hidden="true"></i>' + escapeHtml(t) +
+      ' <input type="color" data-k="' + k + '" value="' + v.toLowerCase() + '" aria-label="สีของ ' + escapeHtml(t) + '"' +
+      ' oninput="calPicked[this.dataset.k] = this.value.toUpperCase(); renderCalPickers()"> ' + chip(t, v) + '</label>';
+  }).join('');
+}
 function renderTeacherPickers() {
   document.getElementById('gsTeachers').innerHTML = TEACHERS.map(t =>
     '<label class="swatch" style="--c:' + (teacherPicked[t] || TEACHER_DEFAULT_COLORS[t]) + '"><i aria-hidden="true"></i>' + escapeHtml(t) +
@@ -7926,28 +8175,725 @@ async function openGcalSettings() {
   document.getElementById('gsUrl').value = (data && data.gcal_ics_url) || '';
   gcalPicked = ((data && data.gcal_color) || GCAL_DEFAULT).toUpperCase();
   teacherPicked = Object.assign({}, TEACHER_DEFAULT_COLORS, (data && data.teacher_colors) || {});
+  calPicked = {};
+  CAL_COLOR_KEYS.forEach(([k, , def]) => { const v = data && data.cal_colors && data.cal_colors[k]; calPicked[k] = HEX_RE.test(v || '') ? v.toUpperCase() : def; });
+  renderCalPickers();
   renderGcalSwatches();
   renderTeacherPickers();
   document.getElementById('gcalDialog').showModal();
 }
 
 async function saveGcalSettings() {
+  if (!isManager()) { showToast('⚠️ ตั้งค่าได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }   // กันซ้ำนอกจากซ่อนปุ่ม (RLS ก็ปฏิเสธ)
   const v = document.getElementById('gsUrl').value.trim();
   if (v && !v.startsWith(GCAL_PREFIX)) { showToast('⚠️ ต้องเป็น “ที่อยู่ลับในรูปแบบ iCal” ของ Google ซึ่งขึ้นต้นด้วย ' + GCAL_PREFIX); return; }
   const btn = document.getElementById('gsSaveBtn');
   btn.disabled = true;
   const { data, error } = await db.from('staff_settings')
-    .update({ gcal_ics_url: v || null, gcal_color: gcalPicked, teacher_colors: teacherPicked, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+    .update({ gcal_ics_url: v || null, gcal_color: gcalPicked, teacher_colors: teacherPicked, cal_colors: calPicked,
+              updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
   btn.disabled = false;
-  if (error) { console.error('[Save staff settings]', error); showFatalError('บันทึกการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
+  if (error) {
+    console.error('[Save staff settings]', error);
+    showFatalError('บันทึกการตั้งค่าไม่สำเร็จ: ' + error.message + (/cal_colors/.test(error.message) ? ' — ต้องรัน migration 031 ก่อน' : ''));
+    return;
+  }
   if (!data || !data.length) { showFatalError('บันทึกการตั้งค่าไม่สำเร็จ — บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 023'); return; }
   calState.gcolor = gcalPicked;
   calState.teacherColors = Object.assign({}, teacherPicked);
+  calState.calColors = Object.assign({}, calPicked);
   document.getElementById('gcalDialog').close();
-  showToast(v ? '✅ เชื่อม Google Calendar แล้ว' : '✅ เลิกเชื่อม Google Calendar แล้ว');
+  showToast('✅ บันทึกสีปฏิทินแล้ว' + (v ? ' · เชื่อม Google Calendar อยู่' : ' · ยังไม่ได้เชื่อม Google Calendar'));
+  renderHome();
   loadCalendar();
   loadHomeToday();
 }
+
+// ===========================================================================
+// การตั้งค่าที่ทีมงานทุกคนอ่านได้ — staff_display_settings() (migration 031)
+// สีปฏิทิน (หมวดร้าน · การจองห้อง · อาจารย์ · Google) และการรับเงิน (พร้อมเพย์ · รูป QR บัญชี)
+// staff_settings อ่านตรงได้เฉพาะเจ้าของร้าน/ผู้ดูแล (มีที่อยู่ลับ iCal) — ฟังก์ชันนี้คืนเฉพาะค่าที่ไม่ลับ
+// ไม่ผ่าน `gcal` เพราะ gcal ตอบ not_configured ก่อนถึงสีถ้ายังไม่เชื่อม Google และเรื่องเงินไม่เกี่ยวกับปฏิทิน
+// ===========================================================================
+const payState = { loaded: false, missing: false, promptpayId: '', name: '', mode: 'promptpay', images: [] };
+async function loadDisplaySettings() {
+  const me = currentUserId;
+  if (!me) return;
+  let data = null, error = null;
+  try { ({ data, error } = await db.rpc('staff_display_settings')); }
+  catch (err) { error = { message: err.message }; }
+  if (me !== currentUserId) return;
+  if (error) {
+    // ยังไม่ได้รัน 031 = ใช้สีตั้งต้นต่อ หน้า QR บอกวิธีตั้งค่า (ไม่ใช่ความผิดของผู้ใช้) · อย่างอื่นบอกตามจริง (กฎข้อ 8)
+    if (error.code === 'PGRST202' || /staff_display_settings/.test(error.message || '')) {
+      Object.assign(payState, { loaded: true, missing: true });
+      return;
+    }
+    console.error('[Display settings]', error);
+    showFatalError('โหลดการตั้งค่าสีปฏิทิน/การรับเงินไม่สำเร็จ: ' + error.message);
+    return;
+  }
+  const d = data || {};
+  calState.calColors = d.cal_colors && typeof d.cal_colors === 'object' ? d.cal_colors : {};
+  if (d.teacher_colors && typeof d.teacher_colors === 'object' && Object.keys(d.teacher_colors).length) calState.teacherColors = d.teacher_colors;
+  if (HEX_RE.test(d.gcal_color || '')) calState.gcolor = d.gcal_color;
+  Object.assign(payState, {
+    loaded: true, missing: false, promptpayId: d.promptpay_id || '', name: d.pay_name || '',
+    mode: d.pay_default_mode === 'image' ? 'image' : 'promptpay',
+    images: Array.isArray(d.pay_qr_images) ? d.pay_qr_images.filter(x => x && x.path) : [],
+  });
+  if (current === HOME) renderHome();
+  if (current === 'calendar') renderCalendar();
+}
+
+// ===========================================================================
+// QR พร้อมเพย์ — สร้างที่หน้าเว็บทั้งหมด (EMVCo Merchant-Presented QR ตามรูปแบบพร้อมเพย์ของ ธปท.)
+// ไม่มีอะไรถูกส่งออกไปไหน · เทสต์เทียบกับเวกเตอร์ของ promptpay-qr (dtinth · ใช้กันทั่วไป) + CRC แบบตารางที่เขียนแยก
+//   00 รูปแบบ "01" · 01 "11" ไม่มียอด / "12" มียอด · 29 ข้อมูลผู้รับ (00 = A000000677010111 ·
+//   01 = มือถือ "0066" + เบอร์ตัด 0 หน้า (13 หลัก) · 02 = เลขประจำตัว 13 หลัก) · 58 "TH" · 53 "764" (บาท) ·
+//   54 ยอด ทศนิยม 2 ตำแหน่งเสมอ · 63 CRC-16/CCITT-FALSE (poly 0x1021 · เริ่ม 0xFFFF) ของทุกตัวอักษรรวม "6304"
+// ===========================================================================
+function ppNormalizeId(raw) {
+  const d = String(raw || '').replace(/[^0-9]/g, '');
+  if (/^0\d{9}$/.test(d)) return { kind: 'phone', id: d };                    // 08x-xxx-xxxx
+  if (/^66\d{9}$/.test(d)) return { kind: 'phone', id: '0' + d.slice(2) };    // +66 8x-xxx-xxxx
+  if (/^\d{13}$/.test(d)) return { kind: 'nid', id: d };                      // เลขประจำตัวประชาชน / ผู้เสียภาษี
+  return null;
+}
+function emvField(tag, value) { return tag + String(value.length).padStart(2, '0') + value; }
+function crc16ccitt(str) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;                 // ข้อมูลเป็น ASCII ล้วน (ตัวเลข/ตัวพิมพ์ใหญ่) — 1 ตัว = 1 ไบต์
+    for (let b = 0; b < 8; b++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+// ยอด → ข้อความทศนิยม 2 ตำแหน่ง ('' = ไม่ระบุยอด) · ผิดรูป = null
+function ppAmount(v) {
+  if (v === null || v === undefined || String(v).trim() === '') return '';
+  const n = Number(String(v).replace(/,/g, ''));
+  if (!isFinite(n) || n <= 0 || n >= 1e9) return null;
+  return (Math.round(n * 100) / 100).toFixed(2);
+}
+function promptPayPayload(id, amount) {
+  const t = ppNormalizeId(id);
+  if (!t) throw new Error('เลขพร้อมเพย์ต้องเป็นเบอร์มือถือ 10 หลัก หรือเลขประจำตัว 13 หลัก');
+  const amt = ppAmount(amount);
+  if (amt === null) throw new Error('ยอดเงินไม่ถูกต้อง');
+  const target = t.kind === 'phone' ? emvField('01', '0066' + t.id.slice(1)) : emvField('02', t.id);
+  const body = emvField('00', '01') + emvField('01', amt ? '12' : '11') +
+    emvField('29', emvField('00', 'A000000677010111') + target) +
+    emvField('58', 'TH') + emvField('53', '764') + (amt ? emvField('54', amt) : '') + '6304';
+  return body + crc16ccitt(body);
+}
+
+// ---- ตัวสร้าง QR (ISO/IEC 18004 · โหมดไบต์ · แก้ผิดระดับ M · เวอร์ชัน 1–10) ----------------------------
+// เขียนเองแทนไลบรารีจาก CDN: payload พร้อมเพย์ยาวไม่เกิน ~90 ตัว ใช้แค่เวอร์ชันเล็ก (~150 บรรทัด) · หน้าเคาน์เตอร์
+// ไม่ต้องพึ่งเน็ตอีกทางหนึ่งตอนลูกค้ายืนรอจ่าย · ไม่มีไฟล์ .js แยกให้ sw.js แคชค้าง (กฎข้อ 10)
+// เทียบตารางโมดูลกับตัวสร้างของ Kazuhiko Arase (MIT) ทุกหน้ากากแล้วตรงกันทุกโมดูล — เทสต์เก็บผลที่ตรวจแล้วไว้เทียบ
+const QR_M = [null,     // [EC ต่อบล็อก, [[จำนวนบล็อก, data codeword ต่อบล็อก], ...]]
+  [10, [[1, 16]]], [16, [[1, 28]]], [26, [[1, 44]]], [18, [[2, 32]]], [24, [[2, 43]]],
+  [16, [[4, 27]]], [18, [[4, 31]]], [22, [[2, 38], [2, 39]]], [22, [[3, 36], [2, 37]]], [26, [[4, 43], [1, 44]]]];
+const QR_ALIGN = [null, [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+const GF_EXP = [], GF_LOG = [];
+(() => { let x = 1; for (let i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; } for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255]; })();
+function gfMul(a, b) { return a && b ? GF_EXP[GF_LOG[a] + GF_LOG[b]] : 0; }
+function rsRemainder(data, n) {
+  let g = [1];                                   // (x − α⁰)(x − α¹)…(x − αⁿ⁻¹) ตัวหน้าดีกรีสูงสุด
+  for (let i = 0; i < n; i++) {
+    const next = new Array(g.length + 1).fill(0);
+    g.forEach((c, j) => { next[j] ^= c; next[j + 1] ^= gfMul(c, GF_EXP[i]); });
+    g = next;
+  }
+  const res = new Array(n).fill(0);
+  for (const b of data) {
+    const f = b ^ res.shift();
+    res.push(0);
+    for (let i = 0; i < n; i++) res[i] ^= gfMul(g[i + 1], f);
+  }
+  return res;
+}
+function qrMaskBit(mask, x, y) {
+  switch (mask) {
+    case 0: return (x + y) % 2 === 0;
+    case 1: return y % 2 === 0;
+    case 2: return x % 3 === 0;
+    case 3: return (x + y) % 3 === 0;
+    case 4: return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+    case 5: return x * y % 2 + x * y % 3 === 0;
+    case 6: return (x * y % 2 + x * y % 3) % 2 === 0;
+    default: return ((x + y) % 2 + x * y % 3) % 2 === 0;
+  }
+}
+function qrPenalty(m) {
+  const n = m.length;
+  let p = 0, dark = 0;
+  const lines = [];
+  for (let i = 0; i < n; i++) { lines.push(m[i].map(Number).join('')); lines.push(m.map(r => Number(r[i])).join('')); }
+  for (const l of lines) {
+    for (const run of l.match(/0+|1+/g)) if (run.length >= 5) p += run.length - 2;          // N1: 3 + (ยาว − 5)
+    for (let i = 0; i + 11 <= l.length; i++) {                                              // N3: 1011101 ชิดขาว 4 ช่อง
+      const w = l.slice(i, i + 11);
+      if (w === '10111010000' || w === '00001011101') p += 40;
+    }
+  }
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    if (m[y][x]) dark++;
+    if (x < n - 1 && y < n - 1 && m[y][x] === m[y][x + 1] && m[y][x] === m[y + 1][x] && m[y][x] === m[y + 1][x + 1]) p += 3;   // N2
+  }
+  return p + 10 * Math.floor(Math.abs(dark * 100 / (n * n) - 50) / 5);                      // N4
+}
+function qrEncode(text, forceMask) {
+  const bytes = Array.from(new TextEncoder().encode(String(text)));
+  let v = 1;
+  const capOf = ver => QR_M[ver][1].reduce((s, [c, d]) => s + c * d, 0);
+  while (v <= 10 && 4 + (v < 10 ? 8 : 16) + 8 * bytes.length > capOf(v) * 8) v++;
+  if (v > 10) throw new Error('ข้อความยาวเกินกว่าจะทำเป็น QR');
+  const [ecLen, groups] = QR_M[v], dataCw = capOf(v);
+  const bits = [];
+  const put = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+  put(4, 4); put(bytes.length, v < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+  put(0, Math.min(4, dataCw * 8 - bits.length));
+  while (bits.length % 8) bits.push(0);
+  const cw = [];
+  for (let i = 0; i < bits.length; i += 8) cw.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+  for (let pad = 0xEC; cw.length < dataCw; pad ^= 0xEC ^ 0x11) cw.push(pad);
+  const blocks = [];
+  let k = 0;
+  groups.forEach(([count, len]) => { for (let i = 0; i < count; i++) { const d = cw.slice(k, k + len); k += len; blocks.push({ d, e: rsRemainder(d, ecLen) }); } });
+  const all = [];
+  for (let i = 0; i < Math.max(...blocks.map(b => b.d.length)); i++) blocks.forEach(b => { if (i < b.d.length) all.push(b.d[i]); });
+  for (let i = 0; i < ecLen; i++) blocks.forEach(b => all.push(b.e[i]));
+
+  const n = 17 + 4 * v;
+  const m = Array.from({ length: n }, () => new Array(n).fill(false));
+  const fn = Array.from({ length: n }, () => new Array(n).fill(false));
+  const set = (x, y, dark) => { m[y][x] = dark; fn[y][x] = true; };
+  const finder = (cx, cy) => {
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+      const x = cx + dx, y = cy + dy;
+      if (x < 0 || y < 0 || x >= n || y >= n) continue;
+      const d = Math.max(Math.abs(dx), Math.abs(dy));
+      set(x, y, d !== 2 && d !== 4);
+    }
+  };
+  finder(3, 3); finder(n - 4, 3); finder(3, n - 4);
+  for (let i = 0; i < n; i++) { if (!fn[6][i]) set(i, 6, i % 2 === 0); if (!fn[i][6]) set(6, i, i % 2 === 0); }
+  const al = QR_ALIGN[v];
+  al.forEach(ay => al.forEach(ax => {
+    if ((ax === 6 && ay === 6) || (ax === 6 && ay === n - 7) || (ax === n - 7 && ay === 6)) return;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(ax + dx, ay + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+  }));
+  const drawFormat = mask => {
+    const data = (0 << 3) | mask;                // ระดับ M = 00
+    let rem = data;
+    for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    const f = ((data << 10) | rem) ^ 0x5412, bit = i => ((f >>> i) & 1) === 1;
+    for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+    set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+    for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+    for (let i = 0; i < 8; i++) set(n - 1 - i, 8, bit(i));
+    for (let i = 8; i < 15; i++) set(8, n - 15 + i, bit(i));
+    set(8, n - 8, true);                         // โมดูลมืดตายตัว
+  };
+  drawFormat(0);                                 // จองพื้นที่ก่อนวางข้อมูล
+  if (v >= 7) {
+    let rem = v;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+    const vb = (v << 12) | rem;
+    for (let i = 0; i < 18; i++) { const dark = ((vb >>> i) & 1) === 1, a = n - 11 + i % 3, b = Math.floor(i / 3); set(a, b, dark); set(b, a, dark); }
+  }
+  let bi = 0;
+  for (let right = n - 1; right >= 1; right -= 2) {
+    if (right === 6) right = 5;
+    for (let vert = 0; vert < n; vert++) for (let j = 0; j < 2; j++) {
+      const x = right - j, y = ((right + 1) & 2) === 0 ? n - 1 - vert : vert;
+      if (!fn[y][x] && bi < all.length * 8) { m[y][x] = ((all[bi >>> 3] >>> (7 - (bi & 7))) & 1) === 1; bi++; }
+    }
+  }
+  const withMask = mask => {
+    const out = m.map(r => r.slice());
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!fn[y][x] && qrMaskBit(mask, x, y)) out[y][x] = !out[y][x];
+    const keep = m.map(r => r.slice());
+    for (let y = 0; y < n; y++) m[y] = out[y];
+    drawFormat(mask);
+    const res = m.map(r => r.slice());
+    for (let y = 0; y < n; y++) m[y] = keep[y];
+    return res;
+  };
+  let best = null, bestMask = 0;
+  const masks = forceMask === undefined ? [0, 1, 2, 3, 4, 5, 6, 7] : [forceMask];
+  for (const mask of masks) {
+    const t = withMask(mask), sc = masks.length > 1 ? qrPenalty(t) : 0;
+    if (!best || sc < best.sc) { best = { sc, t }; bestMask = mask; }
+  }
+  return { version: v, mask: bestMask, size: n, modules: best.t };
+}
+// วาดเป็น SVG ขาวดำ (QR ต้องดำบนขาวเสมอ ไม่ตามธีม) · ขอบเงียบ 4 โมดูลตามมาตรฐาน
+function qrSvg(text, label) {
+  const q = qrEncode(text), N = q.size + 8;
+  let d = '';
+  q.modules.forEach((row, y) => {
+    for (let x = 0; x < q.size;) {
+      if (!row[x]) { x++; continue; }
+      let w = 1;
+      while (x + w < q.size && row[x + w]) w++;
+      d += 'M' + (x + 4) + ' ' + (y + 4) + 'h' + w + 'v1h-' + w + 'z';
+      x += w;
+    }
+  });
+  return '<svg class="qr-svg" viewBox="0 0 ' + N + ' ' + N + '" shape-rendering="crispEdges" role="img" aria-label="' + escapeHtml(label || 'คิวอาร์โค้ด') + '">' +
+    '<rect width="' + N + '" height="' + N + '" fill="#FFFFFF"/><path d="' + d + '" fill="#000000"/></svg>';
+}
+
+// ---- หน้าต่าง QR รับเงิน ------------------------------------------------------
+const PAY_BUCKET = 'payment-qr';                 // migration 031 — ถังปิด ทีมงานอ่านด้วย signed URL · เขียนได้เฉพาะเจ้าของร้าน/ผู้ดูแล
+const pay = { mode: 'promptpay', amount: '', imgId: null, urls: {} };
+function maskPpId(id) { const t = ppNormalizeId(id); return t ? '···' + t.id.slice(-4) : ''; }
+async function openPayQr(mode, amount) {
+  if (!payState.loaded) await loadDisplaySettings();
+  const hasPp = !!ppNormalizeId(payState.promptpayId), hasImg = payState.images.length > 0;
+  let m = mode || payState.mode;
+  if (!mode) { if (m === 'promptpay' && !hasPp && hasImg) m = 'image'; if (m === 'image' && !hasImg && hasPp) m = 'promptpay'; }
+  pay.mode = m;
+  pay.amount = amount ? ppAmount(amount) || '' : '';
+  if (!payState.images.some(x => x.id === pay.imgId)) pay.imgId = hasImg ? payState.images[0].id : null;
+  document.getElementById('paySetBtn').hidden = !isManager();
+  const dlg = document.getElementById('payDialog');
+  if (!dlg.open) dlg.showModal();
+  renderPay();
+  const amt = document.getElementById('payAmt');
+  if (amt && !pay.amount) amt.focus();
+}
+function setPayMode(m) { pay.mode = m; renderPay(); }
+function payAmountInput(v) { pay.amount = v; renderPayStage(); }
+function paySetupHtml(what) {
+  return '<div class="pay-setup" role="status"><h3>ยังไม่ได้ตั้งค่า' + what + '</h3>' +
+    (payState.missing
+      ? '<p class="hint" style="margin:0;">ระบบรับเงินยังไม่พร้อม — ต้องรัน migration 031 ในฐานข้อมูลก่อน (แจ้งเจ้าของร้านหรือผู้ดูแลระบบ)</p>'
+      : isManager()
+        ? '<p class="hint" style="margin:0 0 10px;">ใส่เลขพร้อมเพย์ ชื่อที่จะขึ้นใต้ QR และ/หรืออัปโหลดรูป QR บัญชีของร้าน</p>' +
+          '<button class="btn btn-primary btn-sm" type="button" onclick="openPaySettings()">ตั้งค่าการรับเงิน</button>'
+        : '<p class="hint" style="margin:0;">แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้ตั้งค่าที่ปุ่ม “ตั้งค่าการรับเงิน” ในหน้านี้</p>') + '</div>';
+}
+function renderPay() {
+  document.querySelectorAll('.pay-modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === pay.mode)));
+  const body = document.getElementById('payBody');
+  if (pay.mode === 'promptpay') {
+    if (!ppNormalizeId(payState.promptpayId)) { body.innerHTML = paySetupHtml('พร้อมเพย์'); return; }
+    body.innerHTML = '<div class="pay-grid"><div>' +
+      '<label class="lbl" for="payAmt">ยอดที่ลูกค้าต้องจ่าย (บาท)</label>' +
+      '<input type="text" id="payAmt" class="input pay-amt-in" inputmode="decimal" autocomplete="off" value="' + escapeHtml(pay.amount) + '" placeholder="0.00" oninput="payAmountInput(this.value)">' +
+      '<p class="hint">เว้นว่าง = QR ไม่ระบุยอด ลูกค้ากรอกยอดเองในแอปธนาคาร · ยอดถูกฝังใน QR แก้ในแอปไม่ได้</p>' +
+      '</div><div id="payStage"></div></div>';
+    renderPayStage();
+    return;
+  }
+  if (!payState.images.length) { body.innerHTML = paySetupHtml('รูป QR บัญชีของร้าน'); return; }
+  body.innerHTML = '<div class="pay-grid"><div class="pay-pick" role="group" aria-label="เลือกบัญชี">' +
+    payState.images.map(x => '<button class="btn" type="button" data-id="' + escapeHtml(x.id) + '" aria-pressed="' + (x.id === pay.imgId) + '"' +
+      ' onclick="pay.imgId = this.dataset.id; renderPay()">' + escapeHtml(x.label || 'QR บัญชี') + '</button>').join('') +
+    '</div><div id="payStage"></div></div>';
+  renderPayStage();
+}
+async function renderPayStage() {
+  const st = document.getElementById('payStage');
+  if (!st) return;
+  const name = payState.name ? '<div class="pay-name">' + escapeHtml(payState.name) + '</div>' : '';
+  if (pay.mode === 'promptpay') {
+    const amt = ppAmount(pay.amount);
+    if (amt === null) { st.innerHTML = '<div class="pay-stage"><div class="alert alert-red" role="alert" style="margin:0;">ยอดเงินไม่ถูกต้อง — ใส่ตัวเลขมากกว่า 0 เช่น 1250 หรือ 1250.50</div></div>'; return; }
+    let svg;
+    try { svg = qrSvg(promptPayPayload(payState.promptpayId, amt), 'คิวอาร์โค้ดพร้อมเพย์' + (amt ? ' ยอด ' + amt + ' บาท' : '')); }
+    catch (e) { st.innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(e.message) + '</div>'; return; }
+    st.innerHTML = '<div class="pay-stage">' + svg +
+      (amt ? '<div class="pay-amount">฿' + formatMoney(amt) + '</div>' : '<div class="pay-amount none">ไม่ระบุยอด — ลูกค้ากรอกยอดเอง</div>') +
+      name + '<div class="pay-meta">พร้อมเพย์ ' + escapeHtml(maskPpId(payState.promptpayId)) + ' · DJ LAB SIAM</div></div>';
+    return;
+  }
+  const it = payState.images.find(x => x.id === pay.imgId);
+  if (!it) { st.innerHTML = ''; return; }
+  st.innerHTML = '<div class="pay-stage"><div class="hint">กำลังเปิดรูป...</div></div>';
+  const url = await payImageUrl(it.path);
+  if (pay.imgId !== it.id || !document.getElementById('payStage')) return;
+  st.innerHTML = url
+    ? '<div class="pay-stage"><img class="pay-img" src="' + escapeHtml(url) + '" alt="QR ของ ' + escapeHtml(it.label || 'บัญชีร้าน') + '">' +
+      '<div class="pay-name">' + escapeHtml(it.label || 'QR บัญชี') + '</div>' + (payState.name ? '<div class="pay-meta">' + escapeHtml(payState.name) + '</div>' : '') + '</div>'
+    : '<div class="alert alert-red" role="alert">เปิดรูป QR ไม่สำเร็จ — ลองใหม่ หรือแจ้งเจ้าของร้านให้อัปโหลดรูปนี้ใหม่</div>';
+}
+// ถังปิด: ขอ signed URL อายุ 10 นาที เก็บไว้ใช้ซ้ำ 9 นาที (ไม่ขอใหม่ทุกครั้งที่สลับบัญชี)
+async function payImageUrl(path) {
+  const c = pay.urls[path];
+  if (c && c.until > Date.now()) return c.url;
+  const { data, error } = await db.storage.from(PAY_BUCKET).createSignedUrl(path, 600);
+  if (error || !data) { console.error('[Pay QR url]', error); showFatalError('เปิดรูป QR บัญชีไม่สำเร็จ: ' + (error ? error.message : 'ไม่มีข้อมูล')); return null; }
+  pay.urls[path] = { url: data.signedUrl, until: Date.now() + 540000 };
+  return data.signedUrl;
+}
+
+// ---- ตั้งค่าการรับเงิน (เจ้าของร้าน/ผู้ดูแล) ------------------------------------
+// ด่านอยู่ในทุกฟังก์ชันที่เขียน ไม่ใช่แค่ซ่อนปุ่ม (RLS ของ staff_settings และถัง payment-qr ปฏิเสธซ้ำอีกชั้น)
+let paySetDraft = { mode: 'promptpay', images: [] };
+async function openPaySettings() {
+  if (!isManager()) { showToast('⚠️ ตั้งค่าการรับเงินได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  const { data, error } = await db.from('staff_settings').select('*').eq('id', true).maybeSingle();
+  if (error) { console.error('[Load pay settings]', error); showFatalError('อ่านการตั้งค่าไม่สำเร็จ: ' + error.message); return; }
+  const d = data || {};
+  document.getElementById('psId').value = d.promptpay_id || '';
+  document.getElementById('psName').value = d.pay_name || '';
+  document.getElementById('psImgLabel').value = '';
+  document.getElementById('psImgFile').value = '';
+  paySetDraft = { mode: d.pay_default_mode === 'image' ? 'image' : 'promptpay', images: Array.isArray(d.pay_qr_images) ? d.pay_qr_images : [] };
+  renderPayIdHint();
+  renderPaySetImages();
+  pickPayDefault(paySetDraft.mode);
+  document.getElementById('paySetDialog').showModal();
+}
+function renderPayIdHint() {
+  const v = document.getElementById('psId').value.trim(), t = ppNormalizeId(v), el = document.getElementById('psIdHint');
+  el.style.color = v && !t ? '#8A0012' : '';
+  el.textContent = !v ? 'เว้นว่าง = ยังไม่ใช้พร้อมเพย์'
+    : t ? (t.kind === 'phone' ? '✓ เบอร์มือถือ ' + t.id : '✓ เลขประจำตัว 13 หลัก ' + t.id)
+    : 'ต้องเป็นเบอร์มือถือ 10 หลัก (ขึ้นต้น 0) หรือเลขประจำตัว 13 หลัก';
+}
+function pickPayDefault(m) {
+  paySetDraft.mode = m;
+  document.querySelectorAll('#psMode button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mode === m)));
+  document.querySelectorAll('#psMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+}
+async function renderPaySetImages() {
+  const box = document.getElementById('psImages');
+  box.innerHTML = paySetDraft.images.length
+    ? paySetDraft.images.map(x => '<div class="pq-row" data-id="' + escapeHtml(x.id) + '"><span class="pq-thumb" data-path="' + escapeHtml(x.path) + '"></span>' +
+        '<span class="t">' + escapeHtml(x.label || 'QR บัญชี') + '</span>' +
+        '<button class="btn btn-sm btn-danger" type="button" data-id="' + escapeHtml(x.id) + '" onclick="removePayQr(this.dataset.id)">เอาออก</button></div>').join('')
+    : '<p class="hint" style="margin:0;">ยังไม่มีรูป QR บัญชี</p>';
+  // ถังปิด: รูปย่อขึ้นหลังได้ signed URL (ไม่วาง <img> ที่ยังไม่มี src ไว้ก่อน)
+  for (const th of box.querySelectorAll('.pq-thumb[data-path]')) {
+    const u = await payImageUrl(th.dataset.path);
+    if (!u || !th.isConnected) continue;
+    const img = document.createElement('img');
+    img.alt = '';
+    img.src = u;
+    th.appendChild(img);
+  }
+}
+async function savePaySettings() {
+  if (!isManager()) { showToast('⚠️ ตั้งค่าการรับเงินได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  const raw = document.getElementById('psId').value.trim();
+  const t = raw ? ppNormalizeId(raw) : null;
+  if (raw && !t) { showToast('⚠️ เลขพร้อมเพย์ต้องเป็นเบอร์มือถือ 10 หลัก หรือเลขประจำตัว 13 หลัก'); document.getElementById('psId').focus(); return; }
+  const name = document.getElementById('psName').value.trim();
+  const btn = document.getElementById('psSaveBtn');
+  btn.disabled = true;
+  const { data, error } = await db.from('staff_settings')
+    .update({ promptpay_id: t ? t.id : null, pay_name: name || null, pay_default_mode: paySetDraft.mode,
+              updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+  btn.disabled = false;
+  if (error) { console.error('[Save pay settings]', error); showFatalError('บันทึกการตั้งค่าการรับเงินไม่สำเร็จ: ' + error.message + (/promptpay|pay_/.test(error.message) ? ' — ต้องรัน migration 031 ก่อน' : '')); return; }
+  if (!data || !data.length) { showFatalError('บันทึกการตั้งค่าการรับเงินไม่สำเร็จ — บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 031'); return; }
+  Object.assign(payState, { promptpayId: t ? t.id : '', name, mode: paySetDraft.mode });
+  document.getElementById('paySetDialog').close();
+  showToast('✅ บันทึกการตั้งค่าการรับเงินแล้ว');
+  if (document.getElementById('payDialog').open) renderPay();
+}
+async function savePayImages(list) {
+  const { data, error } = await db.from('staff_settings')
+    .update({ pay_qr_images: list, updated_by: currentUserId, updated_at: new Date().toISOString() }).eq('id', true).select('id');
+  if (error || !data || !data.length) {
+    console.error('[Save pay images]', error);
+    showFatalError('บันทึกรายการรูป QR ไม่สำเร็จ: ' + (error ? error.message : 'บัญชีนี้ไม่มีสิทธิ์ หรือยังไม่ได้รัน migration 031'));
+    return false;
+  }
+  paySetDraft.images = list;
+  payState.images = list.slice();
+  return true;
+}
+async function uploadPayQr() {
+  if (!isManager()) { showToast('⚠️ อัปโหลดรูป QR ได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return false; }
+  const label = document.getElementById('psImgLabel').value.trim();
+  const f = document.getElementById('psImgFile').files[0];
+  if (!label) { showToast('⚠️ ใส่ชื่อกำกับรูปก่อน เช่น “กสิกร · บัญชีร้าน”'); document.getElementById('psImgLabel').focus(); return false; }
+  if (!f) { showToast('⚠️ เลือกไฟล์รูป QR ก่อน'); return false; }
+  if (paySetDraft.images.length >= 12) { showToast('⚠️ เก็บรูป QR ได้สูงสุด 12 รูป — เอารูปเก่าออกก่อน'); return false; }
+  const btn = document.getElementById('psImgBtn');
+  btn.disabled = true;
+  try {
+    let blob;
+    try { blob = await shrinkPhoto(f); }                       // ย่อที่เครื่องแบบเดียวกับรูปสินค้า (ด้านยาว 800px)
+    catch (e) { showFatalError('ย่อรูปไม่สำเร็จ: ' + e.message); return false; }
+    const id = crypto.randomUUID();
+    const path = id + (blob.type === 'image/webp' ? '.webp' : '.jpg');
+    // อัปโหลดไฟล์ก่อน → ค่อยเพิ่มลงรายการ · ลงรายการไม่ผ่านแล้วลบไฟล์ทิ้ง ไม่ทิ้งไฟล์กำพร้าไว้ในถัง
+    const up = await db.storage.from(PAY_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+    if (up.error) { showFatalError('อัปโหลดรูป QR ไม่สำเร็จ: ' + up.error.message); return false; }
+    if (!await savePayImages(paySetDraft.images.concat([{ id, label, path }]))) { await db.storage.from(PAY_BUCKET).remove([path]); return false; }
+  } catch (err) {
+    showFatalError('ติดต่อเซิร์ฟเวอร์ไม่สำเร็จ: ' + err.message);
+    return false;
+  } finally { btn.disabled = false; }
+  document.getElementById('psImgLabel').value = '';
+  document.getElementById('psImgFile').value = '';
+  renderPaySetImages();
+  if (document.getElementById('payDialog').open) renderPay();
+  showToast('✅ เพิ่มรูป QR “' + label + '” แล้ว');
+  return true;
+}
+function removePayQr(id) {
+  if (!isManager()) { showToast('⚠️ เอารูป QR ออกได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ'); return; }
+  const it = paySetDraft.images.find(x => x.id === id);
+  if (!it) return;
+  askConfirm('เอารูป QR ออก', '<p>เอารูป <strong>' + escapeHtml(it.label || 'QR บัญชี') + '</strong> ออกจากหน้า QR รับเงิน — อัปโหลดใหม่ได้ภายหลัง</p>', 'เอาออก', async () => {
+    if (!await savePayImages(paySetDraft.images.filter(x => x.id !== id))) return;
+    const { error } = await db.storage.from(PAY_BUCKET).remove([it.path]);
+    if (error) showToast('⚠️ ลบไฟล์รูปไม่สำเร็จ (เอาออกจากรายการแล้ว): ' + error.message);
+    closeConfirm();
+    renderPaySetImages();
+    if (document.getElementById('payDialog').open) renderPay();
+    showToast('✅ เอารูป QR ออกแล้ว');
+  });
+}
+
+// ===========================================================================
+// เครื่องคิดเลขลอย — ทุกหมวด · ปุ่มดำมุมขวาล่าง · Alt+K
+// ไม่ใช้ eval: แยกคำ (calcTokens) แล้วคิดแบบไล่ลำดับความสำคัญ (× ÷ ก่อน + −)
+// % แบบเครื่องคิดเลขหน้าร้าน: "a + b%" / "a − b%" = a ± (a × b ÷ 100) (บวก VAT · หักส่วนลด) ·
+//   ตามหลัง × ÷ หรืออยู่เดี่ยว = หาร 100 ("200 × 10%" = 20 · "50%" = 0.5)
+// ===========================================================================
+function calcTokens(src) {
+  const s = String(src).replace(/\s+/g, '').replace(/[x×*]/g, '*').replace(/[÷/]/g, '/').replace(/[−–]/g, '-').replace(/,/g, '');
+  const out = [];
+  for (let i = 0; i < s.length;) {
+    const c = s[i];
+    if (/[0-9.]/.test(c)) {
+      let j = i;
+      while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      const t = s.slice(i, j);
+      if (!/^(\d+\.?\d*|\.\d+)$/.test(t)) throw new Error('ตัวเลขไม่ถูกต้อง: ' + t);
+      out.push({ t: 'n', v: parseFloat(t) });
+      i = j;
+    } else if ('+-*/%'.includes(c)) { out.push({ t: c }); i++; }
+    else throw new Error('มีตัวที่คิดไม่ได้: ' + c);
+  }
+  return out;
+}
+function calcEval(src) {
+  let toks;
+  try { toks = calcTokens(src); } catch (e) { return { ok: false, error: e.message }; }
+  if (!toks.length) return { ok: false, error: '' };
+  let i = 0;
+  const peek = () => toks[i], take = () => toks[i++];
+  function factor() {                            // คืน { v, pct, raw } — pct = เป็น "ตัวเลข%" ล้วน ๆ
+    const t = take();
+    if (!t) throw new Error('สูตรยังไม่จบ');
+    if (t.t === '-' || t.t === '+') { const f = factor(); return t.t === '-' ? { v: -f.v, pct: f.pct, raw: -f.raw } : f; }
+    if (t.t !== 'n') throw new Error('สูตรไม่ครบ — มีเครื่องหมายติดกัน');
+    let v = t.v, pct = false, raw = v;
+    while (peek() && peek().t === '%') { take(); raw = v; v = v / 100; pct = true; }
+    return { v, pct, raw };
+  }
+  function term() {
+    let f = factor(), single = true;
+    while (peek() && (peek().t === '*' || peek().t === '/')) {
+      const op = take().t, r = factor();
+      if (op === '/' && r.v === 0) throw new Error('หารด้วยศูนย์ไม่ได้');
+      f = { v: op === '*' ? f.v * r.v : f.v / r.v, pct: false, raw: 0 };
+      single = false;
+    }
+    return single ? f : { v: f.v, pct: false, raw: 0 };
+  }
+  try {
+    let v = term().v;
+    while (peek()) {
+      const op = take().t;
+      if (op !== '+' && op !== '-') throw new Error('สูตรไม่ครบ');
+      const t = term();
+      const r = t.pct ? v * t.raw / 100 : t.v;   // a ± b% = a ± a×b/100
+      v = op === '+' ? v + r : v - r;
+    }
+    if (!isFinite(v)) throw new Error('ผลลัพธ์ใหญ่เกินไป');
+    return { ok: true, value: Math.round(v * 1e10) / 1e10 || 0 };     // ตัดเศษทศนิยมลอย (0.1 + 0.2) · ไม่มี −0
+  } catch (e) { return { ok: false, error: e.message }; }
+}
+
+const CALC_KEY = 'djlab.desk.calc.v1';         // เปิด/ปิดค้างไว้ของเครื่องนี้ (ไม่ใช่ของคน)
+const calc = { expr: '', result: null, error: '', done: false, history: [], back: null };
+let calcSnap = null;                           // สถานะก่อนตัวอักษรตัวแรกของชุดที่อาจเป็นการยิงบาร์โค้ด
+function calcFmt(v) { return Number(v).toLocaleString('en-US', { maximumFractionDigits: 10 }); }
+function calcShow(expr) {                      // ภายในใช้ + - * / · หน้าจอใช้ + − × ÷ · ลบติดเครื่องหมาย = (−n)
+  return expr.replace(/(^|[+\-*/])-(\d*\.?\d*%?)/g, (m, a, n) => a + (a ? '(−' + n + ')' : '−' + n))
+    .replace(/\*/g, ' × ').replace(/\//g, ' ÷ ').replace(/(\d|%|\))\+/g, '$1 + ').replace(/(\d|%|\))-/g, '$1 − ');
+}
+function calcLastNumber() {                    // ตำแหน่งเริ่มของตัวเลขตัวท้าย (รวม %) · -1 = ไม่มี
+  const m = calc.expr.match(/(\d*\.?\d*%?)$/);
+  return m && m[1] ? calc.expr.length - m[1].length : -1;
+}
+function calcInput(k) {
+  const ops = { '+': '+', '−': '-', '×': '*', '÷': '/' };
+  if (calc.error && k !== '⌫') { calc.expr = ''; calc.error = ''; calc.done = false; }   // หลังผิดพลาด กดอะไรก็เริ่มใหม่ (ยกเว้น ⌫ = แก้สูตรเดิม)
+  if (/^[0-9]$/.test(k) || k === '.') {
+    if (calc.done) { calc.expr = ''; calc.done = false; calc.result = null; }
+    if (/%$/.test(calc.expr)) return renderCalc();
+    const p = calcLastNumber(), cur = p < 0 ? '' : calc.expr.slice(p);
+    if (k === '.' && cur.includes('.')) return renderCalc();
+    if (k === '.' && !cur) calc.expr += '0';
+    if (cur === '0' && k !== '.') calc.expr = calc.expr.slice(0, -1);
+    calc.expr += k;
+  } else if (ops[k]) {
+    if (calc.done && calc.result !== null) calc.expr = String(calc.result);
+    calc.done = false;
+    if (!calc.expr) { if (k === '−') calc.expr = '-'; return renderCalc(); }
+    if (/[+\-*/]$/.test(calc.expr)) calc.expr = calc.expr.slice(0, -1).replace(/[+\-*/]$/, '');
+    if (calc.expr) calc.expr += ops[k];
+  } else if (k === '%') {
+    if (calc.done && calc.result !== null) { calc.expr = String(calc.result); calc.done = false; }
+    if (/[0-9.]$/.test(calc.expr)) calc.expr += '%';
+  } else if (k === '±') {
+    if (calc.done && calc.result !== null) { calc.expr = String(calc.result); calc.done = false; }
+    const p = calcLastNumber();
+    if (p < 0) { calc.expr += '-'; return renderCalc(); }
+    const unary = calc.expr[p - 1] === '-' && (p - 1 === 0 || /[+\-*/]/.test(calc.expr[p - 2]));
+    calc.expr = unary ? calc.expr.slice(0, p - 1) + calc.expr.slice(p) : calc.expr.slice(0, p) + '-' + calc.expr.slice(p);
+  } else if (k === '=') {
+    if (!calc.expr || calc.done) return renderCalc();
+    const r = calcEval(calc.expr);
+    if (!r.ok) { calc.error = r.error || 'สูตรยังไม่จบ'; calc.done = true; return renderCalc(); }
+    calc.history.unshift({ expr: calc.expr, value: r.value });
+    calc.history = calc.history.slice(0, 5);
+    calc.result = r.value;
+    calc.done = true;
+  } else if (k === '⌫') {
+    if (calc.done) { calc.done = false; calc.result = null; calc.error = ''; }
+    calc.expr = calc.expr.slice(0, -1);
+  } else if (k === 'C') {
+    const p = calcLastNumber();
+    calc.done = false; calc.result = null;
+    if (p >= 0) { const unary = calc.expr[p - 1] === '-' && (p - 1 === 0 || /[+\-*/]/.test(calc.expr[p - 2])); calc.expr = calc.expr.slice(0, unary ? p - 1 : p); }
+  } else if (k === 'AC') {
+    calc.expr = ''; calc.result = null; calc.error = ''; calc.done = false;
+  }
+  renderCalc();
+}
+function renderCalc() {
+  document.getElementById('calcExpr').textContent = calc.expr ? calcShow(calc.expr) + (calc.done && !calc.error ? ' =' : '') : '';
+  const out = document.getElementById('calcOut');
+  out.className = 'calc-out';
+  if (calc.error) { out.classList.add('err'); out.setAttribute('role', 'alert'); out.textContent = '⚠ ' + calc.error; }
+  else {
+    out.removeAttribute('role');
+    if (calc.done && calc.result !== null) out.textContent = calcFmt(calc.result);
+    else {
+      const r = calc.expr ? calcEval(calc.expr) : null;
+      if (r && r.ok && /[+\-*/%]/.test(calc.expr.replace(/^-/, ''))) { out.classList.add('preview'); out.textContent = '= ' + calcFmt(r.value); }
+      else out.textContent = calc.expr ? calcShow(calc.expr) : '0';
+    }
+  }
+  const h = document.getElementById('calcHist');
+  h.hidden = !calc.history.length;
+  h.innerHTML = '<h3>ล่าสุด (กดเพื่อใช้ผลลัพธ์ต่อ)</h3>' + calc.history.map((x, i) =>
+    '<button class="calc-h" type="button" onclick="calcReuse(' + i + ')"><span>' + escapeHtml(calcShow(x.expr)) + '</span><b>= ' + escapeHtml(calcFmt(x.value)) + '</b></button>').join('');
+}
+function calcReuse(i) {
+  const x = calc.history[i];
+  if (!x) return;
+  calc.expr = String(x.value); calc.result = null; calc.error = ''; calc.done = false;
+  renderCalc();
+  document.getElementById('calcPanel').focus();
+}
+function calcValue() {
+  if (calc.done && calc.result !== null) return calc.result;
+  const r = calc.expr ? calcEval(calc.expr) : null;
+  return r && r.ok ? r.value : null;
+}
+async function copyCalc() {
+  const v = calcValue();
+  if (v === null) { showToast('⚠️ ยังไม่มีผลลัพธ์ให้คัดลอก'); return; }
+  try { await navigator.clipboard.writeText(String(v)); showToast('✅ คัดลอก ' + v + ' แล้ว — วางในช่องราคา/ยอดได้เลย'); }
+  catch (e) { showToast('⚠️ คัดลอกอัตโนมัติไม่ได้ — ผลลัพธ์คือ ' + v); }
+}
+function calcSnapshot() { return JSON.stringify({ expr: calc.expr, result: calc.result, error: calc.error, done: calc.done, history: calc.history }); }
+function calcHasFocus() { const p = document.getElementById('calcPanel'); return !p.hidden && p.contains(document.activeElement); }
+// เรียกจาก onWedgeScan: ชุดที่ปิดท้ายด้วย Enter แล้วกลายเป็นการยิงบาร์โค้ด — ตัวอักษรที่หล่นเข้าเครื่องคิดเลขไปแล้วต้องไม่ค้างอยู่
+// (ใช้ตัวตรวจเครื่องยิงชุดเดิมทั้งหมด ไม่แยกตัวตรวจใหม่ · Enter ของการยิงไม่เคยมาถึงเครื่องคิดเลขเพราะถูกหยุดตอน capture)
+function calcUndoScan() {
+  if (!calcSnap || !calcHasFocus()) return;
+  Object.assign(calc, JSON.parse(calcSnap));
+  calcSnap = null;
+  renderCalc();
+}
+function calcKeyOf(e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return null;
+  const c = e.code;
+  let m;
+  if ((m = c.match(/^Numpad(\d)$/))) return m[1];
+  if ((m = c.match(/^Digit(\d)$/))) return e.shiftKey ? ({ Digit5: '%', Digit8: '×' })[c] || null : m[1];   // event.code — แป้นไทยก็พิมพ์ตัวเลขได้
+  if (e.key === 'Escape') return 'esc';
+  return ({ NumpadAdd: '+', NumpadSubtract: '−', NumpadMultiply: '×', NumpadDivide: '÷', NumpadDecimal: '.', Period: '.', Comma: '.',
+            Minus: '−', Slash: e.shiftKey ? null : '÷', Equal: e.shiftKey ? '+' : '=', Enter: '=', NumpadEnter: '=',
+            Backspace: '⌫', Delete: 'C', KeyX: '×' })[c] || null;
+}
+function saveCalcOpen(open) { try { localStorage.setItem(CALC_KEY, JSON.stringify({ open })); } catch (e) { /* เก็บไม่ได้ก็แค่จำไม่ได้ */ } }
+function openCalc(focus) {
+  const p = document.getElementById('calcPanel');
+  if (focus) calc.back = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  p.hidden = false;
+  document.getElementById('calcBtn').setAttribute('aria-expanded', 'true');
+  saveCalcOpen(true);
+  renderCalc();
+  playerLayout();                              // หน้าต่างวิดีโอหลบแผงที่เพิ่งเปิด
+  if (focus) p.focus();
+}
+function closeCalc(restoreFocus) {
+  const p = document.getElementById('calcPanel');
+  if (p.hidden) return;
+  const hadFocus = p.contains(document.activeElement);
+  p.hidden = true;
+  document.getElementById('calcBtn').setAttribute('aria-expanded', 'false');
+  saveCalcOpen(false);
+  playerLayout();                              // แผงปิดแล้ว หน้าต่างวิดีโอกลับไปที่เดิมที่จำไว้
+  if (restoreFocus && hadFocus) {
+    const b = calc.back;
+    if (b && b.isConnected && typeof b.focus === 'function') b.focus({ preventScroll: true });
+    else document.getElementById('calcBtn').focus();
+  }
+  calc.back = null;
+}
+// fromButton = กดปุ่มดำ: เปิดอยู่ = ปิดเสมอ · Alt+K: เปิดอยู่แต่โฟกัสอยู่ที่อื่น = ดึงโฟกัสกลับมา ไม่ปิด
+function toggleCalc(fromButton) {
+  const p = document.getElementById('calcPanel');
+  if (p.hidden) openCalc(true);
+  else if (fromButton) closeCalc(false);
+  else if (!p.contains(document.activeElement)) p.focus();
+  else closeCalc(true);
+}
+(function () {
+  const p = document.getElementById('calcPanel');
+  document.getElementById('calcKeys').addEventListener('click', e => {
+    const b = e.target.closest('button[data-k]');
+    if (b) { calcInput(b.dataset.k); }
+  });
+  p.addEventListener('keydown', e => {
+    const k = calcKeyOf(e);
+    if (!k) {
+      // ปุ่มอื่นตอนอยู่ในเครื่องคิดเลขไม่ไปเป็นคีย์ลัดของหมวด (เช่น ลูกศร/Delete ในตะกร้า) · ยกเว้น Alt/Ctrl · F9 · ? · Tab
+      if (!e.altKey && !e.ctrlKey && !e.metaKey && e.key !== '?' && e.key !== 'Tab' && !/^F\d+$/.test(e.key)) e.stopPropagation();
+      return;
+    }
+    if (k === 'esc') { e.preventDefault(); e.stopPropagation(); closeCalc(true); return; }
+    if (k === '=' && e.target.closest('button:not([data-k])')) return;      // Enter บนปุ่มคัดลอก/ประวัติ = กดปุ่มนั้น
+    // ตัวแรกของชุดที่อาจเป็นการยิง (ตัวฟังของเครื่องยิงตอน capture นับไว้แล้ว) — จำสถานะไว้ ถ้าจบด้วย Enter
+    // แล้วกลายเป็นการยิง onWedgeScan → calcUndoScan คืนกลับทั้งก้อน · คนพิมพ์ทีละตัวก็จำใหม่ทุกตัว
+    if (wedgeBuf.length <= 1) calcSnap = calcSnapshot();
+    e.preventDefault();
+    e.stopPropagation();
+    calcInput(k);
+  });
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(CALC_KEY) || 'null'); } catch (e) { saved = null; }
+  if (saved && saved.open) openCalc(false);    // เปิดค้างไว้ครั้งก่อน = เปิดไว้ให้ แต่ไม่แย่งโฟกัสจากช่องยิงบาร์โค้ด
+  else renderCalc();
+})();
 
 setInterval(tickHome, 1000);
 renderNav();
@@ -8200,6 +9146,7 @@ function wedgeRoute() {
 }
 
 async function onWedgeScan(value) {
+  calcUndoScan();                             // ตัวอักษรของการยิงที่หล่นเข้าเครื่องคิดเลข — คืนสถานะเดิมทั้งก้อน แล้วส่งต่อตามหมวดเหมือนเดิม
   const purpose = wedgeRoute();
   if (!purpose) return;                       // ยังไม่ได้ล็อกอิน เงียบไว้
   if (purpose === 'blocked') { showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง'); return; }

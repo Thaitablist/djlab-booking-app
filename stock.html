@@ -22,7 +22,9 @@
     --line-strong: #CFCCC3;
     --text: #0F0F0F;
     --text2: #5B5953;
-    --text3: #807D75;
+    --text3: #6E6B64;                       /* ชุดเดียวกับ desk.html — ≥ 4.5:1 บนขาว/surface2 */
+    --ash: #807D75;                         /* เส้นลายแทนรูป (ไม่ใช่ตัวหนังสือ) */
+    --head: #E3DFD5;                        /* พื้นหัวแผง (แบบ B — ชุดเดียวกับ desk.html) */
     --ok: #1F6B3A;
     --ok-soft: #E8F2EB;
     --warn: #8A5A00;
@@ -68,7 +70,8 @@
     gap: 10px;
   }
   .logo { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .logo-box { background: var(--red); color: #fff; font-family: var(--font-head); font-weight: 700; font-size: 14px; padding: 3px 8px; }
+  /* โลโก้ทางการชุดเดียวกับเมนูซ้ายของคอนโซล (desk.html) — ตัวอักษรขาวทำมาสำหรับพื้นมืด */
+  .logo-img { display: block; width: 73px; height: 24px; flex-shrink: 0; }
   .module-select {
     font-family: var(--font-head); font-size: 17px; font-weight: 600; color: #fff; background: transparent;
     border: 0; padding: 8px 2px; min-height: 44px; cursor: pointer; max-width: 210px;
@@ -99,8 +102,8 @@
   .page.active { display: block; }
 
   .card { background: var(--surface); border: 1px solid var(--line); padding: 16px; margin-bottom: 12px; }
-  .card-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 12px;
-    padding-bottom: 8px; border-bottom: 3px solid var(--black); }
+  .card-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--text); margin: -16px -16px 12px;
+    padding: 10px 16px; background: var(--head); border-bottom: 2px solid var(--black); }   /* หัวแผงแบบ B — ชุดเดียวกับ .panel-head ของ desk.html */
 
   .form-group { margin-bottom: 14px; }
   .form-label { font-size: 14px; color: var(--text2); margin-bottom: 6px; display: block; font-weight: 500; }
@@ -131,7 +134,7 @@
 
   .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
   .stat-card { background: var(--surface); border: 1px solid var(--line); padding: 12px 10px; }
-  .stat-value { font-family: var(--font-head); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat-value { font-family: var(--font-head); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .stat-label { font-size: 14px; color: var(--text2); margin-top: 2px; line-height: 1.3; }
   .stat-card.warn .stat-value { color: var(--red); }
 
@@ -234,7 +237,7 @@
   .pw-tab { flex: none; min-height: 52px; padding: 0 14px; border: 0; background: none; cursor: pointer;
     font-family: var(--font-head); font-weight: 600; font-size: 16px; color: var(--text2); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
   .pw-tab small { font-family: var(--font-body); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
-  .pw-tab[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -4px 0 var(--red); }   /* เส้นใน ไม่ใช่ border — แถบแท็บเลื่อนได้จึงตัดของที่ล้นออกไป */
+  .pw-tab[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -3px 0 var(--black); }   /* เส้นใน ไม่ใช่ border — แถบแท็บเลื่อนได้จึงตัดของที่ล้นออกไป · ดำ 3px = แท็บที่เลือก ชุดเดียวกับ desk (แดงสงวนไว้ให้เมนูล่าง) */
   .pw-panels { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
   .pw-panels::-webkit-scrollbar { display: none; }
   .pw-panel { flex: 0 0 100%; min-width: 0; overflow-y: auto; scroll-snap-align: start; scroll-snap-stop: always; padding: 10px 12px 16px; overscroll-behavior-y: contain; }
@@ -254,7 +257,7 @@
   /* กระเบื้องรูป: พื้นขาว ระยะในเท่ากันทุกรูป — รูปพื้นมืดจึงอ่านเป็นภาพในกรอบ ไม่ใช่รูโหว่ */
   .pc-ph { aspect-ratio: 4 / 3; padding: 8px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .pc-ph img { width: 100%; height: 100%; object-fit: contain; }
-  .sil { width: 100%; height: 100%; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+  .sil { width: 100%; height: 100%; stroke: var(--ash); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .pc-b { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; flex: 1; }
   .pc-name { font-family: var(--font-head); font-weight: 600; font-size: 15px; line-height: 1.3; min-height: 2.6em;
@@ -297,7 +300,7 @@
   .sn-group h4 { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text2); margin: 12px 0 6px; }
   .sn-group h4 b { font-family: var(--font-head); color: var(--text); font-size: 15px; }
   .sn-list { display: flex; flex-wrap: wrap; gap: 6px; }
-  .sn { font-size: 14px; font-weight: 600; padding: 4px 8px; border: 1px solid var(--line-strong); background: var(--surface); letter-spacing: .02em; }
+  .sn { font-size: 14px; font-weight: 600; padding: 3px 8px; border: 1px solid var(--line-strong); background: var(--surface); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
   .sn.in_stock { border-color: var(--black); }
   .sn.sold { color: var(--text2); background: var(--surface2); }
   .sn.defective { border-style: dashed; border-color: var(--red); color: #8A0012; }
@@ -309,7 +312,7 @@
   /* ถาดรับเข้า / นับ — ลิ้นชักล่างเหนือแถบเมนู · ยุบเหลือแถบเดียว แตะเพื่อกางออก */
   .tray { position: fixed; left: 50%; transform: translateX(-50%); bottom: var(--navh); width: 100%; max-width: 480px; z-index: 300;
     background: var(--surface); border-top: 3px solid var(--black); box-shadow: 0 -8px 24px rgba(15,15,15,.14); display: flex; flex-direction: column; max-height: 74dvh; }
-  .tray-h { display: flex; align-items: center; gap: 8px; min-height: 64px; padding: 8px 8px 8px 12px; }
+  .tray-h { display: flex; align-items: center; gap: 8px; min-height: 64px; padding: 8px 8px 8px 12px; background: var(--head); }
   .tray-open { flex: 1; min-width: 0; min-height: 48px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; border: 0; background: none; cursor: pointer; text-align: left; }
   .tray-open strong { font-family: var(--font-head); font-size: 17px; }
   .tray-open span { font-size: 14px; color: var(--text2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -378,7 +381,7 @@
 
 <div class="header">
   <div class="logo">
-    <div class="logo-box">DJ LAB</div>
+    <img class="logo-img" src="logo-full-dark.png" srcset="logo-full-dark.png 1x, logo-full-dark@2x.png 2x" width="73" height="24" alt="DJ LAB SIAM">
     <select class="module-select" id="moduleSelect" aria-label="เลือกระบบ">
       <option value="DJ_LAB_SIAM_BookingApp.html">จองห้องซ้อม</option>
       <option value="stock.html" selected>สต็อกสินค้า</option>
@@ -1862,7 +1865,7 @@ async function loadProductUnits(productId) {
 
   const inStock = data.filter(u => u.status === 'in_stock').length;
   box.innerHTML =
-    '<div class="card-title" style="margin-bottom:8px;">ซีเรียลรายเครื่อง (' + data.length +
+    '<div class="card-title" style="margin:0 0 8px;">ซีเรียลรายเครื่อง (' + data.length +
     ' เครื่อง · อยู่ในสต็อก ' + inStock + ')</div>' +
     data.map(u =>
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;' +

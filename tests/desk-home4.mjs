@@ -248,8 +248,11 @@ async function runTests() {
   ptr(bar, 'pointerdown', r0.left + 10, r0.top + 10);
   ptr(bar, 'pointermove', 99999, 99999);
   ptr(bar, 'pointerup', 99999, 99999);
-  ok('ลากเลยขอบขวาล่าง → ทั้งหน้าต่างยังอยู่ในจอ', pos().x === innerWidth - P().offsetWidth && pos().y === innerHeight - P().offsetHeight,
-    JSON.stringify([pos(), innerWidth, innerHeight]));
+  // มุมขวาล่างจองไว้ให้ปุ่มเครื่องคิดเลข (รอบ 5) — ลากชนมุมนั้นแล้วหน้าต่างหยุดเหนือปุ่ม ไม่ใช่ติดขอบจอล่าง
+  const cb = document.getElementById('calcBtn').getBoundingClientRect();
+  ok('ลากเลยขอบขวาล่าง → ทั้งหน้าต่างยังอยู่ในจอ และหยุดเหนือปุ่มเครื่องคิดเลข (ไม่ทับ)', pos().x === innerWidth - P().offsetWidth &&
+    pos().y === Math.round(cb.top - 12 - P().offsetHeight) && P().getBoundingClientRect().bottom <= cb.top,
+    JSON.stringify([pos(), innerWidth, innerHeight, cb.top]));
   r0 = P().getBoundingClientRect();
   ptr(bar, 'pointerdown', r0.left + 10, r0.top + 10);
   ptr(bar, 'pointermove', 50, 100);
@@ -273,7 +276,8 @@ async function runTests() {
   await sleep(150);
   ok('Alt+← ยังเป็นย้อนกลับหมวดตามเดิม (ไม่ถูกแถบหน้าต่างกิน)', current === 'bills' && pos().x === before.x, current);
   key(bar, 'Home');
-  ok('Home = กลับมุมขวาล่าง', pos().x === innerWidth - P().offsetWidth - 20 && pos().y === innerHeight - P().offsetHeight - 20, JSON.stringify(pos()));
+  const cb2 = document.getElementById('calcBtn').getBoundingClientRect();
+  ok('Home = กลับมุมขวาล่าง (เหนือปุ่มเครื่องคิดเลข)', pos().x === innerWidth - P().offsetWidth - 20 && pos().y === Math.round(cb2.top - 12 - P().offsetHeight), JSON.stringify(pos()));
   ok('หน้าคีย์ลัด (?) บอกวิธีย้ายหน้าต่างวิดีโอ', txt('helpDialog').indexOf('ย้ายหน้าต่างวิดีโอ') !== -1);
 
   // ── 11. โฟกัสในกรอบวิดีโอ → เตือนเรื่องเครื่องยิง ─────────────────────────
