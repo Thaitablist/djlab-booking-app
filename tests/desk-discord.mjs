@@ -16,6 +16,7 @@ const { MOCK: MOCK3 } = await import(pathToFileURL(join(root, 'tests/desk-home3.
 
 // ห้องปลอม — ใช้ทั้งในเทสต์และภาพหน้าจอ (ชื่อคนสมมติ)
 export const DISCORD_MOCK = `<script>
+window.DJLAB_DISCORD_ENABLED = true;     // ห้อง Discord ถูกพักไว้ (สวิตช์ใน desk.html ปิด) — เทสต์ชุดนี้เปิดเพื่อคุมโค้ดที่เก็บไว้
 const DC_CH = '1515751634087706724', DC_BOT = '700000000000000007';
 const dcAt = (hhmm, day) => new Date((day || TODAY) + 'T' + hhmm + ':00+07:00').toISOString();
 const dcU = {
@@ -404,9 +405,37 @@ async function runTests() {
 }
 </script>`;
 
+// สวิตช์ปิด (ค่าที่ขึ้นเว็บจริงตอนนี้ — เจ้าของพักไว้ 1 ต.ค. 69): ไม่มีในเมนู · ไม่มีไอคอนลัด · ไม่เรียกฟังก์ชัน discord · #discord ไม่เปิดหมวดนี้
+const OFF = `<script>
+window.addEventListener('load', () => setTimeout(runTests, 300));
+${HARNESS}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function runTests() {
+  L('=== Discord: พักไว้ (สวิตช์ปิด) ===');
+  const calls = [];
+  const orig = window.callFn;
+  window.callFn = (name, body) => { calls.push(name); return orig(name, body); };
+  document.getElementById('loginEmail').value = 'tibass@x';
+  document.getElementById('loginPassword').value = 'x';
+  await doLogin();
+  await sleep(400);
+  ok('สวิตช์ปิดอยู่', DISCORD_ENABLED === false);
+  ok('ไม่มี Discord ในเมนูซ้าย', !SECTIONS.some(s => s.id === 'discord') && !document.getElementById('navBadge-discord'));
+  ok('ไม่มี Discord ในรายการไอคอนลัด', !LAUNCH_ITEMS.some(x => x.key === 'discord'));
+  showSection('discord');
+  await sleep(200);
+  ok('สั่งเปิด #discord ตรง ๆ ก็ไม่เข้าหมวดนี้', current !== 'discord');
+  await dcStart();
+  ok('ไม่เรียกฟังก์ชัน discord เลย', calls.indexOf('discord') === -1 && dc.state === 'idle', calls.join(','));
+  L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
+  L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
+}
+</script>`;
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const flags = ['--host-resolver-rules=MAP * ~NOTFOUND', '--window-size=1440,900'];
   const a = runPage({ root, file: 'desk.html', mock: MOCK3 + DISCORD_MOCK, tests: TESTS, flags });
   const b = runPage({ root, file: 'desk.html', mock: MOCK3 + DISCORD_MOCK, tests: SETUP, flags });
-  process.exit(a.ok && b.ok ? 0 : 1);
+  const c = runPage({ root, file: 'desk.html', mock: MOCK3 + DISCORD_MOCK.replace('window.DJLAB_DISCORD_ENABLED = true;', ''), tests: OFF, flags });
+  process.exit(a.ok && b.ok && c.ok ? 0 : 1);
 }

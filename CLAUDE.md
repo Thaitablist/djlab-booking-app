@@ -271,6 +271,11 @@ endpoint ที่รับสัญญาณคือ `/webhooks/booking-confir
 
 ### Discord (`#discord` · Alt+S) — ห้อง 🪴｜staff-only (1 ต.ค. 69)
 
+> ⏸ **พักไว้ — เจ้าของสั่ง 1 ต.ค. 69 "ยกเลิกทาง Discord เก็บงานที่ทำไว้"** · โค้ดทั้งหมดยังอยู่ ปิดที่สวิตช์เดียว
+> `DISCORD_ENABLED` (ตรงหัว `SECTIONS` ใน desk.html): ไม่มีในเมนู · ไม่มีไอคอนลัด · ไม่เรียกฟังก์ชัน `discord` เลย ·
+> ฟังก์ชัน `discord` **ไม่ได้ติดตั้ง**บน Supabase · เทสต์ชุด Discord เปิดสวิตช์เองผ่าน `window.DJLAB_DISCORD_ENABLED`
+> และมีชุด "พักไว้" คุมว่าตอนปิดไม่มีอะไรโผล่ · **เปิดกลับ** = แก้สวิตช์เป็น `true` แล้วทำ STAFF-HOME.md ขั้นที่ 8
+
 ทีมงานอ่าน/ตอบห้อง staff-only (`1515751634087706724`) ของเซิร์ฟเวอร์ร้านจากคอนโซล ผ่าน Edge Function **`discord`**
 (Discord REST v10 ด้วยโทเคนบอทตัวเดิม · secret `DISCORD_BOT_TOKEN`) · **ไม่แตะบอทบน Railway เลย** · ไม่มีตาราง/migration
 

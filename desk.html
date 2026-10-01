@@ -2064,8 +2064,12 @@ const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold:
 // manager: true = เฉพาะเจ้าของร้าน/ผู้ดูแล
 // (activity ตาม activity.html · admin เจ้าของร้านสั่งปิดจากพนักงานในคอนโซล — admin-data.html เดิมไม่ได้กั้น)
 // hash = ชื่อใน URL (#stock, #pos ...) ทำให้ปุ่มย้อนกลับ/เปิดหน้าใหม่แล้วกลับหมวดเดิมได้
+// ห้อง Discord ทีมงาน: เจ้าของสั่งพักไว้ 1 ต.ค. 69 ("ยกเลิกทาง Discord เก็บงานที่ทำไว้")
+// โค้ดทั้งหมดยังอยู่และยังมีเทสต์คุม — ปิดที่สวิตช์นี้ที่เดียว: ไม่มีในเมนู · ไม่มีไอคอนลัด · ไม่เรียกฟังก์ชัน discord เลย
+// เปิดกลับ = เปลี่ยนเป็น true (แล้วทำตาม STAFF-HOME.md ขั้นที่ 8) · เทสต์เปิดผ่าน window.DJLAB_DISCORD_ENABLED
+const DISCORD_ENABLED = window.DJLAB_DISCORD_ENABLED === true;
 const SECTIONS = [
-  { id: 'home',     hash: 'home',          group: 'พนักงาน',     icon: 'home', label: 'หน้าแรก', key: 'H' },
+  { id: 'home',    hash: 'home',          group: 'พนักงาน',     icon: 'home', label: 'หน้าแรก', key: 'H' },
   { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: 'board', label: 'กระดานข้อความ', key: 'B' },
   { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: 'mail', label: 'กล่องจดหมายร้าน', key: 'M' },
   { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: 'calendar', label: 'ปฏิทิน', key: 'C' },
@@ -2081,7 +2085,7 @@ const SECTIONS = [
   { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: 'daily', label: 'สรุปรายวัน', key: '8' },
   { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: 'activity', label: 'บันทึกการใช้งาน', manager: true, key: '9' },
   { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: 'admin', label: 'จัดการข้อมูล', manager: true, key: '0' },
-];
+].filter(s => s.id !== 'discord' || DISCORD_ENABLED);
 // ไอคอนเมนูซ้าย — เส้น 1.75 ปลายเหลี่ยม มุมแหลม ชุดเดียวกับ .ico-svg ทั้งคอนโซล (เลิกใช้อักขระ Unicode แทนไอคอน · 1 ต.ค. 69)
 // ตกแต่งล้วน: ชื่อหมวดอยู่ข้าง ๆ เป็นตัวหนังสือเสมอ จึง aria-hidden
 const NAV_ICONS = {
@@ -6741,7 +6745,7 @@ const LAUNCH_ITEMS = [
   color: b.key === 'starred' ? '#F9A825' : '#5C6BC0',     // ป้ายอีเมล = ฟ้าอมม่วงอ่อนของอีเมล · ติดดาว = เหลืองอำพัน
   go: () => openMailBox(b.key),
   badge: () => { const c = mailState.counts[b.key]; return c && b.key !== 'starred' ? c.unseen : 0; },
-})));
+}))).filter(x => x.key !== 'discord' || DISCORD_ENABLED);
 const LAUNCH_DEFAULT = ['pos', 'mail', 'booking', 'calendar'];
 let homePrefs = { launcher: LAUNCH_DEFAULT.slice(), apps: [], loaded: false, error: '' };
 let launchDraft = null;        // null = ไม่ได้แก้อยู่ · array = ค่าที่กำลังเลือกในโหมดแก้ไข
@@ -8078,7 +8082,7 @@ function dcMarkSeen() {
 }
 
 async function dcStart() {
-  if (!currentUserId) return;
+  if (!DISCORD_ENABLED || !currentUserId) return;
   if (dc.user !== currentUserId) {
     // คนใหม่บนเครื่องนี้ (ล็อกอิน / สลับบัญชี) — อ่านถึงไหนเป็นของแต่ละคน · ชื่อหน้าข้อความก็เปลี่ยนตามคน
     dc.user = currentUserId;
