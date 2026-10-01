@@ -20,7 +20,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* หน้านี้ทำมาเพื่อจอคอมหน้าเคาน์เตอร์ (≥1280px) — มือถือยังใช้ stock.html / sales.html เหมือนเดิม */
+  /* หน้านี้ทำมาเพื่อจอคอมหน้าเคาน์เตอร์ (≥1280px) · iPad ทั้งสองแนว (1 ต.ค. 69) · iPhone (< 768px · 2 ต.ค. 69) — กฎของแต่ละชั้นอยู่ท้ายสไตล์ชีต
+     หน้ามือถือเดิม stock.html / sales.html ยังใช้ได้ตามปกติ */
   :root {
     --red: #CC001A;          /* สีหลักของแบรนด์ ใช้เฉพาะจุดที่ต้องการให้เห็นก่อน */
     --red-soft: #FBE9EC;
@@ -472,6 +473,7 @@
   .seller .ava { width: 26px; height: 26px; font-size: 14px; }
   .seller.primary { border-color: var(--black); font-weight: 600; }
   .seller button { border: 0; background: none; cursor: pointer; font-size: 14px; padding: 0 6px; }
+  .seller small { font-size: 14px; }                 /* "(หลัก)" — <small> เปล่าๆ เหลือ 11.67px ผิดกฎ 14px ของเจ้าของร้าน */
 
   /* สลับบัญชี */
   .acct-list { display: flex; flex-direction: column; gap: 8px; }
@@ -636,6 +638,7 @@
   .seg button[aria-pressed="true"] + button { border-left-color: var(--black); }
   .seg button:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; position: relative; z-index: 1; }
   .modes button { min-width: 84px; font-size: 16px; }
+  #groupSwitch button { gap: 0; }                    /* ป้าย "จัดตาม"+"แบรนด์" เป็นสองชิ้น (ชิ้นแรกย่อหายบนมือถือ) — gap ของ .seg จะแทรกช่องว่างกลางคำ */
   .modes .m-n { font-family: var(--font-head); font-size: 14px; font-weight: 700; min-width: 22px; padding: 0 5px; background: var(--red); color: #fff; }
   #addProductBtn { min-height: 54px; }
 
@@ -955,6 +958,8 @@
   }
   /* ระหว่างพิมพ์บน iPad (แป้นบนจอเปิด) หน้าต่างวิดีโอลอยหลบไปก่อน ไม่บังช่องที่กำลังพิมพ์ · เสียงยังเล่นต่อ (ซ่อนภาพ ไม่ถอด iframe) */
   body.kb-open .player:not(.docked) { visibility: hidden; }
+  /* จอเตี้ยมาก (iPhone SE): แผงเครื่องคิดเลขเปิดแล้วไม่เหลือที่ให้วิดีโอเลย → ซ่อนภาพ ไม่ทับแผง · ปิดแผงแล้วกลับมา (playerLayout) */
+  .player.no-room:not(.docked) { visibility: hidden; }
 
   .nav-btn, .nav-scrim { display: none; }
   .nav-btn { align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 12px;
@@ -1114,6 +1119,160 @@
     .lt:hover .lt-icon { transform: none; box-shadow: 0 2px 6px rgba(15,15,15,.14), 0 8px 18px rgba(15,15,15,.12); }
     .ev:hover { transform: none; box-shadow: none; }
   }
+
+  /* ======================================================================
+     < 768px = iPhone (เจ้าของสั่ง 2 ต.ค. 69: "บน iPhone UI เละเทะมาก ใช้งานไม่ได้") — ชั้นที่สี่ ต่อจากชั้น iPad ข้างบน
+     ไม่ใช่การย่อทุกอย่างลง: งานเดียวกัน คนละท่าถือ — มือเดียว นิ้วโป้ง เห็นทีละอย่าง
+       แถบบน       [เมนู][←][ชื่อหมวด] + ช่องค้นหาเต็มแถว · ชื่อผู้ใช้/ออกจากระบบไปท้ายลิ้นชักเมนู (placeUser) ·
+                   เครื่องคิดเลขอยู่มุมขวาของแถวแรก จึงไม่แย่งที่เนื้อหา (--calc-clear = 0)
+       ผนังสต็อก   สแกน → โหมด → [จัดตาม · ใกล้หมด · หมด] → ชิปแถบเลื่อนข้าง (ไม่พับเป็น "+n") → ปีกเต็มจอ ปีกถัดไปโผล่แง้มให้ปัด
+       ตาราง       ตัดคอลัมน์รอง (.col-opt) · แตะแถว = ดูครบในแผงเต็มจอ · ตะกร้า = การ์ดต่อรายการ
+     ทุกเกณฑ์ของ iPad ยังใช้ (เป้ากด ≥ 44 · ช่องกรอก ≥ 16px · ตัวหนังสือ ≥ 14px) ผ่านชุดเดียวกัน — tests/desk-iphone.mjs
+     ====================================================================== */
+  @media screen and (max-width: 767px) {
+    :root { --calc-clear: 0px; }
+    .app { min-width: 0; }
+
+    /* แถบบน */
+    .topbar { gap: 8px; padding: 8px 12px 10px; }
+    .topbar h1 { min-width: 0; margin-right: 52px; }      /* 52 = ที่ของปุ่มเครื่องคิดเลข (44 + ห่าง 8) ชื่อหมวดยาวตัดเป็น … */
+    .lbl-back { display: none; }
+    #backBtn { min-width: 44px; padding-left: 0; padding-right: 0; }
+    .gsearch { max-width: none; }
+    .calc-btn { position: fixed; top: 8px; right: 12px; }
+    .calc { position: fixed; top: 60px; right: 8px; width: min(320px, calc(100vw - 16px)); max-height: calc(100dvh - 72px); }
+    .sidebar-foot .user { flex-direction: column; align-items: stretch; gap: 10px; margin: 0 0 12px; white-space: normal; color: #CFCCC3; }
+    .sidebar-foot .user strong { color: #fff; }
+    .sidebar-foot .user .btn { background: none; color: #fff; border: 1px solid #6B6962; text-decoration: none; }
+
+    /* พื้นที่ทำงาน · การ์ด · กล่องสถิติ */
+    .workspace { padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); }
+    .workspace.is-wall { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+    .workspace.is-chat { padding: 12px; }
+    .card { padding: 16px; margin-bottom: 16px; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stats > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .stat { padding: 12px 14px; }
+
+    /* หน้าแรก: ชื่อ → นาฬิกา → สถานะร้าน เรียงลงเป็นคอลัมน์เดียว (นาฬิกา 136px ล้นจอ — ลดตามความกว้าง ไม่เกิน 96px) */
+    .deck { grid-template-columns: minmax(0, 1fr); grid-template-areas: "hi" "clock" "side"; gap: 8px; margin: -16px -16px 0; padding: 16px 16px 18px; }
+    .deck-greet { white-space: normal; }
+    .bigclock { justify-self: start; font-size: min(22vw, 96px); }
+    .bigclock .sec { font-size: min(8vw, 34px); margin-left: 6px; }          /* ≈ 36% ของตัวนาฬิกา (22vw) — เขียนเป็นค่าตรงๆ ไม่ใช้ em ซ้อน */
+    .deck-side { text-align: left; padding-bottom: 0; }
+    .me-strip { margin: 0 -16px 16px; padding: 12px 16px; gap: 10px 20px; }
+
+    /* ตาราง: คอลัมน์รองซ่อน (ข้อมูลครบอยู่ในแผงรายละเอียดตอนแตะแถว) */
+    .col-opt { display: none; }
+    table.data th .th, table.data td { padding: 10px 8px; }
+
+    /* ตะกร้าขายหน้าร้าน: การ์ดต่อรายการ — แถวแรก ชื่อ + ปุ่มลบ · แถวสอง จำนวน / ราคา / รวม (ล้นก็ตกลงบรรทัดใหม่เอง) */
+    table.cart-tbl, table.cart-tbl tbody { display: block; }
+    table.cart-tbl thead { display: none; }
+    table.cart-tbl tr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    table.cart-tbl td, table.cart-tbl td:not(:first-child) { display: block; width: auto; padding: 0; border: 0; }
+    table.cart-tbl td:nth-child(1) { order: 1; flex: 1 1 calc(100% - 52px); min-width: 0; }
+    table.cart-tbl td:nth-child(5) { order: 2; }
+    table.cart-tbl td:nth-child(2) { order: 3; }
+    table.cart-tbl td:nth-child(3) { order: 4; flex: 1 1 88px; min-width: 88px; }
+    table.cart-tbl td:nth-child(4) { order: 5; margin-left: auto; text-align: right; }
+    table.cart-tbl .price-in { width: 100%; }
+    .qty input { width: 48px; }
+
+    /* ผนังสต็อก */
+    .wall-sec { gap: 8px; }
+    .wall-top { gap: 8px; }
+    .scanbox { height: 50px; padding: 0 4px 0 12px; gap: 10px; }
+    .modes button { flex: 1; min-width: 0; padding: 0 6px; }
+    #addProductBtn { min-height: 44px; padding: 0 12px; }
+    .wall-bar { flex-wrap: wrap; gap: 8px; min-height: 0; }
+    .lbl-by { display: none; }
+    #groupSwitch { order: 1; }
+    .flags { order: 2; margin-left: auto; }
+    /* ชิปกรองเป็นแถบเลื่อนข้างบรรทัดเดียวชิดขอบจอ — ไม่ตกบรรทัด จึงไม่ถูกพับเป็น "+n หมวด" (layoutChips พับเมื่อชิปตกบรรทัดสอง) */
+    .wall-chips { order: 3; flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; margin: 0 -12px; padding: 2px 12px; }
+    .wall-chips::-webkit-scrollbar { display: none; }
+    /* ปีกเต็มจอเหลือแง้มให้เห็นปีกถัดไป (บอกว่าปัดต่อได้ · ปุ่มลูกศรไม่มีที่ยืนแล้ว) */
+    .wall-wrap:has(> .wall.snaps) { margin: 0; }
+    .wall-step { display: none; }
+    .wall { gap: 8px; }
+    .wall.snaps .wing { flex: 0 0 calc(100% - 28px); }
+    /* ถาดรับเข้า/นับ: ปุ่มกับข้อความลงบรรทัดเต็ม ไม่ทับกัน · สูงไม่เกินครึ่งจอ ผนังยังเหลือที่ */
+    .tray { flex: 0 1 auto; max-height: 55dvh; }
+    .tray-h { gap: 8px 10px; padding: 8px 12px; }
+    .tray-acts { flex-wrap: wrap; width: 100%; margin-left: 0; gap: 8px; }
+    .tray-note { flex: 1 0 100%; max-width: none; white-space: normal; }
+    .tray-reason { width: 100% !important; }
+    .tray-h .btn { flex: 1; }
+    .tray-b { padding: 10px 12px; gap: 12px; }
+
+    /* หน้าต่างวิดีโอลอย: ไม่กว้างกว่าจอ */
+    .player { width: min(400px, calc(100vw - 16px)); }
+
+    /* คอลัมน์ที่ตัดเฉพาะบนมือถือ (col-ph) — คนละตัวกับ .col-opt ที่หายตอนเปิดแผงรายละเอียดบนคอม/iPad · วันเวลาตกบรรทัดได้ */
+    .col-ph { display: none; }
+    table.data td.dt { white-space: normal; }
+    /* การ์ดที่มีตารางอยู่ตรงๆ (สรุปรายวัน): ตารางกว้างกว่าจอเลื่อนข้างในการ์ดเอง ไม่ดันทั้งหน้าให้ล้น */
+    .card:has(> table.data) { overflow-x: auto; }
+
+    /* ตะกร้า: ป้ายกำกับของแถวที่สอง (ก่อนหน้านี้เป็นตัวเลขเปล่าๆ "12900" ติด "12,900.00" แยกไม่ออกว่าอันไหนต่อหน่วย อันไหนรวม) */
+    table.cart-tbl tr { align-items: flex-start; }
+    table.cart-tbl td:nth-child(n+2):nth-child(-n+4)::before { display: block; margin-bottom: 2px; font-size: 14px; font-weight: 400; line-height: 1.3; color: var(--text2); }
+    table.cart-tbl td:nth-child(2)::before { content: 'จำนวน'; }
+    table.cart-tbl td:nth-child(3)::before { content: 'ราคาต่อหน่วย'; }
+    table.cart-tbl td:nth-child(4)::before { content: 'รวม'; }
+    table.cart-tbl td:nth-child(4) strong { display: block; line-height: 44px; }     /* ตัวเลขรวมอยู่แนวเดียวกับช่องกรอกข้างๆ (สูง 44) */
+
+    /* ปฏิทินรายเดือน: ขอบในช่องแคบลง ให้ปุ่มวันกว้างถึง 44 */
+    .cal-cell { padding: 4px 2px; }
+
+    /* ไทม์ไลน์จองห้อง: 8 ชั่วโมงในความกว้างจอเดียวทำให้ก้อนจองอ่านไม่ออก ("17…") — ให้เลื่อนข้างได้ ชื่อห้องติดซ้ายตลอด */
+    #bkTimeline { overflow-x: auto; }
+    .tl-head, .tl-row { grid-template-columns: 96px minmax(560px, 1fr); }
+    .tl-room { position: sticky; left: 0; z-index: 2; padding-right: 6px; background: var(--surface); }
+
+    /* จัดการข้อมูล: เมนูตารางเป็นแถบเลื่อนข้าง (14 ตารางเรียงลงจะยาวกว่าจอ) แล้วข้อมูลเต็มความกว้างข้างล่าง */
+    .admin-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .tlist { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .tlist::-webkit-scrollbar { display: none; }
+    .tlist button { flex: 0 0 auto; width: auto; white-space: nowrap; border: 1px solid var(--line-strong); }
+    .tlist button.active { border-color: var(--black); }
+    .mcal { gap: 0; }                                  /* 7 ช่องในจอ 375 ได้ช่องละ 44.4 พอดี (มีช่องไฟ 2px จะเหลือ 42) */
+    /* iPhone SE (375): สวิตช์จัดผนัง + ธงใกล้หมด/หมด ต้องอยู่แถวเดียวกัน — ลดช่องไฟในตัวปุ่มลงเล็กน้อย */
+    .flag { padding: 5px 8px; gap: 6px; }
+    .seg button { padding-left: 12px; padding-right: 12px; }
+  }
+
+  /* ======================================================================
+     จอเตี้ย (สูงไม่เกิน 500px · ทุกความกว้าง) = iPhone แนวนอน — ตัดที่จุดที่เนื้อหาเสีย ไม่ตามชื่อเครื่อง
+     ที่ 844×390 แถบบนสองแถว + แถวควบคุมผนังสามแถวกินเกือบทั้งความสูง ผนังเหลือแค่หัวปีก ไม่เห็นสินค้าสักรุ่น
+       แถบบนแถวเดียว (ค้นหาอยู่ในแถวเดียวกัน) · ผนัง: ช่องยิง+โหมดแถวเดียว · จัดตาม+ชิป+ธงแถวเดียว · ถาดไม่เกิน 60% ของความสูง
+     ====================================================================== */
+  @media screen and (max-height: 500px) {
+    .topbar { flex-wrap: nowrap; gap: 8px; padding: 6px 12px; }
+    .topbar h1 { flex: 0 1 auto; max-width: 34vw; margin-right: 0; }
+    .gsearch { order: 0; flex: 1 1 0; min-width: 0; }
+    .workspace.is-wall { padding: 8px 28px calc(8px + env(safe-area-inset-bottom)); }   /* 28 = ที่ของปุ่มเลื่อนปีก 44 − ขอบ 16 (กฎจอสัมผัส) */
+    .wall-sec { gap: 8px; }
+    .scanbox { height: 48px; }                                                         /* 48 − กรอบ 2px×2 = ช่องพิมพ์สูง 44 */
+    #addProductBtn { min-height: 44px; }
+    .wall-top { flex-wrap: nowrap; }
+    .wall-top .scanbox { flex: 1 1 0; min-width: 220px; }
+    .wall-top .modes { flex: 0 0 auto; }
+    .wall-top .modes button { flex: 0 0 auto; min-width: 72px; }
+    .wall-bar { flex-wrap: nowrap; }
+    .wall-chips { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .wall-chips::-webkit-scrollbar { display: none; }
+    .tray { flex: 0 1 auto; max-height: 60dvh; }
+  }
+  /* ...และถ้าความกว้างเป็นมือถือด้วย (SE แนวนอน 667): เครื่องคิดเลขลอยมุมขวาบนของแถบ จึงเว้นขวาให้ · ผนังเรียงเดิมของแถว (ไม่ย้าย order) */
+  @media screen and (max-height: 500px) and (max-width: 767px) {
+    .topbar { padding-right: 64px; }
+    .workspace.is-wall { padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); }   /* ปุ่มเลื่อนปีกถูกซ่อนบนมือถือ ไม่ต้องเว้น 28 */
+    #groupSwitch, .flags, .wall-chips { order: 0; }
+    .flags { margin-left: 0; }
+    .wall-chips { flex: 1 1 0; margin: 0; padding: 2px 0; }
+  }
 </style>
 </head>
 <body>
@@ -1155,7 +1314,7 @@
       <button class="nav-btn" id="navBtn" type="button" onclick="setNav(!document.body.classList.contains('nav-open'))"
               aria-controls="sidebar" aria-expanded="false" aria-label="เมนู"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>เมนู</button>
       <button class="btn btn-sm" id="backBtn" type="button" onclick="goBack()" disabled
-              title="ย้อนกลับไปหมวดก่อนหน้า (Alt+←)" aria-label="ย้อนกลับไปหมวดก่อนหน้า">← ย้อนกลับ</button>
+              title="ย้อนกลับไปหมวดก่อนหน้า (Alt+←)" aria-label="ย้อนกลับไปหมวดก่อนหน้า">← <span class="lbl-back">ย้อนกลับ</span></button>
       <h1 id="pageTitle">สินค้า</h1>
       <div class="gsearch">
         <input type="search" id="globalSearch" class="input" autocomplete="off"
@@ -1281,10 +1440,10 @@
             <table class="data">
               <thead><tr>
                 <th class="pad">สถานะของฉัน</th>
-                <th class="pad">วันที่</th>
+                <th class="pad col-ph">วันที่</th>
                 <th class="pad">หัวข้อ</th>
                 <th class="pad col-opt">ผู้เขียน</th>
-                <th class="pad num">อ่านแล้ว</th>
+                <th class="pad num col-ph">อ่านแล้ว</th>
               </tr></thead>
               <tbody id="boardRows"></tbody>
             </table>
@@ -1394,8 +1553,8 @@
           </div>
           <div class="wall-bar">
             <div class="seg" id="groupSwitch" role="group" aria-label="จัดผนัง (กด G สลับ)">
-              <button type="button" data-group="brand" aria-pressed="true" onclick="setWallGroup('brand')">จัดตามแบรนด์</button>
-              <button type="button" data-group="category" aria-pressed="false" onclick="setWallGroup('category')">จัดตามหมวด</button>
+              <button type="button" data-group="brand" aria-pressed="true" onclick="setWallGroup('brand')"><span class="lbl-by">จัดตาม</span>แบรนด์</button>
+              <button type="button" data-group="category" aria-pressed="false" onclick="setWallGroup('category')"><span class="lbl-by">จัดตาม</span>หมวด</button>
             </div>
             <div class="wall-chips" id="wallChips" role="group" aria-label="ตัวกรอง"></div>
             <div class="flags">
@@ -1566,7 +1725,7 @@
               <thead><tr>
                 <th><button class="th" data-t="bills" data-k="created_at">วันเวลา</button></th>
                 <th><button class="th" data-t="bills" data-k="sale_no">เลขที่บิล</button></th>
-                <th><button class="th" data-t="bills" data-k="customer">ลูกค้า</button></th>
+                <th class="col-ph"><button class="th" data-t="bills" data-k="customer">ลูกค้า</button></th>
                 <th class="col-opt"><button class="th" data-t="bills" data-k="payment">ชำระโดย</button></th>
                 <th class="col-opt"><button class="th" data-t="bills" data-k="staff">พนักงานขาย</button></th>
                 <th class="num"><button class="th" data-t="bills" data-k="total">ยอดสุทธิ</button></th>
@@ -1727,8 +1886,8 @@
               <div class="card" style="padding:0;">
                 <h3 style="padding:16px 20px 0;">รายรับ</h3>
                 <table class="data">
-                  <thead><tr><th class="pad">เวลา</th><th class="pad">ที่มา</th><th class="pad">รายละเอียด</th>
-                    <th class="pad">วิธีชำระ</th><th class="num pad">จำนวนเงิน</th><th class="no-print pad"></th></tr></thead>
+                  <thead><tr><th class="pad">เวลา</th><th class="pad col-ph">ที่มา</th><th class="pad">รายละเอียด</th>
+                    <th class="pad col-ph">วิธีชำระ</th><th class="num pad">จำนวนเงิน</th><th class="no-print pad"></th></tr></thead>
                   <tbody id="incomeTableBody"></tbody>
                   <tfoot><tr><td colspan="4" style="text-align:right;font-weight:600;">รวมรายรับ</td><td class="num" id="incomeTotal" style="font-weight:700;">0.00</td><td class="no-print"></td></tr></tfoot>
                 </table>
@@ -1736,7 +1895,7 @@
               <div class="card" style="padding:0;">
                 <h3 style="padding:16px 20px 0;">รายจ่าย</h3>
                 <table class="data">
-                  <thead><tr><th class="pad">ลำดับ</th><th class="pad">รายการ</th><th class="pad">บิล</th>
+                  <thead><tr><th class="pad col-ph">ลำดับ</th><th class="pad">รายการ</th><th class="pad">บิล</th>
                     <th class="num pad">จำนวนเงิน</th><th class="no-print pad"></th></tr></thead>
                   <tbody id="expenseTableBody"></tbody>
                   <tfoot><tr><td colspan="3" style="text-align:right;font-weight:600;">รวมรายจ่าย</td><td class="num" id="expenseTotal" style="font-weight:700;">0.00</td><td class="no-print"></td></tr></tfoot>
@@ -4432,9 +4591,9 @@ function renderBills() {
     (!q || [s.sale_no, customerName(s), s.customers && s.customers.phone, sellerNames(s)]
       .some(x => (x || '').toLowerCase().includes(q))));
   fillTable('bills', sortRows('bills', rows), s =>
-    '<td style="white-space:nowrap;">' + formatDateTime(s.created_at) + '</td>' +
+    '<td class="nowrap dt">' + formatDateTime(s.created_at) + '</td>' +
     '<td><strong' + (s.status === 'void' ? ' style="text-decoration:line-through;"' : '') + '>' + escapeHtml(s.sale_no) + '</strong></td>' +
-    '<td>' + escapeHtml(customerName(s)) + '</td>' +
+    '<td class="col-ph">' + escapeHtml(customerName(s)) + '</td>' +
     '<td class="col-opt">' + escapeHtml(s.payment_method || '—') + '</td>' +
     '<td class="col-opt">' + escapeHtml(sellerNames(s)) + '</td>' +
     '<td class="num"><strong>' + formatMoney(s.total) + '</strong></td>' +
@@ -4670,6 +4829,20 @@ function setNav(open, focusBack) {
   } else if (focusBack) document.getElementById('navBtn').focus({ preventScroll: true });
 }
 NAV_DRAWER.addEventListener('change', syncNavInert);
+
+// iPhone (< 768px): แถบบนเหลือเมนู/ย้อนกลับ/ชื่อหมวด/ค้นหา — ชื่อผู้ใช้กับปุ่มออกจากระบบไปอยู่ท้ายลิ้นชักเมนู
+// ย้ายโหนดเดิม ไม่ทำสำเนา (id #currentUserInfo และปุ่มยังเป็นของเดิม) · จอกว้างกว่านั้นกลับไปท้ายแถบบน
+// ช่องค้นหา: ตัดคำบอกคีย์ลัด (กด / หรือ Ctrl+K) บนมือถือ — ไม่มีคีย์บอร์ดให้กด และคำยาวจนถูกตัดครึ่งช่อง
+const PHONE = window.matchMedia('(max-width: 767px)');
+const SEARCH_HINT = document.getElementById('globalSearch').placeholder;
+function placeUser() {
+  const u = document.querySelector('.user');
+  if (PHONE.matches) document.querySelector('.sidebar-foot').prepend(u);
+  else document.querySelector('.topbar').append(u);
+  document.getElementById('globalSearch').placeholder = PHONE.matches ? 'ค้นหาสินค้า / บิล / ลูกค้า' : SEARCH_HINT;
+}
+PHONE.addEventListener('change', placeUser);
+placeUser();
 
 // ---------------------------------------------------------------------------
 // แป้นพิมพ์บนจอของ iPad: Safari ไม่ย่อหน้าเว็บ (layout viewport คงเดิม) แค่ย่อส่วนที่มองเห็น (visualViewport)
@@ -6122,9 +6295,9 @@ function renderDaily() {
   document.getElementById('incomeTableBody').innerHTML = incomeRows.length
     ? incomeRows.map(r => '<tr style="cursor:default;">' +
         '<td class="nowrap">' + formatTimeThai(r.occurred_at) + '</td>' +
-        '<td>' + escapeHtml(r.source) + ' <span class="sub">(' + (KIND[r.kind] || r.kind) + ')</span></td>' +
+        '<td class="col-ph">' + escapeHtml(r.source) + ' <span class="sub">(' + (KIND[r.kind] || r.kind) + ')</span></td>' +
         '<td>' + escapeHtml(r.detail) + '</td>' +
-        '<td>' + escapeHtml(r.payment_method || '-') + '</td>' +
+        '<td class="col-ph">' + escapeHtml(r.payment_method || '-') + '</td>' +
         '<td class="num">' + formatMoney(r.amount) + '</td>' +
         '<td class="no-print nowrap">' + (r.kind === 'manual'
           ? '<button class="btn btn-sm" type="button" onclick="openIncomeModal(\'' + r.ref_id + '\')">แก้ไข</button> ' +
@@ -6133,7 +6306,7 @@ function renderDaily() {
     : '<tr><td colspan="6"><div class="empty">ยังไม่มีรายรับในวันนี้</div></td></tr>';
   document.getElementById('expenseTableBody').innerHTML = expenseRows.length
     ? expenseRows.map(e => '<tr style="cursor:default;">' +
-        '<td>' + e.seq + '</td>' +
+        '<td class="col-ph">' + e.seq + '</td>' +
         '<td>' + escapeHtml(e.description) + '</td>' +
         '<td>' + (e.receipt_path
           ? '<button class="btn btn-sm no-print" type="button" onclick="viewReceipt(\'' + e.id + '\')">ดูบิล</button><span class="print-only">มีบิล</span>'
@@ -7546,13 +7719,19 @@ function clampMini(x, y) {
   const left = fit(Math.min(...zones.map(r => r.left)) - CALC_GAP - w, c.y);
   const ok = [up, left].filter(q => !hits(q))
     .sort((a, b) => (Math.abs(a.x - c.x) + Math.abs(a.y - c.y)) - (Math.abs(b.x - c.x) + Math.abs(b.y - c.y)));
-  return ok[0] || fit(left.x, up.y);
+  if (ok[0]) return ok[0];
+  // จอแคบ (iPhone): แผงเครื่องคิดเลขกว้างเกือบเต็มจอ ข้างบน/ซ้ายของแผงไม่มีที่พอ → ลงไปอยู่ใต้แผง (ทางสุดท้ายเท่านั้น — คอมใช้ขึ้นบน/ซ้ายตามเดิม)
+  const down = fit(c.x, Math.max(...zones.map(r => r.bottom)) + CALC_GAP);
+  if (!hits(down)) return down;
+  // ใต้แผงก็ไม่พอ (จอเตี้ย เช่น iPhone SE) — ไม่ทับแผง: ซ่อนภาพไว้ เสียงเล่นต่อ แบบเดียวกับตอนแป้นพิมพ์เปิด (.no-room)
+  return Object.assign(fit(left.x, up.y), { blocked: true });
 }
 function placeMini() {
   const p = document.getElementById('player');
   const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
   const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };   // มุมขวาล่าง (เครื่องคิดเลขย้ายไปมุมขวาบนแล้ว มุมนี้ว่าง) — clampMini ยังหลบแผงเครื่องคิดเลขให้
   const c = clampMini(want.x, want.y);
+  p.classList.toggle('no-room', !!c.blocked);
   p.style.left = c.x + 'px';
   p.style.top = c.y + 'px';
 }
@@ -7563,7 +7742,7 @@ function playerLayout() {
   const docked = playerMode === 'youtube' && current === HOME && !document.getElementById('sec-home').hidden && dock.getClientRects().length > 0;
   p.classList.toggle('docked', docked);
   if (docked) {
-    p.classList.remove('min');
+    p.classList.remove('min', 'no-room');
     const r = dock.getBoundingClientRect(), ws = document.querySelector('.workspace').getBoundingClientRect();
     Object.assign(p.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px',
       // ช่องจอดเลื่อนพ้นพื้นที่ทำงาน (เลื่อนหน้าลง) — ตัดส่วนที่เกินออก ไม่ให้วิดีโอลอยทับแถบบน
@@ -8124,11 +8303,11 @@ function renderBoard() {
   fillTable('board', boardSorted(), m => {
     const rec = boardRecipients(m), n = rec.filter(a => hasRead(m, a.id)).length;
     return '<td>' + boardStatusHtml(m) + '</td>' +
-      '<td class="nowrap">' + fmtDate(m.refers_to) + '</td>' +
+      '<td class="nowrap col-ph">' + fmtDate(m.refers_to) + '</td>' +
       '<td>' + (m.pinned ? '<span class="st st-off">📌 ปักหมุด</span> ' : '') + '<strong>' + escapeHtml(m.title) + '</strong>' +
         (m.target_admin_id ? '<div class="sub">ถึง ' + escapeHtml(staffName(m.target_admin_id)) + ' เท่านั้น</div>' : '') + '</td>' +
       '<td class="col-opt">' + escapeHtml(staffName(m.author_id)) + '</td>' +
-      '<td class="num nowrap" title="อ่านแล้ว ' + n + ' จาก ' + rec.length + ' คน">อ่านแล้ว ' + n + '/' + rec.length + '</td>';
+      '<td class="num nowrap col-ph" title="อ่านแล้ว ' + n + ' จาก ' + rec.length + ' คน">อ่านแล้ว ' + n + '/' + rec.length + '</td>';
   }, boardMsgs.length ? 'ไม่พบข้อความที่ตรงกับตัวกรอง' : 'ยังไม่มีข้อความบนกระดาน — กด “+ เขียนข้อความ” เพื่อฝากข้อความถึงทีม');
 }
 document.getElementById('boardSearch').addEventListener('input', renderBoard);
