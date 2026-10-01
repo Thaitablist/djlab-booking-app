@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const suites = ['wedge-scanner.mjs', 'wedge-scanner-sales.mjs', 'desk.mjs', 'desk-modules.mjs', 'desk-staff.mjs', 'desk-home3.mjs', 'desk-home4.mjs', 'stock-wall.mjs', 'stock-phone.mjs', 'desk-batch5.mjs', 'desk-discord.mjs'];
+const suites = ['wedge-scanner.mjs', 'wedge-scanner-sales.mjs', 'desk.mjs', 'desk-modules.mjs', 'desk-staff.mjs', 'desk-home3.mjs', 'desk-home4.mjs', 'stock-wall.mjs', 'stock-phone.mjs', 'desk-batch5.mjs', 'desk-discord.mjs', 'desk-polish.mjs'];
 
 let failed = 0;
 for (const s of suites) {

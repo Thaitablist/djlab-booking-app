@@ -38,6 +38,16 @@
     --shadow: 0 1px 2px rgba(15,15,15,.05), 0 4px 16px rgba(15,15,15,.05);
     --font-head: 'Prompt', 'Noto Sans Thai', sans-serif;
     --font-body: 'Noto Sans Thai', 'Segoe UI', sans-serif;
+    /* บนพื้นดำของเมนูซ้าย/เครื่องเล่น (ลงทะเบียนใน DESIGN.md แล้ว) */
+    --nav-hover: #1C1C1C;
+    --nav-active: #1F1F1F;
+    --on-black-muted: #9A978F;
+    --on-black-soft: #CFCCC3;
+    --on-black-line: #3A3A38;   /* เส้นขอบปุ่มบนแถบเครื่องเล่น · ก้านแถบเลื่อนของเมนูซ้าย */
+    --open-dot: #3DDC84;        /* จุด "ร้านเปิดอยู่" บนแถบดำของหน้าแรก (คู่กับคำว่า เปิดร้าน เสมอ) */
+    --red-divider: #F3CDD4;     /* เส้นคั่นแถวบนพื้น red-soft (กล่องข้อความที่ยังไม่อ่าน) */
+    --side-w: 248px;            /* ความกว้างเมนูซ้าย */
+    --calc-clear: 48px;         /* ปุ่มเครื่องคิดเลข 44 + ห่าง 20 จากขอบ − ขอบในของพื้นที่ทำงาน 28 + ระยะห่าง 12 */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -54,11 +64,20 @@
   [hidden] { display: none !important; }
 
   /* ---------- โครงหน้า ---------- */
-  .app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; min-width: 1200px; }
-  .sidebar { background: var(--black); color: #fff; display: flex; flex-direction: column; overflow-y: auto; }
+  /* เมนูซ้ายกว้าง 248px (เจ้าของเลือกแบบ ข · 1 ต.ค. 69) — ป้ายยาวสุดย่อเฉพาะในเมนู (SECTIONS[].short) ชื่อเต็มอยู่ที่ title และชื่อหน้า */
+  .app { display: grid; grid-template-columns: var(--side-w) 1fr; height: 100vh; min-width: 1200px; }
+  /* เลื่อนได้เฉพาะรายการเมนู โลโก้ข้างบนกับเครื่องคิดเลข/คีย์ลัดข้างล่างอยู่กับที่ */
+  .sidebar { background: var(--black); color: #fff; display: flex; flex-direction: column; overflow: hidden; }
+  #navList { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+  /* แถบเลื่อนบาง 8px บนพื้นดำ — ช่องของมันกันไว้ตลอด (scrollbar-gutter) ป้ายจึงไม่ขยับเมื่อเมนูเริ่มเลื่อน
+     ใช้ ::-webkit-scrollbar ไม่ใช้ scrollbar-width: Chrome จะเมินสไตล์ข้างล่างทั้งหมดถ้าตั้งค่านั้น */
+  #navList::-webkit-scrollbar { width: 8px; }
+  #navList::-webkit-scrollbar-track { background: transparent; }
+  #navList::-webkit-scrollbar-thumb { background: var(--on-black-line); }
+  #navList::-webkit-scrollbar-thumb:hover { background: var(--on-black-muted); }
   /* โลโก้ทางการ (ตัวอักษรขาวทำมาสำหรับพื้นมืด) + คำว่า Console — เจ้าของสั่งแทนกล่องแดง "DJ LAB" (1 ต.ค. 69)
      ต้นฉบับ: WEBSITE DJ LAB/logo_full.png (ใช้บน djlabsiam.com อยู่แล้ว) ตัดขอบแล้วย่อ 1×/2× */
-  .brand { padding: 18px 20px 16px; display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid #262626; }
+  .brand { flex: none; padding: 18px 20px 16px; display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid #262626; }
   .brand-logo { display: block; width: 122px; height: 40px; flex-shrink: 0; }
   .brand-console { font-family: var(--font-head); font-weight: 600; font-size: 19px; line-height: 1; color: #fff; letter-spacing: .01em; padding-bottom: 1px; }
   .brand-box { background: var(--red); color: #fff; font-family: var(--font-head); font-weight: 700; font-size: 14px; padding: 4px 8px; letter-spacing: .5px; }
@@ -69,16 +88,16 @@
     background: none; border: 0; border-left: 3px solid transparent; color: #E8E6E0;
     padding: 9px 10px; cursor: pointer; font-size: 15px;
   }
-  .nav-item:hover { background: #1C1C1C; }
-  .nav-item.active { background: #1F1F1F; border-left-color: var(--red); color: #fff; font-weight: 600; }
+  .nav-item:hover { background: var(--nav-hover); }
+  .nav-item.active { background: var(--nav-active); border-left-color: var(--red); color: #fff; font-weight: 600; }
   .nav-item .ico { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: #CFCCC3; }
   .nav-item .ico .ico-svg { width: 18px; height: 18px; }
   .nav-item:hover .ico, .nav-item.active .ico { color: #fff; }
-  .nav-item .lbl { flex: 1; }
+  .nav-item .lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* ไม่ตกบรรทัดเด็ดขาด · ตัวเลขยังไม่อ่านหลักพันค่อยตัดท้าย (ชื่อเต็มอยู่ใน title) */
   .nav-item .kbd { font-size: 14px; color: #8A877F; }
   .nav-item .soon { font-size: 14px; color: #8A877F; }
   .nav-item:focus-visible { outline-color: #fff; outline-offset: -2px; }
-  .sidebar-foot { margin-top: auto; padding: 16px 20px; border-top: 1px solid #262626; font-size: 14px; color: #9A978F; }
+  .sidebar-foot { flex: none; padding: 16px 20px; border-top: 1px solid #262626; font-size: 14px; color: #9A978F; }
   .sidebar-foot button { background: none; border: 0; color: #E8E6E0; cursor: pointer; text-decoration: underline; font-size: 14px; }
   .sidebar-foot kbd { color: var(--black); margin-right: 6px; }
 
@@ -87,7 +106,7 @@
     display: flex; align-items: center; gap: 20px; padding: 14px 28px;
     background: var(--surface); border-bottom: 2px solid var(--black);
   }
-  .topbar h1 { font-size: 20px; flex-shrink: 0; min-width: 200px; }
+  .topbar h1 { font-size: 19px; flex-shrink: 0; min-width: 200px; }
   #backBtn:disabled { opacity: .4; }
   .gsearch { position: relative; flex: 1; max-width: 560px; }
   .gsearch input { width: 100%; }
@@ -116,7 +135,7 @@
   .detail-head.tinted .btn:hover { background: color-mix(in srgb, currentColor 16%, transparent); }
   .detail-head.tinted kbd { background: transparent; color: inherit; border-color: currentColor; }
   .detail-head.tinted :focus-visible { outline-color: currentColor; }
-  .detail-head h2 { font-size: 18px; }
+  .detail-head h2 { font-size: 19px; }
   .detail-body { padding: 18px 24px 32px; }
 
   /* ---------- ชิ้นส่วนที่ใช้ร่วม ---------- */
@@ -215,6 +234,10 @@
   .qty button { width: 32px; height: 34px; border: 0; background: var(--surface2); cursor: pointer; font-size: 16px; }
   .qty input { width: 56px; height: 34px; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
   .price-in { width: 120px; min-height: 34px; padding: 4px 8px; text-align: right; }
+  /* ตะกร้า: คอลัมน์จำนวน/ราคา/รวม/ลบ กว้างเท่าเนื้อในพอดี (ระยะในข้างละ 8px) ชื่อสินค้าได้ที่ที่เหลือทั้งหมด
+     — ที่ 1280 ชื่อรุ่นเคยถูกบีบจน DDJ-FLX4 แตกเป็น 3–4 บรรทัด · ชื่อตัดได้เฉพาะระหว่างคำ (nwWords) */
+  table.cart-tbl td:not(:first-child) { width: 1%; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+  table.cart-tbl .nw { white-space: nowrap; }
   .serials { margin-top: 4px; }
   .serial { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; border: 1px solid var(--line-strong); padding: 0 0 0 8px; margin: 4px 6px 0 0; background: var(--surface2); }
   .serial button { border: 0; background: none; cursor: pointer; padding: 2px 8px; font-size: 14px; }
@@ -227,7 +250,7 @@
   dialog { margin: auto; border: 0; padding: 0; box-shadow: 0 12px 48px rgba(15,15,15,.25); max-width: 560px; width: 92vw; background: var(--surface); color: var(--text); }
   dialog::backdrop { background: rgba(15,15,15,.45); }
   .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
-  .dlg-head h2 { font-size: 18px; }
+  .dlg-head h2 { font-size: 19px; }
   .dlg-body { padding: 18px 22px 22px; }
   .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 0 22px 20px; }
   .opt { border: 1px solid var(--line); padding: 14px; margin-top: 12px; }
@@ -289,7 +312,7 @@
 
   /* ---------- หน้าแรกพนักงาน ---------- */
   .nav-item .nbadge { background: var(--red); color: #fff; font-size: 14px; font-weight: 700; min-width: 22px; padding: 0 6px; text-align: center; }
-  .btn-lg { min-height: 52px; padding: 12px 28px; font-size: 17px; }
+  .btn-lg { min-height: 52px; padding: 12px 28px; font-size: 16px; }
   .pre { white-space: pre-wrap; word-break: break-word; }
   code { font-family: Consolas, Menlo, monospace; font-size: 14px; }   /* monospace ของเบราว์เซอร์ตั้งต้นที่ 13px — ต่ำกว่ากฎข้อ 6 */
   ::selection { background: var(--black); color: #fff; }
@@ -304,7 +327,7 @@
   .deck { background: var(--black); color: #fff; padding: 18px 28px 20px; margin: -24px -28px 0;
     display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 28px; }
   .deck-hi { min-width: 0; }
-  .deck-greet { font-family: var(--font-head); font-weight: 600; font-size: 26px; line-height: 1.25;
+  .deck-greet { font-family: var(--font-head); font-weight: 600; font-size: 24px; line-height: 1.25;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .deck-hi .deck-date { font-size: 16px; font-weight: 500; color: #CFCCC3; margin: 2px 0 12px; }
   .deck .me-stat > span:first-child { color: #CFCCC3; }
@@ -314,21 +337,21 @@
   .bigclock .sec { font-size: 46px; color: #9A978F; margin-left: 10px; letter-spacing: 0; }
   .deck-side { text-align: right; padding-bottom: 8px; }
   .deck-date { font-family: var(--font-head); font-weight: 600; font-size: 24px; }
-  .shop-state { font-family: var(--font-head); font-weight: 600; font-size: 20px; margin-top: 10px; }
+  .shop-state { font-family: var(--font-head); font-weight: 600; font-size: 19px; margin-top: 10px; }
   .shop-state .dot { display: inline-block; width: 12px; height: 12px; margin-right: 10px; background: #6B6962; vertical-align: 1px; }
-  .shop-state.open .dot { background: #3DDC84; }
+  .shop-state.open .dot { background: var(--open-dot); }
   .deck .st-sub { font-size: 15px; color: #CFCCC3; margin-top: 2px; }
 
   /* แถบของฉัน: ใครล็อกอินอยู่ · สลับบัญชี · ยอดขายของฉัน · ตอกบัตร/วันลา (ยังรอปรึกษา) */
   .me-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 26px; background: var(--surface); border: 1px solid var(--line);
     border-top: 0; padding: 14px 20px; margin: 0 -28px 22px; }
   .me-who { display: flex; align-items: center; gap: 12px; margin-right: 4px; }
-  .me-who .ava { width: 46px; height: 46px; font-size: 20px; }
+  .me-who .ava { width: 46px; height: 46px; font-size: 19px; }
   .me-who strong { display: block; font-family: var(--font-head); font-size: 19px; line-height: 1.2; }
   .me-who span { font-size: 14px; color: var(--text2); }
   .me-stat { display: flex; flex-direction: column; min-width: 0; }
   .me-stat > span { font-size: 14px; color: var(--text2); }
-  .me-stat > strong { font-family: var(--font-head); font-weight: 600; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .me-stat > strong { font-family: var(--font-head); font-weight: 600; font-size: 19px; font-variant-numeric: tabular-nums; }
   .me-stat > strong small { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text2); margin-left: 4px; }
   .me-sep { width: 1px; align-self: stretch; background: var(--line); }
   .pill-wait { display: inline-block; font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text2);
@@ -337,9 +360,9 @@
 
   /* ข้อความที่ยังไม่ได้อ่าน — จุดเดียวบนหน้าแรกที่ใช้สีแดงเต็มที่ เพราะคือสิ่งที่ต้องเห็นก่อน */
   .unread-box { background: var(--red-soft); border: 1px solid #F0B8C1; padding: 16px 20px 8px; margin-bottom: 22px; }
-  .unread-box h3 { display: flex; align-items: center; gap: 10px; font-size: 17px; margin-bottom: 6px; color: #8A0012; }
+  .unread-box h3 { display: flex; align-items: center; gap: 10px; font-size: 16px; margin-bottom: 6px; color: #8A0012; }
   .unread-box .count { background: var(--red); color: #fff; font-family: var(--font-head); min-width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; }
-  .unread-box .list-row { border-bottom-color: #F3CDD4; align-items: center; }
+  .unread-box .list-row { border-bottom-color: var(--red-divider); align-items: center; }
   .unread-box .list-row:last-child { border-bottom: 0; }
   .ava { width: 34px; height: 34px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font-head); font-weight: 600; font-size: 15px; }
@@ -408,7 +431,7 @@
   .player-bar:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
   .player.dragging .player-bar { cursor: grabbing; }
   .player-bar .ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-  .player-bar button { background: none; border: 1px solid #3A3A38; color: #fff; font-size: 14px; padding: 3px 10px; cursor: pointer; }
+  .player-bar button { background: none; border: 1px solid var(--on-black-line); color: #fff; font-size: 14px; padding: 3px 10px; cursor: pointer; }
   .player-bar button:hover { border-color: #fff; }
   .player-body { position: relative; height: 225px; overflow: hidden; transition: height .2s cubic-bezier(0.16, 1, 0.3, 1); }
   .player-body.spotify { height: 152px; }
@@ -451,7 +474,7 @@
   .acct .pick:hover { background: var(--surface2); }
   .acct .pick strong { font-family: var(--font-head); }
   .acct.current { background: var(--surface2); }
-  .pin-input { font-family: var(--font-head); font-size: 32px; letter-spacing: .4em; text-align: center; min-height: 60px; }
+  .pin-input { font-family: var(--font-head); font-size: 34px; letter-spacing: .4em; text-align: center; min-height: 60px; }
   .login-accts { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 
   /* ป้ายสีทึบ (ปฏิทิน · หน้าแรก): พื้น = สีของแหล่ง · ตัวอักษรขาว/ดำเลือกจากคอนทราสต์จริง (inkOn) ≥ 4.5:1 */
@@ -502,7 +525,7 @@
   .mail-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
   .mail-reader { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-height: 300px; }
   .mail-reader .mr-head { padding: 16px 20px; background: var(--head); border-bottom: 2px solid var(--black); }
-  .mail-reader .mr-head h2 { font-size: 18px; margin-bottom: 6px; word-break: break-word; }
+  .mail-reader .mr-head h2 { font-size: 19px; margin-bottom: 6px; word-break: break-word; }
   .mail-reader iframe { display: block; width: 100%; height: calc(100vh - 430px); min-height: 320px; border: 0; background: #fff; }
   .lbl-toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; color: var(--text2); }
   .lbl-toggle[aria-pressed="true"] { background: var(--black); color: #fff; }
@@ -593,7 +616,7 @@
     background: var(--surface); border: 2px solid var(--black); cursor: text; }
   .scanbox:focus-within { outline: 3px solid rgba(15,15,15,.14); outline-offset: 0; }
   .scanbox .ico-svg { width: 24px; height: 24px; }
-  .scanbox input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; font-size: 17px; }
+  .scanbox input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; font-size: 16px; }
   .scanbox input::placeholder { color: var(--text2); }
   .scanbox input::-webkit-search-cancel-button { cursor: pointer; }
   .scan-mode { flex-shrink: 0; background: var(--black); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: 14px; padding: 2px 8px; }
@@ -708,11 +731,11 @@
   .tray { flex: 0 0 clamp(250px, 34vh, 330px); display: flex; flex-direction: column; min-height: 0; background: var(--surface);
     border: 2px solid var(--black); box-shadow: 0 -4px 18px rgba(15,15,15,.08); }
   .tray-h { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--head); border-bottom: 2px solid var(--black); flex-shrink: 0; flex-wrap: wrap; }
-  .tray-h h2 { font-size: 18px; font-weight: 700; }
+  .tray-h h2 { font-size: 19px; font-weight: 700; }
   /* ข้อความล่าสุด + ปุ่ม เป็นก้อนเดียวชิดขวา — แถบหัวแคบแล้วทั้งก้อนลงบรรทัดใหม่ด้วยกัน ไม่แตกกลางก้อน */
   .tray-acts { display: flex; align-items: center; gap: 12px; margin-left: auto; }
   .tray-sum { font-size: 15px; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tray-sum b { font-family: var(--font-head); font-size: 20px; color: var(--text); }
+  .tray-sum b { font-family: var(--font-head); font-size: 19px; color: var(--text); }
   .tray-h .input { width: auto; min-height: 36px; padding: 5px 10px; }
   .tray-reason { width: 260px !important; }
   .tray-b { flex: 1; min-height: 0; display: flex; gap: 18px; padding: 12px 14px; overflow-x: auto; overflow-y: hidden;
@@ -726,7 +749,7 @@
   .t-gh { display: flex; align-items: baseline; gap: 8px; font-family: var(--font-head); font-weight: 600; font-size: 16px; white-space: nowrap;
     padding-bottom: 4px; border-bottom: 3px solid var(--line); }
   .t-group.target .t-gh { border-bottom-color: var(--black); }
-  .t-gh .t-n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .t-gh .t-n { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .t-gh .t-now { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text2); }
   .t-cards { display: flex; gap: 8px; }
   .t-card { position: relative; width: max-content; min-width: 136px; flex: none; display: flex; flex-direction: column; border: 1px solid var(--line-strong); background: var(--surface); }
@@ -755,7 +778,7 @@
   .c-miss { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text2); margin-top: 2px; }
   .nw { white-space: nowrap; }
   .c-miss b { color: var(--red); font-weight: 700; }
-  .c-exp { font-family: var(--font-head); font-size: 20px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .c-exp { font-family: var(--font-head); font-size: 19px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
   .c-step { display: flex; align-items: center; gap: 10px; }
   .c-step b { font-family: var(--font-head); font-size: 24px; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
   .c-var { font-size: 15px; font-weight: 700; }
@@ -801,17 +824,25 @@
   .sn.hit { background: var(--black); border-color: var(--black); color: #fff; }
 
 
-  /* ---------- เครื่องคิดเลขลอย (ทุกหมวด · มุมขวาล่าง) ----------
-     ปุ่มเหลี่ยม (กฎมุมเหลี่ยม — ข้อยกเว้นมีแค่ไอคอนลัด) · มุมนี้ "จองไว้" — หน้าต่างวิดีโอลอยหลบ (clampMini)
-     แผงไม่ใช่ <dialog>: เปิดค้างไว้แล้วยังยิงบาร์โค้ดเข้าหมวดที่เปิดอยู่ได้ (wedgeRoute ปฏิเสธเฉพาะ dialog) */
-  .calc-btn { position: fixed; right: 20px; bottom: 20px; z-index: 820; width: 52px; height: 52px; display: inline-flex; align-items: center; justify-content: center;
-    border: 0; background: var(--black); color: #fff; cursor: pointer; box-shadow: 0 6px 18px rgba(15,15,15,.28); }
-  .calc-btn .ico-svg { width: 24px; height: 24px; }
-  .calc-btn:hover { background: #2A2A2A; }
-  .calc-btn[aria-expanded="true"] { background: var(--surface); color: var(--black); box-shadow: inset 0 0 0 2px var(--black), 0 6px 18px rgba(15,15,15,.28); }
-  .calc-btn:focus-visible { outline: 2px solid var(--black); outline-offset: 3px; }
-  .calc { position: fixed; right: 20px; bottom: 84px; z-index: 820; width: 320px; background: var(--surface); border: 2px solid var(--black);
-    box-shadow: 0 12px 40px rgba(15,15,15,.3); display: flex; flex-direction: column; }
+  /* ---------- เครื่องคิดเลข (ทุกหมวด · มุมขวาบนของพื้นที่ทำงาน ใต้เส้นแบ่งแถบบน) ----------
+     เจ้าของสั่ง 1 ต.ค. 69 ("มุมขวาบนใต้เส้นแบ่ง ให้ออกจากมุมเล็กน้อย") — ปุ่มลอยมุมขวาล่างเดิมบังปุ่ม QR/บันทึกการขาย
+     ปุ่มกับแผงอยู่ใน .ws-wrap (กรอบของพื้นที่ทำงาน ไม่ใช่ตัวที่เลื่อน) จึงอยู่กับที่ตอนเลื่อนหน้า และหลบแผงรายละเอียดขวาเอง
+     ปุ่มขาวกรอบดำแบบปุ่มปกติ (มุมเหลี่ยม) — ลอยอยู่บนแถบดำของหน้าแรกก็ยังเห็น · เปิดอยู่ = ดำ (กฎ "เลือกอยู่ = ดำ")
+     แผงไม่ใช่ <dialog>: เปิดค้างไว้แล้วยังยิงบาร์โค้ดเข้าหมวดที่เปิดอยู่ได้ (wedgeRoute ปฏิเสธเฉพาะ dialog)
+     หน้าต่างวิดีโอหลบทั้งปุ่มและแผง (clampMini) */
+  .ws-wrap { position: relative; flex: 1; min-width: 0; display: flex; }
+  .calc-btn { position: absolute; top: 14px; right: 20px; z-index: 30; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--black); background: var(--surface); color: var(--black); cursor: pointer; box-shadow: 0 6px 18px rgba(15,15,15,.18); }
+  .calc-btn .ico-svg { width: 22px; height: 22px; }
+  .calc-btn:hover { background: var(--sel); }
+  .calc-btn[aria-expanded="true"] { background: var(--black); color: #fff; }
+  .calc-btn:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+  /* เปิดลงล่างและไปทางซ้ายจากใต้ปุ่ม · สูงไม่เกินกรอบ (จอเตี้ยเลื่อนในแผงเอง) */
+  .calc { position: absolute; top: 66px; right: 20px; z-index: 820; width: 320px; max-height: calc(100% - 78px); overflow-y: auto;
+    background: var(--surface); border: 2px solid var(--black); box-shadow: 0 12px 40px rgba(15,15,15,.3); display: flex; flex-direction: column; }
+  /* แถวแรกของหมวดที่มีปุ่ม/ลิงก์ชิดขวาตรงระดับปุ่มเครื่องคิดเลข: เว้นขวาเท่ากับปุ่ม + ระยะห่าง ปุ่มของแถวนั้นจึงไม่ถูกบัง
+     (เฉพาะแถวนั้น ไม่ใช่ทั้งพื้นที่ทำงาน · tests/desk-polish.mjs ไล่ทุกหมวด 3 ขนาดจอ) */
+  .calc-clear { margin-right: var(--calc-clear); }
   .calc:focus { outline: none; }
   .calc:focus-visible { outline: 3px solid rgba(15,15,15,.25); outline-offset: 2px; }
   .calc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 14px; background: var(--head); border-bottom: 2px solid var(--black); }
@@ -820,14 +851,14 @@
   .calc-expr { font-size: 15px; color: var(--text2); min-height: 23px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
   .calc-out { font-family: var(--font-head); font-weight: 600; font-size: 34px; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .calc-out.preview { color: var(--text2); }
-  .calc-out.err { font-family: var(--font-body); font-size: 17px; font-weight: 700; color: #8A0012; padding-top: 6px; }
+  .calc-out.err { font-family: var(--font-body); font-size: 16px; font-weight: 700; color: #8A0012; padding-top: 6px; }
   .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-strong); border-bottom: 1px solid var(--line-strong); }
-  .calc-keys button { min-height: 48px; border: 0; background: var(--surface); font-family: var(--font-head); font-weight: 600; font-size: 20px; cursor: pointer; color: var(--text);
+  .calc-keys button { min-height: 48px; border: 0; background: var(--surface); font-family: var(--font-head); font-weight: 600; font-size: 19px; cursor: pointer; color: var(--text);
     font-variant-numeric: tabular-nums; }
   .calc-keys button:hover { background: var(--sel); }
   .calc-keys .op { background: var(--surface2); font-family: var(--font-body); font-size: 24px; font-weight: 500; }   /* Prompt วาด ÷ × − + ตัวเล็กมาก */
   .calc-keys .fn { font-size: 16px; }
-  .calc-keys [data-k="±"] { font-family: var(--font-body); font-size: 22px; font-weight: 500; }
+  .calc-keys [data-k="±"] { font-family: var(--font-body); font-size: 24px; font-weight: 500; }
   .calc-keys .eq { background: var(--black); color: #fff; }
   .calc-keys .eq:hover { background: #2A2A2A; }
   .calc-keys button:focus-visible { outline: 2px solid var(--black); outline-offset: -4px; }
@@ -840,12 +871,6 @@
   .calc-h:hover { background: var(--surface2); }
   .calc-h span:first-child { color: var(--text2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .calc-h b { font-family: var(--font-head); font-weight: 600; white-space: nowrap; }
-  /* พื้นที่ทำงานเลื่อนลงจนสุดแล้ว เนื้อหาบรรทัดท้ายต้องโผล่พ้นปุ่มเครื่องคิดเลข */
-  .workspace { padding-bottom: 96px; }
-  .detail-body { padding-bottom: 88px; }
-  .wing-b::after, .tray-b::after { content: ''; display: block; flex: none; width: 1px; height: 56px; }
-  .tray-b::after { height: 1px; width: 64px; }
-  .tray-count .tray-b::after { width: 1px; height: 56px; }
 
   /* ---------- QR รับเงิน ---------- */
   .pay-modes { margin-bottom: 16px; }
@@ -858,12 +883,12 @@
   .pay-amount.none { font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text2); }
   .pay-name { font-family: var(--font-head); font-weight: 600; font-size: 19px; }
   .pay-meta { font-size: 14px; color: var(--text2); }
-  .pay-amt-in { font-family: var(--font-head); font-size: 26px; min-height: 54px; text-align: right; font-variant-numeric: tabular-nums; }
+  .pay-amt-in { font-family: var(--font-head); font-size: 24px; min-height: 54px; text-align: right; font-variant-numeric: tabular-nums; }
   .pay-pick { display: flex; flex-direction: column; gap: 6px; }
   .pay-pick button { text-align: left; justify-content: flex-start; white-space: normal; }
   .pay-pick button[aria-pressed="true"] { background: var(--black); color: #fff; }
   .pay-setup { border: 1px dashed var(--line-strong); background: var(--surface2); padding: 18px 20px; }
-  .pay-setup h3 { font-size: 17px; margin-bottom: 6px; }
+  .pay-setup h3 { font-size: 16px; margin-bottom: 6px; }
   .pq-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
   .pq-thumb { width: 56px; height: 56px; border: 1px solid var(--line); background: #fff; flex: none; display: flex; }
   .pq-thumb img { width: 100%; height: 100%; object-fit: contain; }
@@ -880,7 +905,7 @@
   @media print {
     .sidebar, .topbar, .detail, .no-print, .toast, #fatalError, .calc-btn, .calc { display: none !important; }
     .app { display: block; height: auto; min-width: 0; }
-    .main, .content, .workspace { display: block; height: auto; overflow: visible; padding: 0; }
+    .main, .content, .ws-wrap, .workspace { display: block; height: auto; overflow: visible; padding: 0; }
     .split { display: block; }
     .print-only { display: block !important; }
     .card, .tablewrap { box-shadow: none; max-height: none; overflow: visible; }
@@ -890,7 +915,7 @@
   /* เข้าสู่ระบบ */
   .login { position: fixed; inset: 0; z-index: 900; background: var(--bg); display: flex; align-items: center; justify-content: center; }
   .login-box { width: 400px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-top: 3px solid var(--red); padding: 32px; }
-  .login-box h1 { font-size: 22px; margin: 16px 0 4px; }
+  .login-box h1 { font-size: 24px; margin: 16px 0 4px; }
 
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px);
@@ -950,6 +975,7 @@
     </header>
 
     <div class="content">
+     <div class="ws-wrap">
       <main class="workspace">
 
         <!-- ============ หน้าแรกพนักงาน ============ -->
@@ -963,7 +989,7 @@
               <div class="me-stat" id="clockPill"><span>ตอกบัตรวันนี้</span><span class="pill-wait">รอปรึกษา</span></div>
             </div>
             <div class="bigclock" id="homeClock" role="timer" aria-label="เวลาตอนนี้ (เวลาไทย)">--:--<span class="sec">--</span></div>
-            <div class="deck-side">
+            <div class="deck-side calc-clear">
               <div class="shop-state" id="shopState" role="status"><span class="dot" aria-hidden="true"></span><span id="shopStateText">—</span></div>
               <div class="st-sub" id="shopStateSub">เปิดทุกวัน 12:00–20:00</div>
             </div>
@@ -1046,7 +1072,7 @@
 
         <!-- ============ กระดานข้อความ ============ -->
         <section class="section" id="sec-board" hidden>
-          <div class="toolbar">
+          <div class="toolbar calc-clear">
             <input type="search" id="boardSearch" class="input grow" placeholder="ค้นหาหัวข้อ / ข้อความ / ชื่อผู้เขียน" autocomplete="off" aria-label="ค้นหาข้อความ">
             <select id="fBoard" class="input" aria-label="แสดงข้อความ">
               <option value="">ทุกข้อความ</option>
@@ -1132,11 +1158,11 @@
 
         <!-- ============ ปฏิทิน ============ -->
         <section class="section" id="sec-calendar" hidden>
-          <div class="toolbar">
+          <div class="toolbar calc-clear">
             <button class="btn btn-sm" type="button" onclick="shiftCal(-1)" aria-label="ก่อนหน้า" title="ก่อนหน้า (←)">‹</button>
             <button class="btn btn-sm" type="button" onclick="setCalAnchor(todayBangkok())">วันนี้</button>
             <button class="btn btn-sm" type="button" onclick="shiftCal(1)" aria-label="ถัดไป" title="ถัดไป (→)">›</button>
-            <strong id="calTitle" style="font-family:var(--font-head);font-size:18px;min-width:180px;"></strong>
+            <strong id="calTitle" style="font-family:var(--font-head);font-size:19px;min-width:180px;"></strong>
             <select id="calView" class="input" aria-label="มุมมอง" onchange="setCalView(this.value)">
               <option value="month">รายเดือน</option>
               <option value="week">รายสัปดาห์</option>
@@ -1155,7 +1181,7 @@
 
         <!-- ============ สินค้า — ผนังสต็อก ============ -->
         <section class="section wall-sec" id="sec-products" hidden>
-          <div class="wall-top">
+          <div class="wall-top calc-clear">
             <label class="scanbox" for="productSearch">
               <svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 6V2.5h3.5M14.5 2.5H18V6M18 14v3.5h-3.5M5.5 17.5H2V14M6 6v8M9 6v8M11.5 6v8M14 6v8"/></svg>
               <span class="scan-mode" id="scanModeTag" hidden></span>
@@ -1232,7 +1258,7 @@
 
         <!-- ============ ประวัติการเคลื่อนไหว ============ -->
         <section class="section" id="sec-moves" hidden>
-          <div class="toolbar">
+          <div class="toolbar calc-clear">
             <input type="search" id="moveSearch" class="input grow" placeholder="ค้นหาสินค้า / SKU / เหตุผล / ผู้ทำรายการ" autocomplete="off" aria-label="ค้นหาประวัติ">
             <select id="fMoveType" class="input" aria-label="ประเภท">
               <option value="">ทุกประเภท</option>
@@ -1477,7 +1503,7 @@
 
         <!-- ============ สรุปรายวัน ============ -->
         <section class="section" id="sec-daily" hidden>
-          <div class="toolbar no-print">
+          <div class="toolbar no-print calc-clear">
             <button class="btn btn-sm" type="button" onclick="shiftDailyDate(-1)" title="วันก่อนหน้า" aria-label="วันก่อนหน้า">‹</button>
             <input type="date" id="reportDate" class="input" style="width:auto;" aria-label="วันที่ของรายงาน">
             <button class="btn btn-sm" type="button" onclick="shiftDailyDate(1)" title="วันถัดไป" aria-label="วันถัดไป">›</button>
@@ -1489,7 +1515,7 @@
             <button class="btn" type="button" onclick="downloadCsv()">ดาวน์โหลด CSV</button>
           </div>
           <div class="print-only" style="text-align:center;margin-bottom:16px;">
-            <div class="head" style="font-size:20px;">DJ LAB SIAM</div>
+            <div class="head" style="font-size:19px;">DJ LAB SIAM</div>
             <div>รายงานสรุปรายรับ-รายจ่ายประจำวันที่ <span id="printDateLabel"></span></div>
           </div>
           <div class="stats">
@@ -1568,7 +1594,7 @@
             </div>
             <div>
               <div id="adNote"></div>
-              <div class="toolbar">
+              <div class="toolbar calc-clear">
                 <input type="search" id="adSearch" class="input grow" placeholder="พิมพ์แล้วกด Enter เพื่อค้นหา" aria-label="ค้นหาในตาราง">
                 <button class="btn btn-primary" id="adAddBtn" type="button" onclick="adOpenRow(null)" hidden>+ เพิ่มแถว</button>
               </div>
@@ -1584,6 +1610,42 @@
           </div>
         </section>
       </main>
+      <!-- เครื่องคิดเลข: ไอคอนลอยมุมขวาบนของพื้นที่ทำงาน ใต้เส้นแบ่งแถบบน (เจ้าของสั่ง 1 ต.ค. 69 "มุมขวาบนใต้เส้นแบ่ง ให้ออกจากมุมเล็กน้อย")
+           อยู่ใน .ws-wrap ไม่ใช่ใน .workspace — ไม่เลื่อนตามหน้า และเปิดแผงรายละเอียดขวาแล้วขยับมาอยู่ซ้ายของแผงเอง
+           แถวแรกของทุกหมวดเว้นที่ให้ปุ่มด้วย .calc-clear (ดู CSS) · แผงไม่ใช่ <dialog>: เปิดค้างไว้แล้วยังยิงบาร์โค้ดเข้าหมวดที่เปิดอยู่ได้ -->
+      <button class="calc-btn" id="calcBtn" type="button" onclick="toggleCalc(true)" aria-expanded="false" aria-controls="calcPanel"
+              title="เครื่องคิดเลข (Alt+K)" aria-label="เครื่องคิดเลข (Alt+K)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="4" y="2.5" width="12" height="15"/><path d="M6.5 5.5h7v3h-7z"/><path d="M7 11.5h.01M10 11.5h.01M13 11.5h.01M7 14.5h.01M10 14.5h.01M13 14.5h.01" stroke-width="2"/></svg></button>
+<div class="calc" id="calcPanel" role="dialog" aria-modal="false" aria-labelledby="calcTitle" tabindex="-1" hidden>
+  <div class="calc-head"><h2 id="calcTitle">เครื่องคิดเลข</h2>
+    <button class="btn btn-sm btn-ghost" type="button" onclick="closeCalc(true)" aria-label="ปิดเครื่องคิดเลข">✕ <kbd>Esc</kbd></button></div>
+  <div class="calc-screen" aria-live="polite">
+    <div class="calc-expr" id="calcExpr"></div>
+    <div class="calc-out" id="calcOut">0</div>
+  </div>
+  <div class="calc-keys" id="calcKeys">
+    <button type="button" class="fn" data-k="AC" title="ล้างทั้งหมด (AC)">AC</button>
+    <button type="button" class="fn" data-k="C" title="ล้างตัวเลขที่กำลังพิมพ์ (Delete)">C</button>
+    <button type="button" class="fn" data-k="⌫" title="ลบทีละตัว (Backspace)" aria-label="ลบทีละตัว">⌫</button>
+    <button type="button" class="op" data-k="÷" aria-label="หาร">÷</button>
+    <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+    <button type="button" class="op" data-k="×" aria-label="คูณ">×</button>
+    <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+    <button type="button" class="op" data-k="−" aria-label="ลบ">−</button>
+    <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+    <button type="button" class="op" data-k="+" aria-label="บวก">+</button>
+    <button type="button" class="fn" data-k="±" title="สลับบวก/ลบของตัวเลขล่าสุด" aria-label="สลับบวกลบ">±</button>
+    <button type="button" data-k="0">0</button>
+    <button type="button" data-k="." aria-label="จุดทศนิยม">.</button>
+    <button type="button" class="fn" data-k="%" title="เปอร์เซ็นต์: 200 + 10% = 220 · 200 × 10% = 20" aria-label="เปอร์เซ็นต์">%</button>
+    <button type="button" class="eq" data-k="=" style="grid-column: 1 / -1;" aria-label="เท่ากับ">= <span style="font-family:var(--font-body);font-size:14px;font-weight:500;">Enter</span></button>
+  </div>
+  <div class="calc-foot">
+    <button class="btn btn-sm" id="calcCopyBtn" type="button" onclick="copyCalc()">คัดลอกผลลัพธ์</button>
+    <span class="hint" style="margin:0;">พิมพ์จากแป้นได้เลย</span>
+  </div>
+  <div class="calc-hist" id="calcHist" hidden></div>
+</div>
+     </div>
 
       <aside class="detail" id="detail" hidden aria-label="รายละเอียด">
         <div class="detail-head">
@@ -1621,7 +1683,7 @@
     <div class="st st-ok" style="font-size:15px;">✓ บันทึกแล้ว</div>
     <h2 id="successTitle" style="margin-top:12px;">บันทึกการขายสำเร็จ</h2>
     <div class="hint" id="successSaleNo"></div>
-    <div class="stat-value" id="successSaleTotal" style="font-size:32px;margin-top:10px;"></div>
+    <div class="stat-value" id="successSaleTotal" style="font-size:34px;margin-top:10px;"></div>
   </div>
   <div class="dlg-foot" style="justify-content:center;">
     <button class="btn btn-primary" type="button" onclick="document.getElementById('successDialog').close()">เสร็จสิ้น (Enter)</button>
@@ -1649,7 +1711,7 @@
       <span><kbd>←</kbd> <kbd>→</kbd></span><span>เลื่อนวันในหมวดจองห้องซ้อมและสรุปรายวัน · เลื่อนเดือน/สัปดาห์ในปฏิทิน</span>
       <span><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>Alt</kbd>+<kbd>→</kbd></span><span>กลับไปหมวดก่อนหน้า / ไปข้างหน้า (เหมือนปุ่ม ← ย้อนกลับ บนแถบบน และปุ่มย้อนของเมาส์)</span>
       <span><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> (ที่แถบหน้าต่างวิดีโอ)</span><span>ย้ายหน้าต่างวิดีโอทีละ 20px · <kbd>Home</kbd> กลับมุมขวาล่าง · ลากด้วยเมาส์ก็ได้</span>
-      <span><kbd>Alt</kbd>+<kbd>K</kbd></span><span>เปิด/ปิดเครื่องคิดเลข (ปุ่มดำมุมขวาล่าง) · พิมพ์ตัวเลขจากแป้นได้เลย · <kbd>Enter</kbd> = ผลลัพธ์ · <kbd>Esc</kbd> ปิด · ยิงบาร์โค้ดตอนเครื่องคิดเลขเปิดอยู่ = เข้าหมวดที่เปิดอยู่ตามปกติ ไม่เข้าเครื่องคิดเลข</span>
+      <span><kbd>Alt</kbd>+<kbd>K</kbd></span><span>เปิด/ปิดเครื่องคิดเลข (ปุ่มมุมขวาบนใต้แถบบน) · พิมพ์ตัวเลขจากแป้นได้เลย · <kbd>Enter</kbd> = ผลลัพธ์ · <kbd>Esc</kbd> ปิด · ยิงบาร์โค้ดตอนเครื่องคิดเลขเปิดอยู่ = เข้าหมวดที่เปิดอยู่ตามปกติ ไม่เข้าเครื่องคิดเลข</span>
       <span><kbd>?</kbd></span><span>เปิดหน้านี้</span>
     </div>
     <p class="hint" style="margin-top:14px;">คีย์ลัดไม่ทำงานระหว่างพิมพ์ในช่องกรอก (ยกเว้น Esc, Ctrl+K, F9) และไม่รบกวนเครื่องยิงบาร์โค้ด</p>
@@ -1960,40 +2022,6 @@
   </form>
 </dialog>
 
-<!-- เครื่องคิดเลขลอย — อยู่นอกทุกหมวด · มุมขวาล่าง (หน้าต่างวิดีโอหลบมุมนี้) -->
-<button class="calc-btn" id="calcBtn" type="button" onclick="toggleCalc(true)" aria-expanded="false" aria-controls="calcPanel"
-        title="เครื่องคิดเลข (Alt+K)" aria-label="เครื่องคิดเลข (Alt+K)"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="2.5" width="12" height="15"/><path d="M6.5 5.5h7v3h-7z"/><path d="M7 11.5h.01M10 11.5h.01M13 11.5h.01M7 14.5h.01M10 14.5h.01M13 14.5h.01" stroke-width="2"/></svg></button>
-<div class="calc" id="calcPanel" role="dialog" aria-modal="false" aria-labelledby="calcTitle" tabindex="-1" hidden>
-  <div class="calc-head"><h2 id="calcTitle">เครื่องคิดเลข</h2>
-    <button class="btn btn-sm btn-ghost" type="button" onclick="closeCalc(true)" aria-label="ปิดเครื่องคิดเลข">✕ <kbd>Esc</kbd></button></div>
-  <div class="calc-screen" aria-live="polite">
-    <div class="calc-expr" id="calcExpr"></div>
-    <div class="calc-out" id="calcOut">0</div>
-  </div>
-  <div class="calc-keys" id="calcKeys">
-    <button type="button" class="fn" data-k="AC" title="ล้างทั้งหมด (AC)">AC</button>
-    <button type="button" class="fn" data-k="C" title="ล้างตัวเลขที่กำลังพิมพ์ (Delete)">C</button>
-    <button type="button" class="fn" data-k="⌫" title="ลบทีละตัว (Backspace)" aria-label="ลบทีละตัว">⌫</button>
-    <button type="button" class="op" data-k="÷" aria-label="หาร">÷</button>
-    <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
-    <button type="button" class="op" data-k="×" aria-label="คูณ">×</button>
-    <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
-    <button type="button" class="op" data-k="−" aria-label="ลบ">−</button>
-    <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
-    <button type="button" class="op" data-k="+" aria-label="บวก">+</button>
-    <button type="button" class="fn" data-k="±" title="สลับบวก/ลบของตัวเลขล่าสุด" aria-label="สลับบวกลบ">±</button>
-    <button type="button" data-k="0">0</button>
-    <button type="button" data-k="." aria-label="จุดทศนิยม">.</button>
-    <button type="button" class="fn" data-k="%" title="เปอร์เซ็นต์: 200 + 10% = 220 · 200 × 10% = 20" aria-label="เปอร์เซ็นต์">%</button>
-    <button type="button" class="eq" data-k="=" style="grid-column: 1 / -1;" aria-label="เท่ากับ">= <span style="font-family:var(--font-body);font-size:14px;font-weight:500;">Enter</span></button>
-  </div>
-  <div class="calc-foot">
-    <button class="btn btn-sm" id="calcCopyBtn" type="button" onclick="copyCalc()">คัดลอกผลลัพธ์</button>
-    <span class="hint" style="margin:0;">พิมพ์จากแป้นได้เลย</span>
-  </div>
-  <div class="calc-hist" id="calcHist" hidden></div>
-</div>
-
 <!-- เครื่องเล่น: อยู่นอกทุกหมวด เปลี่ยนหมวดแล้วเสียงไม่หยุด (หน้าคอนโซลเป็นหน้าเดียว ไม่โหลดใหม่) -->
 <div class="player" id="player" hidden role="region" aria-label="เครื่องเล่น">
   <div class="player-bar" id="playerBar" tabindex="0" aria-label="หน้าต่างเครื่องเล่น — ลากเพื่อย้าย หรือใช้ลูกศรย้ายทีละนิด · Home กลับมุมขวาล่าง">
@@ -2024,7 +2052,7 @@ function showFatalError(msg) {
     close.textContent = '✕';
     close.setAttribute('aria-label', 'ปิดข้อความ');
     close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
-      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;cursor:pointer;';
+      'color:#fff;font-size:19px;line-height:1;padding:4px 8px;cursor:pointer;';
     close.addEventListener('click', () => box.remove());
     box.appendChild(close);
     document.body.appendChild(box);
@@ -2068,16 +2096,18 @@ const UNIT_STATUS_LABEL = { in_stock: 'อยู่ในสต็อก', sold:
 // โค้ดทั้งหมดยังอยู่และยังมีเทสต์คุม — ปิดที่สวิตช์นี้ที่เดียว: ไม่มีในเมนู · ไม่มีไอคอนลัด · ไม่เรียกฟังก์ชัน discord เลย
 // เปิดกลับ = เปลี่ยนเป็น true (แล้วทำตาม STAFF-HOME.md ขั้นที่ 8) · เทสต์เปิดผ่าน window.DJLAB_DISCORD_ENABLED
 const DISCORD_ENABLED = window.DJLAB_DISCORD_ENABLED === true;
+// short = ป้ายในเมนูซ้ายเท่านั้น — เจ้าของตั้งเองทุกคำ ตามตัวอักษร (1 ต.ค. 69 · ชื่อเต็มใส่ในเมนู 248px ไม่พอเมื่อมีคีย์ลัด/ตัวเลขยังไม่อ่าน)
+// "ประวัติสต๊อก" ใช้ไม้ตรีตามที่เจ้าของพิมพ์ — ตั้งใจ ไม่ใช่พิมพ์ผิด · ชื่อหน้าและ title ของปุ่มเมนูยังเป็นชื่อเต็ม (label)
 const SECTIONS = [
   { id: 'home',    hash: 'home',          group: 'พนักงาน',     icon: 'home', label: 'หน้าแรก', key: 'H' },
-  { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: 'board', label: 'กระดานข้อความ', key: 'B' },
-  { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: 'mail', label: 'กล่องจดหมายร้าน', key: 'M' },
+  { id: 'board',    hash: 'board',         group: 'พนักงาน',     icon: 'board', label: 'กระดานข้อความ', short: 'ข้อความ', key: 'B' },
+  { id: 'mail',     hash: 'mail',          group: 'พนักงาน',     icon: 'mail', label: 'กล่องจดหมายร้าน', short: 'Mailbox', key: 'M' },
   { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: 'calendar', label: 'ปฏิทิน', key: 'C' },
   // S = staff-only (ห้อง Discord) · ไม่ใช้ D เพราะ Alt+D ของ Chrome บนวินโดวส์คือไปที่แถบที่อยู่
   { id: 'discord',  hash: 'discord',       group: 'พนักงาน',     icon: 'discord', label: 'Discord', key: 'S' },
   { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: 'products', label: 'สินค้า', key: '1' },
-  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: 'movement', label: 'รับเข้า / ตัดออก / ปรับยอด', key: '2' },
-  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', key: '3' },
+  { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: 'movement', label: 'รับเข้า / ตัดออก / ปรับยอด', short: 'เข้า-ออก/ปรับยอด', key: '2' },
+  { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', short: 'ประวัติสต๊อก', key: '3' },
   { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: 'pos', label: 'ขายหน้าร้าน', key: '4' },
   { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: 'bills', label: 'ประวัติบิล', key: '5' },
   { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: 'booking', label: 'จองห้องซ้อม', key: '6' },
@@ -3965,14 +3995,14 @@ function renderCart() {
     renderCartSummary();
     return;
   }
-  el.innerHTML = '<table class="data"><thead><tr><th style="padding:10px 14px;">สินค้า</th>' +
+  el.innerHTML = '<table class="data cart-tbl"><thead><tr><th style="padding:10px 14px;">สินค้า</th>' +
     '<th style="padding:10px 14px;">จำนวน</th><th class="num" style="padding:10px 14px;">ราคาต่อหน่วย</th>' +
     '<th class="num" style="padding:10px 14px;">รวม</th><th></th></tr></thead><tbody>' +
     cart.map((item, idx) => {
       const stock = qtyOf(item.product_id);
       const over = item.qty > stock;
       return '<tr' + (idx === cartSel ? ' class="sel"' : '') + ' onclick="cartSel=' + idx + ';markCartSel()">' +
-        '<td><strong>' + escapeHtml(item.name) + '</strong><div class="sub">' + escapeHtml(item.sku) + ' · คงเหลือ ' + stock + '</div>' +
+        '<td><strong>' + nwWords(item.name) + '</strong><div class="sub">' + nwWords(item.sku + ' · คงเหลือ ' + stock) + '</div>' +
           (over ? '<div class="st st-warn" style="margin-top:4px;">⚠ ขายมากกว่ายอดคงเหลือ — ตรวจสต็อกจริงก่อนส่งมอบ</div>' : '') +
           (hasSerials(item) ? '<div class="serials">' + item.serials.map((s, si) =>
             '<span class="serial">🔖 ' + escapeHtml(s) + '<button type="button" onclick="event.stopPropagation(); removeUnitFromCart(' + idx +
@@ -3992,6 +4022,9 @@ function renderCart() {
     }).join('') + '</tbody></table>';
   renderCartSummary();
 }
+
+// ชื่อรุ่น/SKU มีขีด (DDJ-FLX4) ซึ่งเบราว์เซอร์ถือเป็นที่ตัดบรรทัด — ห่อทีละคำด้วย nowrap ให้ตัดได้แค่ระหว่างคำ
+function nwWords(t) { return String(t).split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : '<span class="nw">' + escapeHtml(w) + '</span>').join(''); }
 
 function markCartSel() {
   document.querySelectorAll('#cartList tbody tr').forEach((tr, i) => tr.classList.toggle('sel', i === cartSel));
@@ -4296,7 +4329,7 @@ function renderNav() {
     const badge = s.id === 'board' || s.id === 'mail' || s.id === 'discord' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
-      '<span class="ico" aria-hidden="true">' + navIcon(s.icon) + '</span><span class="lbl">' + escapeHtml(s.label) + '</span>' +
+      '<span class="ico" aria-hidden="true">' + navIcon(s.icon) + '</span><span class="lbl">' + escapeHtml(s.short || s.label) + '</span>' +
       badge + (key ? '<span class="kbd">' + key + '</span>' : '') + '</button>';
   });
   document.getElementById('navList').innerHTML = html + '</div>';
@@ -4304,6 +4337,15 @@ function renderNav() {
 }
 
 function sectionKey(s) { return s.key ? 'Alt+' + s.key : ''; }
+// จอเตี้ยรายการเมนูเลื่อนได้ — เปลี่ยนหมวดด้วยคีย์ลัด (Alt+0 ฯลฯ) แล้วหมวดที่เปิดต้องโผล่ในเมนู ไม่ค้างอยู่ใต้ขอบ
+// เลื่อนเฉพาะรายการเมนูเอง (ไม่ใช้ scrollIntoView ที่ไปเลื่อนกล่องอื่นที่ครอบอยู่ด้วย)
+function navReveal() {
+  const a = document.querySelector('#navList .nav-item.active'), nl = document.getElementById('navList');
+  if (!a) return;
+  const r = a.getBoundingClientRect(), n = nl.getBoundingClientRect();
+  if (r.top < n.top) nl.scrollTop -= n.top - r.top;
+  else if (r.bottom > n.bottom) nl.scrollTop += r.bottom - n.bottom;
+}
 
 // ---------------------------------------------------------------------------
 // ประวัติการเปลี่ยนหมวด — เจ้าของเปิดคอนโซลเป็นหน้าต่างแอป (--app=) ซึ่งไม่มีปุ่ม back ของเบราว์เซอร์
@@ -4364,6 +4406,7 @@ function showSection(id, mode) {
   playerLayout();                 // เครื่องเล่น: จอดบนหน้าแรก / ย่อเป็นหน้าต่างเล็กในหมวดอื่น (ไม่ย้าย iframe)
   document.getElementById('pageTitle').textContent = s.label;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.s === id));
+  navReveal();
   // ย้ายโฟกัสเข้าพื้นที่ทำงาน ไม่งั้น Enter จะไปกดปุ่มเมนูที่เพิ่งคลิกซ้ำ
   const focusEl = { products: 'wall', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
     booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
@@ -4818,7 +4861,7 @@ function openBooking(id) {
       (b.room_model ? '<dt>รุ่นที่ระบุ</dt><dd>' + escapeHtml(b.room_model) + '</dd>' : '') +
       (b.equip ? '<dt>อุปกรณ์</dt><dd>' + escapeHtml(b.equip) + '</dd>' : '') +
       (b.note ? '<dt>หมายเหตุ</dt><dd>' + escapeHtml(b.note) + '</dd>' : '') +
-      '<dt>ค่าใช้จ่าย</dt><dd><strong style="font-size:20px;">' + formatMoney(b.cost) + '</strong> บาท</dd>' +
+      '<dt>ค่าใช้จ่าย</dt><dd><strong style="font-size:19px;">' + formatMoney(b.cost) + '</strong> บาท</dd>' +
       '<dt>ชั่วโมงสะสม</dt><dd>+' + b.hours + ' ชม.</dd>' +
       '<dt>ช่องทาง</dt><dd>' + escapeHtml({ staff: 'พนักงานบันทึก', online_line: 'จองผ่าน LINE', online_web: 'จองผ่านเว็บ' }[b.source] || b.source) + '</dd>' +
     '</dl>' +
@@ -7007,8 +7050,8 @@ const MINI_KEY = 'djlab.desk.miniPos.v1';     // จำตำแหน่งไ�
 let miniPos = (() => { try { const v = JSON.parse(localStorage.getItem(MINI_KEY) || 'null'); return v && isFinite(v.x) && isFinite(v.y) ? v : null; } catch (e) { return null; } })();
 function saveMiniPos() { try { if (miniPos) localStorage.setItem(MINI_KEY, JSON.stringify(miniPos)); else localStorage.removeItem(MINI_KEY); } catch (e) { /* เบราว์เซอร์ไม่ให้เก็บ ก็แค่จำไม่ได้ */ } }
 // ไม่ให้หลุดนอกจอ — ทั้งตอนลาก ตอนย่อ/ขยายหน้าต่างเบราว์เซอร์ และตอนเปิดหน้าใหม่บนจอที่เล็กกว่าเดิม
-// มุมขวาล่างจองไว้ให้เครื่องคิดเลข (ปุ่ม + แผงตอนเปิด) — หน้าต่างลอยไม่ทับ ทั้งตำแหน่งตั้งต้น ตอนลาก และตอนย่อจอ
-// ทับเมื่อไหร่ขยับออกให้น้อยที่สุด: ขึ้นไปเหนือมุมนั้น หรือไปทางซ้ายของมัน (ตำแหน่งที่จำไว้ไม่ถูกแก้ ปิดแผงแล้วกลับที่เดิม)
+// เครื่องคิดเลข (ปุ่มมุมขวาบน + แผงตอนเปิด) — หน้าต่างลอยไม่ทับ ทั้งตำแหน่งตั้งต้น ตอนลาก และตอนย่อจอ
+// ทับเมื่อไหร่ขยับออกให้น้อยที่สุด: ขึ้นไปเหนือมัน หรือไปทางซ้ายของมัน (ตำแหน่งที่จำไว้ไม่ถูกแก้ ปิดแผงแล้วกลับที่เดิม)
 const CALC_GAP = 12;
 function calcZones() {
   return ['calcBtn', 'calcPanel'].map(id => document.getElementById(id))
@@ -7032,7 +7075,7 @@ function clampMini(x, y) {
 function placeMini() {
   const p = document.getElementById('player');
   const w = p.offsetWidth || 400, h = p.offsetHeight || 260;
-  const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };   // มุมขวาล่าง — clampMini ยกขึ้นเหนือปุ่มเครื่องคิดเลขให้
+  const want = miniPos || { x: window.innerWidth - w - 20, y: window.innerHeight - h - 20 };   // มุมขวาล่าง (เครื่องคิดเลขย้ายไปมุมขวาบนแล้ว มุมนี้ว่าง) — clampMini ยังหลบแผงเครื่องคิดเลขให้
   const c = clampMini(want.x, want.y);
   p.style.left = c.x + 'px';
   p.style.top = c.y + 'px';
@@ -9336,7 +9379,7 @@ function removePayQr(id) {
 }
 
 // ===========================================================================
-// เครื่องคิดเลขลอย — ทุกหมวด · ปุ่มดำมุมขวาล่าง · Alt+K
+// เครื่องคิดเลข — ทุกหมวด · ปุ่มมุมขวาบนใต้แถบบน แผงเปิดลงล่างจากใต้ปุ่ม · Alt+K
 // ไม่ใช้ eval: แยกคำ (calcTokens) แล้วคิดแบบไล่ลำดับความสำคัญ (× ÷ ก่อน + −)
 // % แบบเครื่องคิดเลขหน้าร้าน: "a + b%" / "a − b%" = a ± (a × b ÷ 100) (บวก VAT · หักส่วนลด) ·
 //   ตามหลัง × ÷ หรืออยู่เดี่ยว = หาร 100 ("200 × 10%" = 20 · "50%" = 0.5)

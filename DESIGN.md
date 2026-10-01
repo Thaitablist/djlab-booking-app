@@ -22,6 +22,11 @@ colors:
   head: "#E3DFD5"
   on-black-muted: "#9A978F"
   on-black-soft: "#CFCCC3"
+  on-black-line: "#3A3A38"
+  nav-hover: "#1C1C1C"
+  nav-active: "#1F1F1F"
+  open-dot: "#3DDC84"
+  red-divider: "#F3CDD4"
   ok: "#1F6B3A"
   ok-soft: "#E8F2EB"
   ok-rule: "#BFD9C7"
@@ -38,6 +43,10 @@ colors:
   launcher-register: "#7986CB"
   launcher-payqr: "#33B679"
   launcher-discord: "#455A64"
+  launcher-board: "#F6BF26"
+  launcher-mail-label: "#5C6BC0"
+  launcher-starred: "#F9A825"
+  launcher-spotify: "#1DB954"
 typography:
   display:
     fontFamily: "Prompt, Noto Sans Thai, sans-serif"
@@ -110,11 +119,11 @@ components:
     rounded: "{rounded.none}"
     padding: "14px 28px"
   calc-button:
-    backgroundColor: "{colors.black}"
-    textColor: "{colors.surface}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.black}"
     rounded: "{rounded.none}"
-    width: "52px"
-    height: "52px"
+    width: "44px"
+    height: "44px"
   calc-key:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.text}"
@@ -272,7 +281,7 @@ The stock wall (desk `#stock` plus the stock.html product page) is the system's 
 A near-monochrome warm-neutral console with one brand red, plus a separate, data-driven calendar palette that lives only inside calendar chips and launcher tiles.
 
 ### Primary
-- **Signal Red** (`red`): the brand red, used only where attention must land first: the active nav edge, unread-message box and count badges, today/now markers on the calendar and timeline, the low-stock edge, tag and flag on the stock wall, the accent button and the login box top rule. (Toasts and alerts no longer carry a coloured side stripe; alerts use a 1px frame in their own tint.) Hover deepens to `red-hover`. `red-soft` is its tinted alert/badge ground, `red-rule` its soft border, and `red-ink` is the deep red used for text on `red-soft` (8.6:1).
+- **Signal Red** (`red`): the brand red, used only where attention must land first: the active nav edge, unread-message box and count badges (rows inside the unread box are divided by `red-divider`), today/now markers on the calendar and timeline, the low-stock edge, tag and flag on the stock wall, the accent button and the login box top rule. (Toasts and alerts no longer carry a coloured side stripe; alerts use a 1px frame in their own tint.) Hover deepens to `red-hover`. `red-soft` is its tinted alert/badge ground, `red-rule` its soft border, and `red-ink` is the deep red used for text on `red-soft` (8.6:1).
 
 ### Neutral
 - **Counter Black** (`black`, also `text`): primary text, sidebar and phone chrome, primary buttons, the selected state of chips, segments and flags, the 3px group rules, the out-of-stock edge and focus outlines. Hover is `black-hover`.
@@ -285,7 +294,8 @@ A near-monochrome warm-neutral console with one brand red, plus a separate, data
 - **Graphite** (`text2`): secondary text, labels, hints and meta lines (7.0:1 on white).
 - **Faint Ink** (`text3`, #6E6B64): the lightest reading text (muted day numbers, missing mail labels, struck-out bookings, row arrows). It measures 5.3:1 on white, 5.1:1 on `surface2`, 4.6:1 on `sel` and 4.8:1 on `bg`. Not used on `head`.
 - **Ash** (`ash`, #807D75): product silhouette strokes only. 4.1:1 on white, so never text.
-- **On-black tones** (`on-black-muted`, `on-black-soft`): group titles, shortcuts and secondary text on the black sidebar, deck and phone header.
+- **On-black tones** (`on-black-muted`, `on-black-soft`): group titles, shortcuts and secondary text on the black sidebar, deck and phone header. `on-black-line` is the hairline on black (player-bar button borders, the sidebar scrollbar thumb). `nav-hover` and `nav-active` are the two lifted blacks of sidebar items (hover, and the selected section or the open calculator).
+- **Open dot** (`open-dot`): the small square beside "เปิดร้าน" on the home deck. It only appears with that word.
 
 ### Status (semantic, paired with words)
 - **Ledger Green** (`ok`, `ok-soft`, `ok-rule`): in stock, receipts and even counts.
@@ -299,7 +309,7 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 - **Drawer head:** opening a calendar item tints the drawer head with that item's colour (teacher, category or bookings layer) and measured white/black ink. Every other drawer keeps the `head` paper.
 - **Google layer:** read-only Google Calendar events use the owner's pick from Google's own 11-colour menu (Tomato #D50000 · Flamingo #E67C73 · Tangerine #F4511E · Banana #F6BF26 · Sage #33B679 · Basil #0B8043 · Peacock #039BE5 · Blueberry #3F51B5 · Lavender #7986CB · Grape #8E24AA · Graphite #616161), defaulting to Peacock (`cal-google-default`).
 - **Teacher colours:** Google events whose title ends in " — <teacher>" take that teacher's colour. The owner can change these; the defaults are Zlex #C2185B · Leonie #00897B · Nutty #F6BF26 · TiBass #6D4C41 · Maniac #C0CA33 · Alldayz #00ACC1. The teacher's name is always shown as text too.
-- **Launcher tiles:** per-item colours come from the launcher catalogue (ขายหน้าร้าน uses Signal Red; the rest reuse calendar and Google hues: สินค้ารับเข้า teal `launcher-receive`, สร้างลิงก์สมัครสมาชิก lavender `launcher-register`, QR รับเงิน sage `launcher-payqr`). Discord uses a neutral blue-grey (`launcher-discord`) with a drawn chat glyph; never Discord's own blurple or logo.
+- **Launcher tiles:** per-item colours come from the launcher catalogue (ขายหน้าร้าน uses Signal Red; the rest reuse calendar and Google hues: สินค้ารับเข้า teal `launcher-receive`, สร้างลิงก์สมัครสมาชิก lavender `launcher-register`, QR รับเงิน sage `launcher-payqr`, กระดาน banana `launcher-board`, mail-label tiles `launcher-mail-label`, ติดดาว `launcher-starred`). The Spotify app tile uses Spotify green (`launcher-spotify`) because it opens Spotify itself. Discord uses a neutral blue-grey (`launcher-discord`) with a drawn chat glyph; never Discord's own blurple or logo.
 - **QR codes:** always pure black modules on pure white with a 4-module quiet zone, whatever the theme. They are data, not decoration.
 
 ### Named Rules
@@ -320,9 +330,10 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 - **Display** (Prompt 600, 136px, 0.9, −0.02em, tabular): the home deck's big clock only.
 - **Numeral Hero** (Prompt 700, 80px desk drawer / 68px phone sheet, 0.82): the on-hand count of the selected model.
 - **Numeral Wall** (Prompt 700, 34px, tabular): the count on each stock-wall row or card.
-- **Headline** (Prompt 600, 24–26px): stat values, the POS net total and the deck greeting.
-- **Title** (Prompt 600–700, 18–20px): the topbar page title (20px), wing headers (19px), dialog/drawer heads (18px) and the word "Console" beside the sidebar logo (19px).
-- **Title Small** (Prompt 600, 15–17px): card and panel heads, model names on the wall (16px), segment and tab labels.
+- **Headline** (Prompt 600, 24px): stat values, the POS net total and the deck greeting.
+- **Title** (Prompt 600–700, 19px): the topbar page title, wing headers, dialog/drawer heads and the word "Console" beside the sidebar logo.
+- **Title Small** (Prompt 600, 16px): card and panel heads, model names on the wall, segment and tab labels.
+- **Off-ramp exceptions (kept on purpose):** the home clock's seconds (46px beside the 136px clock), the booking timer (44px) and the phone stock sheet count (68px). Everything else snaps to the ramp.
 - **Body** (Noto Sans Thai 400, 15px, 1.5): all reading text and table cells. Phone inputs use 16px so iOS does not zoom.
 - **Label** (Noto Sans Thai 500–700, 14px): field labels, meta lines, chips, tags, badges and hints. 14px is the floor.
 
@@ -333,13 +344,13 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 
 ## Layout
 
-- **Desk console:** a fixed 248px black sidebar (official DJ LAB SIAM logo, 122×40 at 1×/2×, with "Console" in Prompt beside it) and a flexible main column (`min-width: 1200px`, full viewport height). The main column is a white topbar with a 2px black bottom rule (page title, global search up to 560px, user) over a scrolling workspace padded 24px × 28px (96px at the bottom, so the last rows clear the calculator button). An optional 420–440px white detail drawer docks on the right; when it opens, secondary columns hide and two-column splits stack instead of squeezing.
+- **Desk console:** a fixed 248px black sidebar and a flexible main column (`min-width: 1200px`, full viewport height). The sidebar has three parts: the official DJ LAB SIAM logo (122×40 at 1×/2×, with "Console" in Prompt beside it) fixed at the top, the nav list in the middle, and a foot fixed at the bottom with the shortcut-help link. Only the nav list scrolls, with a thin 8px `on-black-line` scrollbar whose gutter is always reserved (`scrollbar-gutter: stable`) and `overscroll-behavior: contain`, so labels never move or wrap and the page never scrolls with it. Changing section by keyboard scrolls the active item into view. At 248px four labels are too long for their slot next to the shortcut hint and an unread badge, so the nav shows the owner's own short labels, verbatim: ข้อความ (กระดานข้อความ), Mailbox (กล่องจดหมายร้าน), เข้า-ออก/ปรับยอด (รับเข้า / ตัดออก / ปรับยอด) and ประวัติสต๊อก (ประวัติการเคลื่อนไหว, spelled with ไม้ตรี on purpose). The full names stay as page titles and item tooltips. Every label fits on one line with no ellipsis, with 2- and 3-digit badges. The main column is a white topbar with a 2px black bottom rule (page title, global search up to 560px, user) over a scrolling workspace padded 24px × 28px (40px at the bottom). An optional 420–440px white detail drawer docks on the right; when it opens, secondary columns hide and two-column splits stack instead of squeezing.
 - **Home:** a black full-bleed deck (three columns: name and clock-in · big clock · shop state), a white "me" strip, then a 7:5 grid of panels.
 - **Stock wall (desk):** the workspace stops scrolling. A full-width 54px scan field with the หา · รับเข้า · นับ segment sits on top, then a chip row (group switch, filter chips with counts, and the ใกล้หมด n · หมด n flags on the right), then the wall. Wings are ≥262px columns (the "other brands" wing is narrower). Each wing scrolls on its own; when the wings don't fit, they get equal integer widths and snap one wing at a time, with black step buttons at the edges. In receive/count mode a bottom tray (clamp 250–330px) docks below and the wall shrinks to make room rather than being covered.
 - **Phone pages:** body capped at 480px, a sticky 56px black header, a fixed 62px black bottom nav, and 16px page padding. The phone stock wall fills the viewport between header and nav, with a scan bar, swipeable wing tabs, and a two-column card grid per wing. The receive/count tray docks above the nav.
 - **Spacing rhythm:** 4 / 8 / 12 / 16 / 20px, with 10px and 14px used inside dense rows. Rows are separated by hairlines, not gaps.
 - **Targets:** at least 40px on desk (32px for small buttons) and at least 44px on phone (48px for primary buttons).
-- **Reserved corner (desk):** the bottom-right corner holds the 52px calculator button (20px from both edges) and, when open, its 320px panel above it. The floating video player never overlaps either: its default spot is above the button, and dragging or resizing pushes it up or left of the corner by the smallest move.
+- **Calculator dock (desk):** a 44px square icon button at the top-right of the workspace, 14px below the topbar's 2px rule and 20px from the right edge (owner, 1 Oct 2026). It sits in the frame around the workspace (`.ws-wrap`), not in the scrolling area, so it stays put while the page scrolls and moves left of the detail drawer when one opens. The first row of every section that has right-aligned controls at that height (board, calendar, stock-wall top row, movement history, daily, admin toolbars and the shop-state block on the home deck) carries `.calc-clear`, a right margin of 48px, so nothing sits under the button at the default scroll. Content that later scrolls under it is covered by the solid button and comes back when scrolled again. Its 320px panel opens straight down from under the button, right-aligned to it, and scrolls inside itself on short screens. The floating video player never overlaps the button or the panel: its default spot is the bottom-right corner (20px from both edges), and dragging or resizing pushes it up or left of the panel by the smallest move.
 
 ## Elevation & Depth
 
@@ -350,7 +361,7 @@ Mostly flat and ruled: depth comes from white surfaces on paper, hairline border
 - **Drawer edge** (`box-shadow: -8px 0 24px rgba(15,15,15,.04)`): the right detail drawer.
 - **Dialog** (`box-shadow: 0 12px 48px rgba(15,15,15,.25)`, backdrop `rgba(15,15,15,.45)`): modal dialogs.
 - **Floating player** (`box-shadow: 0 12px 40px rgba(15,15,15,.35)`): the draggable mini-player.
-- **Calculator** (button `0 6px 18px rgba(15,15,15,.28)`, panel `0 12px 40px rgba(15,15,15,.3)`): the floating calculator.
+- **Calculator** (button `0 6px 18px rgba(15,15,15,.18)`, panel `0 12px 40px rgba(15,15,15,.3)`): the floating calculator button and its panel.
 - **Docked tray** (`box-shadow: 0 -4px 18px rgba(15,15,15,.08)` desk, `0 -8px 24px rgba(15,15,15,.14)` phone): receive/count trays.
 - **Launcher tile** (`box-shadow: 0 2px 6px rgba(15,15,15,.14), 0 8px 18px rgba(15,15,15,.12)`; lifts 3px on hover): app-icon tiles only.
 
@@ -405,7 +416,7 @@ A row of square buttons inside one 1px black frame, divided by hairlines. The pr
 - **Phone (stock.html):** card titles become full-bleed `head` bars with the same 2px black rule; the tray head uses the same paper. The black phone header is unchanged.
 
 ### Navigation
-- **Desk sidebar:** black, top-left official logo plus "Console", 15px items with drawn 1.75-stroke icons, grouped under 14px muted titles. Hover `#1C1C1C`; active is a slightly lifted black with a 3px red left edge and 600 weight. Shortcut hints sit at the right of each item.
+- **Desk sidebar:** black, top-left official logo plus "Console", 15px items with drawn 1.75-stroke icons, grouped under 14px muted titles. Hover `nav-hover`; active is `nav-active` with a 3px red left edge and 600 weight. Shortcut hints sit at the right of each item. Labels are always one line (`nowrap`); a label too long for its slot ends in an ellipsis rather than wrapping, and the full name stays in the tooltip and the page title.
 - **Phone:** the black header carries the official logo (73×24) and a module select. The black bottom nav has icon plus label, and the active item gets a 3px red top edge.
 - **Tabs:** a 3px black underline marks the selected tab (mail tabs on desk, wing tabs on phone). Red stays reserved for the active nav item.
 
@@ -417,7 +428,7 @@ A row of square buttons inside one 1px black frame, divided by hairlines. The pr
 - **Tray:** docks at the bottom in receive/count mode. Units collect as photo cards with the serial on one line; duplicates get a red frame and the word "ซ้ำ".
 
 ### Calculator (desk, every section)
-A square black 52px button at the bottom-right (Alt+K) opens a non-modal 320px panel above it: a `head` title bar, a right-aligned screen (expression in `text2`, result in Prompt 34px tabular, live "= preview"), a 4-column square keypad with 1px gaps (operators on `surface2`, `=` black full-width), copy-result, and the last five results. Keyboard works while it has focus (digits by `event.code`, so the Thai layout types numbers; Enter is =, Esc closes and returns focus). A barcode burst that lands in it is undone and routed to the current section, like any scan. Open/closed is remembered per machine.
+A 44px square icon button at the top-right of the workspace (Alt+K, tooltip and label "เครื่องคิดเลข (Alt+K)"), white face with a 1px black border like every default button, so it also reads on the black home deck; open = black fill with white icon. It opens a non-modal 320px panel straight down from under it: a `head` title bar, a right-aligned screen (expression in `text2`, result in Prompt 34px tabular, live "= preview"), a 4-column square keypad with 1px gaps (operators on `surface2`, `=` black full-width), copy-result, and the last five results. Keyboard works while it has focus (digits by `event.code`, so the Thai layout types numbers; Enter is =, Esc closes and returns focus). A barcode burst that lands in it is undone and routed to the current section, like any scan. Open/closed is remembered per machine.
 
 ### QR รับเงิน (payment QR)
 A dialog with two modes in a segmented control: **พร้อมเพย์ — ใส่ยอด** (amount field + a 340px black-on-white QR inside a 2px black frame, the amount in Prompt 34px, the display name, and the PromptPay ID masked to its last four digits) and **QR บัญชีของร้าน** (pick a labelled account, show its uploaded image). Unconfigured modes show a dashed setup panel, never an error. The POS payment card has a full-width "QR พร้อมเพย์ — ยอดบิลนี้" button.
@@ -436,6 +447,7 @@ One full-height panel: a header-B head with the channel name, a scrolling messag
 - **Do** show a category line silhouette (text3 stroke, square caps) for any model with no photo, and use the same drawing on desk and phone.
 - **Do** put every product photo on a white tile with equal padding and `object-fit: contain`.
 - **Do** show prices on the stock wall and in its drawer as `฿` with no decimals (for example ฿12,900). Bills, POS and daily accounts keep two decimals.
+- **Do** keep model names and SKUs whole in the POS cart: they may wrap only between words, never at a hyphen (DDJ-FLX4, DJM-S11), and the qty/price/total/remove columns take only the width they need so the name column gets the rest.
 - **Do** keep serial numbers on one line (`white-space: nowrap`, tabular figures, +0.02em tracking), because staff compare them character by character against the box sticker.
 - **Do** keep all text at 14px or larger, and chip text at 4.5:1 or better via measured white/black ink.
 - **Do** use black fill with white text for every selected or pressed state (chips, segments, flags, drawer actions).
@@ -443,7 +455,7 @@ One full-height panel: a header-B head with the channel name, a scrolling messag
 - **Do** honour `prefers-reduced-motion`: no lifts, flashes or slides; state still reads through words and colour.
 - **Do** use one ease for movement, `cubic-bezier(0.16, 1, 0.3, 1)`, at 150–450ms.
 - **Do** head every panel and table with `head` paper and a 2px black rule.
-- **Do** keep the bottom-right corner clear for the calculator; floating windows move around it.
+- **Do** keep floating windows clear of the calculator panel; they move around it.
 
 ### Don't:
 - **Don't** round anything outside the launcher tiles.

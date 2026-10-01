@@ -73,7 +73,7 @@
   /* โลโก้ทางการชุดเดียวกับเมนูซ้ายของคอนโซล (desk.html) — ตัวอักษรขาวทำมาสำหรับพื้นมืด */
   .logo-img { display: block; width: 73px; height: 24px; flex-shrink: 0; }
   .module-select {
-    font-family: var(--font-head); font-size: 17px; font-weight: 600; color: #fff; background: transparent;
+    font-family: var(--font-head); font-size: 16px; font-weight: 600; color: #fff; background: transparent;
     border: 0; padding: 8px 2px; min-height: 44px; cursor: pointer; max-width: 210px;
   }
   .module-select:focus-visible { outline-color: #fff; }
@@ -102,7 +102,7 @@
   .page.active { display: block; }
 
   .card { background: var(--surface); border: 1px solid var(--line); padding: 16px; margin-bottom: 12px; }
-  .card-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--text); margin: -16px -16px 12px;
+  .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--text); margin: -16px -16px 12px;
     padding: 10px 16px; background: var(--head); border-bottom: 2px solid var(--black); }   /* หัวแผงแบบ B — ชุดเดียวกับ .panel-head ของ desk.html */
 
   .form-group { margin-bottom: 14px; }
@@ -151,7 +151,7 @@
   @keyframes sheet-up { from { transform: translateY(24px); } to { transform: none; } }
   .modal-title { font-family: var(--font-head); font-size: 19px; font-weight: 700; margin-bottom: 14px; padding-right: 48px; }
   .modal-close { float: right; width: 44px; height: 44px; margin: -8px -8px 0 0; display: inline-flex; align-items: center; justify-content: center;
-    background: none; border: 0; color: var(--text); cursor: pointer; font-size: 26px; line-height: 1; }
+    background: none; border: 0; color: var(--text); cursor: pointer; font-size: 24px; line-height: 1; }
 
   .toast {
     position: fixed; bottom: calc(var(--navh) + 16px); left: 50%; transform: translateX(-50%) translateY(16px);
@@ -188,7 +188,7 @@
   .product-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
   .product-details { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
   .product-qty { font-size: 14px; }
-  .product-qty strong { font-family: var(--font-head); font-size: 20px; }
+  .product-qty strong { font-family: var(--font-head); font-size: 19px; }
   .product-price { font-size: 15px; font-weight: 700; text-align: right; }
 
   .history-item { padding: 12px 0; border-bottom: 1px solid var(--line); }
@@ -196,7 +196,7 @@
   .history-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .history-product { font-weight: 700; font-size: 15px; }
   .history-meta { font-size: 14px; color: var(--text2); margin-top: 2px; }
-  .history-qty { font-family: var(--font-head); font-size: 20px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .history-qty { font-family: var(--font-head); font-size: 19px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .qty-pos { color: var(--ok); }
   .qty-neg { color: var(--red); }
   .history-reason { font-size: 14px; color: var(--text2); margin-top: 4px; }
@@ -284,7 +284,7 @@
   .sh-photo-act { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; }
   .sh-close { position: absolute; right: 8px; top: 8px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: var(--surface); cursor: pointer; }
   .sh-meta { font-size: 14px; color: var(--text2); }
-  .sh-name { font-family: var(--font-head); font-size: 21px; font-weight: 700; line-height: 1.25; }
+  .sh-name { font-family: var(--font-head); font-size: 19px; font-weight: 700; line-height: 1.25; }
   .sh-name + .sh-meta { margin: 2px 0 12px; }
   .sh-count { display: flex; align-items: flex-end; gap: 14px; padding-bottom: 12px; border-bottom: 3px solid var(--black); }
   .sh-num { font-family: var(--font-head); font-weight: 700; font-size: 68px; line-height: .82; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
@@ -314,7 +314,7 @@
     background: var(--surface); border-top: 3px solid var(--black); box-shadow: 0 -8px 24px rgba(15,15,15,.14); display: flex; flex-direction: column; max-height: 74dvh; }
   .tray-h { display: flex; align-items: center; gap: 8px; min-height: 64px; padding: 8px 8px 8px 12px; background: var(--head); }
   .tray-open { flex: 1; min-width: 0; min-height: 48px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; border: 0; background: none; cursor: pointer; text-align: left; }
-  .tray-open strong { font-family: var(--font-head); font-size: 17px; }
+  .tray-open strong { font-family: var(--font-head); font-size: 16px; }
   .tray-open span { font-size: 14px; color: var(--text2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tray-open span.bad { color: var(--red); font-weight: 600; }
   .tray-h .btn { width: auto; min-height: 48px; padding: 0 14px; font-size: 15px; }
@@ -564,12 +564,12 @@
     <button class="modal-close" onclick="closeScanner()">×</button>
     <div class="modal-title" id="scanTitle">สแกนบาร์โค้ด</div>
 
-    <div id="scanVideoWrap" style="position:relative;background:#000;overflow:hidden;">
+    <div id="scanVideoWrap" style="position:relative;background:var(--black);overflow:hidden;">
       <video id="scanVideo" playsinline muted style="width:100%;display:block;object-fit:cover;"></video>
       <!-- กรอบนี้ต้องตรงกับ SCAN_ROI ในโค้ดเป๊ะ ๆ ไม่งั้นผู้ใช้เล็งผิดที่ -->
       <div style="position:absolute;left:8%;right:8%;top:32%;bottom:32%;
                   border:2px solid #CC001A;pointer-events:none;
-                  box-shadow:0 0 0 9999px rgba(0,0,0,0.35);"></div>
+                  box-shadow:0 0 0 9999px rgba(15,15,15,.35);"></div>
     </div>
 
     <div class="alert alert-plain" id="scanHint" style="margin-top:12px;">เล็งบาร์โค้ดให้อยู่ในกรอบแดง</div>
@@ -600,13 +600,13 @@ function showFatalError(msg) {
   if (!box) {
     box = document.createElement('div');
     box.id = 'fatalError';
-    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c8232c;' +
+    box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:var(--red);' +
       'color:#fff;font:14px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap;' +
       'word-break:break-word;max-height:45vh;overflow:auto;';
     const close = document.createElement('button');
     close.textContent = '✕';
     close.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;' +
-      'color:#fff;font-size:20px;line-height:1;padding:4px 8px;';
+      'color:#fff;font-size:19px;line-height:1;padding:4px 8px;';
     close.addEventListener('click', () => box.remove());
     box.appendChild(close);
     document.body.appendChild(box);
