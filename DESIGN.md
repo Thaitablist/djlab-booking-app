@@ -264,7 +264,7 @@ components:
 
 This is the working surface of a DJ equipment shop, not a showroom for it. Everything sits on a warm paper ground (`bg`) under near-black type, in square boxes with hairline rules, the way a counter ledger or a gear rack sits: plain, dense, and fast to scan. Black does the structural work: the sidebar, the phone header and bottom nav, the selected state of every control, and the heavy rules that head a group. Panel and table headers sit on a darker paper (`head`) over a 2px black rule, so the head of every working area reads before its rows. The brand red appears only where something must be seen first.
 
-Two devices share one world. `desk.html` is a keyboard-first counter console (≥1280px, USB scanner, hash-routed sections in one file); `stock.html` and the other phone pages are portrait, one-hand, camera-scan pages capped at 480px. They use the same tokens, the same two typefaces, and the same square geometry. Only the touch-target sizes change.
+Two devices share one world. `desk.html` is a keyboard-first counter console (≥1280px, USB scanner, hash-routed sections in one file) that also runs on an iPad in both orientations (finger first, the iPad camera or a Bluetooth scanner, a keyboard sometimes attached); `stock.html` and the other phone pages are portrait, one-hand, camera-scan pages capped at 480px. They use the same tokens, the same two typefaces, and the same square geometry. Only the touch-target sizes and the iPad breakpoints change.
 
 The stock wall (desk `#stock` plus the stock.html product page) is the system's signature expression: every model is a photo tile plus one big Prompt numeral, shelved in wings under a 3px black rule, and status is always a red or black inset edge **plus** a word.
 
@@ -333,8 +333,8 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 - **Headline** (Prompt 600, 24px): stat values, the POS net total and the deck greeting.
 - **Title** (Prompt 600–700, 19px): the topbar page title, wing headers, dialog/drawer heads and the word "Console" beside the sidebar logo.
 - **Title Small** (Prompt 600, 16px): card and panel heads, model names on the wall, segment and tab labels.
-- **Off-ramp exceptions (kept on purpose):** the home clock's seconds (46px beside the 136px clock), the booking timer (44px) and the phone stock sheet count (68px). Everything else snaps to the ramp.
-- **Body** (Noto Sans Thai 400, 15px, 1.5): all reading text and table cells. Phone inputs use 16px so iOS does not zoom.
+- **Off-ramp exceptions (kept on purpose):** the home clock's seconds (46px beside the 136px clock), the booking timer (44px) and the phone stock sheet count (68px). On an iPad in landscape with the sidebar (1100–1279px) the home clock steps down to 112px with 38px seconds, so the shop-state column keeps "อีก n ชม. n นาที" on one line and the clock stays centred. Everything else snaps to the ramp.
+- **Body** (Noto Sans Thai 400, 15px, 1.5): all reading text and table cells. Phone inputs, and every desk input on a coarse pointer (iPad), use 16px so iOS does not zoom on focus. User zoom is never blocked.
 - **Label** (Noto Sans Thai 500–700, 14px): field labels, meta lines, chips, tags, badges and hints. 14px is the floor.
 
 ### Named Rules
@@ -349,7 +349,13 @@ These colours appear only as solid chip grounds on the calendar, the home agenda
 - **Stock wall (desk):** the workspace stops scrolling. A full-width 54px scan field with the หา · รับเข้า · นับ segment sits on top, then a chip row (group switch, filter chips with counts, and the ใกล้หมด n · หมด n flags on the right), then the wall. Wings are ≥262px columns (the "other brands" wing is narrower). Each wing scrolls on its own; when the wings don't fit, they get equal integer widths and snap one wing at a time, with black step buttons at the edges. In receive/count mode a bottom tray (clamp 250–330px) docks below and the wall shrinks to make room rather than being covered.
 - **Phone pages:** body capped at 480px, a sticky 56px black header, a fixed 62px black bottom nav, and 16px page padding. The phone stock wall fills the viewport between header and nav, with a scan bar, swipeable wing tabs, and a two-column card grid per wing. The receive/count tray docks above the nav.
 - **Spacing rhythm:** 4 / 8 / 12 / 16 / 20px, with 10px and 14px used inside dense rows. Rows are separated by hairlines, not gaps.
-- **Targets:** at least 40px on desk (32px for small buttons) and at least 44px on phone (48px for primary buttons).
+- **Targets:** at least 40px on desk (32px for small buttons) and at least 44px on phone (48px for primary buttons). On any coarse pointer (desk on an iPad) every visible target is at least 44 × 44, small buttons included; a checkbox counts its label as the target.
+- **iPad (desk.html, both orientations):** three width bands, chosen where the content breaks rather than by device name.
+  - **≥ 1280px:** the desk layout above, unchanged (iPad Pro 12.9 landscape lands here and only gets the touch rules).
+  - **1100–1279px (iPad landscape):** the 248px sidebar stays. The POS payment column narrows to 320px so a cart with finger-sized steppers still fits, and the stock-wall bar may wrap the ใกล้หมด/หมด flags to a second line (right-aligned) when the detail drawer is open.
+  - **< 1100px (iPad portrait, and iPad 10.2 landscape at 1024):** the sidebar becomes an off-canvas drawer opened by a black 44px "เมนู" button at the left of the topbar, over a `rgba(15,15,15,.45)` scrim; the topbar wraps to two rows (menu · back · title · user, then search full width); the right detail drawer becomes an overlay sheet `min(440px, 100%)` instead of squeezing the workspace. A drawer, not an icon rail: fifteen sections cannot be told apart by icon alone, a rail's labels would only live in hover tooltips (no hover on touch), and the rail would cost 64px of a 712px work area. The drawer keeps the owner's labels and gives the work area the full width. Its open state survives rotation.
+  - **≤ 900px (portrait):** POS, the booking/customers/daily splits, the home grid and the mail split stack to one column; the home deck puts the 136px clock on its own row; the stock-wall scan field takes its own row above the mode switch.
+  - Heights use `dvh` (Safari's `vh` ignores its toolbar), and bottom-docked things add `env(safe-area-inset-bottom)` (`viewport-fit=cover`).
 - **Calculator dock (desk):** a 44px square icon button at the top-right of the workspace, 14px below the topbar's 2px rule and 20px from the right edge (owner, 1 Oct 2026). It sits in the frame around the workspace (`.ws-wrap`), not in the scrolling area, so it stays put while the page scrolls and moves left of the detail drawer when one opens. The first row of every section that has right-aligned controls at that height (board, calendar, stock-wall top row, movement history, daily, admin toolbars and the shop-state block on the home deck) carries `.calc-clear`, a right margin of 48px, so nothing sits under the button at the default scroll. Content that later scrolls under it is covered by the solid button and comes back when scrolled again. Its 320px panel opens straight down from under the button, right-aligned to it, and scrolls inside itself on short screens. The floating video player never overlaps the button or the panel: its default spot is the bottom-right corner (20px from both edges), and dragging or resizing pushes it up or left of the panel by the smallest move.
 
 ## Elevation & Depth
@@ -363,6 +369,7 @@ Mostly flat and ruled: depth comes from white surfaces on paper, hairline border
 - **Floating player** (`box-shadow: 0 12px 40px rgba(15,15,15,.35)`): the draggable mini-player.
 - **Calculator** (button `0 6px 18px rgba(15,15,15,.18)`, panel `0 12px 40px rgba(15,15,15,.3)`): the floating calculator button and its panel.
 - **Docked tray** (`box-shadow: 0 -4px 18px rgba(15,15,15,.08)` desk, `0 -8px 24px rgba(15,15,15,.14)` phone): receive/count trays.
+- **iPad nav drawer** (`box-shadow: 8px 0 32px rgba(15,15,15,.3)`) and **overlay detail sheet** (`box-shadow: -12px 0 40px rgba(15,15,15,.22)`): the two things that slide over the workspace below 1100px. The camera panel reuses the calculator panel shadow.
 - **Launcher tile** (`box-shadow: 0 2px 6px rgba(15,15,15,.14), 0 8px 18px rgba(15,15,15,.12)`; lifts 3px on hover): app-icon tiles only.
 
 ### Named Rules
@@ -416,6 +423,7 @@ A row of square buttons inside one 1px black frame, divided by hairlines. The pr
 - **Phone (stock.html):** card titles become full-bleed `head` bars with the same 2px black rule; the tray head uses the same paper. The black phone header is unchanged.
 
 ### Navigation
+- **iPad below 1100px:** the same sidebar slides in as a drawer from the black "เมนู" button (three-line glyph plus the word), over a dark scrim. Tapping a section, the scrim or Esc closes it; the work area behind is inert while it is open.
 - **Desk sidebar:** black, top-left official logo plus "Console", 15px items with drawn 1.75-stroke icons, grouped under 14px muted titles. Hover `nav-hover`; active is `nav-active` with a 3px red left edge and 600 weight. Shortcut hints sit at the right of each item. Labels are always one line (`nowrap`); a label too long for its slot ends in an ellipsis rather than wrapping, and the full name stays in the tooltip and the page title.
 - **Phone:** the black header carries the official logo (73×24) and a module select. The black bottom nav has icon plus label, and the active item gets a 3px red top edge.
 - **Tabs:** a 3px black underline marks the selected tab (mail tabs on desk, wing tabs on phone). Red stays reserved for the active nav item.
@@ -426,6 +434,19 @@ A row of square buttons inside one 1px black frame, divided by hairlines. The pr
 - **Photo tile:** always a white tile with equal inner padding and a hairline border (`object-fit: contain`), so dark product shots read as framed pictures rather than holes in the wall. Inactive products desaturate.
 - **Detail drawer:** a 250px white photo stage, the meta line, an 80px count over a 3px black rule, a four-way black-framed action bar, then serial chips grouped by status.
 - **Tray:** docks at the bottom in receive/count mode. Units collect as photo cards with the serial on one line; duplicates get a red frame and the word "ซ้ำ".
+
+### Touch (desk on iPad)
+- **Pointer, not width, decides touch rules** (`pointer: coarse` for sizes, `hover: none` for reveals), so an iPad with a trackpad behaves like the desk and a narrow desktop window does not grow fat buttons.
+- **Nothing hides behind hover.** On `hover: none` the stock wall's "+ เพิ่มรูป" tile shows on every row without a photo (a quiet dashed tile, not a filled button), the floating player shows a drawn six-dot grip, and text that the desk truncates with a tooltip (the tray's last message, the home agenda titles) wraps instead.
+- **Keyboard hints hide, shortcuts stay.** Alt+… hints in the sidebar, the `/` key in the scan field, `Esc`/`F9` keys inside buttons and the cart's key hints are hidden on coarse pointers; every shortcut still works when a keyboard is attached, and "? ดูคีย์ลัดทั้งหมด" stays in the sidebar foot.
+- **No traps:** inner scrollers (sidebar, wings, wall, detail sheet, dropdown results, calculator, tray, chat log) use `overscroll-behavior: contain`; in-page tables do not (a table taller than the screen would stop the page from scrolling). The page itself never bounces (`overscroll-behavior: none` on html). Buttons use `touch-action: manipulation`, so fast taps never zoom, while pinch-zoom still works.
+- **No auto-focus of text fields on touch:** a section change, a mode switch or a launcher tap does not focus a text field (iOS would raise the keyboard over half the screen). The Bluetooth scanner listens at document level, so it does not need a focused field.
+- **On-screen keyboard:** toasts lift above it (`--kb`), and the floating video hides its picture while the keyboard is up (audio keeps playing).
+- **Wing step buttons** are 44px wide on touch; when they show, the wall insets 16px each side so the buttons sit in the gutter and never cover a stock count.
+
+### Camera scan (desk on iPad)
+- **Button:** a 44px bordered square with the drawn camera glyph inside the stock-wall scan field, and a "กล้อง" button beside the POS search. It shows on touch devices or devices that report a camera; the counter PC never sees it.
+- **Panel:** not a modal (the Bluetooth scanner must keep working while it is open). It floats top-centre, `min(520px, 100vw − 32px)`, with a `head` title bar, a black mode tag (หา · รับเข้า · นับ · ขาย), the live video with the same red reading frame as stock.html (8% / 32% insets), a one-line status that names what was read and the running count, and ไฟฉาย + a full-width black "เสร็จแล้ว". It leaves the cart and the receive/count tray visible below.
 
 ### Calculator (desk, every section)
 A 44px square icon button at the top-right of the workspace (Alt+K, tooltip and label "เครื่องคิดเลข (Alt+K)"), white face with a 1px black border like every default button, so it also reads on the black home deck; open = black fill with white icon. It opens a non-modal 320px panel straight down from under it: a `head` title bar, a right-aligned screen (expression in `text2`, result in Prompt 34px tabular, live "= preview"), a 4-column square keypad with 1px gaps (operators on `surface2`, `=` black full-width), copy-result, and the last five results. Keyboard works while it has focus (digits by `event.code`, so the Thai layout types numbers; Enter is =, Esc closes and returns focus). A barcode burst that lands in it is undone and routed to the current section, like any scan. Open/closed is remembered per machine.
@@ -456,6 +477,8 @@ One full-height panel: a header-B head with the channel name, a scrolling messag
 - **Do** use one ease for movement, `cubic-bezier(0.16, 1, 0.3, 1)`, at 150–450ms.
 - **Do** head every panel and table with `head` paper and a 2px black rule.
 - **Do** keep floating windows clear of the calculator panel; they move around it.
+- **Do** give every target on a coarse pointer 44 × 44 and every input 16px text.
+- **Do** make anything that appears on hover visible on `hover: none`.
 
 ### Don't:
 - **Don't** round anything outside the launcher tiles.
@@ -466,3 +489,4 @@ One full-height panel: a header-B head with the channel name, a scrolling messag
 - **Don't** add a coloured side stripe to alerts or toasts.
 - **Don't** write "Google" on teacher or Google calendar chips; they start with the time, and the teacher's name must always be visible as text.
 - **Don't** wrap or truncate a serial number.
+- **Don't** block user zoom or focus a text field from code on touch.

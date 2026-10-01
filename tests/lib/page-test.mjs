@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // เครื่องหลักเป็น Mac แต่มีคนรันบนวินโดวส์ด้วย — หาตัวที่มีจริงในเครื่อง
-const CHROME = [
+export const CHROME = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -23,14 +23,16 @@ const CHROME = [
 const SUPABASE_TAG = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
 const ZXING_TAG = '<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>';
 
-export function runPage({ root, file, mock, tests, hash, flags }) {
+// ก๊อปไฟล์จริงไปโฟลเดอร์ชั่วคราว สลับแท็ก Supabase เป็นตัวปลอม ต่อท้ายด้วยชุดทดสอบ
+// คืน path ของไฟล์ที่สร้าง หรือ null ถ้าหาแท็กไม่เจอ (tests/lib/cdp-page.mjs ใช้ตัวเดียวกัน)
+export function writePatched({ root, file, mock, tests }) {
   const html = readFileSync(join(root, file), 'utf8');
 
   // ถ้าแท็กในไฟล์จริงเปลี่ยนไป การสลับจะไม่เกิด แล้วเทสต์จะยิงเน็ตจริงโดยไม่มี
   // ใครรู้ — ต้องดังตรงนี้ก่อน
   if (!html.includes(SUPABASE_TAG)) {
     console.error(file + ': หาแท็ก Supabase ไม่เจอ — เทสต์นี้จะไม่ได้ทดสอบอะไรเลย');
-    return { ran: false, ok: false, lines: [] };
+    return null;
   }
 
   const patched = html
@@ -41,6 +43,12 @@ export function runPage({ root, file, mock, tests, hash, flags }) {
   const dir = mkdtempSync(join(tmpdir(), 'djlab-page-'));
   const target = join(dir, file.replace('.html', '.under-test.html'));
   writeFileSync(target, patched);
+  return target;
+}
+
+export function runPage({ root, file, mock, tests, hash, flags }) {
+  const target = writePatched({ root, file, mock, tests });
+  if (!target) return { ran: false, ok: false, lines: [] };
 
   const r = spawnSync(CHROME, [
     '--headless', '--disable-gpu', '--no-sandbox',

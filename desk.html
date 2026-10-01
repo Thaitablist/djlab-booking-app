@@ -2,14 +2,20 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- viewport-fit=cover: iPad ที่มีขอบมนใช้จอเต็ม แล้วเว้นขอบด้วย env(safe-area-inset-*) เอง · ไม่ปิดการซูมของผู้ใช้
+     (iOS ซูมเองตอนแตะช่องที่ตัวหนังสือเล็กกว่า 16px — แก้ที่ขนาดช่องบนจอสัมผัส ไม่ใช่ห้ามซูม) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0F0F0F">
+<!-- "เพิ่มไปยังหน้าจอโฮม" บน iPad: เปิดเต็มจอเป็นแอป (iPadOS ใหม่อ่าน display: standalone จาก manifest เอง แท็กนี้สำหรับรุ่นเก่า) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DJ LAB คอนโซล">
 <title>DJ LAB SIAM — คอนโซลร้าน</title>
 <!-- manifest แยกจากของหน้าจองห้อง: ตัวนั้นชี้ start_url ไปหน้าจองและใช้ไอคอนแผ่นเสียง
      ติดตั้งจากหน้านี้แล้วต้องได้โลโก้ D ของร้านและเปิดเข้าคอนโซลตรง -->
 <link rel="manifest" href="desk.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="desk-icon-192.png">
-<link rel="apple-touch-icon" href="desk-icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="desk-icon-192.png"><!-- พื้นทึบ (RGB ไม่มีโปร่งใส) — iOS ไม่เติมพื้นดำให้ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -733,7 +739,7 @@
   .tray-h { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--head); border-bottom: 2px solid var(--black); flex-shrink: 0; flex-wrap: wrap; }
   .tray-h h2 { font-size: 19px; font-weight: 700; }
   /* ข้อความล่าสุด + ปุ่ม เป็นก้อนเดียวชิดขวา — แถบหัวแคบแล้วทั้งก้อนลงบรรทัดใหม่ด้วยกัน ไม่แตกกลางก้อน */
-  .tray-acts { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .tray-acts { display: flex; align-items: center; gap: 12px; margin-left: auto; min-width: 0; }   /* min-width 0: ถาดแคบกว่าก้อนนี้ (เปิดแผงขวาบน iPad) ข้อความล่าสุดหดเป็น … แทนการดันถาดล้นจอ */
   .tray-sum { font-size: 15px; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .tray-sum b { font-family: var(--font-head); font-size: 19px; color: var(--text); }
   .tray-h .input { width: auto; min-height: 36px; padding: 5px 10px; }
@@ -743,7 +749,7 @@
   .tray-empty { color: var(--text2); font-size: 15px; max-width: 72ch; }
   .tray-empty ol { margin: 6px 0 0 20px; }
   .tray-empty li { margin-top: 2px; }
-  .tray-note { max-width: 520px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 4px 10px; border: 1px solid var(--line-strong); background: var(--surface2); }
+  .tray-note { min-width: 0; max-width: 520px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 4px 10px; border: 1px solid var(--line-strong); background: var(--surface2); }
   .tray-note.bad { border-color: #F0B8C1; background: var(--red-soft); color: #8A0012; }
   .t-group { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 150px; }
   .t-gh { display: flex; align-items: baseline; gap: 8px; font-family: var(--font-head); font-weight: 600; font-size: 16px; white-space: nowrap;
@@ -923,6 +929,191 @@
     z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; max-width: 640px; box-shadow: var(--shadow);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ======================================================================
+     iPad (เจ้าของสั่ง 1 ต.ค. 69 — ใช้คอนโซลบน iPad ได้ทั้งแนวตั้งและแนวนอน · นิ้วเป็นหลัก ต่อคีย์บอร์ดบ้าง)
+     ≥ 1280px + เมาส์ = เหมือนเดิมทุกอย่าง: กฎในส่วนนี้อยู่ใต้ media query ทั้งหมด ยกเว้นข้างล่างนี้ที่บนคอมได้ค่าเดิมเป๊ะ
+       (dvh = vh บนคอม · env(safe-area-inset-*) = 0 บนคอม)
+     1100–1279  = iPad แนวนอน: เมนูซ้ายเต็มเหมือนคอม (พื้นที่ทำงานเหลือ 852–1031px ใกล้ 1032 ของจอ 1280)
+     < 1100     = iPad แนวตั้ง + iPad 1024 แนวนอน: เมนูเป็นลิ้นชักจากปุ่ม "เมนู" บนแถบบน (เหตุผลอยู่ใน DESIGN.md)
+     pointer: coarse = เป้ากด ≥ 44px · ช่องกรอก ≥ 16px (iOS ซูมเองถ้าเล็กกว่า) · hover: none = ของที่เคยโผล่ตอนชี้เมาส์ โผล่ตลอด
+     ====================================================================== */
+  /* screen เท่านั้น — กฎพิมพ์ (@media print ข้างบน) ปลดความสูง/ขอบพวกนี้ทิ้งเพื่อพิมพ์หลายหน้า ห้ามมาทับ */
+  @media screen {
+    /* 100vh ของ Safari = ความสูงตอนแถบเครื่องมือหุบ → ล่างสุดของหน้าจมใต้แถบ · dvh ตามแถบจริง (เบราว์เซอร์เก่าใช้ค่า vh เดิมข้างบน) */
+    .app, .main { height: 100dvh; }
+    .tablewrap { max-height: calc(100dvh - 290px); }
+    .mail-reader iframe { height: calc(100dvh - 430px); }
+    .tray { flex-basis: clamp(250px, 34dvh, 330px); }
+    .gresults { max-height: 60dvh; }
+    /* ขอบล่างของ iPad ที่มีแถบโฮม (เส้นขีดล่างจอ) — ของที่ชิดล่างยกขึ้นพ้นแถบ */
+    .workspace { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+    .workspace.is-wall { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    .sidebar-foot { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    /* --kb = ความสูงแป้นพิมพ์บนจอที่บังอยู่ (syncKeyboard) — ข้อความแจ้งเตือนลอยเหนือแป้น ไม่จมใต้แป้น */
+    .toast { bottom: calc(24px + env(safe-area-inset-bottom) + var(--kb, 0px)); }
+  }
+  /* ระหว่างพิมพ์บน iPad (แป้นบนจอเปิด) หน้าต่างวิดีโอลอยหลบไปก่อน ไม่บังช่องที่กำลังพิมพ์ · เสียงยังเล่นต่อ (ซ่อนภาพ ไม่ถอด iframe) */
+  body.kb-open .player:not(.docked) { visibility: hidden; }
+
+  .nav-btn, .nav-scrim { display: none; }
+  .nav-btn { align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 12px;
+    border: 1px solid var(--black); background: var(--black); color: #fff; cursor: pointer; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .nav-btn .ico-svg { width: 20px; height: 20px; }
+  .nav-btn:hover { background: #2A2A2A; }
+
+  /* ปุ่มกล้อง (สแกนด้วยกล้องของ iPad) — โผล่เฉพาะเครื่องจอสัมผัส หรือเครื่องที่มีกล้อง (.can-cam ตั้งจาก JS) */
+  .cam-btn { display: none; flex-shrink: 0; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 0 10px;
+    border: 1px solid var(--black); background: var(--surface); color: var(--black); cursor: pointer; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .cam-btn .ico-svg { width: 22px; height: 22px; }
+  .cam-btn:hover { background: var(--sel); }
+  .can-cam .cam-btn { display: inline-flex; }
+  .scan-row { display: flex; gap: 8px; align-items: stretch; }
+  .scan-row .input { flex: 1; min-width: 0; }
+  /* แผงกล้อง: ลอยกลางบน ไม่ใช่ <dialog> — wedgeRoute ปฏิเสธการยิงตอนมี dialog เปิด แต่เครื่องยิง Bluetooth ต้องยิงได้ทั้งที่กล้องเปิดอยู่
+     ไม่บังถาดล่างของผนัง (รับเข้า/นับ) และตะกร้า — เห็นของที่เพิ่งอ่านได้เข้าไปทันที */
+  .cam { position: fixed; z-index: 840; left: 50%; top: calc(12px + env(safe-area-inset-top)); transform: translateX(-50%);
+    width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--surface); border: 2px solid var(--black); box-shadow: 0 12px 40px rgba(15,15,15,.3); }
+  .cam-head { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; background: var(--head); border-bottom: 2px solid var(--black); }
+  .cam-head h2 { font-size: 16px; flex: 1; min-width: 0; }
+  .cam-view { position: relative; background: var(--black); overflow: hidden; aspect-ratio: 16 / 9; }
+  .cam-view video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* กรอบนี้ต้องตรงกับ SCAN_ROI ในโค้ดเป๊ะ ๆ ไม่งั้นผู้ใช้เล็งผิดที่ (ชุดเดียวกับ stock.html) */
+  .cam-roi { position: absolute; left: 8%; right: 8%; top: 32%; bottom: 32%; border: 2px solid var(--red); pointer-events: none;
+    box-shadow: 0 0 0 9999px rgba(15,15,15,.35); }
+  .cam-hint { padding: 10px 14px; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--line); }
+  .cam-err { padding: 10px 14px 0; }
+  .cam-err .alert { margin: 0; white-space: pre-line; }
+  .cam-foot { display: flex; gap: 10px; padding: 12px 14px; }
+  .cam-foot .btn-primary { flex: 1; }
+
+  /* ที่จับหน้าต่างวิดีโอลอย — บนคอมบอกด้วยเคอร์เซอร์มือ (grab) แต่จอสัมผัสไม่มีเคอร์เซอร์ จึงวาดให้เห็น */
+  .player-grip { display: none; width: 18px; height: 18px; flex-shrink: 0; color: var(--on-black-muted); }
+
+  @media (max-width: 1279px) {
+    .app { min-width: 0; }
+    /* iPad แนวนอน (พื้นที่ทำงาน 852–1031): ช่องชำระเงินแคบลง ตะกร้าที่ปุ่มจำนวนโตขึ้นสำหรับนิ้วยังพอดี */
+    .pos { grid-template-columns: minmax(0, 1fr) 320px; }
+    /* หน้าแรก: พื้นที่ทำงาน 852–1031 นาฬิกา 136px บีบช่องสถานะร้านจน "นาที" ตกบรรทัด — เล็กลงเท่าที่พอ (ยังกลางแถบ) */
+    .bigclock { font-size: 112px; }
+    .bigclock .sec { font-size: 38px; }
+    /* แผงสินค้าขวาเปิดอยู่ (เหลือ ~436px): ปุ่ม ใกล้หมด/หมด ลงบรรทัดใหม่ชิดขวา แทนการดันแถวล้นจอ (ชิปยังพับเข้า "+n" ตามเดิม) */
+    .wall-bar { flex-wrap: wrap; }
+    .flags { margin-left: auto; }
+  }
+
+  /* ---- < 1100px: เมนูซ้ายเป็นลิ้นชัก · แถบบนสองแถว · แผงรายละเอียดลอยทับด้านขวา ---- */
+  @media (max-width: 1099px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    /* visibility ซ่อนตอนปิด = ไม่อยู่ในลำดับ Tab และโปรแกรมอ่านจอไม่อ่านเมนูที่อยู่นอกจอ */
+    .sidebar { position: fixed; z-index: 860; top: 0; bottom: 0; left: 0; width: var(--side-w); max-width: calc(100vw - 56px);
+      padding-left: env(safe-area-inset-left); transform: translateX(-100%); visibility: hidden;
+      transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear .25s; box-shadow: 8px 0 32px rgba(15,15,15,.3); }
+    body.nav-open .sidebar { transform: none; visibility: visible; transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1); }
+    body.nav-open .nav-scrim { display: block; position: fixed; inset: 0; z-index: 855; background: rgba(15,15,15,.45); }
+    .nav-btn { display: inline-flex; }
+    .topbar { flex-wrap: wrap; gap: 10px 12px; padding: 10px 28px 12px; }
+    .topbar h1 { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gsearch { order: 9; flex: 1 0 100%; max-width: none; }
+    .user { margin-left: 0; }
+    .frame-hint { top: 128px; }
+    /* แถบแจ้งเตือนแถวแรกของหมวด (บันทึกการใช้งาน) ยาวถึงขอบขวาบนจอแคบ — เว้นที่ให้ปุ่มเครื่องคิดเลขเหมือน .calc-clear */
+    .section > .alert:first-child { margin-right: var(--calc-clear); }
+    /* แผงรายละเอียด/ลิ้นชักสินค้า: ลอยทับด้านขวา ไม่บีบพื้นที่ทำงาน (จอ 768 เหลือที่ให้ตารางแค่ ~270px ถ้าดันกัน)
+       แตะของอื่นบนจอได้ตามปกติ — แตะแถวอื่นบนผนัง = เปลี่ยนสินค้าในแผง · เครื่องคิดเลขอยู่ใต้แผงจนกว่าจะปิดแผง */
+    .content { position: relative; }
+    .detail, .detail.stock-drawer { position: absolute; z-index: 40; top: 0; right: 0; bottom: 0; width: min(440px, 100%);
+      overscroll-behavior: contain; box-shadow: -12px 0 40px rgba(15,15,15,.22); }
+    .calc { z-index: 35; }
+  }
+
+  /* ---- ≤ 900px (iPad แนวตั้ง): คอลัมน์คู่เรียงลงแทนการบีบ ---- */
+  @media (max-width: 900px) {
+    .pos, .split, .home-grid, .mail-split { grid-template-columns: minmax(0, 1fr); }
+    .stats-4 { grid-template-columns: repeat(2, 1fr); }
+    /* หน้าแรก: นาฬิกาใหญ่ลงแถวของตัวเอง (สามช่องในแถวเดียวบีบชื่อกับสถานะร้านจนอ่านไม่ออก) — ขนาดเดิม 136px */
+    .deck { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "hi side" "clock clock"; row-gap: 6px; }
+    .deck-hi { grid-area: hi; }
+    .deck-side { grid-area: side; align-self: start; }
+    .bigclock { grid-area: clock; justify-self: center; font-size: 136px; }
+    .bigclock .sec { font-size: 46px; }
+    /* ผนังสต็อก: ช่องยิงเต็มแถวของตัวเอง (เหลือ ~70px ถ้าต้องแบ่งกับปุ่มโหมด) · ปุ่มโหมด/สินค้าใหม่ลงแถวที่สอง */
+    .wall-top { flex-wrap: wrap; }
+    .wall-top .scanbox { flex: 1 0 100%; }
+    .wall-top .modes { flex: 1 1 auto; }
+    .wall-top .modes button { flex: 1; }
+  }
+
+  /* ---- จอสัมผัส: เป้ากด ≥ 44 × 44px (แนวทางของ Apple) · ช่องกรอก 16px ---- */
+  @media (pointer: coarse) {
+    html, body { overscroll-behavior: none; }           /* ไม่เด้งทั้งหน้า/ไม่ดึงรีเฟรชตอนปัดเลยขอบ */
+    /* กล่องที่เลื่อนในตัว: ปัดจนสุดแล้วไม่ลามไปเลื่อนพื้นที่ทำงานข้างหลัง (เมนู/ปีกผนังตั้งไว้แล้ว) — ไม่ใส่กับตารางในหน้า
+       เพราะตารางสูงเต็มจอแล้วจะเลื่อนหน้าต่อไม่ได้ (กลายเป็นกับดักกลับด้าน) */
+    .detail, .gresults, .presults, .calc, .tray-b, .wall, .dc-log { overscroll-behavior: contain; }
+    /* แตะรัว ๆ (± จำนวน · ปุ่มเครื่องคิดเลข) ต้องไม่กลายเป็นแตะสองทีซูม — ยังถ่างนิ้วซูมได้ตามปกติ */
+    button, a, input, select, textarea, label, .w-row, table.data tbody tr, .ev, .tl-block { touch-action: manipulation; }
+    .btn, .btn-sm { min-height: 44px; min-width: 44px; }
+    .input, select.input, textarea.input, .price-in { min-height: 44px; }
+    input, select, textarea, .input, select.input, textarea.input, .scanbox input { font-size: 16px; }
+    .pin-input { font-size: 34px; }
+    .pay-amt-in { font-size: 24px; }
+    input[type="checkbox"], input[type="radio"] { width: 22px; height: 22px; }
+    input[type="color"] { min-width: 44px; min-height: 44px; }
+    .tray-h .input { min-height: 44px; }
+    .price-in { width: 96px; }
+    /* ก้อนจองสั้น ๆ (1 ชม.) บนไทม์ไลน์แคบกว่านิ้ว — กว้างอย่างน้อย 44 (ล้นเข้าชั่วโมงถัดไปไม่กี่ px · ตารางข้างล่างแตะได้อีกทาง) */
+    .tl-block { min-width: 44px; }
+    .chk { min-height: 44px; }
+    .nav-item { min-height: 48px; }
+    .sidebar-foot button { min-height: 44px; }
+    .qty button { width: 44px; height: 44px; }
+    .qty input { height: 44px; }
+    .serial button, .seller button { min-width: 44px; min-height: 44px; }
+    .fchip, .flag, .seg button { min-height: 44px; align-items: center; }
+    .mcal button { min-height: 48px; }
+    .cal-day { min-height: 44px; }
+    .ev { line-height: 20px; padding-top: 12px; padding-bottom: 12px; }
+    .cal-week .ev { padding-top: 12px; padding-bottom: 12px; }
+    .ev-more { min-height: 44px; }
+    table.data th .th { min-height: 44px; }
+    table.data td { padding-top: 11px; padding-bottom: 11px; }
+    .tlist button, .mail-tab, .row-link, .gresult, .presult, .calc-h, .acct .pick, .swatch { min-height: 44px; }
+    .t-x, .stepbtn { width: 44px; height: 44px; }
+    /* ปุ่มเลื่อนปีกกว้าง 44 ต้องไม่ทับตัวเลขคงเหลือที่ขอบปีก — ตอนปีกล้นจอ (มีปุ่ม) ผนังหดเข้ามาข้างละ 16px
+       ให้ปุ่มอยู่ในขอบว่างทั้งปุ่ม (28 + 16) · ปีกพอดีจอ = ไม่มีปุ่ม ไม่ต้องหด */
+    .wall-wrap:has(> .wall.snaps) { margin: 0 16px; }
+    .wall-step { width: 44px; }
+    .wall-step.prev { left: -44px; }
+    .wall-step.next { right: -44px; }
+    .player-bar { padding-top: 0; padding-bottom: 0; }
+    .player-bar button { min-width: 44px; min-height: 44px; }
+    /* คีย์ลัดยังใช้ได้เมื่อต่อคีย์บอร์ด แต่ป้ายบอกคีย์ลัดรกจอสัมผัส — ซ่อนเฉพาะป้าย (หน้า ? ดูคีย์ลัดยังเปิดได้จากท้ายเมนู) */
+    .nav-item .kbd, .scanbox kbd, .btn kbd, .kbd-hint { display: none; }
+  }
+
+  /* ปฏิทินเล็กของหมวดจองห้อง: 7 ช่องในคอลัมน์ 340px ได้ช่องละ 41px — คอลัมน์ข้างกว้างขึ้นให้ช่องละ ≥ 44 (จอแคบเรียงเป็นคอลัมน์เดียวอยู่แล้ว) */
+  @media (pointer: coarse) and (min-width: 901px) {
+    .split { grid-template-columns: minmax(0, 1fr) 364px; }
+  }
+
+  /* ---- ไม่มีเมาส์ชี้: ของที่เคยโผล่เฉพาะตอนชี้ ต้องเห็นตลอด ---- */
+  @media (hover: none) {
+    /* "+ เพิ่มรูป" (เจ้าของร้าน/ผู้ดูแล) — บนคอมเงียบจนชี้/เลือกแถว เพราะ 100+ รุ่นที่ยังไม่มีรูปจะกลายเป็นปุ่มเต็มผนัง
+       บนจอสัมผัสไม่มี "ชี้" จึงโชว์ตลอดแบบเส้นประเบา ๆ (แตะแถว = เปิดแผงสินค้าเหมือนเดิม · แตะช่องรูป = เลือกรูป) */
+    .ph-add { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
+    .ph-add .cta { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .ph-add .idle { display: none; }
+    .player-grip { display: block; }
+    /* ข้อความที่บนคอมตัดเป็น … แล้วอ่านเต็มได้จากป้ายตอนชี้ (title) — จอสัมผัสไม่มีป้ายตอนชี้ จึงตัดบรรทัดให้เห็นครบ */
+    .tray-note { white-space: normal; }
+    .agenda-row .ttl { white-space: normal; }
+    .dc-stamp { visibility: visible; }
+    .dc-acts { display: flex; position: static; margin-top: 4px; }
+    /* :hover ค้างหลังแตะบน iOS — ไม่ยกไอคอน/ป้ายค้างไว้ */
+    .lt:hover .lt-icon { transform: none; box-shadow: 0 2px 6px rgba(15,15,15,.14), 0 8px 18px rgba(15,15,15,.12); }
+    .ev:hover { transform: none; box-shadow: none; }
+  }
 </style>
 </head>
 <body>
@@ -948,8 +1139,9 @@
   </form>
 </div>
 
+<div class="nav-scrim" onclick="setNav(false, true)" aria-hidden="true"></div>
 <div class="app">
-  <nav class="sidebar" aria-label="เมนูหลัก">
+  <nav class="sidebar" id="sidebar" aria-label="เมนูหลัก">
     <div class="brand"><img class="brand-logo" src="logo-full-dark.png" srcset="logo-full-dark.png 1x, logo-full-dark@2x.png 2x" width="122" height="40" alt="DJ LAB SIAM"><span class="brand-console" lang="en">Console</span></div>
     <div id="navList"></div>
     <div class="sidebar-foot">
@@ -959,6 +1151,9 @@
 
   <div class="main">
     <header class="topbar">
+      <!-- จอแคบกว่า 1100px (iPad แนวตั้ง) เมนูซ้ายหุบเป็นลิ้นชัก — ปุ่มนี้เปิด · บนคอมซ่อน -->
+      <button class="nav-btn" id="navBtn" type="button" onclick="setNav(!document.body.classList.contains('nav-open'))"
+              aria-controls="sidebar" aria-expanded="false" aria-label="เมนู"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>เมนู</button>
       <button class="btn btn-sm" id="backBtn" type="button" onclick="goBack()" disabled
               title="ย้อนกลับไปหมวดก่อนหน้า (Alt+←)" aria-label="ย้อนกลับไปหมวดก่อนหน้า">← ย้อนกลับ</button>
       <h1 id="pageTitle">สินค้า</h1>
@@ -1123,7 +1318,7 @@
                   <button class="btn btn-sm" id="mailNext" type="button" onclick="mailPage(1)">เก่ากว่า ›</button>
                 </div>
               </div>
-              <div class="mail-reader" id="mailReader"><div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div></div>
+              <div class="mail-reader" id="mailReader"><div class="empty">เลือกอีเมลจากรายการเพื่ออ่าน</div></div>
             </div>
           </div>
         </section>
@@ -1188,6 +1383,7 @@
               <input type="search" id="productSearch" autocomplete="off" spellcheck="false"
                      placeholder="ยิงบาร์โค้ด / ซีเรียล หรือพิมพ์ชื่อรุ่น แล้วกด Enter" aria-label="ยิงบาร์โค้ดหรือค้นหาสินค้า">
               <kbd title="กด / หรือ Ctrl+K เพื่อมาที่ช่องนี้">/</kbd>
+              <button class="cam-btn" type="button" onclick="openCam()" aria-label="สแกนด้วยกล้อง" title="สแกนด้วยกล้อง"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 6.5h3l1.5-2h6l1.5 2h3v10h-15z"/><circle cx="10" cy="11" r="3"/></svg></button>
             </label>
             <div class="seg modes" role="group" aria-label="โหมดของผนัง">
               <button type="button" data-mode="find" aria-pressed="true" onclick="setWallMode('find')">หา</button>
@@ -1291,15 +1487,18 @@
             <div>
               <div class="card">
                 <h3>เพิ่มสินค้าลงตะกร้า</h3>
-                <input type="search" id="posSearch" class="input" autocomplete="off"
-                       placeholder="พิมพ์ชื่อ / SKU แล้วกด Enter — หรือยิงบาร์โค้ดได้เลย" aria-label="ค้นหาสินค้าเข้าตะกร้า">
+                <div class="scan-row">
+                  <input type="search" id="posSearch" class="input" autocomplete="off"
+                         placeholder="พิมพ์ชื่อ / SKU แล้วกด Enter — หรือยิงบาร์โค้ดได้เลย" aria-label="ค้นหาสินค้าเข้าตะกร้า">
+                  <button class="cam-btn" type="button" onclick="openCam()" aria-label="สแกนด้วยกล้อง" title="สแกนด้วยกล้อง"><svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 6.5h3l1.5-2h6l1.5 2h3v10h-15z"/><circle cx="10" cy="11" r="3"/></svg>กล้อง</button>
+                </div>
                 <div class="presults" id="posResults" hidden style="margin-top:8px;"></div>
-                <p class="hint">↑ ↓ เลือก · <kbd>Enter</kbd> ใส่ตะกร้า · ยิงซีเรียลเพื่อระบุเครื่องที่ขาย</p>
+                <p class="hint"><span class="kbd-hint">↑ ↓ เลือก · <kbd>Enter</kbd> ใส่ตะกร้า · </span>ยิงซีเรียลเพื่อระบุเครื่องที่ขาย</p>
               </div>
               <div class="card" style="padding:0;">
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0;">
                   <h3 style="margin:0;">ตะกร้าสินค้า</h3>
-                  <span class="hint" style="margin:0;">เลือกบรรทัดแล้ว <kbd>+</kbd> <kbd>−</kbd> ปรับจำนวน · <kbd>Delete</kbd> ลบ</span>
+                  <span class="hint kbd-hint" style="margin:0;">เลือกบรรทัดแล้ว <kbd>+</kbd> <kbd>−</kbd> ปรับจำนวน · <kbd>Delete</kbd> ลบ</span>
                 </div>
                 <div id="cartList" style="margin-top:12px;"></div>
               </div>
@@ -2025,6 +2224,7 @@
 <!-- เครื่องเล่น: อยู่นอกทุกหมวด เปลี่ยนหมวดแล้วเสียงไม่หยุด (หน้าคอนโซลเป็นหน้าเดียว ไม่โหลดใหม่) -->
 <div class="player" id="player" hidden role="region" aria-label="เครื่องเล่น">
   <div class="player-bar" id="playerBar" tabindex="0" aria-label="หน้าต่างเครื่องเล่น — ลากเพื่อย้าย หรือใช้ลูกศรย้ายทีละนิด · Home กลับมุมขวาล่าง">
+    <svg class="player-grip" viewBox="0 0 18 18" aria-hidden="true" fill="currentColor"><rect x="5" y="3" width="2.5" height="2.5"/><rect x="10.5" y="3" width="2.5" height="2.5"/><rect x="5" y="7.75" width="2.5" height="2.5"/><rect x="10.5" y="7.75" width="2.5" height="2.5"/><rect x="5" y="12.5" width="2.5" height="2.5"/><rect x="10.5" y="12.5" width="2.5" height="2.5"/></svg>
     <span class="ttl" id="playerTitle"></span>
     <button type="button" id="playerMinBtn" onclick="togglePlayerMin()">ย่อ</button>
     <button type="button" onclick="closePlayer()" aria-label="ปิดเครื่องเล่น">✕ ปิด</button>
@@ -2033,6 +2233,19 @@
   <div class="player-shield" id="playerShield" hidden></div>
 </div>
 <div class="frame-hint" id="frameHint" hidden role="status">โฟกัสอยู่ในกรอบวิดีโอ/อีเมล — คลิกที่หน้าคอนโซลหนึ่งครั้งก่อนยิงบาร์โค้ด</div>
+
+<!-- แผงกล้อง (iPad) — ไม่ใช่ <dialog> โดยตั้งใจ: wedgeRoute ปฏิเสธการยิงตอนมี dialog เปิด แต่เครื่องยิง Bluetooth ต้องยิงได้ทั้งที่กล้องเปิดอยู่ -->
+<div class="cam" id="camPanel" role="dialog" aria-modal="false" aria-labelledby="camTitle" hidden>
+  <div class="cam-head"><h2 id="camTitle">สแกนด้วยกล้อง</h2><span class="scan-mode" id="camMode"></span>
+    <button class="btn btn-sm btn-ghost" type="button" onclick="closeCam()" aria-label="ปิดกล้อง">✕ ปิด</button></div>
+  <div class="cam-view" id="camWrap"><video id="camVideo" playsinline muted autoplay></video><div class="cam-roi"></div></div>
+  <div class="cam-hint" id="camHint" role="status" aria-live="polite">เล็งบาร์โค้ดให้อยู่ในกรอบแดง</div>
+  <div class="cam-err" id="camError"></div>
+  <div class="cam-foot">
+    <button class="btn" id="camTorchBtn" type="button" onclick="camTorch()" disabled>ไฟฉาย</button>
+    <button class="btn btn-primary" id="camDoneBtn" type="button" onclick="closeCam()">เสร็จแล้ว</button>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2224,6 +2437,7 @@ function loginVisible() {
 async function handleAuthState(session) {
   if (!session) {
     dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
+    closeCam();                     // ออกจากระบบ = ปิดกล้อง (iPad) ด้วย
     document.getElementById('loginOverlay').style.display = 'flex';
     currentAdmin = null;
     currentUserId = null;
@@ -3253,7 +3467,7 @@ function setWallMode(m) {
   if (m !== 'find') buildTray();       // รายการที่ยิงค้างไว้ของแต่ละโหมดยังอยู่ครบ สลับไปมาไม่หาย
   renderProducts();
   markModeCounts();
-  box.focus();
+  focusField(box);
 }
 function markModeCounts() {
   const r = document.querySelector('.modes [data-mode="receive"]');
@@ -4387,6 +4601,8 @@ function showSection(id, mode) {
   }
   current = id;
   closeDetail();
+  closeCam();                     // กล้องผูกกับหมวดที่เปิดตอนกด — เปลี่ยนหมวดแล้วปิดกล้องจริง (ไฟกล้องไม่ค้าง)
+  if (document.body.classList.contains('nav-open')) setNav(false);   // เลือกหมวดจากลิ้นชักเมนู (iPad แนวตั้ง) แล้วลิ้นชักหุบเอง
   document.querySelectorAll('.section').forEach(el => { el.hidden = true; });
   document.getElementById('sec-' + id).hidden = false;
   // ผนังสต็อกเต็มความสูงจอ แต่ละปีกเลื่อนของตัวเอง — พื้นที่ทำงานต้องไม่เลื่อนทั้งหน้าซ้อนอีกชั้น
@@ -4411,9 +4627,269 @@ function showSection(id, mode) {
   const focusEl = { products: 'wall', moves: 'tw-moves', bills: 'tw-bills', pos: 'posSearch',
     booking: 'tw-bookings', customers: 'tw-customers', activity: 'tw-activity', admin: 'tw-admin',
     home: 'sec-home', board: 'tw-board', mail: 'tw-mail', discord: dc.state === 'setup' ? null : 'dcInput' }[id];
-  if (focusEl) document.getElementById(focusEl).focus({ preventScroll: true });
+  if (focusEl) focusField(document.getElementById(focusEl), false, true);
   return true;
 }
+
+// ---------------------------------------------------------------------------
+// จอสัมผัส (iPad): โฟกัสช่องพิมพ์ด้วยโค้ดระหว่างแตะ = แป้นพิมพ์บนจอเด้งขึ้นมาบังครึ่งจอทุกครั้งที่เปลี่ยนหมวด
+// จึงไม่ดึงโฟกัสเข้าช่องพิมพ์เองบนจอสัมผัส — คนแตะช่องเองค่อยพิมพ์ · เครื่องยิง Bluetooth ฟังที่ document อยู่แล้ว
+// ไม่ต้องมีช่องโฟกัส (ปลดโฟกัสจากปุ่มที่เพิ่งแตะด้วย ไม่งั้น Enter ไปกดปุ่มนั้นซ้ำ) · ของที่ไม่ใช่ช่องพิมพ์ (ผนัง/ตาราง) โฟกัสตามเดิม
+// ---------------------------------------------------------------------------
+const TOUCH = window.matchMedia('(pointer: coarse)');
+function focusField(el, select, keepScroll) {
+  if (!el) return;
+  if (TOUCH.matches && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+    const a = document.activeElement;
+    if (a && a !== document.body && typeof a.blur === 'function') a.blur();
+    return;
+  }
+  el.focus(keepScroll ? { preventScroll: true } : undefined);
+  if (select && el.select) el.select();
+}
+
+// ---------------------------------------------------------------------------
+// เมนูซ้ายแบบลิ้นชัก — จอแคบกว่า 1100px (iPad แนวตั้ง · iPad 1024 แนวนอน) · CSS เป็นคนซ่อน/โชว์ตามขนาดจอ
+// สถานะเปิดอยู่ที่ body.nav-open: หมุนจอไปแนวนอน (เมนูเต็ม) แล้วหมุนกลับ ลิ้นชักยังเปิดค้างเหมือนเดิม
+// ระหว่างเปิด พื้นที่ข้างหลัง inert (Tab ไม่หลุดออกไปหลังม่าน) — เครื่องยิงยังฟังที่ document จึงยิงได้ตามปกติ
+// ---------------------------------------------------------------------------
+const NAV_DRAWER = window.matchMedia('(max-width: 1099px)');
+function syncNavInert() {
+  const open = document.body.classList.contains('nav-open') && NAV_DRAWER.matches;
+  document.querySelector('.main').inert = open;
+}
+function setNav(open, focusBack) {
+  document.body.classList.toggle('nav-open', open);
+  document.getElementById('navBtn').setAttribute('aria-expanded', String(open));
+  syncNavInert();
+  if (!NAV_DRAWER.matches) return;
+  if (open) {
+    navReveal();
+    const a = document.querySelector('#navList .nav-item.active') || document.querySelector('#navList .nav-item');
+    if (a) a.focus({ preventScroll: true });
+  } else if (focusBack) document.getElementById('navBtn').focus({ preventScroll: true });
+}
+NAV_DRAWER.addEventListener('change', syncNavInert);
+
+// ---------------------------------------------------------------------------
+// แป้นพิมพ์บนจอของ iPad: Safari ไม่ย่อหน้าเว็บ (layout viewport คงเดิม) แค่ย่อส่วนที่มองเห็น (visualViewport)
+// ของที่ fixed ชิดล่างจึงจมใต้แป้น — วัดส่วนที่ถูกบังเป็น --kb: ข้อความแจ้งเตือนลอยเหนือแป้น · หน้าต่างวิดีโอลอยหลบไปก่อน (.kb-open)
+// ≥ 120px ถึงนับว่าเป็นแป้นพิมพ์ (แถบเครื่องมือของ Safari หุบ/กางแค่ไม่กี่สิบ px ไม่ใช่แป้น)
+// ---------------------------------------------------------------------------
+function syncKeyboard() {
+  const vv = window.visualViewport;
+  const hidden = vv ? Math.round(document.documentElement.clientHeight - vv.height - vv.offsetTop) : 0;
+  const open = TOUCH.matches && hidden >= 120;
+  document.documentElement.style.setProperty('--kb', (open ? hidden : 0) + 'px');
+  document.body.classList.toggle('kb-open', open);
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncKeyboard);
+  window.visualViewport.addEventListener('scroll', syncKeyboard);
+}
+
+// ---------------------------------------------------------------------------
+// สแกนด้วยกล้อง (iPad) — ยกมาจาก stock.html ทั้งชุด ไม่ได้เขียนตัวอ่านใหม่: ค่ากล้อง (กล้องหลัง 1920×1080 โฟกัสต่อเนื่อง) ·
+// อ่านเฉพาะในกรอบแดง (SCAN_ROI) · BarcodeDetector ก่อน ไม่มีค่อยใช้ ZXing ~10 ครั้ง/วินาที · กันอ่านใบเดิมซ้ำใน 2 วินาที
+// รหัสที่อ่านได้วิ่ง routeScan() ทางเดียวกับเครื่องยิง — รับเข้า/นับ/ขาย ได้ผลเหมือนยิงทุกอย่าง
+// โหมดหา = อ่านได้แล้วปิดกล้อง (เปิดแผงสินค้าให้) · รับเข้า/นับ/ขาย = เปิดค้าง อ่านต่อไปเรื่อย ๆ เหมือน stock.html
+// ⚠️ ปิดกล้องจริงเสมอ (ไฟกล้องค้าง/กินแบต): ปุ่มปิด · เปลี่ยนหมวด · แอปถูกซ่อน (visibilitychange) · ออกจากระบบ · มีหน้าต่างซ้อนขึ้นมา
+// ZXing โหลดตอนกดกล้องครั้งแรกเท่านั้น (คอมหน้าเคาน์เตอร์ไม่มีกล้อง ไม่ต้องโหลดทุกครั้งที่เปิดคอนโซล) · URL เดียวกับ stock.html
+// ---------------------------------------------------------------------------
+const SCAN_ROI = { left: 0.08, right: 0.92, top: 0.32, bottom: 0.68 };
+const SCAN_FORMATS = ['ean_13', 'code_128', 'code_39', 'qr_code'];
+const ZXING_SRC = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+const CAM_MODE = { search: 'หา', receive: 'รับเข้า', count: 'นับ', cart: 'ขาย', serial: 'ซีเรียล', movement: 'เลือกสินค้า' };
+const cam = { stream: null, track: null, scanning: false, detector: null, reader: null, torch: false, last: '', lastAt: 0, zxAt: 0, token: 0 };
+const camCanvas = document.createElement('canvas');
+const camCtx = camCanvas.getContext('2d', { willReadFrequently: true });
+
+// ปุ่มกล้องโผล่เฉพาะจอสัมผัส หรือเครื่องที่มีกล้องจริง (คอมหน้าเคาน์เตอร์ไม่มีกล้อง = ไม่เห็นปุ่ม)
+function syncCamAvail() {
+  const can = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && (TOUCH.matches || syncCamAvail.hasCam === true);
+  document.documentElement.classList.toggle('can-cam', can);
+}
+TOUCH.addEventListener('change', syncCamAvail);
+syncCamAvail();
+if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+  navigator.mediaDevices.enumerateDevices()
+    .then(ds => { syncCamAvail.hasCam = ds.some(d => d.kind === 'videoinput'); syncCamAvail(); })
+    .catch(() => { /* อ่านรายการอุปกรณ์ไม่ได้ ก็ใช้เกณฑ์จอสัมผัสอย่างเดียว */ });
+}
+
+function loadZXing() {
+  if (window.ZXing) return Promise.resolve();
+  if (!loadZXing.p) loadZXing.p = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = ZXING_SRC;
+    s.onload = res;
+    s.onerror = () => { loadZXing.p = null; rej(new Error('โหลดตัวอ่านบาร์โค้ดไม่สำเร็จ — ตรวจการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่')); };
+    document.head.appendChild(s);
+  });
+  return loadZXing.p;
+}
+
+async function openCam() {
+  const purpose = wedgeRoute();
+  if (!CAM_MODE[purpose]) { showToast('⚠️ สแกนด้วยกล้องใช้ได้ในหมวดสต็อกสินค้าและขายหน้าร้าน'); return; }
+  const token = ++cam.token;
+  cam.last = ''; cam.lastAt = 0;
+  document.getElementById('camMode').textContent = CAM_MODE[purpose];
+  document.getElementById('camHint').textContent = 'เล็งบาร์โค้ดให้อยู่ในกรอบแดง';
+  document.getElementById('camError').innerHTML = '';
+  document.getElementById('camPanel').hidden = false;
+  try {
+    if (!cam.stream) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 }, focusMode: { ideal: 'continuous' } },
+        audio: false,
+      });
+      // ปิดแผง/เปลี่ยนหมวดระหว่างรอคนกดอนุญาตกล้อง — ปิดกล้องที่เพิ่งได้มาทิ้งทันที ไม่ปล่อยไฟกล้องค้าง
+      if (token !== cam.token) { stream.getTracks().forEach(t => t.stop()); return; }
+      cam.stream = stream;
+      const v = document.getElementById('camVideo');
+      v.srcObject = stream;
+      await v.play();
+      if (token !== cam.token) return;
+      cam.track = stream.getVideoTracks()[0];
+      camAspect();
+      const caps = cam.track.getCapabilities ? cam.track.getCapabilities() : {};
+      document.getElementById('camTorchBtn').disabled = !(caps && 'torch' in caps);
+      await camEngine();
+      if (token !== cam.token) return;
+    }
+    cam.scanning = true;
+    requestAnimationFrame(camTick);
+  } catch (err) {
+    if (token !== cam.token) return;
+    // บน iPad เปิด console ดูไม่ได้ ความล้มเหลวต้องขึ้นบนจอเสมอ
+    const msg = err && err.name === 'NotAllowedError'
+      ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง — เปิดสิทธิ์กล้องให้เว็บนี้ในการตั้งค่า (ตั้งค่า → Safari → กล้อง) แล้วลองใหม่'
+      : 'เปิดกล้องไม่สำเร็จ: ' + (err && err.message ? err.message : String(err));
+    document.getElementById('camError').innerHTML = '<div class="alert alert-red" role="alert">' + escapeHtml(msg) + '</div>';
+  }
+}
+
+// กรอบวิดีโอสัดส่วนเท่าภาพจริง กรอบแดงบนจอจึงตรงกับพื้นที่ที่อ่านจริง — หมุน iPad แล้วภาพเปลี่ยนด้าน วัดใหม่
+function camAspect() {
+  const v = document.getElementById('camVideo');
+  const s = cam.track && cam.track.getSettings ? cam.track.getSettings() : {};
+  const w = v.videoWidth || s.width, h = v.videoHeight || s.height;
+  if (w && h) document.getElementById('camWrap').style.aspectRatio = w + ' / ' + h;
+}
+document.getElementById('camVideo').addEventListener('resize', camAspect);
+
+async function camEngine() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      const usable = SCAN_FORMATS.filter(f => supported.includes(f));
+      if (usable.length) { cam.detector = new BarcodeDetector({ formats: usable }); return; }
+    } catch (e) { /* เครื่องนี้ใช้ไม่ได้ ตกไปใช้ ZXing */ }
+  }
+  await loadZXing();
+  const hints = new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+    ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
+    ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.QR_CODE,
+  ]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+  cam.reader = new ZXing.MultiFormatReader();
+  cam.reader.setHints(hints);
+}
+
+// อ่านเฉพาะพื้นที่ในกรอบแดง กันไม่ให้ไปอ่านบาร์โค้ดกล่องข้าง ๆ ที่วางใกล้กัน
+function camROI() {
+  const v = document.getElementById('camVideo');
+  const vw = v.videoWidth, vh = v.videoHeight;
+  if (!vw || !vh) return false;
+  const sx = Math.round(vw * SCAN_ROI.left), sy = Math.round(vh * SCAN_ROI.top);
+  const sw = Math.round(vw * (SCAN_ROI.right - SCAN_ROI.left));
+  const sh = Math.round(vh * (SCAN_ROI.bottom - SCAN_ROI.top));
+  if (camCanvas.width !== sw || camCanvas.height !== sh) { camCanvas.width = sw; camCanvas.height = sh; }
+  camCtx.drawImage(v, sx, sy, sw, sh, 0, 0, sw, sh);
+  return true;
+}
+
+async function camTick() {
+  if (!cam.scanning) return;
+  if (camROI()) {
+    if (cam.detector) {
+      try {
+        const codes = await cam.detector.detect(camCanvas);
+        if (codes.length && cam.scanning) { camScanned(codes[0].rawValue); return; }
+      } catch (e) { /* เฟรมนี้อ่านไม่ได้ ข้ามไป */ }
+    } else if (cam.reader) {
+      // ZXing โยน exception ทุกเฟรมที่อ่านไม่ได้ ซึ่งแพง จำกัดไว้ ~10 ครั้ง/วินาที
+      const now = performance.now();
+      if (now - cam.zxAt >= 100) {
+        cam.zxAt = now;
+        try {
+          const src = new ZXing.HTMLCanvasElementLuminanceSource(camCanvas);
+          const result = cam.reader.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src)));
+          if (result && cam.scanning) { camScanned(result.getText()); return; }
+        } catch (e) {
+          /* ไม่เจอบาร์โค้ดในเฟรมนี้ = เรื่องปกติ */
+        } finally {
+          if (cam.reader && cam.reader.reset) cam.reader.reset();
+        }
+      }
+    }
+  }
+  if (cam.scanning) requestAnimationFrame(camTick);
+}
+
+async function camScanned(code) {
+  cam.scanning = false;                      // หยุดทันที ไม่งั้นอ่านซ้ำรัว ๆ
+  const token = cam.token;
+  const value = String(code || '').trim();
+  // กันอ่านใบเดิมซ้ำตอนเปิดค้าง — คนยังถือกล้องจ่อกล่องเดิมอยู่ (เครื่องยิงไม่มีปัญหานี้ ต้องเหนี่ยวไกใหม่ถึงได้ค่าซ้ำ)
+  const now = performance.now();
+  if (!value || (value === cam.last && now - cam.lastAt < 2000)) { camRearm(); return; }
+  cam.last = value; cam.lastAt = now;
+  if (navigator.vibrate) navigator.vibrate(120);
+  document.getElementById('camHint').textContent = 'อ่านได้: ' + value;
+  const purpose = await routeScan(value, false);
+  if (token !== cam.token) return;           // ระหว่างนั้นปิดกล้องไปแล้ว (เช่น เปลี่ยนหมวด)
+  // หาเจอ = เปิดแผงสินค้าให้แล้ว · รหัสที่ไม่รู้จักเปิดหน้าต่างถาม — ปิดกล้องให้คนตัดสินใจ ไม่อ่านต่อลับหลัง
+  if (!purpose || purpose === 'search' || purpose === 'movement' || document.querySelector('dialog[open]')) { closeCam(); return; }
+  const more = purpose === 'cart' ? ' · ในตะกร้า ' + cart.length + ' รายการ'
+    : purpose === 'receive' ? ' · ในถาดรับเข้า ' + rcvTotal() + ' ชิ้น' : '';
+  camRearm('อ่านได้: ' + value + more + ' — สแกนชิ้นถัดไปได้เลย');
+}
+
+function camRearm(hint) {
+  if (hint) document.getElementById('camHint').textContent = hint;
+  const token = cam.token;
+  // หน่วงสั้น ๆ ก่อนเปิดอ่านใหม่ ไม่งั้นกล้องยังจ่อใบเดิมอยู่จะอ่านซ้ำทันที
+  setTimeout(() => {
+    if (token !== cam.token || !cam.stream) return;
+    cam.scanning = true;
+    requestAnimationFrame(camTick);
+  }, 600);
+}
+
+function camTorch() {
+  if (!cam.track) return;
+  cam.torch = !cam.torch;
+  cam.track.applyConstraints({ advanced: [{ torch: cam.torch }] })
+    .then(() => { document.getElementById('camTorchBtn').textContent = cam.torch ? 'ปิดไฟฉาย' : 'ไฟฉาย'; })
+    .catch(() => { cam.torch = false; showToast('⚠️ เครื่องนี้เปิดไฟฉายจากเว็บไม่ได้'); });
+}
+
+function closeCam() {
+  cam.token++;
+  cam.scanning = false;
+  // ปิดกล้องจริง ๆ ไม่งั้นไฟกล้องค้างและกินแบตทั้งวัน
+  if (cam.stream) { cam.stream.getTracks().forEach(t => t.stop()); cam.stream = null; }
+  cam.track = null; cam.detector = null; cam.reader = null; cam.torch = false;
+  document.getElementById('camVideo').srcObject = null;
+  document.getElementById('camTorchBtn').textContent = 'ไฟฉาย';
+  document.getElementById('camTorchBtn').disabled = true;
+  document.getElementById('camPanel').hidden = true;
+}
+// สลับแอป/ล็อกจอ iPad = ปิดกล้องทันที (กลับมาแล้วกดเปิดใหม่) — Safari ไม่ได้ปิดให้เองทุกรุ่น
+document.addEventListener('visibilitychange', () => { if (document.hidden) closeCam(); });
 
 // ---------------------------------------------------------------------------
 // ค้นหาทั้งร้าน (แถบบน)
@@ -4500,6 +4976,8 @@ document.addEventListener('keydown', e => {
 
   if (e.key === 'Escape') {
     if (dlg) return;                              // dialog ปิดตัวเองด้วย Esc อยู่แล้ว
+    if (document.body.classList.contains('nav-open') && NAV_DRAWER.matches) { setNav(false, true); return; }
+    if (!document.getElementById('camPanel').hidden) { closeCam(); return; }
     if (el && el.id === 'globalSearch') { el.value = ''; renderGlobal(); el.blur(); return; }
     if (el && el.id === 'posSearch' && el.value) { el.value = ''; renderPosResults(); return; }
     if (el && el.id === 'productSearch' && el.value) { el.value = ''; renderProducts(); return; }
@@ -6773,7 +7251,7 @@ const LAUNCH_ITEMS = [
   { key: 'booking',  t: 'ห้องซ้อม',    icon: 'room',   color: '#8E24AA', go: () => showSection('booking'),
     badge: () => bookings.filter(b => !b.confirmed && b.status !== 'cancelled').length },
   { key: 'calendar', t: 'ปฏิทิน',      icon: 'cal',    color: '#0B8043', go: () => showSection('calendar') },
-  { key: 'stock',    t: 'ค้นหาสต็อก',  icon: 'search', color: '#F4511E', go: () => { showSection('products'); const s = document.getElementById('productSearch'); s.focus(); s.select(); } },
+  { key: 'stock',    t: 'ค้นหาสต็อก',  icon: 'search', color: '#F4511E', go: () => { showSection('products'); focusField(document.getElementById('productSearch'), true); } },
   { key: 'board',    t: 'กระดาน',      icon: 'board',  color: '#F6BF26', go: () => showSection('board'), badge: () => myUnread().length },
   { key: 'customers',t: 'ลูกค้า',      icon: 'people', color: '#039BE5', go: () => showSection('customers') },
   { key: 'daily',    t: 'สรุปรายวัน',  icon: 'sum',    color: '#616161', go: () => showSection('daily') },
@@ -6804,9 +7282,7 @@ function launchGo(key) { const it = launchItem(key); if (it) it.go(); }
 // สินค้ารับเข้า: ผนังสต็อกในโหมดรับเข้า โฟกัสช่องยิง (setWallMode โฟกัสให้)
 function openReceive() { showSection('products'); setWallMode('receive'); checkFrameFocus(); }
 function focusScan() {
-  const s = document.getElementById('posSearch');
-  s.focus();
-  s.select();
+  focusField(document.getElementById('posSearch'), true);
   checkFrameFocus();
 }
 
@@ -7819,7 +8295,7 @@ function openMailBox(key) {
   mailState.q = '';
   document.getElementById('mailSearch').value = '';
   mailState.open = null;
-  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div>';
+  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลจากรายการเพื่ออ่าน</div>';
   if (current !== 'mail') showSection('mail'); else loadMailList();
   renderMailTabs();
 }
@@ -7909,6 +8385,8 @@ async function openMail(id) {
   const token = ++mailState.readToken;
   const reader = document.getElementById('mailReader');
   reader.innerHTML = '<div class="empty">กำลังเปิดอีเมล…</div>';
+  // iPad แนวตั้ง: ตัวอ่านอยู่ใต้รายการ (คอลัมน์เดียว) — เลื่อนลงไปให้เห็นอีเมลที่เปิด
+  if (window.matchMedia('(max-width: 900px)').matches) reader.scrollIntoView({ block: 'start' });
   const r = await callFn('mail', { action: 'get', uid, box: mailState.box });
   if (token !== mailState.readToken) return;
   if (r.error) {
@@ -8026,7 +8504,7 @@ async function archiveMail() {
   mailState.total = Math.max(0, mailState.total - 1);
   if (!m.seen && mailState.unseen) mailState.unseen--;
   mailState.open = null;
-  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลทางซ้ายเพื่ออ่าน</div>';
+  document.getElementById('mailReader').innerHTML = '<div class="empty">เลือกอีเมลจากรายการเพื่ออ่าน</div>';
   renderMail(); renderHome(); updateNavBadges();
   showToast('✅ เก็บเข้าคลังแล้ว — ยังค้นเจอใน Gmail ที่ “จดหมายทั้งหมด”');
 }
@@ -9873,12 +10351,19 @@ function wedgeRoute() {
 async function onWedgeScan(value) {
   calcUndoScan();                             // ตัวอักษรของการยิงที่หล่นเข้าเครื่องคิดเลข — คืนสถานะเดิมทั้งก้อน แล้วส่งต่อตามหมวดเหมือนเดิม
   dcComposerSync();                           // ช่องพิมพ์ Discord ถูกคืนค่าเดิมแล้ว (wedgeRestore) — ตัวนับ/ความสูงตามให้ตรง
+  await routeScan(value, true);
+}
+
+// ทางเดียวของรหัสที่อ่านได้ ไม่ว่ามาจากเครื่องยิง (สาย/Bluetooth) หรือกล้องของ iPad (camScanned) —
+// หมวดที่เปิดอยู่ตัดสินว่าเอาไปทำอะไร รับเข้า/นับ/ขาย จึงได้ผลเหมือนกันทุกทาง · คืนจุดประสงค์ที่ใช้ (null = ไม่ได้ทำอะไร)
+async function routeScan(value, viaGun) {
   const purpose = wedgeRoute();
-  if (!purpose) return;                       // ยังไม่ได้ล็อกอิน เงียบไว้
-  if (purpose === 'blocked') { showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง'); return; }
-  if (purpose === 'wrongpage') { showToast('⚠️ เครื่องยิงบาร์โค้ดใช้ได้ในหมวดสต็อกสินค้าและขายหน้าร้าน — เปลี่ยนหมวดก่อนแล้วค่อยยิง'); return; }
+  if (!purpose) return null;                  // ยังไม่ได้ล็อกอิน เงียบไว้
+  if (purpose === 'blocked') { showToast('⚠️ ปิดหน้าต่างที่เปิดค้างอยู่ก่อน แล้วค่อยยิง'); return null; }
+  if (purpose === 'wrongpage') { showToast('⚠️ เครื่องยิงบาร์โค้ดใช้ได้ในหมวดสต็อกสินค้าและขายหน้าร้าน — เปลี่ยนหมวดก่อนแล้วค่อยยิง'); return null; }
   scanPurpose = purpose;
-  await onScanned(value, true);
+  await onScanned(value, viaGun);
+  return purpose;
 }
 
 document.addEventListener('keydown', e => {
