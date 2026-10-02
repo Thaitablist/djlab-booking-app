@@ -961,6 +961,47 @@
   /* จอเตี้ยมาก (iPhone SE): แผงเครื่องคิดเลขเปิดแล้วไม่เหลือที่ให้วิดีโอเลย → ซ่อนภาพ ไม่ทับแผง · ปิดแผงแล้วกลับมา (playerLayout) */
   .player.no-room:not(.docked) { visibility: hidden; }
 
+  /* Ops Board (#ops · เฉพาะเจ้าของร้าน) — หัวกลุ่มบอกความเร่งด่วนเป็นคำ + ขอบในซ้าย 4px (ไม่ใช้สีอย่างเดียว) · เหลี่ยม ตัวหนังสือ ≥ 14px */
+  .ops-red { color: var(--red); }
+  .ops-group { margin-bottom: 20px; }
+  .ops-group h3 { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 10px 16px; font-size: 16px;
+    background: var(--head); border: 1px solid var(--line); border-bottom: 2px solid var(--black); }
+  .ops-group h3 .n { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--text2); }
+  .ops-list { background: var(--surface); border: 1px solid var(--line); border-top: 0; }
+  .ops-task { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .ops-task:last-child { border-bottom: 0; }
+  .ops-task.sev-red { box-shadow: inset 4px 0 0 var(--red); }
+  .ops-task.sev-amber { box-shadow: inset 4px 0 0 var(--warn); }
+  .ops-task.sev-green { box-shadow: inset 4px 0 0 var(--ok); }
+  .ops-task.done { color: var(--text2); background: var(--surface2); }
+  .ops-task.done .ops-title { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .ops-title { font-family: var(--font-head); font-size: 16px; font-weight: 600; line-height: 1.4; }
+  .ops-detail { margin-top: 2px; font-size: 14px; color: var(--text2); }
+  .ops-act { margin-top: 6px; padding: 6px 10px; font-size: 14px; background: var(--surface2); }
+  .ops-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 14px; color: var(--text2); }
+  .ops-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .ops-side select.input { width: auto; font-weight: 600; }
+  .ops-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  /* ช่วยคิด (Claude) — หน้าต่างเลือกแบบคำขอ + คำตอบเรียงใหม่สุดก่อน · ข้อความคำตอบเลือก/คัดลอกได้ (pre-wrap) */
+  .ops-ai-task { font-family: var(--font-head); font-size: 16px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; overflow-wrap: anywhere; }
+  .ops-ai-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+  .ops-ai-ans { margin-top: 12px; border: 1px solid var(--line); background: var(--surface); }
+  .ops-ai-ans.fresh { border-color: var(--black); }
+  .ops-ai-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; color: var(--text2); background: var(--surface2); }
+  .ops-ai-out { margin: 0; padding: 10px 12px; font: 14px/1.7 var(--font-body); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow: auto; }
+  .ops-ai-hist { margin: 16px 0 0; font-size: 14px; color: var(--text2); font-weight: 600; }
+  .ops-src { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .ops-src:first-of-type { border-top: 0; padding-top: 0; }
+  .ops-src .st { grid-row: span 2; align-self: start; }
+  .ops-src .nt { color: var(--text2); }
+  .ops-rep { padding: 6px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .ops-rep:first-of-type { border-top: 0; padding-top: 0; }
+  .ops-rep code { display: block; font-size: 14px; color: var(--text2); word-break: break-all; }
+  @media (max-width: 640px) {
+    .ops-task { grid-template-columns: minmax(0, 1fr); }
+    .ops-side { flex-direction: row; align-items: center; justify-content: space-between; }
+  }
+
   .nav-btn, .nav-scrim { display: none; }
   .nav-btn { align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 12px;
     border: 1px solid var(--black); background: var(--black); color: #fff; cursor: pointer; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
@@ -1967,6 +2008,34 @@
             </div>
           </div>
         </section>
+
+        <!-- ============ Ops Board (เฉพาะเจ้าของร้าน) ============ -->
+        <section class="section" id="sec-ops" hidden aria-label="Ops Board กระดานงานภายในร้าน">
+          <div id="opsAlert"></div>
+          <div class="stats stats-4" aria-label="สรุปภาพรวม">
+            <div class="stat"><div class="stat-value ops-red" id="opsStatRed">0</div><div class="stat-label">ด่วน ยังไม่เสร็จ</div></div>
+            <div class="stat"><div class="stat-value" id="opsStatAmber">0</div><div class="stat-label">จับตา ยังไม่เสร็จ</div></div>
+            <div class="stat"><div class="stat-value" id="opsStatDue">0</div><div class="stat-label">เลยกำหนด / ครบใน 3 วัน</div></div>
+            <div class="stat"><div class="stat-value" id="opsStatDone">0</div><div class="stat-label">เสร็จใน 7 วันล่าสุด</div></div>
+          </div>
+          <div class="split">
+            <div>
+              <div class="toolbar calc-clear">
+                <div class="seg" id="opsFilter" role="group" aria-label="สถานะ">
+                  <button type="button" data-filter="open" aria-pressed="true">ยังไม่เสร็จ</button>
+                  <button type="button" data-filter="done" aria-pressed="false">เสร็จแล้ว</button>
+                  <button type="button" data-filter="all" aria-pressed="false">ทั้งหมด</button>
+                </div>
+                <select id="opsArea" class="input" aria-label="หมวดงาน"></select>
+                <input type="search" id="opsSearch" class="input grow" placeholder="ค้นหางาน…" autocomplete="off" aria-label="ค้นหางาน">
+                <button class="btn" id="opsRefresh" type="button">↻ รีเฟรช</button>
+                <button class="btn btn-primary" id="opsAdd" type="button">+ เพิ่มงาน</button>
+              </div>
+              <div id="opsBoard"><div class="empty">กำลังโหลดงาน…</div></div>
+            </div>
+            <div id="opsRail"></div>
+          </div>
+        </section>
       </main>
       <!-- เครื่องคิดเลข: ไอคอนลอยมุมขวาบนของพื้นที่ทำงาน ใต้เส้นแบ่งแถบบน (เจ้าของสั่ง 1 ต.ค. 69 "มุมขวาบนใต้เส้นแบ่ง ให้ออกจากมุมเล็กน้อย")
            อยู่ใน .ws-wrap ไม่ใช่ใน .workspace — ไม่เลื่อนตามหน้า และเปิดแผงรายละเอียดขวาแล้วขยับมาอยู่ซ้ายของแผงเอง
@@ -2075,6 +2144,47 @@
     <p class="hint" style="margin-top:14px;">คีย์ลัดไม่ทำงานระหว่างพิมพ์ในช่องกรอก (ยกเว้น Esc, Ctrl+K, F9) และไม่รบกวนเครื่องยิงบาร์โค้ด</p>
   </div>
   <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('helpDialog').close()">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="opsDialog" aria-labelledby="opsFormTitle">
+  <div class="dlg-head"><h2 id="opsFormTitle">เพิ่มงานใหม่</h2></div>
+  <form class="dlg-body" id="opsForm" novalidate>
+    <div class="field"><label class="lbl" for="opsfTitle">ชื่องาน *</label><input type="text" id="opsfTitle" class="input" maxlength="160" placeholder="เช่น ส่งรายงานแอด ต.ค. ให้มหาจักร"></div>
+    <div class="field"><label class="lbl" for="opsfDetail">รายละเอียด / เกิดอะไรขึ้น</label><textarea id="opsfDetail" class="input" rows="3" maxlength="2000"></textarea></div>
+    <div class="field"><label class="lbl" for="opsfAction">ทำต่อ</label><input type="text" id="opsfAction" class="input" maxlength="300" placeholder="ขั้นต่อไปที่ต้องทำ"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="opsfSev">ความเร่งด่วน</label><select id="opsfSev" class="input"></select></div>
+      <div class="field"><label class="lbl" for="opsfStatus">สถานะ</label><select id="opsfStatus" class="input"></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="opsfArea">หมวด</label><select id="opsfArea" class="input"></select></div>
+      <div class="field"><label class="lbl" for="opsfDue">กำหนดเสร็จ</label><input type="date" id="opsfDue" class="input"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="opsfOwner">ผู้รับผิดชอบ</label><input type="text" id="opsfOwner" class="input" list="opsOwners" maxlength="60"><datalist id="opsOwners"></datalist></div>
+      <div class="field"><label class="lbl" for="opsfSource">ที่มา</label><input type="text" id="opsfSource" class="input" maxlength="120" placeholder="เช่น Gmail · Meta Ads"></div>
+    </div>
+    <div id="opsFormErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="opsfCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="opsfSave" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="opsAiDialog" aria-labelledby="opsAiTitle">
+  <div class="dlg-head"><h2 id="opsAiTitle">ช่วยคิด</h2></div>
+  <div class="dlg-body">
+    <div class="ops-ai-task" id="opsAiTask"></div>
+    <div class="alert alert-plain">เนื้อหาของงานนี้ (ชื่อ รายละเอียด ที่มา ฯลฯ) จะถูกส่งไปให้ Claude ของ Anthropic ประมวลผล · ได้เป็นร่างให้ตรวจเอง ระบบไม่ส่งอะไรออกไปให้ · ถามได้วันละ 20 ครั้ง</div>
+    <div class="ops-ai-pick">
+      <button class="btn btn-primary" type="button" id="opsAiDraft">ร่างข้อความที่ต้องใช้</button>
+      <button class="btn" type="button" id="opsAiSteps">แตกเป็นขั้นตอน</button>
+    </div>
+    <div id="opsAiStatus" role="status" aria-live="polite"></div>
+    <div id="opsAiList"></div>
+  </div>
+  <div class="dlg-foot"><button class="btn" type="button" id="opsAiClose">ปิด (Esc)</button></div>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
@@ -2487,6 +2597,8 @@ const SECTIONS = [
   { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: 'daily', label: 'สรุปรายวัน', key: '8' },
   { id: 'activity', hash: 'activity',      group: 'บัญชีและระบบ', icon: 'activity', label: 'บันทึกการใช้งาน', manager: true, key: '9' },
   { id: 'admin',    hash: 'admin',         group: 'บัญชีและระบบ', icon: 'admin', label: 'จัดการข้อมูล', manager: true, key: '0' },
+  // owner: true = เฉพาะเจ้าของร้าน (เข้มกว่า manager ที่ผู้ดูแลก็เข้าได้) — Ops Board เก็บงาน/ข้อมูลภายในที่เจ้าของไม่ให้ใครเห็น
+  { id: 'ops',      hash: 'ops',           group: 'บัญชีและระบบ', icon: 'ops', label: 'Ops Board', owner: true, key: 'O' },
 ].filter(s => s.id !== 'discord' || DISCORD_ENABLED);
 // ไอคอนเมนูซ้าย — เส้น 1.75 ปลายเหลี่ยม มุมแหลม ชุดเดียวกับ .ico-svg ทั้งคอนโซล (เลิกใช้อักขระ Unicode แทนไอคอน · 1 ต.ค. 69)
 // ตกแต่งล้วน: ชื่อหมวดอยู่ข้าง ๆ เป็นตัวหนังสือเสมอ จึง aria-hidden
@@ -2506,6 +2618,7 @@ const NAV_ICONS = {
   daily:     '<path d="M3 17h14M5.5 14V9M10 14V5M14.5 14v-3"/>',
   activity:  '<rect x="4" y="3" width="12" height="14.5"/><path d="M7.5 3V1.8h5V3M7 8h6M7 11h6M7 14h3.5"/>',
   admin:     '<ellipse cx="10" cy="5" rx="6.5" ry="2.5"/><path d="M3.5 5v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V5M3.5 10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"/>',
+  ops:       '<rect x="3" y="3" width="14" height="14"/><path d="M6.5 7.5l1.5 1.5 2.5-3M6.5 13h7"/>',
 };
 function navIcon(k) { return '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' + (NAV_ICONS[k] || '') + '</svg>'; }
 const HOME = 'home';   // หมวดเริ่มต้นหลังล็อกอิน และที่ที่ถูกส่งกลับเมื่อเปิดหมวดที่ไม่มีสิทธิ์
@@ -2588,6 +2701,10 @@ function isWriter() {
   return !!currentAdmin && (currentAdmin.role === 'owner' || currentAdmin.role === 'admin');
 }
 const isManager = isWriter;
+function isOwner() { return !!currentAdmin && currentAdmin.role === 'owner'; }
+// หมวดที่จำกัดสิทธิ์: manager = เจ้าของ/ผู้ดูแล · owner = เจ้าของคนเดียว — ที่ตรวจทุกจุด (เมนู · เปิดหมวด · สลับบัญชี · URL ตอนเปิดหน้า)
+function sectionAllowed(s) { return !!s && !(s.manager && !isManager()) && !(s.owner && !isOwner()); }
+const sectionRestricted = s => !!(s.manager || s.owner);
 
 function loginVisible() {
   return document.getElementById('loginOverlay').style.display !== 'none';
@@ -2595,6 +2712,7 @@ function loginVisible() {
 
 async function handleAuthState(session) {
   if (!session) {
+    opsReset();                     // ออกจากระบบ = ล้าง Ops Board ออกจากหน้า (ข้อมูลภายในร้าน)
     dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
     closeCam();                     // ออกจากระบบ = ปิดกล้อง (iPad) ด้วย
     document.getElementById('loginOverlay').style.display = 'flex';
@@ -2651,7 +2769,7 @@ async function handleAuthState(session) {
     const r = pendingRoute;
     pendingRoute = null;
     if (!showSection(r, 'replace')) showSection(HOME, 'replace');
-  } else if (sec && sec.manager && !isManager()) showSection(HOME, 'replace');
+  } else if (sec && !sectionAllowed(sec)) showSection(HOME, 'replace');
   else if (['daily', 'activity', 'admin', 'mail', 'calendar'].includes(current)) showSection(current, 'none');
 
   loadAll();
@@ -4691,7 +4809,7 @@ async function confirmVoid() {
 function renderNav() {
   let html = '', group = '';
   SECTIONS.forEach((s, i) => {
-    if (s.manager && !isManager()) return;      // พนักงานไม่เห็นหมวดที่หน้าเดิมปิดไว้
+    if (!sectionAllowed(s)) return;      // พนักงานไม่เห็นหมวดที่หน้าเดิมปิดไว้ · Ops Board เห็นเฉพาะเจ้าของร้าน
     if (s.group !== group) {
       if (group) html += '</div>';
       group = s.group;
@@ -4749,8 +4867,8 @@ window.addEventListener('popstate', e => {
 function showSection(id, mode) {
   const s = SECTIONS.find(x => x.id === id);
   if (!s) return false;
-  if (s.manager && !isManager()) {
-    showToast('⚠️ หมวด "' + s.label + '" เปิดได้เฉพาะเจ้าของร้านหรือผู้ดูแลระบบ');
+  if (!sectionAllowed(s)) {
+    showToast('⚠️ หมวด "' + s.label + '" เปิดได้เฉพาะ' + (s.owner ? 'เจ้าของร้าน' : 'เจ้าของร้านหรือผู้ดูแลระบบ'));
     return false;
   }
   if (mode !== 'none' && location.hash !== '#' + s.hash) {
@@ -4772,6 +4890,7 @@ function showSection(id, mode) {
     if (id === 'daily') loadDaily();
     if (id === 'activity' && !activityLoaded) reloadActivity();
     if (id === 'admin' && !adLoaded) adLoadAll();
+    if (id === 'ops') loadOps();
     if (id === 'mail') loadMailList();
     if (id === 'pos') renderSellers();
     if (id === 'calendar') loadCalendar();
@@ -6166,6 +6285,339 @@ async function unlinkMember(id) {
   openMemberDetail(id);
   showToast('✅ ยกเลิกการผูกบัญชี LINE แล้ว ลูกค้าผูกใหม่ได้ทันที');
 }
+
+// ---------------------------------------------------------------------------
+// Ops Board (#ops) — กระดานงานภายในร้าน · เฉพาะเจ้าของร้าน (migration 033)
+// ย้ายมาจาก Artifact ส่วนตัวบน claude.ai · งานรายสัปดาห์เติมเรื่องใหม่ผ่านฟังก์ชัน ops_agent_write ในฐานข้อมูล ไม่ผ่านหน้านี้
+// สิทธิ์ตัวจริงอยู่ที่ฐานข้อมูล (RLS: เฉพาะ owner) — การซ่อนเมนูเป็นแค่ความสะดวก
+// ข้อมูลภายในร้านต้องไม่ค้างในหน้า: สลับบัญชี/ออกจากระบบ = ล้างทิ้ง (opsReset)
+// ⚠️ DELETE ที่ RLS ปฏิเสธ "สำเร็จแต่ไม่ลบอะไร" (ไม่มี error) — จึงขอแถวที่ลบกลับมา .select('id') แล้วนับ
+// ---------------------------------------------------------------------------
+const OPS_SEV = { red: 'ด่วน', amber: 'จับตา', green: 'ติดตาม' };
+const OPS_STATUS = { todo: 'ยังไม่เริ่ม', doing: 'กำลังทำ', waiting: 'รอคนอื่น', done: 'เสร็จแล้ว' };
+const OPS_AREA = { shop: 'งานร้าน', email: 'อีเมล', ads: 'แอด', maps: 'Google Maps', drive: 'Drive', system: 'ระบบ/บอท', content: 'คอนเทนต์' };
+const OPS_OWNERS = ['เจ้าของร้าน', 'ทีมร้าน', 'Claude', 'มหาจักร'];
+const OPS_AI_BLOCKED_AREA = 'system';     // หมวดที่ไม่ส่งให้ Claude (เจ้าของเลือก) — ตัวจริงที่กันคือ Edge Function `ai` ปุ่มที่ซ่อนเป็นแค่ความสะดวก
+const OPS_AI_KIND = { draft: 'ร่างข้อความ', steps: 'ขั้นตอน' };
+const OPS_AI_NO_TABLE = /ops_task_ai/i;
+const OPS_COLS = 'id, title, detail, action, severity, status, area, due, owner, source, created_at, updated_at, done_at';
+const OPS_NO_TABLE = /relation .*ops_tasks.* does not exist|schema cache|Could not find the table/i;
+let ops = { tasks: [], meta: null, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
+let opsAi = null;                          // หน้าต่างช่วยคิดที่เปิดอยู่ { id, busy, list } — ทุกครั้งที่เปิดสร้างใหม่ คำตอบของรอบเก่าที่ตามมาทีหลังเลยถูกทิ้ง
+
+function opsDaysTo(due) {        // วันถึงกำหนด · ติดลบ = เลยแล้ว · เทียบตามวันที่ไทย
+  const a = String(due || '').split('-').map(Number), b = todayBangkok().split('-').map(Number);
+  if (a.length !== 3 || a.some(isNaN)) return null;
+  return Math.round((Date.UTC(a[0], a[1] - 1, a[2]) - Date.UTC(b[0], b[1] - 1, b[2])) / 86400000);
+}
+function opsDueChip(t) {
+  const n = opsDaysTo(t.due);
+  if (n === null) return '';
+  if (t.status === 'done') return '<span class="st st-off">กำหนด ' + fmtDate(t.due) + '</span>';
+  if (n < 0) return '<span class="st st-bad">เลยกำหนด ' + (-n) + ' วัน (' + fmtDate(t.due) + ')</span>';
+  if (n === 0) return '<span class="st st-warn">ครบกำหนดวันนี้</span>';
+  if (n <= 3) return '<span class="st st-warn">อีก ' + n + ' วัน (' + fmtDate(t.due) + ')</span>';
+  return '<span class="st st-off">กำหนด ' + fmtDate(t.due) + '</span>';
+}
+function opsSort(a, b) {
+  const aDone = a.status === 'done', bDone = b.status === 'done';
+  if (aDone !== bDone) return aDone ? 1 : -1;
+  if (a.due && b.due && a.due !== b.due) return a.due < b.due ? -1 : 1;
+  if (a.due && !b.due) return -1;
+  if (!a.due && b.due) return 1;
+  return String(a.created_at).localeCompare(String(b.created_at));
+}
+function opsVisible() {
+  const q = ops.q.trim().toLowerCase();
+  return ops.tasks.filter(t =>
+    (ops.filter === 'all' || (ops.filter === 'done' ? t.status === 'done' : t.status !== 'done')) &&
+    (ops.area === 'all' || t.area === ops.area) &&
+    (!q || [t.title, t.detail, t.action, t.owner, t.source].join(' ').toLowerCase().includes(q))).sort(opsSort);
+}
+
+function opsTaskHtml(t) {
+  const opts = Object.entries(OPS_STATUS).map(([k, v]) => '<option value="' + k + '"' + (t.status === k ? ' selected' : '') + '>' + v + '</option>').join('');
+  return '<article class="ops-task sev-' + escapeHtml(t.severity) + (t.status === 'done' ? ' done' : '') + '" data-id="' + escapeHtml(t.id) + '">' +
+    '<div style="min-width:0">' +
+      '<div class="ops-title">' + escapeHtml(t.title) + '</div>' +
+      (t.detail ? '<div class="ops-detail">' + escapeHtml(t.detail) + '</div>' : '') +
+      (t.action ? '<div class="ops-act"><strong>ทำต่อ:</strong> ' + escapeHtml(t.action) + '</div>' : '') +
+      '<div class="ops-tags">' + opsDueChip(t) +
+        (OPS_AREA[t.area] ? '<span class="st st-off">' + OPS_AREA[t.area] + '</span>' : '') +
+        (t.owner ? '<span>ผู้รับผิดชอบ: ' + escapeHtml(t.owner) + '</span>' : '') +
+        (t.source ? '<span>ที่มา: ' + escapeHtml(t.source) + '</span>' : '') +
+        (t.area === OPS_AI_BLOCKED_AREA ? '<span>ตัวช่วยคิดไม่รับงานหมวดนี้</span>' : '') + '</div>' +
+    '</div>' +
+    '<div class="ops-side">' +
+      '<select class="input" data-act="status" aria-label="สถานะของงาน ' + escapeHtml(t.title) + '">' + opts + '</select>' +
+      '<div class="ops-btns">' +
+      (t.area === OPS_AI_BLOCKED_AREA ? '' : '<button type="button" class="btn btn-sm" data-act="ai">ช่วยคิด</button>') +
+      '<button type="button" class="btn btn-sm" data-act="edit">แก้ไข</button>' +
+      '<button type="button" class="btn btn-sm btn-danger" data-act="del">ลบ</button></div>' +
+    '</div></article>';
+}
+
+function renderOpsStats() {
+  const open = ops.tasks.filter(t => t.status !== 'done');
+  const set = (id, n) => { document.getElementById(id).textContent = n; };
+  set('opsStatRed', open.filter(t => t.severity === 'red').length);
+  set('opsStatAmber', open.filter(t => t.severity === 'amber').length);
+  set('opsStatDue', open.filter(t => { const n = opsDaysTo(t.due); return n !== null && n <= 3; }).length);
+  set('opsStatDone', ops.tasks.filter(t => t.status === 'done' && t.done_at && Date.parse(t.done_at) >= Date.now() - 7 * 86400000).length);
+}
+function renderOpsBoard() {
+  const el = document.getElementById('opsBoard');
+  if (!ops.loaded) return;
+  if (!ops.tasks.length) { el.innerHTML = '<div class="empty">ยังไม่มีงานบนบอร์ด — กด “+ เพิ่มงาน” หรือรอรอบสรุปวันจันทร์ 10:00 เติมเรื่องใหม่ให้</div>'; return; }
+  const list = opsVisible();
+  if (!list.length) { el.innerHTML = '<div class="empty">ไม่มีงานที่ตรงกับตัวกรอง — ลองเปลี่ยนสถานะ หมวด หรือคำค้น</div>'; return; }
+  el.innerHTML = ['red', 'amber', 'green'].map(sev => {
+    const items = list.filter(t => t.severity === sev);
+    return items.length
+      ? '<section class="ops-group"><h3>' + OPS_SEV[sev] + ' <span class="n">' + items.length + ' งาน</span></h3><div class="ops-list">' + items.map(opsTaskHtml).join('') + '</div></section>'
+      : '';
+  }).join('');
+}
+function renderOpsRail() {
+  const m = ops.meta, card = (h, body) => '<div class="card"><h3>' + h + '</h3>' + body + '</div>';
+  const lab = { ok: ['st-ok', 'ใช้ได้'], partial: ['st-warn', 'บางส่วน'], none: ['st-off', 'ยังไม่มี'] };
+  const sources = (m && Array.isArray(m.sources) ? m.sources : []).map(s => {
+    const l = lab[s.status] || ['st-off', escapeHtml(s.status || '')];
+    return '<div class="ops-src"><span class="st ' + l[0] + '">' + l[1] + '</span><strong>' + escapeHtml(s.name) + '</strong><span class="nt">' + escapeHtml(s.note || '') + '</span></div>';
+  }).join('') || '<div class="hint" style="margin:0;">ยังไม่มีข้อมูลแหล่ง</div>';
+  const reports = (m && Array.isArray(m.reports) ? m.reports : []).slice(0, 6).map(r =>
+    '<div class="ops-rep"><div class="hint" style="margin:0;">' + fmtDate(r.date) + '</div><div>' + escapeHtml(r.name) + '</div>' +
+    (r.file ? '<code>' + escapeHtml(r.file) + '</code>' : '') + '</div>').join('') || '<div class="hint" style="margin:0;">ยังไม่มีรายงาน</div>';
+  document.getElementById('opsRail').innerHTML =
+    card('รอบสรุปอัตโนมัติ',
+      '<div class="ops-rep" style="border:0;padding-top:0;"><strong>' + (m && m.next_scan ? 'รอบถัดไป: ' + formatDateTime(m.next_scan) : 'ทุกวันจันทร์ 10:00') + '</strong></div>' +
+      '<div class="hint" style="margin:0;">' + (m && m.last_scan ? 'รันล่าสุด: ' + formatDateTime(m.last_scan) : 'ยังไม่มีรอบที่รันแล้ว') + '</div>' +
+      '<div class="hint">สแกน Gmail · Meta Ads · Google Maps · Drive แล้วเพิ่มเรื่องใหม่ลงบอร์ดนี้</div>') +
+    card('แหล่งข้อมูล', sources) + card('รายงานล่าสุด', reports);
+}
+function renderOps() { renderOpsStats(); renderOpsBoard(); renderOpsRail(); }
+
+async function loadOps() {
+  if (!isOwner()) return;
+  const uid = currentUserId;
+  const [t, m] = await Promise.all([
+    db.from('ops_tasks').select(OPS_COLS).order('created_at', { ascending: true }),
+    db.from('ops_board_meta').select('last_scan, next_scan, sources, reports').maybeSingle(),
+  ]);
+  if (uid !== currentUserId || !isOwner()) return;           // สลับบัญชีระหว่างโหลด — ทิ้งผล ไม่เอามาแสดง
+  const alertEl = document.getElementById('opsAlert');
+  ops.loaded = true;
+  if (t.error) {
+    console.error('[Ops tasks]', t.error);
+    ops.tasks = []; ops.meta = null;
+    if (OPS_NO_TABLE.test(t.error.message)) {
+      alertEl.innerHTML = '<div class="alert alert-warn">ยังไม่ได้ติดตั้ง Ops Board ในฐานข้อมูล — ต้องรัน migration 033 ก่อน</div>';
+    } else {
+      alertEl.innerHTML = '<div class="alert alert-red">โหลดงานไม่สำเร็จ: ' + escapeHtml(t.error.message) + '</div>';
+      showFatalError('โหลด Ops Board ไม่สำเร็จ: ' + t.error.message);
+    }
+    document.getElementById('opsBoard').innerHTML = '';
+    renderOps();
+    return;
+  }
+  ops.tasks = t.data || [];
+  if (m.error) {
+    console.error('[Ops meta]', m.error);
+    ops.meta = null;
+    alertEl.innerHTML = '<div class="alert alert-warn">โหลดข้อมูลรอบสรุปไม่สำเร็จ: ' + escapeHtml(m.error.message) + ' (รายการงานยังใช้ได้)</div>';
+  } else { ops.meta = m.data || null; alertEl.innerHTML = ''; }
+  renderOps();
+}
+
+function opsReset() {            // ออกจากระบบ/สลับบัญชี — ข้อมูลภายในร้านต้องไม่ค้างในหน้า (DOM ก็ล้าง ไม่ใช่แค่ซ่อน)
+  ops = { tasks: [], meta: null, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
+  document.getElementById('opsBoard').innerHTML = '<div class="empty">กำลังโหลดงาน…</div>';
+  document.getElementById('opsRail').innerHTML = '';
+  document.getElementById('opsAlert').innerHTML = '';
+  ['opsStatRed', 'opsStatAmber', 'opsStatDue', 'opsStatDone'].forEach(id => { document.getElementById(id).textContent = '0'; });
+  document.getElementById('opsSearch').value = '';
+  document.getElementById('opsArea').value = 'all';
+  document.querySelectorAll('#opsFilter button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === 'open')));
+  ['opsfTitle', 'opsfDetail', 'opsfAction', 'opsfDue', 'opsfOwner', 'opsfSource'].forEach(id => { document.getElementById(id).value = ''; });
+  const d = document.getElementById('opsDialog');
+  if (d.open) d.close();
+  opsAi = null;                                             // ช่วยคิด: ทิ้งคำขอที่ยังค้าง + ล้างหน้าต่าง (มีชื่องานกับคำตอบที่มีเนื้อหาภายในร้าน)
+  const ad = document.getElementById('opsAiDialog');
+  if (ad.open) ad.close();
+  document.getElementById('opsAiTask').textContent = '';
+  document.getElementById('opsAiStatus').innerHTML = '';
+  document.getElementById('opsAiList').innerHTML = '';
+  closeConfirm();                                        // หน้าต่างยืนยันลบเก็บชื่องานไว้ใน DOM — ล้างด้วย ไม่งั้นบัญชีถัดไปบนเครื่องเดียวกันเปิดอ่านได้
+  document.getElementById('confirmTitle').textContent = 'ยืนยัน';
+  document.getElementById('confirmBody').innerHTML = '';
+}
+
+async function opsSetStatus(id, status) {
+  const prev = ops.tasks.find(t => t.id === id);
+  if (!prev || prev.status === status) return;
+  const { data, error } = await db.from('ops_tasks').update({ status }).eq('id', id).select(OPS_COLS).single();
+  if (error) {
+    console.error('[Ops status]', error);
+    showFatalError('เปลี่ยนสถานะงานไม่สำเร็จ: ' + error.message);
+    renderOpsBoard();                                         // คืนช่องเลือกเป็นสถานะจริง
+    return;
+  }
+  ops.tasks = ops.tasks.map(t => t.id === id ? data : t);
+  renderOps();
+}
+
+function opsNewId() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+function openOpsForm(id) {
+  const t = id ? ops.tasks.find(x => x.id === id) : null;
+  if (id && !t) { showToast('⚠️ ไม่พบงานนี้'); return; }
+  ops.editingId = t ? t.id : null;
+  const set = (el, v) => { document.getElementById(el).value = v == null ? '' : v; };
+  document.getElementById('opsFormTitle').textContent = t ? 'แก้ไขงาน' : 'เพิ่มงานใหม่';
+  set('opsfTitle', t ? t.title : ''); set('opsfDetail', t ? t.detail : ''); set('opsfAction', t ? t.action : '');
+  set('opsfSev', t ? t.severity : 'amber'); set('opsfStatus', t ? t.status : 'todo'); set('opsfArea', t ? t.area : 'shop');
+  set('opsfDue', t ? t.due : ''); set('opsfOwner', t ? t.owner : 'เจ้าของร้าน'); set('opsfSource', t ? t.source : '');
+  document.getElementById('opsFormErr').hidden = true;
+  const dlg = document.getElementById('opsDialog');
+  if (!dlg.open) dlg.showModal();
+  focusField(document.getElementById('opsfTitle'));
+}
+async function saveOps() {
+  const g = id => document.getElementById(id).value.trim();
+  const v = { title: g('opsfTitle'), detail: g('opsfDetail'), action: g('opsfAction'), severity: g('opsfSev'), status: g('opsfStatus'),
+    area: g('opsfArea'), due: g('opsfDue') || null, owner: g('opsfOwner'), source: g('opsfSource') };
+  const err = document.getElementById('opsFormErr'), btn = document.getElementById('opsfSave');
+  const fail = msg => { err.textContent = msg; err.hidden = false; };
+  err.hidden = true;
+  if (!v.title) { fail('ใส่ชื่องานก่อนบันทึก'); document.getElementById('opsfTitle').focus(); return; }
+  const editing = ops.editingId;
+  btn.disabled = true;
+  try {
+    const res = editing
+      ? await db.from('ops_tasks').update(v).eq('id', editing).select(OPS_COLS).single()
+      : await db.from('ops_tasks').insert({ ...v, id: opsNewId() }).select(OPS_COLS).single();
+    if (res.error) { console.error('[Ops save]', res.error); fail('บันทึกไม่สำเร็จ: ' + res.error.message); return; }
+    ops.tasks = editing ? ops.tasks.map(t => t.id === editing ? res.data : t) : ops.tasks.concat([res.data]);
+    document.getElementById('opsDialog').close();
+    renderOps();
+    showToast('✅ บันทึกงานแล้ว');
+  } catch (e) {
+    console.error('[Ops save]', e);
+    fail('ติดต่อฐานข้อมูลไม่สำเร็จ: ' + e.message);
+  } finally { btn.disabled = false; }
+}
+function opsAskDelete(id) {
+  const t = ops.tasks.find(x => x.id === id);
+  if (!t) return;
+  askConfirm('ลบงาน', '<div class="alert alert-red">กำลังจะลบ “' + escapeHtml(t.title) + '” ถาวร ไม่สามารถย้อนกลับได้</div>', 'ลบเลย', async () => {
+    const { data, error } = await db.from('ops_tasks').delete().eq('id', id).select('id');
+    closeConfirm();
+    if (error) { console.error('[Ops delete]', error); showFatalError('ลบงานไม่สำเร็จ: ' + error.message); return; }
+    if (!data || !data.length) { showFatalError('ลบงานไม่สำเร็จ: ฐานข้อมูลไม่ลบให้ (ไม่มีสิทธิ์ หรืองานนี้ถูกลบไปแล้ว)'); loadOps(); return; }
+    ops.tasks = ops.tasks.filter(x => x.id !== id);
+    renderOps();
+    showToast('✅ ลบงานแล้ว');
+  });
+}
+
+// ---- ช่วยคิด (Claude) — เรียก Edge Function `ai` ส่งแค่ { task_id, kind } ฟังก์ชันดึงงานและประกอบ prompt เอง ----
+function opsAiAnswerHtml(a, fresh) {
+  return '<article class="ops-ai-ans' + (fresh ? ' fresh' : '') + '"><div class="ops-ai-meta"><span>' + escapeHtml(OPS_AI_KIND[a.kind] || a.kind) + ' · ' +
+    (a.created_at ? formatDateTime(a.created_at) : '') + (fresh ? ' · ใหม่' : '') + '</span>' +
+    '<button type="button" class="btn btn-sm" data-act="copy">คัดลอก</button></div><pre class="ops-ai-out">' + escapeHtml(a.output) + '</pre></article>';
+}
+function renderOpsAi() {
+  const list = document.getElementById('opsAiList');
+  if (!opsAi) { list.innerHTML = ''; return; }
+  list.innerHTML = opsAi.list.length
+    ? '<h3 class="ops-ai-hist">คำตอบ (ใหม่สุดอยู่บน)</h3>' + opsAi.list.map(a => opsAiAnswerHtml(a, a.fresh)).join('')
+    : '<div class="hint">ยังไม่เคยถามเรื่องนี้ — เลือกแบบคำขอด้านบน</div>';
+}
+function opsAiSetStatus(html) { document.getElementById('opsAiStatus').innerHTML = html || ''; }
+function opsAiBusy(on) { ['opsAiDraft', 'opsAiSteps'].forEach(id => { document.getElementById(id).disabled = on; }); }
+async function openOpsAi(id) {
+  const t = ops.tasks.find(x => x.id === id);
+  if (!t) { showToast('⚠️ ไม่พบงานนี้'); return; }
+  if (t.area === OPS_AI_BLOCKED_AREA) { showToast('ตัวช่วยคิดไม่รับงานหมวดระบบ/บอท'); return; }
+  const me = opsAi = { id, busy: false, list: [] };
+  document.getElementById('opsAiTask').textContent = t.title;
+  opsAiSetStatus(''); opsAiBusy(false); renderOpsAi();
+  const dlg = document.getElementById('opsAiDialog');
+  if (!dlg.open) dlg.showModal();
+  const { data, error } = await db.from('ops_task_ai').select('id, kind, output, created_at').eq('task_id', id).order('created_at', { ascending: false }).limit(10);
+  if (opsAi !== me) return;                                   // ปิดหน้าต่าง/สลับบัญชี/เปิดงานอื่นระหว่างโหลด
+  if (error) {
+    console.error('[Ops AI history]', error);
+    opsAiSetStatus('<div class="alert alert-warn">โหลดคำตอบเก่าไม่สำเร็จ' + (OPS_AI_NO_TABLE.test(error.message) ? ' — ต้องรัน migration 033 ก่อน' : ': ' + escapeHtml(error.message)) + '</div>');
+    return;
+  }
+  me.list = (data || []).filter(a => a && typeof a.output === 'string');
+  renderOpsAi();
+}
+async function opsAiAsk(kind) {
+  const me = opsAi;
+  if (!me || me.busy) return;
+  me.busy = true; opsAiBusy(true);
+  opsAiSetStatus('<div class="alert alert-plain">กำลังให้ Claude คิด… ปกติใช้เวลา 10–30 วินาที</div>');
+  const r = await callFn('ai', { task_id: me.id, kind });
+  if (opsAi !== me) return;                                   // หน้าต่างถูกปิด/เปลี่ยนไปแล้ว — คำตอบที่บันทึกไว้เปิดดูได้ตอนเปิดงานนี้อีกครั้ง
+  me.busy = false; opsAiBusy(false);
+  if (r.error) {
+    console.error('[Ops AI]', r.error);
+    const msg = r.error.code === 'not_configured'
+      ? 'ตัวช่วยคิดยังไม่พร้อมใช้ — ต้อง deploy ฟังก์ชัน ai และตั้ง ANTHROPIC_API_KEY ใน Supabase (Edge Functions → Secrets) ก่อน'
+      : r.error.message || 'ผิดพลาดที่ไม่ทราบสาเหตุ';
+    opsAiSetStatus('<div class="alert ' + (r.error.code === 'not_configured' || r.error.code === 'quota' ? 'alert-warn' : 'alert-red') + '" role="alert">' + escapeHtml(msg) + '</div>');
+    return;
+  }
+  if (!r.answer || typeof r.answer.output !== 'string') { opsAiSetStatus('<div class="alert alert-red" role="alert">ได้คำตอบที่อ่านไม่ออก ลองอีกครั้ง</div>'); return; }
+  me.list = [{ ...r.answer, fresh: true }].concat(me.list.map(a => ({ ...a, fresh: false })));
+  opsAiSetStatus((r.warning ? '<div class="alert alert-warn" role="alert">' + escapeHtml(r.warning) + '</div>' : '') +
+    (r.usage ? '<div class="hint" style="margin:0 0 4px;">วันนี้ใช้แล้ว ' + Number(r.usage.used) + ' / ' + Number(r.usage.limit) + ' ครั้ง</div>' : ''));
+  renderOpsAi();
+}
+async function opsAiCopy(btn) {
+  const text = btn.closest('.ops-ai-ans').querySelector('.ops-ai-out').textContent;
+  try { await navigator.clipboard.writeText(text); showToast('✅ คัดลอกคำตอบแล้ว'); }
+  catch (e) { showToast('⚠️ คัดลอกอัตโนมัติไม่ได้ — เลือกข้อความในกรอบแล้วกด Ctrl+C'); }
+}
+
+(function opsInit() {
+  const opt =(obj, first) => (first ? '<option value="all">' + first + '</option>' : '') + Object.entries(obj).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+  document.getElementById('opsArea').innerHTML = opt(OPS_AREA, 'ทุกหมวด');
+  document.getElementById('opsfSev').innerHTML = opt(OPS_SEV);
+  document.getElementById('opsfStatus').innerHTML = opt(OPS_STATUS);
+  document.getElementById('opsfArea').innerHTML = opt(OPS_AREA);
+  document.getElementById('opsOwners').innerHTML = OPS_OWNERS.map(o => '<option value="' + o + '">').join('');
+  document.getElementById('opsFilter').addEventListener('click', e => {
+    const b = e.target.closest('button[data-filter]'); if (!b) return;
+    ops.filter = b.dataset.filter;
+    document.querySelectorAll('#opsFilter button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderOpsBoard();
+  });
+  document.getElementById('opsArea').addEventListener('change', e => { ops.area = e.target.value; renderOpsBoard(); });
+  document.getElementById('opsSearch').addEventListener('input', e => { ops.q = e.target.value; renderOpsBoard(); });
+  document.getElementById('opsRefresh').addEventListener('click', () => loadOps());
+  document.getElementById('opsAdd').addEventListener('click', () => openOpsForm(null));
+  document.getElementById('opsfCancel').addEventListener('click', () => document.getElementById('opsDialog').close());
+  document.getElementById('opsForm').addEventListener('submit', e => { e.preventDefault(); saveOps(); });
+  const board = document.getElementById('opsBoard');
+  board.addEventListener('change', e => {
+    const s = e.target.closest('select[data-act="status"]'); if (!s) return;
+    opsSetStatus(s.closest('.ops-task').dataset.id, s.value);
+  });
+  board.addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    const id = b.closest('.ops-task').dataset.id;
+    if (b.dataset.act === 'edit') openOpsForm(id);
+    else if (b.dataset.act === 'del') opsAskDelete(id);
+    else if (b.dataset.act === 'ai') openOpsAi(id);
+  });
+  document.getElementById('opsAiDraft').addEventListener('click', () => opsAiAsk('draft'));
+  document.getElementById('opsAiSteps').addEventListener('click', () => opsAiAsk('steps'));
+  document.getElementById('opsAiClose').addEventListener('click', () => document.getElementById('opsAiDialog').close());
+  document.getElementById('opsAiDialog').addEventListener('close', () => { opsAi = null; });
+  document.getElementById('opsAiList').addEventListener('click', e => { const b = e.target.closest('button[data-act="copy"]'); if (b) opsAiCopy(b); });
+})();
 
 // ---- ลิงก์สมัครสมาชิก ----
 const REGISTER_LIFF = 'https://liff.line.me/2010938781-5HXyGxm5';
@@ -8215,6 +8667,7 @@ function renderLoginAccounts() {
 // เปลี่ยนคนแล้ว: ตะกร้าที่ค้างอยู่ "ยังอยู่" (ส่งต่อให้คนที่มาแทนขายต่อได้ ไม่ต้องยิงใหม่) แต่บิลจะเป็นชื่อคนใหม่
 // และล้างพนักงานขายร่วมที่เลือกไว้ (คนเดิมเลือกไว้ให้บิลของตัวเอง ไม่ใช่ของคนใหม่) — บอกให้รู้ทุกครั้ง
 function onAccountSwitched() {
+  opsReset();                    // Ops Board เป็นข้อมูลของเจ้าของ — สลับเป็นคนอื่นต้องไม่ค้างอยู่ในหน้า
   coSellers = [];
   launchDraft = null;
   mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
@@ -10280,7 +10733,7 @@ setInterval(tickHome, 1000);
 renderNav();
 pendingRoute = sectionFromHash();
 history.replaceState({ n: 0 }, '', location.hash || '#home');
-showSection(pendingRoute && !SECTIONS.find(x => x.id === pendingRoute).manager ? pendingRoute : HOME, 'none');
+showSection(pendingRoute && !sectionRestricted(SECTIONS.find(x => x.id === pendingRoute)) ? pendingRoute : HOME, 'none');
 updateBackBtn();
 renderSerialList();
 renderCart();

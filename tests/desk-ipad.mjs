@@ -24,6 +24,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { HARNESS } from './lib/page-test.mjs';
 import { runCdpPage } from './lib/cdp-page.mjs';
+import { OPS_MOCK } from './lib/ops-mock.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { MOCK: MOCK3 } = await import(pathToFileURL(join(root, 'tests/desk-home3.mjs')).href);
@@ -607,7 +608,7 @@ sOk('ZXing ไม่โหลดตอนเปิดหน้า (คอมห�
 console.log('  === สรุป: ' + sPass + ' PASS / ' + sFail + ' FAIL ===');
 
 const net = '--host-resolver-rules=MAP * ~NOTFOUND';
-const mock = MOCK3 + EXTRA;
+const mock = MOCK3 + OPS_MOCK + EXTRA;   // + ข้อมูล Ops Board ตัวอย่าง (เลย์เอาต์ต้องถูกตรวจกับงานจริงหลายแถว ไม่ใช่หน้าว่าง)
 // คอมหน้าเคาน์เตอร์ไม่มีกล้อง — เครื่องที่รันเทสต์อาจมีเว็บแคม จึงตั้งรายการอุปกรณ์ให้ว่างก่อนหน้าเว็บโหลด
 const NO_CAM = '<script>if (navigator.mediaDevices) navigator.mediaDevices.enumerateDevices = async () => [];</script>';
 const run = (w, h, tests, coarse = true) => () => runCdpPage({ root, file: 'desk.html', mock: coarse ? mock : NO_CAM + mock, tests, width: w, height: h, coarse, shotDir: SHOTS, flags: [net] });

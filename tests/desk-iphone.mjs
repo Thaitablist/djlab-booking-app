@@ -15,6 +15,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdirSync } from 'node:fs';
 import { HARNESS } from './lib/page-test.mjs';
 import { runCdpPage } from './lib/cdp-page.mjs';
+import { OPS_MOCK } from './lib/ops-mock.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { MOCK: MOCK3 } = await import(pathToFileURL(join(root, 'tests/desk-home3.mjs')).href);
@@ -220,6 +221,19 @@ async function runTests() {
   ok(T + ': หน้าต่างซ้อนทุกบานอยู่ในจอทั้งบาน', !badDlg.length, badDlg.join(' | '));
   ok(T + ': ปุ่ม/ช่องในหน้าต่างซ้อน ≥ 44×44', !smallDlg.length, smallDlg.slice(0, 10).join(' | '));
 
+  // ช่วยคิด (Ops Board): ลูปข้างบนเปิดหน้าต่างเปล่า — ตรงนี้ตรวจตอนมีคำตอบจริง (เก่า 2 + ใหม่ 1) เพราะข้อความยาวและมีปุ่มคัดลอกต่อคำตอบ
+  showSection('ops'); await sleep(250); await frames();
+  await openOpsAi('t1');
+  await opsAiAsk('draft'); await sleep(200); await frames();
+  const ad = $('opsAiDialog'), ar = ad.getBoundingClientRect();
+  ok(T + ' ช่วยคิด (มีคำตอบ 3 อัน): หน้าต่างอยู่ในจอทั้งบาน · เลื่อนได้ถ้าสูงเกินจอ · ไม่ล้นข้าง',
+    ad.open && document.querySelectorAll('#opsAiList .ops-ai-ans').length === 3 && inView(ar) && (ad.scrollHeight <= ad.clientHeight + 1 || /(auto|scroll)/.test(getComputedStyle(ad).overflowY)) && ad.scrollWidth <= ad.clientWidth + 1,
+    JSON.stringify([ar.left, ar.top, ar.right, ar.bottom].map(Math.round)) + ' sh=' + ad.scrollHeight + '/' + ad.clientHeight + ' sw=' + ad.scrollWidth + '/' + ad.clientWidth);
+  const adSmall = smallTargets(ad), adTiny = tinyText(ad);
+  ok(T + ' ช่วยคิด: ปุ่มทุกอัน (ร่าง / ขั้นตอน / คัดลอก / ปิด) ≥ 44×44', !adSmall.length, adSmall.join(' | '));
+  ok(T + ' ช่วยคิด: ไม่มีตัวหนังสือเล็กกว่า 14px', !adTiny.length, adTiny.join(' | '));
+  ad.close(); await frames();
+
   showSection('bills'); await sleep(150);
   openCalc(false); await frames();
   const cp = $('calcPanel').getBoundingClientRect();
@@ -291,7 +305,7 @@ async function runTests() {
 </script>`;
 
 const net = '--host-resolver-rules=MAP * ~NOTFOUND';
-const mock = MOCK3 + EXTRA;
+const mock = MOCK3 + OPS_MOCK + EXTRA;   // + ข้อมูล Ops Board ตัวอย่าง (เลย์เอาต์ต้องถูกตรวจกับงานจริงหลายแถว ไม่ใช่หน้าว่าง)
 // PHONE_ROOT=<โฟลเดอร์ที่มี desk.html อีกฉบับ> = ทดสอบหน้าฉบับนั้นแทน (เช่น ฉบับก่อนแก้ — พิสูจน์ว่าเทสต์ตกจริงเมื่อบั๊กยังอยู่)
 const pageRoot = process.env.PHONE_ROOT || root;
 const run = (w, h, tests) => () => runCdpPage({ root: pageRoot, file: 'desk.html', mock, tests, width: w, height: h, coarse: true, shotDir: SHOTS, flags: [net] });

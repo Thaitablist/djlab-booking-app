@@ -117,7 +117,7 @@ function makeClient(opts) {
       }
       return { data: null, error: null };
     },
-    functions: { async invoke(name, o) { CALLS.push({ op: 'fn', name, body: o.body }); return { data: window.FN[name](o.body), error: null }; } },
+    functions: { async invoke(name, o) { CALLS.push({ op: 'fn', name, body: o.body }); return { data: await window.FN[name](o.body), error: null }; } },
     channel() { CHANNELS++; return { on() { return this; }, subscribe() { return this; } }; },
     removeChannel() { CHANNELS--; },
     auth: {

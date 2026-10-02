@@ -416,6 +416,11 @@ A row of square buttons inside one 1px black frame, divided by hairlines. The pr
 - **Border:** 1px `line`.
 - **Internal Padding:** 20px on desk cards, 16px on phone cards, and 14–18px panel heads.
 
+### Ops Board rows (`#ops`, owner only, 2026-10-02)
+- **Group head:** the `head` paper bar with a 2px black bottom rule, the urgency written as a word (ด่วน / จับตา / ติดตาม) plus a count; never colour alone.
+- **Task row:** white, square, 1px `line` between rows, a 4px inset edge on the left in `red` / `warn` / `ok` that repeats the group's word. Title 16px head face; detail, next step, tags 14px. Done rows go `surface2` with a struck title. The due state is a status pill with words ("เลยกำหนด 3 วัน", "อีก 2 วัน"). Status is a select, so a row changes state in one gesture. The side column (select + buttons) stacks right on desk and drops under the text below 640px.
+- **Answer card (ช่วยคิด dialog):** a 1px `line` box with a `surface2` meta strip (kind · time · "ใหม่" on the fresh one, black border) and a copy button; the body is `pre-wrap` 14px so a draft can be selected and pasted whole. Newest answer first.
+
 ### Inputs / Fields
 - **Style:** white, 1px `line-strong`, square, 40px (desk) / 46px (phone), 15–16px text.
 - **Focus:** the border goes black with a 2px black outline inset by 1px.
