@@ -66,6 +66,7 @@ const OPS = { fail: {}, missing: false, noOrders: false, denyDelete: false, seq:
     const rows = () => table === 'ops_tasks' ? OPS.tasks : table === 'ops_task_ai' ? OPS.aiRows : table === 'ops_task_orders' ? OPS.orders : [OPS.meta];
     const match = r => st.filters.every(([c, v]) => r[c] === v) && st.ins.every(([c, vs]) => vs.includes(r[c]));
     const run = async () => {
+      const who0 = me(), owner0 = owner();   // ตัวตนผู้เรียก ณ ตอนส่งคำขอ — ออกจากระบบระหว่างรอ คำขอที่ส่งไปแล้วยัง "ผ่านสิทธิ์" (จำลองคำตอบสำเร็จที่มาถึงหลังออกจากระบบ)
       CALLS.push({ op: st.op, table, payload: st.payload, filters: st.filters.slice(), ins: st.ins.slice(), who: me() && me().id });
       if (table === 'ops_task_ai' && st.op !== 'select') return { data: null, error: { message: 'permission denied for table ops_task_ai' } };   // REVOKE ... FROM authenticated
       if (table === 'ops_task_orders' && OPS.ordGate) await OPS.ordGate;   // ค้างคำขอไว้ (เทสต์ปิดหน้าต่าง/ออกจากระบบกลางทาง)
@@ -79,15 +80,15 @@ const OPS = { fail: {}, missing: false, noOrders: false, denyDelete: false, seq:
         const cols = Object.keys(st.payload || {});
         if (st.op === 'insert') {
           if (cols.some(c => !['task_id', 'instruction', 'ai_answer_id'].includes(c))) return { data: null, error: { message: 'permission denied for table ops_task_orders' } };
-          if (!owner()) return { data: null, error: { message: 'new row violates row-level security policy for table "ops_task_orders"' } };
+          if (!owner0) return { data: null, error: { message: 'new row violates row-level security policy for table "ops_task_orders"' } };
           if (OPS.orders.some(o => o.task_id === st.payload.task_id && ['queued', 'picked'].includes(o.status))) return { data: null, error: { message: 'duplicate key value violates unique constraint "uq_ops_orders_open_per_task"' } };
           const r = { id: 'o' + (++OPS.ordSeq), task_id: st.payload.task_id, instruction: st.payload.instruction, ai_answer_id: st.payload.ai_answer_id || null, status: 'queued', result: null,
-            picked_by: null, created_by: me().id, created_at: nowIso(), picked_at: null, finished_at: null };
+            picked_by: null, created_by: who0.id, created_at: nowIso(), picked_at: null, finished_at: null };
           OPS.orders.push(r); data = [clone(r)];
         } else {
           if (cols.some(c => c !== 'status')) return { data: null, error: { message: 'permission denied for table ops_task_orders' } };
           if (st.payload.status !== 'cancelled') return { data: null, error: { message: 'new row violates row-level security policy for table "ops_task_orders"' } };
-          const hit = owner() ? OPS.orders.filter(r => match(r) && ['queued', 'picked'].includes(r.status)) : [];
+          const hit = owner0 ? OPS.orders.filter(r => match(r) && ['queued', 'picked'].includes(r.status)) : [];
           hit.forEach(r => { r.status = 'cancelled'; r.finished_at = nowIso(); });
           data = hit.map(clone);
         }
