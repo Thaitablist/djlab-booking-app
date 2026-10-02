@@ -267,6 +267,13 @@ async function runTests() {
     sp.restore();
   }
 
+  // ── 7. keydown เปล่า ไม่มี code (ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์ส่งมา) ต้องไม่ทำให้หน้าพัง ──
+  // ต่างจากข้อ 6 ที่ code เป็น '' (แป้นมือถือ) — ตัวนี้ code เป็น undefined ซึ่ง .match เรียกไม่ได้
+  {
+    const errs = bareKeydown(document).concat(bareKeydown(document.body));
+    ok('keydown ที่ไม่มี code ไม่ทำให้เกิด error (เคยพังที่ wedgeChar: Cannot read properties of undefined)', !errs.length, errs.join(' | '));
+  }
+
   L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
   L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
 }

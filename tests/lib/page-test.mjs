@@ -140,6 +140,16 @@ function burstMixed(seq, opts) {
 
 const digits = s => s.split('').map(d => 'Digit' + d);
 
+// keydown เปล่า ๆ ไม่มี code ไม่มี key — ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์ส่งมาแบบนี้ (ไม่ใช่การกดปุ่มจริง)
+// คืนรายการ error ที่เกิดขึ้นระหว่างส่ง (ต้องว่าง) — error ใน listener ไม่ throw ออกมาที่ dispatchEvent จึงต้องดักที่ window
+function bareKeydown(target) {
+  const errs = [], on = e => errs.push(e.message);
+  window.addEventListener('error', on);
+  (target || document).dispatchEvent(new Event('keydown', { bubbles: true, cancelable: true }));
+  window.removeEventListener('error', on);
+  return errs;
+}
+
 function spy() {
   const calls = [];
   const original = window.onScanned;

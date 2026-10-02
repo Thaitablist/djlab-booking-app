@@ -1611,6 +1611,9 @@ let wedgeSnapshot = null;
 function wedgeChar(e) {
   let m;
   const c = e.code;
+  // ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์ส่ง keydown เปล่า ๆ ที่ไม่มี code (undefined) — ไม่ใช่การกดปุ่มจริง
+  // (แป้นมือถือส่ง '' ซึ่งผ่านอยู่แล้ว · ไม่มีบรรทัดนี้ .match ข้างล่างพังเป็นแถบแดงบนจอ)
+  if (!c) return null;
   if ((m = c.match(/^(?:Digit|Numpad)(\d)$/))) return m[1];
   // ตัวอักษรคืนเป็นพิมพ์ใหญ่เสมอ ไม่ดู Shift ไม่ดู CapsLock — เครื่องที่เผลอ
   // เปิด Caps Lock ค้างจะได้ chmp123354nn แทน CHMP123354NN แล้วหาไม่เจอ

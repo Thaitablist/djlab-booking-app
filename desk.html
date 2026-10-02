@@ -10205,6 +10205,7 @@ function calcUndoScan() {
 function calcKeyOf(e) {
   if (e.ctrlKey || e.metaKey || e.altKey) return null;
   const c = e.code;
+  if (!c) return null;                 // keydown เปล่าไม่มี code (ตัวเติมอัตโนมัติ) — เหมือน wedgeChar
   let m;
   if ((m = c.match(/^Numpad(\d)$/))) return m[1];
   if ((m = c.match(/^Digit(\d)$/))) return e.shiftKey ? ({ Digit5: '%', Digit8: '×' })[c] || null : m[1];   // event.code — แป้นไทยก็พิมพ์ตัวเลขได้
@@ -10474,6 +10475,9 @@ let wedgeSnapshot = null; // ค่าเดิมของช่องที่
 function wedgeChar(e) {
   let m;
   const c = e.code;
+  // ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์ส่ง keydown เปล่า ๆ ที่ไม่มี code (undefined) — ไม่ใช่การกดปุ่มจริง
+  // (แป้นมือถือส่ง '' ซึ่งผ่านอยู่แล้ว · ไม่มีบรรทัดนี้ .match ข้างล่างพังเป็นแถบแดงบนจอ)
+  if (!c) return null;
   if ((m = c.match(/^(?:Digit|Numpad)(\d)$/))) return m[1];
   // ตัวอักษรคืนเป็นพิมพ์ใหญ่เสมอ ไม่ดู Shift ไม่ดู CapsLock
   //

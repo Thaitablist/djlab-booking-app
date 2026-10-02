@@ -475,6 +475,13 @@ async function runTests() {
   closeCalc(false);
   cart = []; renderCart();
 
+  // ── 4c2. keydown เปล่า ไม่มี code ตอนเครื่องคิดเลขโฟกัสอยู่ (calcKeyOf อ่าน e.code.match) ต้องไม่ error ──
+  openCalc(true);
+  const exprBefore = calc.expr, calcErrs = bareKeydown($('calcPanel'));
+  ok('เครื่องคิดเลขโฟกัส: keydown ที่ไม่มี code ไม่ทำให้เกิด error', !calcErrs.length, calcErrs.join(' | '));
+  ok('keydown เปล่าไม่แตะค่าบนเครื่องคิดเลข', calc.expr === exprBefore, exprBefore + ' → ' + calc.expr);
+  closeCalc(false);
+
   // ── 4d. ไม่ทับหน้าต่างวิดีโอ (1440) ──────────────────────────────────────
   showSection('bills');
   await ytPlayUrl('https://youtu.be/jNQXAC9IVRw', 'ทดสอบ');

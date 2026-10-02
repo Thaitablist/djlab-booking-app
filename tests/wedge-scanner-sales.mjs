@@ -210,6 +210,12 @@ async function runTests() {
     scanStream = saved;
   }
 
+  // keydown เปล่า ไม่มี code (ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์) ต้องไม่ทำให้หน้าพัง — code เป็น undefined ไม่ใช่ ''
+  {
+    const errs = bareKeydown(document).concat(bareKeydown(document.body));
+    ok('keydown ที่ไม่มี code ไม่ทำให้เกิด error (เคยพังที่ wedgeChar: Cannot read properties of undefined)', !errs.length, errs.join(' | '));
+  }
+
   L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
   L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
 }

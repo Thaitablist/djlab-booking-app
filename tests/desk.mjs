@@ -283,6 +283,13 @@ async function runTests() {
   ok('ประวัติการเคลื่อนไหวแสดงจากฐานข้อมูล', document.querySelectorAll('#moveRows tr[data-i]').length === 1);
   ok('ไม่มีปุ่มแก้หรือลบในหมวดประวัติ', !/แก้ไข|ลบ/.test(document.getElementById('sec-moves').querySelector('table').textContent));
 
+  // ── 11. keydown เปล่า ไม่มี code (ตัวเติมอัตโนมัติ/ตัวจัดการรหัสผ่านของเบราว์เซอร์) ต้องไม่ทำให้คอนโซลพัง ──
+  // เจ้าของเจอ 2 ต.ค. 69: "Cannot read properties of undefined (reading 'match')" ที่ wedgeChar — code เป็น undefined ไม่ใช่ ''
+  {
+    const errs = bareKeydown(document).concat(bareKeydown(document.body));
+    ok('keydown ที่ไม่มี code ไม่ทำให้เกิด error', !errs.length, errs.join(' | '));
+  }
+
   L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
   L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
 }
