@@ -234,6 +234,22 @@ async function runTests() {
   ok(T + ' ช่วยคิด: ไม่มีตัวหนังสือเล็กกว่า 14px', !adTiny.length, adTiny.join(' | '));
   ad.close(); await frames();
 
+  // สั่ง Claude (Ops Board · 034): หน้าต่างสั่งงานที่มีตัวเลือกแนบคำตอบ + แป้นพิมพ์ — ต้องอยู่ในจอ ปุ่ม ≥ 44 ตัวหนังสือ ≥ 14 · แล้วหลังส่งเข้าคิว การ์ดมีกล่องคำสั่ง ไม่ล้นจอ
+  await openOpsOrder('t1');
+  $('opsOrdText').value = 'ตอบอีเมลฉบับนี้ตามร่างที่แนบ แล้วเตรียมไฟล์รายงานแอดให้ครบ ' + 'ข้อความยาวเพื่อดูการตัดบรรทัดบนจอเล็ก '.repeat(4);
+  const od = $('opsOrderDialog'), orr = od.getBoundingClientRect();
+  ok(T + ' สั่ง Claude: หน้าต่างอยู่ในจอทั้งบาน · เลื่อนได้ถ้าสูงเกินจอ · ไม่ล้นข้าง',
+    od.open && inView(orr) && (od.scrollHeight <= od.clientHeight + 1 || /(auto|scroll)/.test(getComputedStyle(od).overflowY)) && od.scrollWidth <= od.clientWidth + 1,
+    JSON.stringify([orr.left, orr.top, orr.right, orr.bottom].map(Math.round)) + ' sh=' + od.scrollHeight + '/' + od.clientHeight);
+  const odSmall = smallTargets(od), odTiny = tinyText(od);
+  ok(T + ' สั่ง Claude: ปุ่ม/ช่อง (ข้อความคำสั่ง · เลือกแนบ · ปิด · ส่งเข้าคิว) ≥ 44×44', !odSmall.length, odSmall.join(' | '));
+  ok(T + ' สั่ง Claude: ไม่มีตัวหนังสือเล็กกว่า 14px · ช่องกรอก ≥ 16px (iOS ไม่ซูมเอง)', !odTiny.length && parseFloat(getComputedStyle($('opsOrdText')).fontSize) >= 16 && parseFloat(getComputedStyle($('opsOrdAi')).fontSize) >= 16, odTiny.join(' | '));
+  $('opsOrdForm').requestSubmit(); await sleep(300); await frames();
+  const oc = document.querySelector('#opsBoard .ops-task[data-id="t1"] .ops-order');
+  ok(T + ' สั่ง Claude: ส่งแล้ว การ์ดมีกล่องคำสั่ง + ปุ่มยกเลิก · ไม่ล้นจอ · ปุ่มบนการ์ดทุกอัน ≥ 44',
+    !od.open && !!oc && pageOverflow().length === 0 && smallTargets(document.querySelector('#opsBoard .ops-task[data-id="t1"]')).length === 0 && clippedCtrls(document.querySelector('#opsBoard .ops-task[data-id="t1"]')).length === 0,
+    pageOverflow().join(' | ') + ' ' + smallTargets(document.querySelector('#opsBoard .ops-task[data-id="t1"]')).join(' | '));
+
   showSection('bills'); await sleep(150);
   openCalc(false); await frames();
   const cp = $('calcPanel').getBoundingClientRect();

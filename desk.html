@@ -990,6 +990,13 @@
   .ops-ai-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; color: var(--text2); background: var(--surface2); }
   .ops-ai-out { margin: 0; padding: 10px 12px; font: 14px/1.7 var(--font-body); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow: auto; }
   .ops-ai-hist { margin: 16px 0 0; font-size: 14px; color: var(--text2); font-weight: 600; }
+  /* คำสั่งถึง Claude (034) — กล่องใต้รายละเอียดงาน: สถานะเป็นคำ + คำสั่งของเจ้าของ + ผลที่ Claude เขียนกลับ (pre-wrap เลือกคัดลอกได้) */
+  .ops-order { margin-top: 8px; padding: 8px 12px; border: 1px solid var(--line-strong); background: var(--surface); font-size: 14px; }
+  .ops-order-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: var(--text2); }
+  .ops-order-head strong { color: var(--text); }
+  .ops-order-text { margin-top: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ops-order-label { margin-top: 6px; font-weight: 600; }
+  .ops-order-res { margin: 2px 0 0; padding: 6px 10px; font: 14px/1.7 var(--font-body); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface2); max-height: 30vh; overflow: auto; }
   .ops-src { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
   .ops-src:first-of-type { border-top: 0; padding-top: 0; }
   .ops-src .st { grid-row: span 2; align-self: start; }
@@ -2185,6 +2192,21 @@
     <div id="opsAiList"></div>
   </div>
   <div class="dlg-foot"><button class="btn" type="button" id="opsAiClose">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="opsOrderDialog" aria-labelledby="opsOrdTitle">
+  <div class="dlg-head"><h2 id="opsOrdTitle">สั่ง Claude ทำงานนี้</h2></div>
+  <form class="dlg-body" id="opsOrdForm" novalidate>
+    <div class="ops-ai-task" id="opsOrdTask"></div>
+    <div class="alert alert-plain">คำสั่งเข้าคิวในฐานข้อมูล — ผู้จัดการข้อมูลภายในรับไปให้ Claude ลงมือทำนอกคอนโซล แล้วเขียนผลกลับมาที่การ์ดงานนี้ · เรื่องที่ออกนอกร้าน (ส่งอีเมล · แตะงบแอด · โพสต์ · ลบหรือแชร์ไฟล์ · แก้ Maps) Claude จะถามเจ้าของยืนยันอีกครั้งก่อนเสมอ ถ้าไม่มีคนเฝ้าจะทำถึงขั้นร่างแล้วรอ · ยกเลิกคำสั่งได้จนกว่า Claude จะทำเสร็จ</div>
+    <div class="field"><label class="lbl" for="opsOrdText">ให้ Claude ทำอะไร *</label><textarea id="opsOrdText" class="input" rows="4" maxlength="2000" placeholder="เช่น ตอบอีเมลฉบับนี้ตามร่างที่แนบ แล้วเตรียมไฟล์รายงานแอดให้ครบ"></textarea></div>
+    <div class="field"><label class="lbl" for="opsOrdAi">แนบคำตอบจากปุ่มช่วยคิด (ไม่บังคับ)</label><select id="opsOrdAi" class="input"><option value="">ไม่แนบ</option></select></div>
+    <div id="opsOrdErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="opsOrdCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="opsOrdSave" type="submit">ส่งเข้าคิว</button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
@@ -6302,7 +6324,13 @@ const OPS_AI_KIND = { draft: 'ร่างข้อความ', steps: 'ขั
 const OPS_AI_NO_TABLE = /ops_task_ai/i;
 const OPS_COLS = 'id, title, detail, action, severity, status, area, due, owner, source, created_at, updated_at, done_at';
 const OPS_NO_TABLE = /relation .*ops_tasks.* does not exist|schema cache|Could not find the table/i;
-let ops = { tasks: [], meta: null, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
+// คำสั่งถึง Claude (034): คิวในฐานข้อมูล — ผู้จัดการข้อมูลภายในรับไปให้ session ของ Claude ลงมือทำนอกคอนโซล แล้วเขียนผลกลับ (หน้านี้ไม่ได้ให้ AI ทำอะไรเอง)
+const OPS_ORD_COLS = 'id, task_id, instruction, ai_answer_id, status, result, picked_by, created_at, picked_at, finished_at';
+const OPS_ORD_STATUS = { queued: ['st-warn', 'รอ Claude รับ'], picked: ['st-warn', 'Claude รับแล้ว กำลังทำ'], done: ['st-ok', 'Claude ทำแล้ว'], failed: ['st-bad', 'ทำไม่สำเร็จ'], cancelled: ['st-off', 'ยกเลิกแล้ว'] };
+const OPS_ORD_OPEN = ['queued', 'picked'];
+const OPS_ORD_NO_TABLE = /ops_task_orders/i;
+let ops = { tasks: [], meta: null, orders: [], ordersOn: true, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
+let opsOrd = null;                         // หน้าต่างสั่งงานที่เปิดอยู่ { id, busy } — สร้างใหม่ทุกครั้งที่เปิด (ผลของรอบเก่าที่ตามมาทีหลังถูกทิ้ง)
 let opsAi = null;                          // หน้าต่างช่วยคิดที่เปิดอยู่ { id, busy, list } — ทุกครั้งที่เปิดสร้างใหม่ คำตอบของรอบเก่าที่ตามมาทีหลังเลยถูกทิ้ง
 
 function opsDaysTo(due) {        // วันถึงกำหนด · ติดลบ = เลยแล้ว · เทียบตามวันที่ไทย
@@ -6335,13 +6363,26 @@ function opsVisible() {
     (!q || [t.title, t.detail, t.action, t.owner, t.source].join(' ').toLowerCase().includes(q))).sort(opsSort);
 }
 
+function opsLatestOrder(taskId) { return ops.ordersOn ? ops.orders.find(x => x.task_id === taskId) || null : null; }   // ops.orders เรียงใหม่สุดก่อน
+function opsOrderHtml(o) {
+  if (!o) return '';
+  const s = OPS_ORD_STATUS[o.status] || ['st-off', escapeHtml(o.status)];
+  return '<div class="ops-order" data-order="' + escapeHtml(o.id) + '">' +
+    '<div class="ops-order-head"><strong>สั่ง Claude:</strong><span class="st ' + s[0] + '">' + s[1] + '</span><span>' + formatDateTime(o.created_at) + '</span>' +
+      (o.picked_by && o.status !== 'queued' ? '<span>รับโดย ' + escapeHtml(o.picked_by) + '</span>' : '') + '</div>' +
+    '<div class="ops-order-text">' + escapeHtml(o.instruction) + '</div>' +
+    (o.result ? '<div class="ops-order-label">ผลจาก Claude</div><pre class="ops-order-res">' + escapeHtml(o.result) + '</pre>' : '') +
+    '</div>';
+}
 function opsTaskHtml(t) {
   const opts = Object.entries(OPS_STATUS).map(([k, v]) => '<option value="' + k + '"' + (t.status === k ? ' selected' : '') + '>' + v + '</option>').join('');
+  const ord = opsLatestOrder(t.id), ordOpen = !!ord && OPS_ORD_OPEN.includes(ord.status);
   return '<article class="ops-task sev-' + escapeHtml(t.severity) + (t.status === 'done' ? ' done' : '') + '" data-id="' + escapeHtml(t.id) + '">' +
     '<div style="min-width:0">' +
       '<div class="ops-title">' + escapeHtml(t.title) + '</div>' +
       (t.detail ? '<div class="ops-detail">' + escapeHtml(t.detail) + '</div>' : '') +
       (t.action ? '<div class="ops-act"><strong>ทำต่อ:</strong> ' + escapeHtml(t.action) + '</div>' : '') +
+      opsOrderHtml(ord) +
       '<div class="ops-tags">' + opsDueChip(t) +
         (OPS_AREA[t.area] ? '<span class="st st-off">' + OPS_AREA[t.area] + '</span>' : '') +
         (t.owner ? '<span>ผู้รับผิดชอบ: ' + escapeHtml(t.owner) + '</span>' : '') +
@@ -6352,6 +6393,8 @@ function opsTaskHtml(t) {
       '<select class="input" data-act="status" aria-label="สถานะของงาน ' + escapeHtml(t.title) + '">' + opts + '</select>' +
       '<div class="ops-btns">' +
       (t.area === OPS_AI_BLOCKED_AREA ? '' : '<button type="button" class="btn btn-sm" data-act="ai">ช่วยคิด</button>') +
+      (ops.ordersOn && t.status !== 'done' && !ordOpen ? '<button type="button" class="btn btn-sm" data-act="order">สั่ง Claude</button>' : '') +
+      (ordOpen ? '<button type="button" class="btn btn-sm" data-act="ordcancel">ยกเลิกคำสั่ง</button>' : '') +
       '<button type="button" class="btn btn-sm" data-act="edit">แก้ไข</button>' +
       '<button type="button" class="btn btn-sm btn-danger" data-act="del">ลบ</button></div>' +
     '</div></article>';
@@ -6400,16 +6443,17 @@ function renderOps() { renderOpsStats(); renderOpsBoard(); renderOpsRail(); }
 async function loadOps() {
   if (!isOwner()) return;
   const uid = currentUserId;
-  const [t, m] = await Promise.all([
+  const [t, m, o] = await Promise.all([
     db.from('ops_tasks').select(OPS_COLS).order('created_at', { ascending: true }),
     db.from('ops_board_meta').select('last_scan, next_scan, sources, reports').maybeSingle(),
+    db.from('ops_task_orders').select(OPS_ORD_COLS).order('created_at', { ascending: false }).limit(300),
   ]);
   if (uid !== currentUserId || !isOwner()) return;           // สลับบัญชีระหว่างโหลด — ทิ้งผล ไม่เอามาแสดง
   const alertEl = document.getElementById('opsAlert');
   ops.loaded = true;
   if (t.error) {
     console.error('[Ops tasks]', t.error);
-    ops.tasks = []; ops.meta = null;
+    ops.tasks = []; ops.meta = null; ops.orders = [];
     if (OPS_NO_TABLE.test(t.error.message)) {
       alertEl.innerHTML = '<div class="alert alert-warn">ยังไม่ได้ติดตั้ง Ops Board ในฐานข้อมูล — ต้องรัน migration 033 ก่อน</div>';
     } else {
@@ -6426,11 +6470,18 @@ async function loadOps() {
     ops.meta = null;
     alertEl.innerHTML = '<div class="alert alert-warn">โหลดข้อมูลรอบสรุปไม่สำเร็จ: ' + escapeHtml(m.error.message) + ' (รายการงานยังใช้ได้)</div>';
   } else { ops.meta = m.data || null; alertEl.innerHTML = ''; }
+  if (o.error) {
+    console.error('[Ops orders]', o.error);
+    ops.orders = [];
+    // ยังไม่ได้รัน 034 = ซ่อนปุ่ม/ป้ายคำสั่งเงียบ ๆ (ส่วนอื่นของบอร์ดใช้ได้ปกติ — หน้าเว็บขึ้นก่อนตารางพร้อมได้โดยไม่พัง)
+    ops.ordersOn = !OPS_ORD_NO_TABLE.test(o.error.message);
+    if (ops.ordersOn) alertEl.innerHTML += '<div class="alert alert-warn">โหลดคำสั่งถึง Claude ไม่สำเร็จ: ' + escapeHtml(o.error.message) + ' (รายการงานยังใช้ได้)</div>';
+  } else { ops.ordersOn = true; ops.orders = o.data || []; }
   renderOps();
 }
 
 function opsReset() {            // ออกจากระบบ/สลับบัญชี — ข้อมูลภายในร้านต้องไม่ค้างในหน้า (DOM ก็ล้าง ไม่ใช่แค่ซ่อน)
-  ops = { tasks: [], meta: null, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
+  ops = { tasks: [], meta: null, orders: [], ordersOn: true, loaded: false, filter: 'open', area: 'all', q: '', editingId: null };
   document.getElementById('opsBoard').innerHTML = '<div class="empty">กำลังโหลดงาน…</div>';
   document.getElementById('opsRail').innerHTML = '';
   document.getElementById('opsAlert').innerHTML = '';
@@ -6447,7 +6498,14 @@ function opsReset() {            // ออกจากระบบ/สลับ�
   document.getElementById('opsAiTask').textContent = '';
   document.getElementById('opsAiStatus').innerHTML = '';
   document.getElementById('opsAiList').innerHTML = '';
-  closeConfirm();                                        // หน้าต่างยืนยันลบเก็บชื่องานไว้ใน DOM — ล้างด้วย ไม่งั้นบัญชีถัดไปบนเครื่องเดียวกันเปิดอ่านได้
+  opsOrd = null;                                            // สั่ง Claude: ทิ้งคำขอที่ค้าง + ล้างหน้าต่าง (มีชื่องาน คำสั่ง และชื่อคำตอบที่แนบ)
+  const od = document.getElementById('opsOrderDialog');
+  if (od.open) od.close();
+  document.getElementById('opsOrdTask').textContent = '';
+  document.getElementById('opsOrdText').value = '';
+  document.getElementById('opsOrdAi').innerHTML = '<option value="">ไม่แนบ</option>';
+  document.getElementById('opsOrdErr').hidden = true;
+  closeConfirm();                                     // หน้าต่างยืนยันลบเก็บชื่องานไว้ใน DOM — ล้างด้วย ไม่งั้นบัญชีถัดไปบนเครื่องเดียวกันเปิดอ่านได้
   document.getElementById('confirmTitle').textContent = 'ยืนยัน';
   document.getElementById('confirmBody').innerHTML = '';
 }
@@ -6581,6 +6639,80 @@ async function opsAiCopy(btn) {
   catch (e) { showToast('⚠️ คัดลอกอัตโนมัติไม่ได้ — เลือกข้อความในกรอบแล้วกด Ctrl+C'); }
 }
 
+// ---- สั่ง Claude ทำงานต่อ (034) — คำสั่งเข้าคิว · ผู้จัดการข้อมูลภายในรับไปให้ session ของ Claude · ผลเขียนกลับมาที่การ์ดงาน ----
+async function openOpsOrder(id) {
+  const t = ops.tasks.find(x => x.id === id);
+  if (!t) { showToast('⚠️ ไม่พบงานนี้'); return; }
+  if (!ops.ordersOn) { showToast('⚠️ ยังไม่ได้ติดตั้งคิวคำสั่งในฐานข้อมูล — ต้องรัน migration 034 ก่อน'); return; }
+  if (t.status === 'done') { showToast('งานนี้เสร็จแล้ว — เปลี่ยนสถานะกลับก่อนถ้าอยากสั่งต่อ'); return; }
+  const cur = opsLatestOrder(id);
+  if (cur && OPS_ORD_OPEN.includes(cur.status)) { showToast('⚠️ งานนี้มีคำสั่งค้างอยู่แล้ว — ยกเลิกคำสั่งเดิมก่อนถ้าอยากสั่งใหม่'); return; }
+  const me = opsOrd = { id, busy: false };
+  document.getElementById('opsOrdTask').textContent = t.title;
+  document.getElementById('opsOrdText').value = '';
+  document.getElementById('opsOrdAi').innerHTML = '<option value="">ไม่แนบ</option>';
+  document.getElementById('opsOrdErr').hidden = true;
+  const dlg = document.getElementById('opsOrderDialog');
+  if (!dlg.open) dlg.showModal();
+  focusField(document.getElementById('opsOrdText'));
+  // คำตอบช่วยคิดของงานนี้ให้เลือกแนบ (ใหม่สุดเป็นค่าเริ่มต้น — สั่งต่อจากที่เพิ่งช่วยคิดได้ในคลิกเดียว) · โหลดไม่ได้ก็สั่งแบบไม่แนบได้
+  const { data, error } = await db.from('ops_task_ai').select('id, kind, created_at').eq('task_id', id).order('created_at', { ascending: false }).limit(10);
+  if (opsOrd !== me || error || !data || !data.length) return;
+  document.getElementById('opsOrdAi').innerHTML = '<option value="">ไม่แนบ</option>' +
+    data.map(a => '<option value="' + escapeHtml(a.id) + '">' + escapeHtml(OPS_AI_KIND[a.kind] || a.kind) + ' · ' + formatDateTime(a.created_at) + '</option>').join('');
+  document.getElementById('opsOrdAi').value = data[0].id;
+}
+async function saveOpsOrder() {
+  const me = opsOrd;
+  if (!me || me.busy) return;
+  const err = document.getElementById('opsOrdErr'), btn = document.getElementById('opsOrdSave');
+  const fail = msg => { err.textContent = msg; err.hidden = false; };
+  err.hidden = true;
+  const text = document.getElementById('opsOrdText').value.trim();
+  if (!text) { fail('บอก Claude ก่อนว่าให้ทำอะไร'); document.getElementById('opsOrdText').focus(); return; }
+  const uid = currentUserId, row = { task_id: me.id, instruction: text }, ai = document.getElementById('opsOrdAi').value;
+  if (ai) row.ai_answer_id = ai;
+  me.busy = true; btn.disabled = true;
+  try {
+    const res = await db.from('ops_task_orders').insert(row).select(OPS_ORD_COLS).single();
+    if (uid !== currentUserId) return;                        // สลับบัญชีระหว่างรอ — ทิ้งผล ไม่วาดลงหน้า
+    const here = opsOrd === me;                               // หน้าต่างยังเป็นของคำขอนี้อยู่ไหม (ถ้าปิดไปแล้ว อย่าแตะช่อง/ข้อความในหน้าต่าง)
+    if (res.error) {
+      console.error('[Ops order]', res.error);
+      if (/duplicate key|unique/i.test(res.error.message)) { if (here) fail('งานนี้มีคำสั่งค้างอยู่แล้ว — ปิดหน้าต่างนี้แล้วดูที่การ์ดงาน'); loadOps(); }
+      else if (here) fail(OPS_ORD_NO_TABLE.test(res.error.message) ? 'ยังไม่ได้ติดตั้งคิวคำสั่งในฐานข้อมูล — ต้องรัน migration 034 ก่อน' : 'ส่งเข้าคิวไม่สำเร็จ: ' + res.error.message);
+      return;
+    }
+    // ส่งสำเร็จแล้วคำสั่งอยู่ในฐานข้อมูลจริง — ต้องขึ้นบนการ์ดแม้เจ้าของปิดหน้าต่างไปก่อนแล้ว (ไม่งั้นหน้าว่า "ไม่มีคำสั่ง" ทั้งที่ Claude กำลังจะมารับ)
+    ops.orders.unshift(res.data);
+    if (here) document.getElementById('opsOrderDialog').close();
+    renderOps();
+    showToast('✅ ส่งเข้าคิวแล้ว — รอ Claude รับ');
+  } catch (e) {
+    console.error('[Ops order]', e);
+    if (opsOrd === me) fail('ติดต่อฐานข้อมูลไม่สำเร็จ: ' + e.message);
+  } finally { me.busy = false; btn.disabled = false; }
+}
+function opsAskCancelOrder(taskId) {
+  const o = ops.orders.find(x => x.task_id === taskId && OPS_ORD_OPEN.includes(x.status));
+  if (!o) return;
+  const note = o.status === 'picked'
+    ? 'Claude รับคำสั่งนี้ไปแล้ว — ยกเลิกจะปล่อยคิว แต่<strong>ไม่ย้อนสิ่งที่ Claude ทำไปแล้ว</strong> (ถ้ามี)'
+    : 'ยังไม่มีใครรับคำสั่งนี้';
+  askConfirm('ยกเลิกคำสั่งถึง Claude', '<div class="alert alert-warn">ยกเลิกคำสั่ง “' + escapeHtml(o.instruction.length > 120 ? o.instruction.slice(0, 120) + '…' : o.instruction) + '”<br>' + note + '</div>', 'ยกเลิกคำสั่ง', async () => {
+    const uid = currentUserId;
+    const { data, error } = await db.from('ops_task_orders').update({ status: 'cancelled' }).eq('id', o.id).in('status', OPS_ORD_OPEN).select(OPS_ORD_COLS);
+    closeConfirm();
+    if (uid !== currentUserId) return;
+    if (error) { console.error('[Ops order cancel]', error); showFatalError('ยกเลิกคำสั่งไม่สำเร็จ: ' + error.message); return; }
+    // ไม่โดนแถวไหน = สถานะเปลี่ยนไปแล้วระหว่างรอ (Claude ทำเสร็จ / ถูกยกเลิกไปก่อน) — โหลดใหม่ให้เห็นของจริง ไม่หลอกว่ายกเลิกสำเร็จ
+    if (!data || !data.length) { showToast('⚠️ คำสั่งนี้เปลี่ยนสถานะไปแล้ว (Claude ทำเสร็จหรือถูกยกเลิก) — โหลดใหม่ให้แล้ว'); loadOps(); return; }
+    ops.orders = ops.orders.map(x => x.id === o.id ? data[0] : x);
+    renderOps();
+    showToast('✅ ยกเลิกคำสั่งแล้ว');
+  });
+}
+
 (function opsInit() {
   const opt =(obj, first) => (first ? '<option value="all">' + first + '</option>' : '') + Object.entries(obj).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
   document.getElementById('opsArea').innerHTML = opt(OPS_AREA, 'ทุกหมวด');
@@ -6611,7 +6743,12 @@ async function opsAiCopy(btn) {
     if (b.dataset.act === 'edit') openOpsForm(id);
     else if (b.dataset.act === 'del') opsAskDelete(id);
     else if (b.dataset.act === 'ai') openOpsAi(id);
+    else if (b.dataset.act === 'order') openOpsOrder(id);
+    else if (b.dataset.act === 'ordcancel') opsAskCancelOrder(id);
   });
+  document.getElementById('opsOrdForm').addEventListener('submit', e => { e.preventDefault(); saveOpsOrder(); });
+  document.getElementById('opsOrdCancel').addEventListener('click', () => document.getElementById('opsOrderDialog').close());
+  document.getElementById('opsOrderDialog').addEventListener('close', () => { opsOrd = null; });
   document.getElementById('opsAiDraft').addEventListener('click', () => opsAiAsk('draft'));
   document.getElementById('opsAiSteps').addEventListener('click', () => opsAiAsk('steps'));
   document.getElementById('opsAiClose').addEventListener('click', () => document.getElementById('opsAiDialog').close());

@@ -10,6 +10,9 @@
  * 2. admin / staff: ไม่เห็นเมนู · เปิดไม่ได้ · ไม่มีคำขอไปถึงตาราง
  * 1b. ช่วยคิด (ปุ่ม "ช่วยคิด" → Edge Function ai): ปุ่มเฉพาะงานที่ไม่ใช่หมวดระบบ · หน้าต่าง · คำตอบเก่า · ส่งแค่ {task_id, kind} · กดซ้ำ ·
  *     XSS · คัดลอก · quota / ยังไม่ตั้งค่า / ล้ม · ปิดหน้าต่างกลางคำขอ · โหลดประวัติไม่ได้ (ฟังก์ชันตัวจริงมีเทสต์แยกที่ Stock App/scripts/test-ai-function.mjs)
+ * 1c. สั่ง Claude ทำงานต่อ (ปุ่ม "สั่ง Claude" → คิว ops_task_orders · 034): ปุ่มเฉพาะงานที่ยังไม่เสร็จและไม่มีคำสั่งค้าง · ส่งแค่ {task_id, instruction, ai_answer_id} ·
+ *     สถานะเป็นคำ (รอรับ/รับแล้ว/ทำแล้ว/ทำไม่สำเร็จ/ยกเลิกแล้ว) + ผลที่ Claude เขียนกลับ (XSS) · ยกเลิกตอน queued/picked · ยกเลิกแต่ Claude ทำเสร็จไปแล้ว (ไม่หลอกว่าสำเร็จ) ·
+ *     สั่งซ้ำจากอีกเครื่อง · ฐานข้อมูลล้ม · ยังไม่ได้รัน 034 (ซ่อนเงียบ ๆ)
  * 3. สลับบัญชีจากเจ้าของเป็นพนักงาน: เนื้อหา Ops Board (รวมคำตอบช่วยคิดและคำขอที่ค้างอยู่) ต้องไม่ค้างอยู่ในหน้า
  */
 
@@ -249,6 +252,129 @@ async function runTests() {
   ok('เปิดใหม่หลังนั้น: เห็นคำตอบที่ฟังก์ชันบันทึกไว้ในประวัติ (ไม่เสียของ)', aiAnswers().length === nHist + 1 && !document.querySelector('#opsAiList .fresh'), aiAnswers().length + ' vs ' + (nHist + 1));
   $('opsAiClose').click(); await sleep(50);
 
+  // ── 1c. สั่ง Claude ทำงานต่อ (034) — คำสั่งเข้าคิว · สถานะ · ผลที่ Claude เขียนกลับ · ยกเลิก · ยังไม่ได้รัน 034 ─────────────
+  setFilter('open'); await frames();
+  const ordBtn = (id, a) => card(id) && card(id).querySelector('[data-act=' + a + ']');
+  const ordCalls = () => opsCalls().filter(c => c.table === 'ops_task_orders');
+  const ordWrites = () => ordCalls().filter(c => c.op !== 'select');
+  const submitOrder = async () => { $('opsOrdForm').requestSubmit(); await sleep(300); };
+  const orderOf = id => OPS.orders.filter(o => o.task_id === id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+  const refresh = async () => { $('opsRefresh').click(); await sleep(350); };
+  ok('โหลดคำสั่งพร้อมงาน: select ops_task_orders (ใหม่สุดก่อน)', ordCalls().some(c => c.op === 'select'));
+  ok('t2 Claude รับแล้ว: ป้ายเป็นคำ "Claude รับแล้ว กำลังทำ" + รับโดย session · มีปุ่ม "ยกเลิกคำสั่ง" · ไม่มีปุ่ม "สั่ง Claude"',
+    /Claude รับแล้ว กำลังทำ/.test(card('t2').textContent) && /รับโดย session-พนักงาน-1/.test(card('t2').textContent) && !!ordBtn('t2', 'ordcancel') && !ordBtn('t2', 'order'));
+  ok('t4 คำสั่งล้มเหลว: ป้าย "ทำไม่สำเร็จ" (st-bad) + ผลที่ Claude เขียนกลับแสดงครบ · คิวว่างแล้ว = มีปุ่ม "สั่ง Claude" ใหม่',
+    !!card('t4').querySelector('.ops-order .st-bad') && /ปฏิเสธ: ต้องเข้าบัญชีโฆษณา/.test(card('t4').querySelector('.ops-order-res').textContent) && !!ordBtn('t4', 'order') && !ordBtn('t4', 'ordcancel'));
+  ok('งานที่ยังไม่เคยสั่ง (t1 · t8) และงานหมวดระบบ (t5): มีปุ่ม "สั่ง Claude" · ไม่มีกล่องคำสั่ง (คำสั่งไป Claude ใน session ขององค์กร ไม่ใช่ไป API ภายนอก จึงไม่กันหมวดระบบเหมือนช่วยคิด)',
+    !!ordBtn('t1', 'order') && !!ordBtn('t8', 'order') && !!ordBtn('t5', 'order') && !card('t1').querySelector('.ops-order'));
+  setFilter('done'); await frames();
+  ok('งานที่เสร็จแล้ว: ไม่มีปุ่ม "สั่ง Claude"', !!card('t6') && !ordBtn('t6', 'order') && !ordBtn('t7', 'order'));
+  setFilter('open'); await frames();
+
+  const latestAi = OPS.aiRows.filter(r => r.task_id === 't1').sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0].id;
+  const aiN = OPS.aiRows.filter(r => r.task_id === 't1').length;
+  ordBtn('t1', 'order').click(); await sleep(300);
+  ok('กด "สั่ง Claude": เปิดหน้าต่าง · แสดงชื่องาน · บอกว่าเข้าคิวแล้วผู้จัดการข้อมูลภายในรับไปให้ Claude · งานออกนอกร้านต้องถามเจ้าของก่อน',
+    $('opsOrderDialog').open && $('opsOrdTask').textContent === 'ตอบอีเมลมหาจักรเรื่องรายงานแอด' && /ผู้จัดการข้อมูลภายใน/.test($('opsOrderDialog').textContent) && /ถามเจ้าของยืนยัน/.test($('opsOrderDialog').textContent));
+  const aiOpts = [...$('opsOrdAi').options].map(o => o.textContent);
+  ok('ตัวเลือกแนบคำตอบช่วยคิด: "ไม่แนบ" + ของงานนี้ทุกอัน · ใหม่สุดเป็นค่าเริ่มต้น (สั่งต่อจากที่เพิ่งช่วยคิดได้ในคลิกเดียว)', aiOpts[0] === 'ไม่แนบ' && aiOpts.length === 1 + aiN && $('opsOrdAi').value === latestAi, aiOpts.length + ' vs ' + (1 + aiN) + ' · ' + $('opsOrdAi').value + ' vs ' + latestAi);
+  await submitOrder();
+  ok('ไม่พิมพ์คำสั่ง: ขึ้นข้อความในหน้าต่าง · ไม่ส่งอะไรไปฐานข้อมูล · หน้าต่างไม่ปิด', $('opsOrderDialog').open && !$('opsOrdErr').hidden && /ให้ทำอะไร/.test($('opsOrdErr').textContent) && ordWrites().length === 0);
+  $('opsOrdText').value = '  ตอบอีเมลฉบับนี้ตามร่างที่แนบ  '; await submitOrder();
+  const insO = ordWrites().pop();
+  ok('ส่งเข้าคิว: insert เฉพาะ {task_id, instruction (ตัดช่องว่าง), ai_answer_id} — ไม่ส่ง status / result / created_by เอง',
+    !!insO && insO.op === 'insert' && JSON.stringify(Object.keys(insO.payload).sort()) === '["ai_answer_id","instruction","task_id"]' && insO.payload.task_id === 't1' &&
+    insO.payload.instruction === 'ตอบอีเมลฉบับนี้ตามร่างที่แนบ' && insO.payload.ai_answer_id === latestAi, JSON.stringify(ins && insO.payload));
+  ok('หน้าต่างปิด · การ์ด t1 มีกล่อง "รอ Claude รับ" + คำสั่ง · ปุ่ม "สั่ง Claude" กลายเป็น "ยกเลิกคำสั่ง" · มีข้อความยืนยัน',
+    !$('opsOrderDialog').open && /รอ Claude รับ/.test(card('t1').querySelector('.ops-order').textContent) && /ตอบอีเมลฉบับนี้ตามร่างที่แนบ/.test(card('t1').querySelector('.ops-order-text').textContent) &&
+    !ordBtn('t1', 'order') && !!ordBtn('t1', 'ordcancel') && /ส่งเข้าคิวแล้ว/.test($('toast').textContent));
+  if (${JSON.stringify(!!SHOTS)}) await shot('ops-order-1440.png');
+
+  // ฝั่ง Claude เดินสถานะ (ผ่านฟังก์ชันในฐานข้อมูล) — หน้าเว็บเห็นหลังรีเฟรช
+  const o1 = orderOf('t1');
+  OPS.agent(o1.id, 'picked', null, 'session-พนักงาน-2'); await refresh();
+  ok('Claude รับแล้ว (หลังรีเฟรช): ป้าย "Claude รับแล้ว กำลังทำ" + รับโดย session-พนักงาน-2 · ยังมีปุ่มยกเลิก', /Claude รับแล้ว กำลังทำ/.test(card('t1').textContent) && /รับโดย session-พนักงาน-2/.test(card('t1').textContent) && !!ordBtn('t1', 'ordcancel'));
+  OPS.agent(o1.id, 'done', 'ร่างพร้อม รอเจ้าของยืนยัน\\n<img src=x onerror="window.__xss=3">'); await refresh();
+  ok('Claude ทำแล้ว: ป้าย "Claude ทำแล้ว" (st-ok) · ผลแสดงเป็นข้อความคงบรรทัดใหม่ ไม่รันสคริปต์ (กัน XSS) · ปุ่ม "สั่ง Claude" กลับมา · ไม่มีปุ่มยกเลิก',
+    !!card('t1').querySelector('.ops-order .st-ok') && !window.__xss && !card('t1').querySelector('.ops-order img') && /<img src=x/.test(card('t1').querySelector('.ops-order-res').textContent) &&
+    getComputedStyle(card('t1').querySelector('.ops-order-res')).whiteSpace === 'pre-wrap' && !!ordBtn('t1', 'order') && !ordBtn('t1', 'ordcancel'));
+
+  // ยกเลิก: ตอน queued (t5) · ตอน picked (t2) · สถานะเปลี่ยนไปแล้วระหว่างรอ (t8)
+  ordBtn('t5', 'order').click(); await sleep(300);
+  ok('งานที่ไม่มีคำตอบช่วยคิด (t5): ตัวเลือกแนบมีแค่ "ไม่แนบ"', $('opsOrdAi').options.length === 1);
+  $('opsOrdText').value = 'ไล่จัดโฟลเดอร์ไดรฟ์ตามหมวด'; await submitOrder();
+  const i5 = ordWrites().pop();
+  ok('สั่งงานหมวดระบบได้ · insert ไม่มี ai_answer_id (ไม่แนบ = ไม่ส่งคีย์นี้)', i5.payload.task_id === 't5' && !('ai_answer_id' in i5.payload) && /รอ Claude รับ/.test(card('t5').textContent));
+  ordBtn('t5', 'ordcancel').click(); await sleep(150);
+  ok('กด "ยกเลิกคำสั่ง" (queued): ขึ้นหน้าต่างยืนยันที่ระบุคำสั่ง · บอกว่ายังไม่มีใครรับ · ยังไม่ยิงอะไร',
+    $('confirmDialog').open && /ไล่จัดโฟลเดอร์ไดรฟ์/.test($('confirmBody').textContent) && /ยังไม่มีใครรับ/.test($('confirmBody').textContent) && !ordWrites().some(c => c.op === 'update'));
+  $('confirmOkBtn').click(); await sleep(300);
+  const u5 = ordWrites().pop();
+  ok('ยืนยัน: update เฉพาะ {status: cancelled} ที่ id นั้น + เงื่อนไข status อยู่ใน queued/picked · การ์ดเป็น "ยกเลิกแล้ว" · ปุ่ม "สั่ง Claude" กลับมา · ไม่มีคำสั่งลบ',
+    u5.op === 'update' && JSON.stringify(u5.payload) === '{"status":"cancelled"}' && u5.filters[0][1] === orderOf('t5').id && JSON.stringify(u5.ins[0]) === '["status",["queued","picked"]]' &&
+    /ยกเลิกแล้ว/.test(card('t5').textContent) && !!ordBtn('t5', 'order') && !ordCalls().some(c => c.op === 'delete'), JSON.stringify(u5));
+
+  ordBtn('t2', 'ordcancel').click(); await sleep(150);
+  ok('ยกเลิกตอน Claude รับแล้ว (t2): หน้าต่างยืนยันเตือนว่าไม่ย้อนสิ่งที่ Claude ทำไปแล้ว', $('confirmDialog').open && /ไม่ย้อนสิ่งที่ Claude ทำไปแล้ว/.test($('confirmBody').textContent) && /หาราคา Serato/.test($('confirmBody').textContent));
+  const nU = ordWrites().length;
+  $('confirmDialog').close(); await sleep(50);
+  ok('ปิดหน้าต่างยืนยัน = ไม่ยกเลิก (คำสั่งยังอยู่ ไม่มีคำสั่งใหม่ไปฐานข้อมูล)', ordWrites().length === nU && /Claude รับแล้ว กำลังทำ/.test(card('t2').textContent));
+  ordBtn('t2', 'ordcancel').click(); await sleep(150); $('confirmOkBtn').click(); await sleep(300);
+  ok('ยืนยันยกเลิกตอน picked: การ์ดเป็น "ยกเลิกแล้ว" (session ที่รับไปตายกลางทาง เจ้าของไม่ติดค้าง)', /ยกเลิกแล้ว/.test(card('t2').textContent) && !!ordBtn('t2', 'order'));
+
+  // สั่งซ้ำตอนมีคำสั่งค้างอยู่ในฐานข้อมูลแต่หน้ายังไม่รู้ (เปิดสองเครื่อง) — unique ของฐานข้อมูลกัน หน้าเว็บบอกชัด
+  ordBtn('t8', 'order').click(); await sleep(250);
+  OPS.orders.push({ id: 'o-other', task_id: 't8', instruction: 'สั่งจากอีกเครื่อง', ai_answer_id: null, status: 'queued', result: null, picked_by: null, created_by: 'u1', created_at: new Date().toISOString(), picked_at: null, finished_at: null });
+  $('opsOrdText').value = 'สั่งซ้ำ'; await submitOrder();
+  ok('งานนี้มีคำสั่งค้างอยู่แล้ว (สั่งจากอีกเครื่อง): หน้าต่างบอกชัดเจน ไม่ปิด · โหลดใหม่ให้เห็นคำสั่งเดิมบนการ์ด', $('opsOrderDialog').open && /มีคำสั่งค้างอยู่แล้ว/.test($('opsOrdErr').textContent) && $('opsOrdSave').disabled === false, $('opsOrdErr').textContent);
+  await sleep(300);
+  ok('การ์ด t8 แสดงคำสั่งที่ค้างอยู่จริง (สั่งจากอีกเครื่อง)', /สั่งจากอีกเครื่อง/.test(card('t8').textContent) && !!ordBtn('t8', 'ordcancel'));
+  $('opsOrderDialog').close(); await sleep(50);
+  // กดยกเลิกในหน้า แต่ระหว่างรอยืนยัน Claude รับและทำเสร็จไปแล้ว → ฐานข้อมูลไม่ยอม (ไม่โดนแถวไหน) หน้าต้องไม่หลอกว่ายกเลิกสำเร็จ
+  ordBtn('t8', 'ordcancel').click(); await sleep(150);
+  OPS.agent('o-other', 'picked', null, 'session-พนักงาน-1'); OPS.agent('o-other', 'done', 'ทำเสร็จก่อนยกเลิก');
+  $('confirmOkBtn').click(); await sleep(400);
+  ok('ยกเลิกแต่ Claude ทำเสร็จไปแล้ว: ฐานข้อมูลไม่โดนแถวไหน → บอกว่าสถานะเปลี่ยนไปแล้ว · โหลดใหม่ให้เห็น "Claude ทำแล้ว" + ผล (ไม่หลอกว่ายกเลิกสำเร็จ)',
+    /เปลี่ยนสถานะไปแล้ว/.test($('toast').textContent) && /Claude ทำแล้ว/.test(card('t8').textContent) && /ทำเสร็จก่อนยกเลิก/.test(card('t8').textContent) && OPS.orders.find(o => o.id === 'o-other').status === 'done');
+
+  // ฐานข้อมูลล้ม
+  OPS.fail.orders_insert = 'พังจำลอง';
+  ordBtn('t4', 'order').click(); await sleep(250); $('opsOrdText').value = 'คำสั่งที่ส่งไม่ได้'; await submitOrder();
+  ok('ส่งเข้าคิวไม่สำเร็จ: แจ้งในหน้าต่าง · หน้าต่างไม่ปิด · ข้อความที่พิมพ์ไม่หาย · ปุ่มกดซ้ำได้', $('opsOrderDialog').open && /ส่งเข้าคิวไม่สำเร็จ: พังจำลอง/.test($('opsOrdErr').textContent) && $('opsOrdText').value === 'คำสั่งที่ส่งไม่ได้' && $('opsOrdSave').disabled === false);
+  OPS.fail.orders_insert = null; await submitOrder();
+  ok('กดส่งซ้ำหลังฐานข้อมูลกลับมา: เข้าคิวได้ (t4)', !$('opsOrderDialog').open && /รอ Claude รับ/.test(card('t4').textContent));
+  OPS.fail.orders_update = 'พังจำลอง';
+  ordBtn('t4', 'ordcancel').click(); await sleep(150); $('confirmOkBtn').click(); await sleep(300);
+  ok('ยกเลิกไม่สำเร็จ: แจ้งความล้มเหลว · คำสั่งยังอยู่ในสถานะเดิม (ไม่หลอกว่าสำเร็จ)', /ยกเลิกคำสั่งไม่สำเร็จ/.test(document.body.innerText) && /รอ Claude รับ/.test(card('t4').textContent));
+  OPS.fail.orders_update = null;
+  OPS.fail.orders_select = 'พังจำลอง'; await refresh();
+  ok('โหลดคำสั่งไม่สำเร็จ: เตือนในแถบ แต่รายการงานยังใช้ได้ (ไม่ทำให้ทั้งบอร์ดล้ม)', /โหลดคำสั่งถึง Claude ไม่สำเร็จ: พังจำลอง/.test($('opsAlert').textContent) && titles().length > 0);
+  OPS.fail.orders_select = null;
+  OPS.noOrders = true; await refresh();
+  ok('ยังไม่ได้รัน 034 (หน้าเว็บขึ้นก่อนตาราง): ซ่อนปุ่ม/กล่องคำสั่งเงียบ ๆ · ไม่มีข้อความ error · งานและปุ่ม "ช่วยคิด" ใช้ได้ตามปกติ',
+    !document.querySelector('#opsBoard [data-act=order], #opsBoard [data-act=ordcancel], #opsBoard .ops-order') && $('opsAlert').textContent.trim() === '' && titles().length > 0 && !!ordBtn('t1', 'ai'));
+  openOpsOrder('t1'); await sleep(100);
+  ok('เรียก openOpsOrder ตอนยังไม่มี 034 ตรง ๆ: หน้าต่างไม่เปิด · บอกให้รัน migration 034', !$('opsOrderDialog').open && /รัน migration 034/.test($('toast').textContent));
+  OPS.noOrders = false; await refresh();
+  ok('รัน 034 แล้วรีเฟรช: ปุ่มและกล่องคำสั่งกลับมา', !!document.querySelector('#opsBoard [data-act=order]') && !!document.querySelector('#opsBoard .ops-order'));
+  ok('งานที่เคยสั่งหลายรอบ (t4: ล้มเหลว แล้วสั่งใหม่): หลังโหลดใหม่ การ์ดแสดงคำสั่ง "ล่าสุด" (รอ Claude รับ) ไม่ใช่รอบเก่า (ทำไม่สำเร็จ)',
+    /รอ Claude รับ/.test(card('t4').querySelector('.ops-order').textContent) && !/ทำไม่สำเร็จ/.test(card('t4').querySelector('.ops-order').textContent));
+
+  // ปิดหน้าต่างระหว่างส่ง: คำสั่งเข้าฐานข้อมูลไปแล้ว ต้องขึ้นบนการ์ด (ไม่ใช่ปล่อยหน้าว่า "ไม่มีคำสั่ง" ทั้งที่ Claude กำลังจะมารับ)
+  ordBtn('t1', 'order').click(); await sleep(250);
+  $('opsOrdText').value = 'สั่งแล้วปิดหน้าต่างก่อนเสร็จ';
+  let rel2 = null; OPS.ordGate = new Promise(r => { rel2 = r; });
+  $('opsOrdForm').requestSubmit(); await sleep(100);
+  $('opsOrderDialog').close(); await sleep(50);
+  OPS.ordGate = null; rel2(); await sleep(300);
+  ok('ปิดหน้าต่างระหว่างส่ง: คำสั่งที่เข้าฐานข้อมูลแล้วยังขึ้นบนการ์ด (รอ Claude รับ + ปุ่มยกเลิก) · หน้าต่างยังปิดอยู่ · ไม่มี error',
+    !$('opsOrderDialog').open && /สั่งแล้วปิดหน้าต่างก่อนเสร็จ/.test(card('t1').textContent) && /รอ Claude รับ/.test(card('t1').querySelector('.ops-order').textContent) && !!ordBtn('t1', 'ordcancel'));
+  ordBtn('t1', 'ordcancel').click(); await sleep(150); $('confirmOkBtn').click(); await sleep(300);   // คืนงาน t1 ให้ว่าง (ส่วนที่ 3 ใช้ต่อ)
+  ok('ยกเลิกคำสั่งที่เพิ่งสั่ง: t1 กลับมาสั่งใหม่ได้', /ยกเลิกแล้ว/.test(card('t1').querySelector('.ops-order').textContent) && !!ordBtn('t1', 'order'));
+  ok('คำสั่งถึง Claude: ตัวหนังสือ ≥ 14px ทุกส่วน · ทุกมุมเป็นเหลี่ยม · หน้าเว็บไม่เคยลบแถวใน ops_task_orders',
+    [...document.querySelectorAll('#opsBoard .ops-order *, #opsOrderDialog *')].filter(e => e.children.length === 0 && e.textContent.trim() && vis(e)).every(e => parseFloat(getComputedStyle(e).fontSize) >= 13.95) &&
+    [...document.querySelectorAll('#opsBoard .ops-order, #opsBoard .ops-order .st, #opsBoard .ops-order-res')].every(e => getComputedStyle(e).borderRadius === '0px') && !ordCalls().some(c => c.op === 'delete'));
+
   // ── 2. admin / staff ─────────────────────────────────────────────────
   for (const [who, label] of [['nui', 'admin (ผู้ดูแลระบบ)'], ['zen', 'staff (พนักงาน)']]) {
     doLogout(); await sleep(400);
@@ -274,11 +400,19 @@ async function runTests() {
   release = null; OPS.aiGate = new Promise(r => { release = r; });
   $('opsAiDraft').click(); await sleep(100);
   ok('(ตั้งต้น) หน้าต่างช่วยคิดเปิดอยู่ มีคำตอบเก่า และกำลังรอคำตอบใหม่', $('opsAiDialog').open && aiAnswers().length > 0 && /กำลังให้ Claude คิด/.test($('opsAiStatus').textContent));
+  ordBtn('t1', 'order').click(); await sleep(250);          // ซ้อนทับหน้าต่างช่วยคิดที่ยังเปิดอยู่ — ออกจากระบบต้องปิดทั้งสองบาน
+  $('opsOrdText').value = 'ข้อความคำสั่งที่พิมพ์ค้างไว้ก่อนออกจากระบบ';
+  ok('(ตั้งต้น) หน้าต่างสั่ง Claude เปิดอยู่พร้อมข้อความที่พิมพ์ไว้', $('opsOrderDialog').open && $('opsOrdText').value.length > 0);
+  let rel3 = null; OPS.ordGate = new Promise(r => { rel3 = r; });
+  $('opsOrdForm').requestSubmit(); await sleep(100);                  // กดส่งแล้วค้างรอฐานข้อมูล แล้วออกจากระบบ
   doLogout(); await sleep(400);
+  OPS.ordGate = null; rel3(); await sleep(300);                       // คำตอบ "ส่งสำเร็จ" มาถึงหลังออกจากระบบแล้ว — ต้องไม่ถูกวาดลงหน้า
   OPS.aiGate = null; release(); await sleep(300);          // คำตอบมาถึงหลังออกจากระบบแล้ว — ต้องไม่ถูกวาดลงหน้า
+  ok('ออกจากระบบกลางหน้าต่างสั่ง Claude: หน้าต่างปิด · ข้อความที่พิมพ์ค้างหาย · ชื่องานในหน้าต่างหาย · ไม่มีคำสั่งในหน่วยความจำ',
+    !$('opsOrderDialog').open && opsOrd === null && $('opsOrdText').value === '' && $('opsOrdTask').textContent === '' && ops.orders.length === 0 && $('opsOrdAi').options.length === 1);
   ok('ออกจากระบบกลางคำขอช่วยคิด: หน้าต่างปิด · สถานะหน้าต่างว่าง · ไม่มีคำตอบ/ชื่องานค้างในหน้าต่าง แม้คำตอบมาทีหลัง',
     !$('opsAiDialog').open && opsAi === null && $('opsAiList').innerHTML === '' && $('opsAiTask').textContent === '' && $('opsAiStatus').innerHTML === '');
-  const leakRe = /ฉบับเก่า|ตัวอย่างร่าง|ขั้นแรก|รายงานแอด ก\.ย\.|ตอบอีเมลมหาจักร|ต่อ Serato|เช็กรีวิวใหม่|ไดรฟ์งานคอนเทนต์|รอยืนยันบัญชีโฆษณา|งานใหม่จากคอนโซล|ชื่อที่แก้แล้ว/;   // ข้อความเฉพาะของงานจริง (รายชื่อผู้รับผิดชอบเป็นค่าคงที่ ไม่นับ)
+  const leakRe = /ข้อความคำสั่งที่พิมพ์ค้างไว้|ตอบอีเมลฉบับนี้ตามร่างที่แนบ|ร่างพร้อม รอเจ้าของยืนยัน|หาราคา Serato DJ Pro|session-พนักงาน|ไล่จัดโฟลเดอร์ไดรฟ์|สั่งจากอีกเครื่อง|ปฏิเสธ: ต้องเข้าบัญชีโฆษณา|ฉบับเก่า|ตัวอย่างร่าง|ขั้นแรก|รายงานแอด ก\.ย\.|ตอบอีเมลมหาจักร|ต่อ Serato|เช็กรีวิวใหม่|ไดรฟ์งานคอนเทนต์|รอยืนยันบัญชีโฆษณา|งานใหม่จากคอนโซล|ชื่อที่แก้แล้ว/;   // ข้อความเฉพาะของงานจริง (รายชื่อผู้รับผิดชอบเป็นค่าคงที่ ไม่นับ)
   const leakAt = [...document.querySelectorAll('body *')].filter(e => !/^(SCRIPT|STYLE)$/.test(e.tagName) && e.children.length === 0 && leakRe.test(e.textContent + (e.value || ''))).map(e => (e.id ? '#' + e.id : e.tagName.toLowerCase() + '.' + e.className));
   ok('ออกจากระบบ: Ops Board ถูกล้างออกจากหน้า (DOM + หน่วยความจำ)', !leakAt.length && ops.tasks.length === 0 && $('opsBoard').innerHTML.indexOf('ops-task') === -1, 'ค้างที่: ' + leakAt.join(', ') + ' · tasks=' + ops.tasks.length);
   await login('zen');
