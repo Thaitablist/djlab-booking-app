@@ -1,0 +1,4 @@
+PRODUCT.md
+.impeccable/*
+!.impeccable/design.json
+!.impeccable/surfaces/
