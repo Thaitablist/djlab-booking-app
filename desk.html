@@ -1009,6 +1009,76 @@
     .ops-side { flex-direction: row; align-items: center; justify-content: space-between; }
   }
 
+  /* ราคาและโปรโมชัน (#catalog · migration 035) — รายการสินค้าตามประเภท + เช็คบ็อกซ์ขายอยู่/เลิกขาย + กล่องโปร
+     สถานะเป็นคำ + สัญลักษณ์เสมอ (.st) · ช่องติ๊กอยู่ในป้ายกว้าง ≥ 44 แตะที่ไหนในป้ายก็ติ๊กได้ · ไม่มีขอบสีข้างซ้าย */
+  #catAlert { margin-right: var(--calc-clear); }       /* แถบแจ้งเตือนแถวแรกอยู่ในกล่องนี้ (ไม่ใช่ลูกตรงของหมวด) — เว้นที่ให้ปุ่มเครื่องคิดเลขเหมือน .section > .alert:first-child */
+  .cat-undo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .cat-undo > span { flex: 1 1 260px; min-width: 0; overflow-wrap: anywhere; }
+  .cat-grp { margin-bottom: 20px; }
+  .cat-grp h3 { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 10px 16px; font-size: 16px;
+    background: var(--head); border: 1px solid var(--line); border-bottom: 2px solid var(--black); }
+  .cat-grp h3 .n { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--text2); }
+  .cat-grp .tablewrap { border-top: 0; max-height: none; box-shadow: none; }
+  table.cat-tbl tbody tr { cursor: default; }
+  table.cat-tbl tbody tr:hover { background: none; }
+  table.cat-tbl tr.off td { background: var(--surface2); color: var(--text2); }
+  table.cat-tbl td { vertical-align: middle; }
+  table.cat-tbl .c-chk { width: 1%; padding: 0 0 0 4px; }
+  table.cat-tbl .c-act { width: 1%; white-space: nowrap; text-align: right; }
+  .cat-chk { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; cursor: pointer; }
+  .cat-chk input { width: 22px; height: 22px; cursor: pointer; }
+  .cat-chk input:disabled { cursor: not-allowed; }
+  .cat-name { font-weight: 600; overflow-wrap: anywhere; }
+  .cat-tags { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; }
+  .cat-tags:empty { display: none; }
+
+  .promo { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); margin-bottom: 20px; }
+  .promo-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px 16px; padding: 14px 18px;
+    background: var(--head); border-bottom: 2px solid var(--black); }
+  .promo-title { font-family: var(--font-head); font-size: 17px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+  .promo-meta { margin-top: 2px; font-size: 14px; color: var(--text2); }
+  .promo-btns { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .promo-body { padding: 4px 18px 14px; }
+  .promo-conds { margin: 10px 0 0; padding-left: 20px; font-size: 14px; color: var(--text2); }
+  .promo-src { margin-top: 8px; font-size: 14px; color: var(--text2); overflow-wrap: anywhere; }
+  .deal { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .deal:last-of-type { border-bottom: 0; }
+  .deal.parked .deal-who { color: var(--text2); }
+  .deal-who { font-weight: 600; overflow-wrap: anywhere; }
+  .deal-price { text-align: right; font-size: 15px; }
+  .deal-price .was { color: var(--text2); font-size: 14px; }
+  .deal-btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .pick { border: 1px solid var(--line-strong); max-height: 240px; overflow-y: auto; background: var(--surface); }
+  .pick label { display: flex; align-items: center; gap: 10px; padding: 6px 12px; min-height: 44px; border-bottom: 1px solid var(--line); cursor: pointer; font-size: 15px; }
+  .pick label:last-child { border-bottom: 0; }
+  .pick label:hover { background: var(--sel); }
+  .pick .pk-main { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+  .pick .pk-sub { display: block; font-size: 14px; color: var(--text2); }
+  .pick .pk-ord { font-weight: 700; min-width: 2.2em; text-align: right; }
+  .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; min-height: 96px; padding: 14px 16px; text-align: center;
+    background: var(--surface2); border: 2px dashed var(--line-strong); color: var(--text); cursor: pointer; font: inherit; font-size: 15px; }
+  .drop:hover, .drop.over { background: var(--sel); border-color: var(--black); }
+  .drop:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+  .drop:disabled { opacity: .6; cursor: not-allowed; }
+  .drop .hint { margin: 0; }
+  .pdf-chip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--line-strong); background: var(--surface); }
+  .pdf-chip .pdf-name { flex: 1 1 200px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .pdf-chip .sub { flex: 1 1 100%; color: var(--text2); font-size: 14px; }
+  .draft-deal { margin-top: 8px; padding: 4px 12px; border: 1px solid var(--line); background: var(--surface); }
+  .draft-deal.bad { background: var(--surface2); }
+  .draft-deal label { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 6px 0; cursor: pointer; }
+  .draft-deal .dd-main { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+  .draft-deal .dd-sub { display: block; margin-top: 2px; font-size: 14px; color: var(--text2); }
+  .promo-file { margin-top: 6px; font-size: 14px; color: var(--text2); overflow-wrap: anywhere; }
+  .cat-json { width: 100%; min-height: 220px; font: 14px/1.6 ui-monospace, Menlo, Consolas, monospace; resize: vertical; }
+  @media (max-width: 640px) {
+    .deal { grid-template-columns: minmax(0, 1fr); }
+    .deal-price { text-align: left; }
+    .promo-head { padding: 12px 14px; }
+    .promo-body { padding: 4px 14px 12px; }
+  }
+
   .nav-btn, .nav-scrim { display: none; }
   .nav-btn { align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 12px;
     border: 1px solid var(--black); background: var(--black); color: #fff; cursor: pointer; font-family: var(--font-head); font-weight: 600; font-size: 15px; }
@@ -2043,6 +2113,46 @@
             <div id="opsRail"></div>
           </div>
         </section>
+
+        <!-- ============ ราคาและโปรโมชัน (migration 035) ============ -->
+        <section class="section" id="sec-catalog" hidden aria-label="ราคาและโปรโมชัน รายการสินค้าตามประเภท">
+          <div id="catAlert"></div>
+          <div class="stats stats-4" aria-label="สรุปรายการสินค้าและโปร">
+            <div class="stat"><div class="stat-value" id="catStatOn">0</div><div class="stat-label">ขายอยู่</div></div>
+            <div class="stat"><div class="stat-value" id="catStatOff">0</div><div class="stat-label">เลิกขาย</div></div>
+            <div class="stat"><div class="stat-value" id="catStatPromo">0</div><div class="stat-label">โปรที่ใช้อยู่วันนี้</div></div>
+            <div class="stat"><div class="stat-value" id="catStatGap">0</div><div class="stat-label">ยังไม่มีรหัสบอท (บอทไม่เห็น)</div></div>
+          </div>
+          <div class="alert alert-plain cat-undo" id="catUndo" role="status" hidden><span id="catUndoText"></span><button type="button" class="btn btn-sm" id="catUndoBtn" hidden>↶ ย้อนกลับ</button></div>
+          <div class="toolbar calc-clear">
+            <div class="seg" id="catTabs" role="group" aria-label="ส่วนของหน้า">
+              <button type="button" data-tab="products" aria-pressed="true">สินค้า</button>
+              <button type="button" data-tab="promos" aria-pressed="false">โปรโมชัน</button>
+            </div>
+            <button class="btn" id="catReload" type="button">↻ รีเฟรช</button>
+            <button class="btn" id="catExport" type="button" hidden>ส่งออก promotions.json</button>
+          </div>
+          <div id="catPaneProducts">
+            <div class="toolbar">
+              <input type="search" id="catSearch" class="input grow" placeholder="ค้นหาชื่อรุ่น · รหัสสินค้า · รหัสบอท · ยี่ห้อ…" autocomplete="off" aria-label="ค้นหาสินค้า">
+              <select id="catType" class="input" aria-label="ประเภทสินค้า"></select>
+              <div class="seg" id="catStatus" role="group" aria-label="สถานะการขาย">
+                <button type="button" data-status="all" aria-pressed="true">ทั้งหมด</button>
+                <button type="button" data-status="on" aria-pressed="false">ขายอยู่</button>
+                <button type="button" data-status="off" aria-pressed="false">เลิกขาย</button>
+              </div>
+            </div>
+            <div id="catList"><div class="empty">กำลังโหลดรายการสินค้า…</div></div>
+          </div>
+          <div id="catPanePromos" hidden>
+            <div class="alert alert-warn" id="catColorWarn"></div>
+            <div class="toolbar">
+              <button class="btn btn-primary" id="promoAdd" type="button" hidden>+ เพิ่มโปรโมชัน</button>
+              <label class="chk"><input type="checkbox" id="promoShowOld"> แสดงโปรที่หมดเวลาแล้วและที่ปิดไว้</label>
+            </div>
+            <div id="promoList"><div class="empty">กำลังโหลดโปรโมชัน…</div></div>
+          </div>
+        </section>
       </main>
       <!-- เครื่องคิดเลข: ไอคอนลอยมุมขวาบนของพื้นที่ทำงาน ใต้เส้นแบ่งแถบบน (เจ้าของสั่ง 1 ต.ค. 69 "มุมขวาบนใต้เส้นแบ่ง ให้ออกจากมุมเล็กน้อย")
            อยู่ใน .ws-wrap ไม่ใช่ใน .workspace — ไม่เลื่อนตามหน้า และเปิดแผงรายละเอียดขวาแล้วขยับมาอยู่ซ้ายของแผงเอง
@@ -2207,6 +2317,107 @@
       <button class="btn btn-primary" id="opsOrdSave" type="submit">ส่งเข้าคิว</button>
     </div>
   </form>
+</dialog>
+
+<!-- ราคาและโปรโมชัน: แก้รุ่น · โปร · ดีล · ส่งออก promotions.json -->
+<dialog id="catEditDlg" aria-labelledby="catEditTitle">
+  <div class="dlg-head"><h2 id="catEditTitle">แก้รุ่นสินค้า</h2></div>
+  <form class="dlg-body" id="catEditForm" novalidate>
+    <div class="hint" id="catEditName" style="margin:0 0 14px;"></div>
+    <div class="field"><label class="lbl" for="cefPrice">ราคาขาย (ปลีกรวม VAT · บาท) *</label><input type="number" id="cefPrice" class="input" min="0" step="1" inputmode="decimal"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="cefCode">รหัสรุ่นของบอท</label><input type="text" id="cefCode" class="input" maxlength="80" autocomplete="off" placeholder="เช่น DDJ-FLX4"></div>
+      <div class="field"><label class="lbl" for="cefCat">ประเภทของบอท</label><select id="cefCat" class="input"></select></div>
+    </div>
+    <div class="hint" style="margin:-6px 0 14px;">รหัสรุ่นต้องตรงกับชื่อรุ่นที่ลูกค้าถามบอท และไม่ซ้ำกับรุ่นอื่น (ไม่สนตัวพิมพ์เล็ก/ใหญ่) · ต้องใส่ทั้งรหัสและประเภท บอทถึงจะเห็นรุ่นนี้ · รุ่นที่เป็นสีต่างกันใช้รหัสแยกกัน</div>
+    <div class="field" id="cefStockedRow"><label class="chk"><input type="checkbox" id="cefStocked"> ร้านสต็อกรุ่นนี้ (ขึ้นผนังสต็อก) — ไม่ติ๊ก = เป็นแค่รายการราคา</label></div>
+    <div id="cefErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="cefCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="cefSave" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="promoDlg" aria-labelledby="promoDlgTitle" style="max-width:640px;">
+  <div class="dlg-head"><h2 id="promoDlgTitle">เพิ่มโปรโมชัน</h2></div>
+  <form class="dlg-body" id="promoForm" novalidate>
+    <div class="field" id="pfPdfBox">
+      <span class="lbl" id="pfPdfLbl">เอกสาร PDF ของโปร (ไม่บังคับ)</span>
+      <button type="button" class="drop" id="pfDrop" aria-describedby="pfDropHint"><span id="pfDropText">ลากไฟล์ PDF ของโปร (เช่น memo ผู้นำเข้า) มาวางที่นี่ หรือกดเพื่อเลือกไฟล์</span>
+        <span class="hint" id="pfDropHint">ไม่เกิน 6 MB · เก็บต้นฉบับแนบกับโปรนี้ (เปิดดูได้เฉพาะเจ้าของร้าน/ผู้ดูแล) · โปรใหม่กด “อ่านแล้วกรอกให้” ได้ — ไฟล์จะถูกส่งไปให้ Claude อ่าน</span></button>
+      <input type="file" id="pfFile" accept="application/pdf,.pdf" hidden>
+      <div class="pdf-chip" id="pfPdfChip" hidden>
+        <span class="pdf-name" id="pfPdfName"></span>
+        <button type="button" class="btn btn-sm btn-primary" id="pfRead" hidden>อ่านแล้วกรอกให้</button>
+        <button type="button" class="btn btn-sm" id="pfPdfView" hidden>เปิดดูไฟล์</button>
+        <button type="button" class="btn btn-sm" id="pfPdfRemove">เอาออก</button>
+        <span class="sub" id="pfPdfSize"></span>
+      </div>
+      <div class="alert alert-plain" id="pfReadStatus" role="status" hidden style="margin:8px 0 0;"></div>
+    </div>
+    <div class="field"><label class="lbl" for="pfName">ชื่อโปร *</label><input type="text" id="pfName" class="input" maxlength="200" autocomplete="off" placeholder="เช่น Starter Pack ส.ค. 2569"></div>
+    <div class="field"><label class="lbl" for="pfCode">รหัสโปร * (ภาษาอังกฤษพิมพ์เล็ก ตัวเลข ขีดกลาง)</label><input type="text" id="pfCode" class="input" maxlength="60" autocomplete="off" placeholder="เช่น starter-pack-2026-08">
+      <div class="hint" id="pfCodeHint">รหัสนี้คือ id ของโปรที่บอทและไฟล์ส่งออกใช้ — ตั้งแล้วแก้ไม่ได้</div></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="pfStart">วันเริ่ม *</label><input type="date" id="pfStart" class="input"></div>
+      <div class="field"><label class="lbl" for="pfEnd">วันสิ้นสุด * (นับรวมทั้งวัน)</label><input type="date" id="pfEnd" class="input"></div>
+    </div>
+    <div class="field"><label class="lbl" for="pfConds">เงื่อนไขของโปร (บรรทัดละข้อ — บอทบอกลูกค้า)</label><textarea id="pfConds" class="input" rows="3" placeholder="เช่น&#10;จำกัด 1 เครื่องต่อลูกค้า 1 ท่าน"></textarea></div>
+    <div class="field"><label class="lbl" for="pfSource">ที่มา / บันทึกภายใน (บอทไม่เห็น)</label><input type="text" id="pfSource" class="input" maxlength="1000" autocomplete="off" placeholder="เช่น memo ผู้นำเข้า วันที่…"></div>
+    <div class="field"><label class="chk"><input type="checkbox" id="pfEnabled" checked> เปิดโปรนี้ — เอาติ๊กออก = ปิดโปร (บอทไม่เห็นทันที เปิดกลับได้)</label></div>
+    <div id="pfDraft" class="field" hidden></div>
+    <div id="pfErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="pfCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="pfSave" type="submit">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dealDlg" aria-labelledby="dealTitle" style="max-width:720px;">
+  <div class="dlg-head"><h2 id="dealTitle">เพิ่มดีล</h2></div>
+  <form class="dlg-body" id="dealForm" novalidate>
+    <div class="hint" id="dealPromo" style="margin:0 0 12px;"></div>
+    <div class="alert alert-warn" id="dealWarn"></div>
+    <div class="field"><label class="lbl" for="dfKind">แบบโปร *</label><select id="dfKind" class="input"></select></div>
+    <div class="field"><label class="lbl" for="dfSearch">เลือกรุ่น * <span id="dfHow"></span></label>
+      <input type="search" id="dfSearch" class="input" placeholder="ค้นหารุ่น…" autocomplete="off" aria-label="ค้นหารุ่นที่จะเข้าโปร" style="margin-bottom:8px;">
+      <div class="pick" id="dfPick" role="group" aria-label="รายการรุ่น"></div>
+      <div class="hint" id="dfSelHint">แสดงเฉพาะรุ่นที่ขายอยู่และมีรหัสบอท</div></div>
+    <div id="dfRowPercent" class="field"><label class="lbl" for="dfPercent">ลดกี่เปอร์เซ็นต์ * (มากกว่า 0 และน้อยกว่า 100)</label><input type="number" id="dfPercent" class="input" min="0" max="99.99" step="0.01" inputmode="decimal"></div>
+    <div id="dfRowSet">
+      <div class="field"><label class="lbl" for="dfSet">ราคาเซ็ต * (บาท · ต้องต่ำกว่าราคาปกติรวม)</label><input type="number" id="dfSet" class="input" min="0" step="1" inputmode="decimal"></div>
+      <div class="field"><label class="lbl" for="dfLabel">ชื่อเซ็ตที่บอทเรียก (เว้นว่าง = ต่อชื่อรุ่นด้วย +)</label><input type="text" id="dfLabel" class="input" maxlength="200" autocomplete="off" placeholder="เช่น Starter Pack"></div>
+    </div>
+    <div id="dfRowGift" class="row2">
+      <div class="field"><label class="lbl" for="dfGift">ของแถม *</label><input type="text" id="dfGift" class="input" maxlength="200" autocomplete="off" placeholder="เช่น หูฟัง HDJ-CUE1"></div>
+      <div class="field"><label class="lbl" for="dfGiftVal">มูลค่าของแถม (บาท) *</label><input type="number" id="dfGiftVal" class="input" min="0" step="1" inputmode="decimal"></div>
+    </div>
+    <div class="alert alert-plain" id="dfPreview" role="status" aria-live="polite"></div>
+    <div id="dfErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="dfCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="dfSave" type="submit">บันทึกดีล</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="catExportDlg" aria-labelledby="catExportTitle" style="max-width:760px;">
+  <div class="dlg-head"><h2 id="catExportTitle">ส่งออก promotions.json</h2></div>
+  <div class="dlg-body">
+    <div class="field"><label class="lbl" for="exScope">ส่งออกโปร</label>
+      <select id="exScope" class="input"><option value="all">ทุกโปรที่เปิดอยู่ (รวมที่ยังไม่เริ่ม)</option><option value="current">เฉพาะที่ใช้ได้วันนี้ (สิ่งที่บอทเห็นตอนนี้)</option></select></div>
+    <div class="hint" id="exInfo" style="margin:0 0 8px;">กำลังสร้างไฟล์…</div>
+    <textarea id="exText" class="input cat-json" readonly aria-label="เนื้อไฟล์ promotions.json" spellcheck="false"></textarea>
+    <div id="exErr" class="alert alert-red" role="alert" hidden style="margin-top:12px;"></div>
+    <div class="hint">ดีลที่พักอยู่ (รุ่นเลิกขาย · ไม่มีรหัสบอท · ราคาเซ็ตไม่ต่ำกว่าราคาปกติรวม) จะไม่อยู่ในไฟล์ · ไฟล์มีช่องที่มาภายใน (_source) — ห้ามเผยแพร่ต่อสาธารณะ</div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" type="button" id="exClose">ปิด (Esc)</button>
+    <button class="btn" type="button" id="exCopy">คัดลอก</button>
+    <button class="btn btn-primary" type="button" id="exDownload">ดาวน์โหลดไฟล์</button>
+  </div>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
@@ -2614,6 +2825,8 @@ const SECTIONS = [
   { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', short: 'ประวัติสต๊อก', key: '3' },
   { id: 'pos',      hash: 'pos',           group: 'การขาย',      icon: 'pos', label: 'ขายหน้าร้าน', key: '4' },
   { id: 'bills',    hash: 'bills',         group: 'การขาย',      icon: 'bills', label: 'ประวัติบิล', key: '5' },
+  // P = ราคา/โปร · migration 035 · staff ดูได้ owner/admin แก้ได้ (ไม่ใช้ manager: ข้อมูลราคา/โปรที่บอทบอกลูกค้า พนักงานหน้าร้านต้องเห็นเหมือนกัน)
+  { id: 'catalog',  hash: 'catalog',       group: 'การขาย',      icon: 'catalog', label: 'ราคา / โปรโมชัน', key: 'P' },
   { id: 'booking',  hash: 'booking',       group: 'ห้องซ้อมและลูกค้า', icon: 'booking', label: 'จองห้องซ้อม', key: '6' },
   { id: 'customers',hash: 'customers',     group: 'ห้องซ้อมและลูกค้า', icon: 'customers', label: 'ข้อมูลลูกค้า', key: '7' },
   { id: 'daily',    hash: 'daily',         group: 'บัญชีและระบบ', icon: 'daily', label: 'สรุปรายวัน', key: '8' },
@@ -2641,6 +2854,7 @@ const NAV_ICONS = {
   activity:  '<rect x="4" y="3" width="12" height="14.5"/><path d="M7.5 3V1.8h5V3M7 8h6M7 11h6M7 14h3.5"/>',
   admin:     '<ellipse cx="10" cy="5" rx="6.5" ry="2.5"/><path d="M3.5 5v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V5M3.5 10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"/>',
   ops:       '<rect x="3" y="3" width="14" height="14"/><path d="M6.5 7.5l1.5 1.5 2.5-3M6.5 13h7"/>',
+  catalog:   '<path d="M3 3.5h6.5l7.5 7.5-6 6L3 9.5z"/><path d="M6.8 7h.01"/>',
 };
 function navIcon(k) { return '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' + (NAV_ICONS[k] || '') + '</svg>'; }
 const HOME = 'home';   // หมวดเริ่มต้นหลังล็อกอิน และที่ที่ถูกส่งกลับเมื่อเปิดหมวดที่ไม่มีสิทธิ์
@@ -2735,6 +2949,7 @@ function loginVisible() {
 async function handleAuthState(session) {
   if (!session) {
     opsReset();                     // ออกจากระบบ = ล้าง Ops Board ออกจากหน้า (ข้อมูลภายในร้าน)
+    catReset();                     // และล้างหมวดราคา/โปรโมชัน (แถบย้อนกลับ ฟอร์มที่พิมพ์ค้าง)
     dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
     closeCam();                     // ออกจากระบบ = ปิดกล้อง (iPad) ด้วย
     document.getElementById('loginOverlay').style.display = 'flex';
@@ -2927,6 +3142,7 @@ function renderAll() {
   renderBookings();
   renderCustomers();
   renderHome();          // ไทล์ปฏิทินนับการจองห้องของวันนี้
+  renderCatalog();       // ราคาและโปรโมชัน (วาดเฉพาะตอนเปิดหมวดนั้นอยู่)
 }
 
 // ---------------------------------------------------------------------------
@@ -4917,6 +5133,7 @@ function showSection(id, mode) {
     if (id === 'activity' && !activityLoaded) reloadActivity();
     if (id === 'admin' && !adLoaded) adLoadAll();
     if (id === 'ops') loadOps();
+    if (id === 'catalog') { renderCatalog(); loadCatalog(); }
     if (id === 'mail') loadMailList();
     if (id === 'pos') renderSellers();
     if (id === 'calendar') loadCalendar();
@@ -6716,6 +6933,765 @@ function opsAskCancelOrder(taskId) {
     showToast('✅ ยกเลิกคำสั่งแล้ว');
   });
 }
+
+// ---------------------------------------------------------------------------
+// ราคาและโปรโมชัน (#catalog · migration 035)
+//   รายการสินค้าตามประเภท + เช็คบ็อกซ์ ขายอยู่/เลิกขาย (= products.is_active) + กล่องโปรโมชัน + ส่งออก promotions.json
+//   staff ดูได้ · owner/admin แก้ได้ — ปุ่มที่ซ่อนไว้แค่กันกดผิด ตัวกันจริงคือ RLS ของฐานข้อมูล (เขียนไม่ได้ = ไม่โดนแถวเลย ต้องตรวจจำนวนแถวที่กลับมาเสมอ)
+//   ทุกการเปลี่ยนลง activity_log เองด้วยทริกเกอร์ของ 035 · ย้อนกลับ = undo_activity (เฉพาะการแก้ ไม่รวมเพิ่ม/ลบ)
+//   ติ๊กออก (เลิกขาย) รุ่นที่อยู่ในโป = ฐานข้อมูลข้ามดีลนั้นเอง (ไม่ลบ · ติ๊กกลับ = ดีลกลับมา) — หน้านี้แค่บอกให้เห็น
+// ---------------------------------------------------------------------------
+const CAT_NO_TABLE = /relation .*(promotions|promotion_deals).* does not exist|Could not find the table|schema cache/i;
+const CAT_BOT = ['player', 'all-in-one', 'controller', 'mixer', 'turntable', 'headphones', 'speaker', 'cable', 'accessory'];   // 9 หมวดตายตัวของบอท (CHECK ใน 035)
+const CAT_KIND = { percent: 'ลด % ต่อรุ่น', set_price: 'ราคาเซ็ตหลายรุ่น', gift: 'ราคาปกติ + ของแถม' };
+const CAT_COLOR_WARN = 'โปรนี้ใช้ได้เฉพาะสีที่เลือก — ถ้าใช้ได้ทุกสีให้ใส่ทุกสี';
+const CAT_NO_BOT = 'ยังไม่ระบุประเภทของบอท';
+const cat = { tab: 'products', q: '', type: '', status: 'all', promos: [], deals: [], promoErr: '', showOld: false, last: null, draft: null, exJson: null, editId: null, promoId: null, pdf: catPdfNew(), pdfTok: 0 };
+const cEl = id => document.getElementById(id);
+
+const catMoney = n => '฿' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+// วันนี้ตามเวลาไทย (YYYY-MM-DD) — ตรงกับ th_today() ในฐานข้อมูล
+function catToday() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' }); }
+const catHasCode = p => !!(p.model_code && p.bot_category);          // ก่อนรัน 035 ไม่มีคอลัมน์ = ถือว่ายังไม่มีรหัส
+const catInstalled = () => !products.length || ('model_code' in products[0]);
+const catBotLabel = k => k ? (CAT_TH[k] || k) : CAT_NO_BOT;
+
+function promoStateOf(p, today) {
+  if (!p.is_enabled) return 'off';
+  if (today < p.starts_on) return 'soon';
+  if (today > p.ends_on) return 'ended';
+  return 'live';
+}
+const PROMO_ST = { live: ['st-ok', '✓ ใช้อยู่'], soon: ['st-warn', '◷ ยังไม่เริ่ม'], ended: ['st-off', '✕ หมดเวลาแล้ว'], off: ['st-off', '⏸ ปิดโปร'] };
+
+// ราคาโปรของดีลหนึ่ง — สูตรเดียวกับ promotions_as_json() ใน 035: เลขจำนวนเต็ม (สตางค์) ไม่ใช้ทศนิยมลอยตัว เพื่อให้ปัดเศษตรงกับ numeric ของ Postgres (ปัดครึ่งขึ้น)
+//   ok = false → ดีลถูกข้ามตอนสร้าง JSON ให้บอท (ติ๊กออก/ไม่มีรหัสบอท/ราคา 0/เซ็ตไม่ถูกกว่าปกติ) — แสดงเป็น "พัก — …"
+function dealCalc(d, byId) {
+  const ps = (d.product_ids || []).map(id => byId.get(id)).filter(Boolean);
+  const out = { ok: false, why: '', ps, reg: 0, promo: 0, disc: '' };
+  if (ps.length !== (d.product_ids || []).length) { out.why = 'พัก — ไม่พบรุ่นในรายการสินค้า'; return out; }
+  const regC = ps.reduce((s, p) => s + Math.round(Number(p.sell_price) * 100), 0);
+  out.reg = regC / 100;
+  if (ps.some(p => !p.is_active)) { out.why = 'พัก — รุ่นเลิกขาย'; return out; }
+  if (ps.some(p => !p.model_code)) { out.why = 'พัก — ยังไม่มีรหัสบอท'; return out; }
+  if (ps.some(p => !(Number(p.sell_price) > 0))) { out.why = 'พัก — ราคาปกติเป็น 0'; return out; }
+  if (d.kind === 'percent') {
+    const pctC = Math.round(Number(d.percent) * 100);
+    out.promo = Math.floor((regC * (10000 - pctC) + 500000) / 1000000);          // round(reg * (100 - percent) / 100)
+    out.disc = String(Number(d.percent)) + '%';
+  } else if (d.kind === 'set_price') {
+    const setC = Math.round(Number(d.set_price) * 100);
+    if (setC >= regC) { out.why = 'พัก — ราคาเซ็ตไม่ต่ำกว่าราคาปกติรวม'; return out; }
+    out.promo = setC / 100;
+    out.disc = 'ประมาณ ' + Math.floor((200 * (regC - setC) + regC) / (2 * regC)) + '%';   // round((1 - set / reg) * 100)
+  }
+  out.ok = true;
+  return out;
+}
+
+// ---- สินค้า -------------------------------------------------------------
+function catPool() {
+  const q = cat.q.trim().toLowerCase();
+  return products.filter(p => {
+    if (cat.status === 'on' && !p.is_active) return false;
+    if (cat.status === 'off' && p.is_active) return false;
+    if (cat.type === '_none' ? !!p.bot_category : (cat.type && p.bot_category !== cat.type)) return false;
+    return !q || [p.name, p.sku, p.model_code, p.brand].some(x => String(x || '').toLowerCase().includes(q));
+  });
+}
+// รุ่น → โปรที่เปิดอยู่และยังไม่หมดเวลา (เหมือน view product_promotions)
+function catPromoMap() {
+  const t = catToday(), live = new Map(cat.promos.filter(p => p.is_enabled && p.ends_on >= t).map(p => [p.id, p])), m = new Map();
+  for (const d of cat.deals) {
+    const pr = live.get(d.promotion_id); if (!pr) continue;
+    for (const id of d.product_ids) { if (!m.has(id)) m.set(id, []); m.get(id).push({ pr, d }); }
+  }
+  return m;
+}
+function catRowHtml(p, pm, writer) {
+  const tags = [];
+  if (!p.is_active) tags.push('<span class="st st-off">✕ เลิกขาย</span>');
+  else if (!(Number(p.sell_price) > 0)) tags.push('<span class="st st-warn">⚠ ยังไม่ตั้งราคา</span>');
+  if (!catHasCode(p)) tags.push('<span class="st st-warn">⚠ ยังไม่มีรหัสบอท</span>');
+  if (p.stocked === false) tags.push('<span class="st st-off">รายการราคา · ไม่สต็อก</span>');
+  const seen = new Set();
+  for (const x of (pm.get(p.id) || [])) if (!seen.has(x.pr.id)) { seen.add(x.pr.id); tags.push('<span class="st st-ok">% ' + escapeHtml(x.pr.name) + '</span>'); }
+  return '<tr class="' + (p.is_active ? '' : 'off') + '" data-id="' + p.id + '">' +
+    '<td class="c-chk"><label class="cat-chk" title="' + (writer ? 'ติ๊ก = ขายอยู่ · เอาติ๊กออก = เลิกขาย' : 'ดูได้อย่างเดียว') + '"><input type="checkbox" data-act="toggle"' +
+      (p.is_active ? ' checked' : '') + (writer ? '' : ' disabled') + ' aria-label="ขายอยู่: ' + escapeHtml(p.name) + '"></label></td>' +
+    '<td><div class="cat-name">' + escapeHtml(p.name) + '</div>' +
+      '<div class="sub">' + escapeHtml(brandLabel(p.brand)) + ' · ' + escapeHtml(p.sku) + (p.model_code ? ' · รหัสบอท ' + escapeHtml(p.model_code) : '') + '</div>' +
+      '<div class="cat-tags">' + tags.join('') + '</div></td>' +
+    '<td class="num nowrap">' + catMoney(p.sell_price) + '</td>' +
+    '<td class="c-act">' + (writer ? '<button type="button" class="btn btn-sm" data-act="edit" aria-label="แก้รุ่น ' + escapeHtml(p.name) + '">แก้</button>' : '') + '</td></tr>';
+}
+function renderCatList() {
+  const box = cEl('catList'), writer = isWriter(), pool = catPool();
+  if (!products.length) { box.innerHTML = '<div class="empty">ยังไม่มีรายการสินค้า</div>'; return; }
+  if (!pool.length) { box.innerHTML = '<div class="empty">ไม่มีรายการที่ตรงกับตัวกรอง — ลองเปลี่ยนคำค้นหรือประเภท</div>'; return; }
+  const pm = catPromoMap();
+  box.innerHTML = [...CAT_BOT, ''].map(k => ({ k, items: pool.filter(p => (p.bot_category || '') === k) })).filter(g => g.items.length).map(g =>
+    '<section class="cat-grp"><h3>' + escapeHtml(catBotLabel(g.k)) + ' <span class="n">' + g.items.length + ' รุ่น</span></h3>' +
+    '<div class="tablewrap"><table class="data cat-tbl"><thead><tr><th class="c-chk pad">ขายอยู่</th><th class="pad">รุ่น</th>' +
+    '<th class="num pad">ราคา</th><th class="c-act"><span class="sr-only">จัดการ</span></th></tr></thead><tbody>' +
+    g.items.map(p => catRowHtml(p, pm, writer)).join('') + '</tbody></table></div></section>').join('');
+}
+
+// ---- สรุป · แจ้งเตือน · แท็บ -------------------------------------------
+function renderCatHead() {
+  const writer = isWriter(), t = catToday();
+  const on = products.filter(p => p.is_active).length;
+  cEl('catStatOn').textContent = on;
+  cEl('catStatOff').textContent = products.length - on;
+  cEl('catStatPromo').textContent = cat.promos.filter(p => promoStateOf(p, t) === 'live').length;
+  cEl('catStatGap').textContent = products.filter(p => !catHasCode(p)).length;
+  const al = [];
+  if (!catInstalled() || cat.promoErr === 'nt') al.push('<div class="alert alert-warn">ยังไม่ได้ติดตั้งแดชบอร์ดขายสินค้าในฐานข้อมูล — ต้องรัน migration 035 ก่อน (ระหว่างนี้ดูรายการสินค้าได้อย่างเดียว)</div>');
+  else if (cat.promoErr) al.push('<div class="alert alert-red">โหลดโปรโมชันไม่สำเร็จ: ' + escapeHtml(cat.promoErr) + '</div>');
+  if (!writer) al.push('<div class="alert alert-plain">ดูได้อย่างเดียว — แก้สถานะขาย ราคา และโปรได้เฉพาะเจ้าของร้านหรือผู้ดูแล</div>');
+  cEl('catAlert').innerHTML = al.join('');
+  cEl('catExport').hidden = !writer;
+  cEl('promoAdd').hidden = !writer;
+  document.querySelectorAll('#catTabs button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === cat.tab)));
+  cEl('catPaneProducts').hidden = cat.tab !== 'products';
+  cEl('catPanePromos').hidden = cat.tab !== 'promos';
+}
+function renderCatalog() {
+  if (current !== 'catalog') return;
+  renderCatHead();
+  if (cat.tab === 'products') renderCatList(); else renderCatPromos();
+}
+
+// ---- โปรโมชัน -----------------------------------------------------------
+function dealHtml(d, byId, writer) {
+  const c = dealCalc(d, byId);
+  const who = c.ps.map(p => escapeHtml(p.model_code || p.name)).join(' + ') || '(ไม่พบรุ่น)';
+  let price;
+  if (!c.ok) price = '<span class="st st-warn">⏸ ' + escapeHtml(c.why) + '</span>';
+  else if (d.kind === 'gift') price = '<div class="was">ราคาปกติ ' + catMoney(c.reg) + '</div><div><strong>ของแถม: ' + escapeHtml(d.gift_item) + '</strong> (มูลค่า ' + catMoney(d.gift_value) + ')</div>';
+  else price = '<div class="was">ราคาปกติ ' + catMoney(c.reg) + '</div><div><strong>' + catMoney(c.promo) + '</strong> · ลด ' + escapeHtml(c.disc) + '</div>';
+  const name = d.kind === 'set_price' ? (d.label ? escapeHtml(d.label) + ' — ' : '') + who : who;
+  return '<div class="deal' + (c.ok ? '' : ' parked') + '" data-deal="' + d.id + '">' +
+    '<div><div class="deal-who">' + name + '</div><div class="sub">' + escapeHtml(CAT_KIND[d.kind] || d.kind) + '</div></div>' +
+    '<div class="deal-price">' + price + '</div>' +
+    (writer ? '<div class="deal-btns"><button type="button" class="btn btn-sm" data-act="dedit">แก้ดีล</button><button type="button" class="btn btn-sm btn-danger" data-act="ddel">ลบดีล</button></div>' : '') + '</div>';
+}
+function promoHtml(p, byId, writer, today) {
+  const st = promoStateOf(p, today), s = PROMO_ST[st], deals = cat.deals.filter(d => d.promotion_id === p.id);
+  const okN = deals.filter(d => dealCalc(d, byId).ok).length;
+  return '<article class="promo" data-id="' + p.id + '">' +
+    '<div class="promo-head"><div><div class="promo-title">' + escapeHtml(p.name) + ' <span class="st ' + s[0] + '">' + s[1] + '</span></div>' +
+      '<div class="promo-meta">' + fmtDate(p.starts_on) + ' – ' + fmtDate(p.ends_on) + ' · รหัส ' + escapeHtml(p.code) + '</div>' +
+      (p.source_file_path ? '<div class="promo-file">📎 เอกสารต้นฉบับ: ' + escapeHtml(p.source_file_name || 'PDF') +
+        (writer ? ' <button type="button" class="btn btn-sm" data-act="pfile">เปิดดู</button>' : ' (เปิดดูได้เฉพาะเจ้าของร้านหรือผู้ดูแล)') + '</div>' : '') + '</div>' +
+    (writer ? '<div class="promo-btns"><button type="button" class="btn btn-sm" data-act="dadd">+ เพิ่มดีล</button><button type="button" class="btn btn-sm" data-act="pedit">แก้ไขโปร</button>' +
+      '<button type="button" class="btn btn-sm' + (p.is_enabled ? ' btn-danger' : '') + '" data-act="ptoggle">' + (p.is_enabled ? 'ปิดโปร' : 'เปิดโปร') + '</button></div>' : '') + '</div>' +
+    '<div class="promo-body">' +
+      (deals.length && !okN ? '<div class="alert alert-warn" style="margin:12px 0 0;">ทุกดีลในโปรนี้พักอยู่ — บอทจะไม่เห็นโปรนี้จนกว่าจะมีดีลที่ใช้ได้</div>' : '') +
+      (deals.length ? deals.map(d => dealHtml(d, byId, writer)).join('') : '<div class="empty" style="padding:20px 0;">ยังไม่มีดีลในโปรนี้' + (writer ? ' — กด “+ เพิ่มดีล”' : '') + '</div>') +
+      ((p.conditions || []).length ? '<ul class="promo-conds">' + p.conditions.map(c => '<li>' + escapeHtml(c) + '</li>').join('') + '</ul>' : '') +
+      (p.source_note ? '<div class="promo-src">ที่มา (ภายใน): ' + escapeHtml(p.source_note) + '</div>' : '') +
+    '</div></article>';
+}
+function renderCatPromos() {
+  const box = cEl('promoList'), writer = isWriter(), t = catToday(), byId = new Map(products.map(p => [p.id, p]));
+  cEl('catColorWarn').textContent = CAT_COLOR_WARN;
+  if (cat.promoErr) { box.innerHTML = ''; return; }
+  const rank = { live: 0, soon: 1, ended: 2, off: 3 };
+  const list = cat.promos.filter(p => cat.showOld || ['live', 'soon'].includes(promoStateOf(p, t)))
+    .sort((a, b) => rank[promoStateOf(a, t)] - rank[promoStateOf(b, t)] || String(b.starts_on).localeCompare(String(a.starts_on)));
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">' + (cat.promos.length ? 'ไม่มีโปรที่ใช้อยู่หรือกำลังจะเริ่ม — ติ๊ก “แสดงโปรที่หมดเวลาแล้ว” เพื่อดูทั้งหมด' : 'ยังไม่มีโปรโมชัน' + (writer ? ' — กด “+ เพิ่มโปรโมชัน”' : '')) + '</div>';
+    return;
+  }
+  box.innerHTML = list.map(p => promoHtml(p, byId, writer, t)).join('');
+}
+
+async function loadCatalog() {
+  const uid = currentUserId;
+  const [pr, dl] = await Promise.all([
+    db.from('promotions').select('*').order('starts_on', { ascending: false }).order('code'),
+    db.from('promotion_deals').select('*').order('sort_order').order('created_at'),
+  ]);
+  if (uid !== currentUserId) return;                       // สลับบัญชีระหว่างโหลด — ทิ้งผล
+  const e = pr.error || dl.error;
+  if (e) {
+    console.error('[Catalog]', e);
+    cat.promos = []; cat.deals = [];
+    cat.promoErr = CAT_NO_TABLE.test(e.message) ? 'nt' : e.message;
+    if (cat.promoErr !== 'nt') showFatalError('โหลดโปรโมชันไม่สำเร็จ: ' + e.message);
+  } else {
+    cat.promos = pr.data || []; cat.deals = dl.data || []; cat.promoErr = '';
+  }
+  renderCatalog();
+}
+
+// ---- บันทึก · แจ้งผล · ย้อนกลับ ----------------------------------------
+function catErrText(e) {
+  const m = String((e && e.message) || e || '');
+  if (e && e.code === '23505') return /model_code/.test(m) ? 'รหัสรุ่นนี้มีรุ่นอื่นใช้อยู่แล้ว (ไม่สนตัวพิมพ์เล็ก/ใหญ่)' : /code/.test(m) ? 'รหัสโปรนี้มีอยู่แล้ว' : 'ข้อมูลซ้ำกับรายการที่มีอยู่';
+  if (e && e.code === '23514') return /[ก-๙]/.test(m) ? m : 'ข้อมูลไม่ผ่านเงื่อนไขของฐานข้อมูล — เช็กตัวเลข วันที่ และรหัสที่กรอก';
+  if (/source_file_(path|name)/.test(m) && /column|schema cache/i.test(m)) return 'ยังไม่ได้รัน migration 036 (ไม่มีช่องแนบไฟล์ในตารางโปร) — บันทึกโปรโดยไม่แนบไฟล์ได้ตามปกติ';
+  if ((e && e.code === '42501') || /row-level security|permission denied/i.test(m)) return 'ไม่มีสิทธิ์ทำรายการนี้ (เฉพาะเจ้าของร้านหรือผู้ดูแล)';   // insert ที่ RLS ปฏิเสธมี error ภาษาอังกฤษ (ต่างจาก update/delete ที่เงียบ)
+  return m;
+}
+const CAT_NO_ROWS = 'ไม่มีสิทธิ์แก้ไข หรือรายการนี้ถูกลบ/เปลี่ยนไปแล้ว (เฉพาะเจ้าของร้านหรือผู้ดูแลแก้ได้) — กด “รีเฟรช” แล้วลองใหม่';
+function catFail(what, error) {
+  console.error('[Catalog]', what, error || 'no rows');
+  showFatalError(what + ': ' + (error ? catErrText(error) : CAT_NO_ROWS));
+}
+// แจ้งผลบนจอค้างไว้ (ไม่หายเองเหมือนข้อความลอย) · undo = { table, id } เมื่อเป็นการแก้ที่ย้อนได้ · เพิ่ม/ลบย้อนผ่านปุ่มนี้ไม่ได้
+function catNote(text, undo) {
+  cat.last = undo ? { table: undo.table, id: undo.id, text } : null;
+  cEl('catUndoText').textContent = text;
+  cEl('catUndoBtn').hidden = !undo || !isWriter();
+  cEl('catUndo').hidden = false;
+  showToast('✅ ' + text);
+}
+async function catUndo() {
+  const u = cat.last; if (!u) return;
+  const btn = cEl('catUndoBtn'); btn.disabled = true;
+  try {
+    const lg = await db.from('activity_log').select('id').eq('table_name', u.table).eq('record_id', u.id).eq('action', 'UPDATE')
+      .order('created_at', { ascending: false }).limit(1);
+    if (lg.error || !lg.data || !lg.data.length) { catFail('หาบันทึกการเปลี่ยนเพื่อย้อนกลับไม่เจอ', lg.error); return; }
+    const r = await db.rpc('undo_activity', { p_log_id: lg.data[0].id });
+    if (r.error) { catFail('ย้อนกลับไม่สำเร็จ', r.error); return; }
+    cat.last = null;
+    cEl('catUndoText').textContent = 'ย้อนกลับแล้ว: ' + u.text;
+    btn.hidden = true;
+    showToast('↶ ย้อนกลับแล้ว');
+    await Promise.all([loadProducts(), loadCatalog()]);
+    renderAll();
+  } finally { btn.disabled = false; }
+}
+
+// ติ๊กขายอยู่/เลิกขาย
+async function catToggle(id, on, box) {
+  const p = products.find(x => x.id === id); if (!p) return;
+  if (!isWriter()) { box.checked = p.is_active; showToast('⚠️ แก้สถานะขายได้เฉพาะเจ้าของร้านหรือผู้ดูแล'); return; }
+  box.disabled = true;
+  const mapOf = () => new Map(products.map(x => [x.id, x]));
+  const before = (catPromoMap().get(id) || []).filter(x => dealCalc(x.d, mapOf()).ok);   // ดีลของรุ่นนี้ที่ใช้ได้อยู่ ก่อนเปลี่ยน
+  const { data, error } = await db.from('products').update({ is_active: on }).eq('id', id).select('id');
+  if (error || !data || !data.length) { box.checked = p.is_active; box.disabled = false; catFail('เปลี่ยนสถานะขายไม่สำเร็จ', error); return; }
+  p.is_active = on;
+  const affected = on ? (catPromoMap().get(id) || []).filter(x => dealCalc(x.d, mapOf()).ok) : before;
+  const names = [...new Set(affected.map(x => x.pr.name))];
+  const hasSet = affected.some(x => x.d.kind === 'set_price');
+  const msg = (on ? 'เปิดการขาย ' : 'ปิดการขาย ') + p.name + ' แล้ว' +
+    (names.length ? (on ? ' · โปร ' + names.join(' · ') + ' ใช้ได้อีกครั้ง' : ' · ถอดออกจากโปร ' + names.join(' · ') + ' แล้ว' + (hasSet ? ' (ดีลเซ็ตที่มีรุ่นนี้พักทั้งเซ็ต)' : '')) :
+      (on ? '' : ' · บอทตอบว่าเลิกขาย'));
+  catNote(msg, { table: 'products', id });
+  renderAll();
+  const again = document.querySelector('#catList tr[data-id="' + id + '"] input[data-act="toggle"]');
+  if (again && !TOUCH.matches) again.focus();
+}
+
+// แก้รุ่น: ราคา · รหัสบอท · ประเภทบอท · สต็อก
+function catEditOpen(id) {
+  const p = products.find(x => x.id === id); if (!p || !isWriter()) return;
+  cat.editId = id;
+  cEl('catEditName').textContent = p.name + ' · ' + brandLabel(p.brand) + ' · ' + p.sku;
+  cEl('cefPrice').value = String(Number(p.sell_price));
+  cEl('cefCode').value = p.model_code || '';
+  cEl('cefCat').value = p.bot_category || '';
+  cEl('cefStockedRow').hidden = !('stocked' in p);
+  cEl('cefStocked').checked = p.stocked !== false;
+  cEl('cefErr').hidden = true;
+  cEl('catEditDlg').showModal();
+}
+async function catEditSave() {
+  const p = products.find(x => x.id === cat.editId); if (!p) return;
+  const err = m => { const b = cEl('cefErr'); b.textContent = m; b.hidden = false; };
+  const price = Number(cEl('cefPrice').value), code = cEl('cefCode').value.trim(), bc = cEl('cefCat').value;
+  if (cEl('cefPrice').value.trim() === '' || !Number.isFinite(price) || price < 0 || price > 9999999999) return err('กรอกราคาขายเป็นตัวเลขตั้งแต่ 0 ขึ้นไป');
+  if ((code && !bc) || (!code && bc)) return err('ใส่ให้ครบทั้งรหัสรุ่นและประเภทของบอท หรือเว้นว่างทั้งสองช่อง — ถ้าขาดอย่างใดอย่างหนึ่งบอทจะไม่เห็นรุ่นนี้');
+  const dup = code && products.find(x => x.id !== p.id && String(x.model_code || '').toLowerCase() === code.toLowerCase());
+  if (dup) return err('รหัสรุ่น ' + code + ' มี “' + dup.name + '” ใช้อยู่แล้ว');
+  const patch = {}, said = [];
+  if (price !== Number(p.sell_price)) { patch.sell_price = price; said.push('ราคา ' + catMoney(p.sell_price) + ' → ' + catMoney(price)); }
+  if (code !== (p.model_code || '')) { patch.model_code = code || null; said.push('รหัสบอท ' + (p.model_code || 'ว่าง') + ' → ' + (code || 'ว่าง')); }
+  if (bc !== (p.bot_category || '')) { patch.bot_category = bc || null; said.push('ประเภทบอท ' + catBotLabel(p.bot_category) + ' → ' + catBotLabel(bc)); }
+  if ('stocked' in p && cEl('cefStocked').checked !== (p.stocked !== false)) { patch.stocked = cEl('cefStocked').checked; said.push(patch.stocked ? 'ร้านสต็อกรุ่นนี้' : 'เป็นแค่รายการราคา (ไม่สต็อก)'); }
+  if (!Object.keys(patch).length) { cEl('catEditDlg').close(); showToast('ไม่มีอะไรเปลี่ยน'); return; }
+  const btn = cEl('cefSave'); btn.disabled = true;
+  try {
+    const { data, error } = await db.from('products').update(patch).eq('id', p.id).select('id');
+    if (error) return err(catErrText(error));
+    if (!data || !data.length) return err(CAT_NO_ROWS);
+    Object.assign(p, patch);
+    cEl('catEditDlg').close();
+    catNote('แก้ ' + p.name + ': ' + said.join(' · '), { table: 'products', id: p.id });
+    renderAll();
+  } finally { btn.disabled = false; }
+}
+
+// โปร: เพิ่ม · แก้ · เปิด/ปิด
+function promoOpen(id) {
+  if (!isWriter()) return;
+  const p = id ? cat.promos.find(x => x.id === id) : null;
+  cat.promoId = p ? p.id : null;
+  cat.pdfTok++; cat.pdf = catPdfNew();
+  if (p && p.source_file_path) cat.pdf.existing = { path: p.source_file_path, name: p.source_file_name || 'PDF' };
+  pdfStatus(); pdfRender();
+  cEl('promoDlgTitle').textContent = p ? 'แก้ไขโปรโมชัน' : 'เพิ่มโปรโมชัน';
+  const t = catToday(), plus = new Date(Date.parse(t + 'T00:00:00Z') + 30 * 86400000).toISOString().slice(0, 10);
+  cEl('pfName').value = p ? p.name : '';
+  cEl('pfCode').value = p ? p.code : 'promo-' + t;
+  cEl('pfCode').readOnly = !!p;
+  cEl('pfCodeHint').textContent = p ? 'รหัสโปรแก้ไม่ได้ (เป็น id ที่บอทและไฟล์ส่งออกใช้)' : 'รหัสนี้คือ id ของโปรที่บอทและไฟล์ส่งออกใช้ — ตั้งแล้วแก้ไม่ได้';
+  cEl('pfStart').value = p ? p.starts_on : t;
+  cEl('pfEnd').value = p ? p.ends_on : plus;
+  cEl('pfConds').value = p ? (p.conditions || []).join('\n') : '';
+  cEl('pfSource').value = p ? p.source_note || '' : '';
+  cEl('pfEnabled').checked = p ? p.is_enabled : true;
+  cEl('pfErr').hidden = true;
+  cEl('promoDlg').showModal();
+}
+async function promoSave() {
+  const err = m => { const b = cEl('pfErr'); b.textContent = m; b.hidden = false; };
+  const name = cEl('pfName').value.trim(), code = cEl('pfCode').value.trim(), s = cEl('pfStart').value, e = cEl('pfEnd').value;
+  const conds = cEl('pfConds').value.split('\n').map(x => x.trim()).filter(Boolean), src = cEl('pfSource').value.trim();
+  const pdf = cat.pdf;
+  if (pdf.busy) return err('กำลังให้ Claude อ่าน PDF อยู่ — รอให้เสร็จก่อนบันทึก (ผลที่อ่านได้จะเติมลงฟอร์มให้)');   // ก่อนตรวจช่องอื่น: ช่องที่ว่างอยู่อาจกำลังจะถูกเติมจากเอกสาร
+  if (!name) return err('กรอกชื่อโปร');
+  if (!cat.promoId && !/^[a-z0-9][a-z0-9-]{1,59}$/.test(code)) return err('รหัสโปรใช้ได้เฉพาะตัวอักษรอังกฤษพิมพ์เล็ก ตัวเลข และขีดกลาง ยาว 2–60 ตัว และขึ้นต้นด้วยตัวอักษรหรือตัวเลข');
+  if (!s || !e) return err('เลือกวันเริ่มและวันสิ้นสุด');
+  if (e < s) return err('วันสิ้นสุดต้องไม่ก่อนวันเริ่ม');
+  if (conds.length > 30) return err('เงื่อนไขใส่ได้ไม่เกิน 30 ข้อ');
+  const row = { name, starts_on: s, ends_on: e, conditions: conds, source_note: src, is_enabled: cEl('pfEnabled').checked };
+  const old = cat.promoId ? cat.promos.find(x => x.id === cat.promoId) : null;
+  const btn = cEl('pfSave'); btn.disabled = true;
+  let path = null;
+  const store = () => db.storage.from('promo-docs');
+  try {
+    if (pdf.file) {
+      path = uuid4() + '.pdf';
+      const up = await store().upload(path, pdf.file, { contentType: 'application/pdf', upsert: false });
+      if (up.error) { path = null; return err(pdfStoreErr(up.error)); }
+      row.source_file_path = path; row.source_file_name = pdfBase(pdf.file.name);
+    } else if (old && pdf.removeExisting) { row.source_file_path = null; row.source_file_name = null; }
+    const dropNew = async () => { if (path) { try { await store().remove([path]); } catch (x) { /* ไฟล์กำพร้าเหลือในถัง ไม่กระทบข้อมูลโปร */ } } };   // บันทึกโปรล้มกลางทาง → ไม่ทิ้งไฟล์ที่เพิ่งอัป
+    if (cat.promoId) {
+      const { data, error } = await db.from('promotions').update(row).eq('id', cat.promoId).select('id');
+      if (error) { await dropNew(); return err(catErrText(error)); }
+      if (!data || !data.length) { await dropNew(); return err(CAT_NO_ROWS); }
+      if (old && old.source_file_path && (path || pdf.removeExisting)) { try { await store().remove([old.source_file_path]); } catch (x) { /* ไฟล์เก่าค้างในถัง ไม่กระทบ */ } }
+      cEl('promoDlg').close();
+      catNote('แก้โปร ' + name + ' แล้ว' + (path ? ' · แนบ PDF ใหม่' : pdf.removeExisting ? ' · เอาไฟล์แนบออก' : ''), { table: 'promotions', id: cat.promoId });
+    } else {
+      const { data, error } = await db.from('promotions').insert({ code, ...row }).select('id');
+      if (error) { await dropNew(); return err(catErrText(error)); }
+      if (!data || !data.length) { await dropNew(); return err(CAT_NO_ROWS); }
+      const dl = await pdfInsertDeals(data[0].id);
+      cEl('promoDlg').close();
+      catNote('เพิ่มโปร ' + name + ' แล้ว' + (path ? ' · แนบ PDF ต้นฉบับแล้ว' : '') +
+        (dl.total ? ' · ดีลจาก PDF เข้า ' + dl.ok + ' จาก ' + dl.total + (dl.bad.length ? ' (เข้าไม่ได้ ' + dl.bad.length + ' — ดูข้อความสีแดง)' : '') :
+          ' — กด “+ เพิ่มดีล” เพื่อใส่รุ่นและราคา (โปรที่ยังไม่มีดีลบอทยังไม่เห็น)'), null);
+      if (dl.bad.length) showFatalError('ดีลจาก PDF ที่เข้าโปรไม่ได้ (เพิ่มเองได้ที่ “+ เพิ่มดีล”):\n' + dl.bad.join('\n'));
+    }
+    await loadCatalog();
+  } finally { btn.disabled = false; }
+}
+async function promoToggle(id) {
+  const p = cat.promos.find(x => x.id === id); if (!p || !isWriter()) return;
+  const on = !p.is_enabled;
+  const { data, error } = await db.from('promotions').update({ is_enabled: on }).eq('id', id).select('id');
+  if (error || !data || !data.length) { catFail(on ? 'เปิดโปรไม่สำเร็จ' : 'ปิดโปรไม่สำเร็จ', error); return; }
+  catNote((on ? 'เปิดโปร ' : 'ปิดโปร ') + p.name + ' แล้ว' + (on ? '' : ' — บอทไม่เห็นโปรนี้ทันที (เปิดกลับได้)'), { table: 'promotions', id });
+  await loadCatalog();
+}
+
+// ---- PDF ของโปร: ลากไฟล์ใส่ · อ่านแล้วกรอกให้ (Edge Function promo-read — ได้ "ร่าง" เจ้าของตรวจเอง) · แนบต้นฉบับ (ถัง promo-docs · 036) ----
+//   อ่านด้วย Claude = ส่งไฟล์ออกไปที่ Anthropic (เจ้าของร้านเลือก 4 ต.ค. 69) · ร่างไม่ถูกบันทึกจนกว่าจะกด "บันทึก" และดีลผ่านตัวกันของฐานข้อมูลเหมือนกรอกมือ
+const CAT_PDF_MAX = 6 * 1024 * 1024;     // ต้องตรงกับ MAX_PDF_BYTES ของ promo-read และ file_size_limit ของถัง promo-docs (036)
+function catPdfNew() { return { file: null, existing: null, removeExisting: false, draft: null, deals: null, busy: 0 }; }
+const pdfSize = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+const pdfBase = n => String(n || 'เอกสาร.pdf').split(/[\\/]/).pop().replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 200) || 'เอกสาร.pdf';
+function uuid4() {
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+}
+const fileToBase64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(r.error || new Error('อ่านไฟล์ไม่ได้')); r.readAsDataURL(f); });
+function pdfStatus(kind, text) {
+  const b = cEl('pfReadStatus');
+  if (!text) { b.hidden = true; b.textContent = ''; return; }
+  b.className = 'alert ' + (kind === 'err' ? 'alert-red' : kind === 'warn' ? 'alert-warn' : 'alert-plain');
+  b.textContent = text; b.hidden = false;
+}
+function pdfStoreErr(e) {
+  const m = String((e && (e.message || e.error)) || e || '');
+  if (/bucket not found|not found/i.test(m)) return 'ยังไม่ได้รัน migration 036 (ไม่มีถังเก็บไฟล์ promo-docs) — บันทึกโปรโดยเอาไฟล์ออกได้ตามปกติ';
+  if (/row-level security|unauthorized|not authorized|403/i.test(m)) return 'ไม่มีสิทธิ์อัปโหลดไฟล์ (เฉพาะเจ้าของร้านหรือผู้ดูแล)';
+  if (/exceed|too large|413|size/i.test(m)) return 'ไฟล์ใหญ่เกิน 6 MB';
+  if (/mime|not supported|invalid/i.test(m)) return 'ถังเก็บไฟล์รับเฉพาะ PDF';
+  return 'อัปโหลดไฟล์ไม่สำเร็จ: ' + m;
+}
+function pdfReadErr(e) {
+  if (e.code === 'not_configured') return 'ยังไม่ได้ติดตั้งหรือตั้งค่าตัวอ่าน PDF (ฟังก์ชัน promo-read + ANTHROPIC_API_KEY) — กรอกมือได้ตามปกติ และไฟล์ยังแนบเก็บไว้กับโปรได้';
+  if (e.code === 'quota') return e.message;
+  return 'อ่าน PDF ไม่สำเร็จ: ' + (e.message || e.code) + ' — กรอกมือได้ตามปกติ';
+}
+// รับไฟล์ที่ลาก/เลือก — ตรวจชนิด ขนาด และหัวไฟล์ (%PDF-) ก่อนรับ · ไม่ใช่ PDF จริงไม่รับ ไม่ว่าชื่อไฟล์จะเป็นอะไร
+async function pdfPick(files) {
+  const list = [...(files || [])];
+  if (!list.length || !isWriter() || !cEl('promoDlg').open) return;
+  const pdfs = list.filter(x => x.type === 'application/pdf' || /\.pdf$/i.test(x.name));
+  if (!pdfs.length) return pdfStatus('err', 'ไฟล์ที่ลากมาไม่ใช่ PDF — ใส่ได้เฉพาะไฟล์ .pdf');
+  const f = pdfs[0];
+  if (f.size === 0) return pdfStatus('err', 'ไฟล์ว่างเปล่า (0 ไบต์)');
+  if (f.size > CAT_PDF_MAX) return pdfStatus('err', 'ไฟล์ใหญ่เกิน 6 MB (ไฟล์นี้ ' + pdfSize(f.size) + ') — ลดขนาดไฟล์ก่อน');
+  let head = ''; try { head = await f.slice(0, 5).text(); } catch (x) { head = ''; }
+  if (head !== '%PDF-') return pdfStatus('err', 'ไฟล์นี้ไม่ใช่ PDF จริง (นามสกุล .pdf แต่เนื้อไฟล์ไม่ใช่)');
+  const p = cat.pdf;
+  if (p.busy) return;
+  cat.pdfTok++;
+  p.file = f; p.draft = null; p.deals = null; p.removeExisting = false;     // เลือกไฟล์ใหม่ = ล้างร่างของไฟล์เก่า
+  pdfStatus(pdfs.length > 1 ? 'warn' : '', pdfs.length > 1 ? 'ลากมาหลายไฟล์ — ใช้ไฟล์แรก: ' + f.name + ' (ใส่ได้ทีละไฟล์)' : '');
+  pdfRender();
+}
+function pdfRender() {
+  const p = cat.pdf, writer = isWriter(), has = !!p.file || (!!p.existing && !p.removeExisting);
+  cEl('pfPdfChip').hidden = !has;
+  if (has) {
+    cEl('pfPdfName').textContent = p.file ? p.file.name : p.existing.name;
+    cEl('pfPdfSize').textContent = p.file ? pdfSize(p.file.size) + ' · จะแนบกับโปรนี้ตอนกดบันทึก' : 'แนบไว้กับโปรนี้แล้ว';
+  } else {
+    cEl('pfPdfName').textContent = ''; cEl('pfPdfSize').textContent = '';      // ซ่อนแล้วต้องล้างข้อความด้วย — ชื่อไฟล์ของคนก่อนหน้าไม่ค้างใน DOM
+  }
+  cEl('pfRead').hidden = !(p.file && !cat.promoId && writer);
+  cEl('pfRead').disabled = !!p.busy;
+  cEl('pfPdfRemove').textContent = p.file ? 'เอาออก' : 'เอาไฟล์ที่แนบไว้ออก';
+  cEl('pfPdfRemove').disabled = !!p.busy;
+  cEl('pfPdfView').hidden = !(p.existing && !p.file && !p.removeExisting);
+  cEl('pfDrop').disabled = !!p.busy;
+  cEl('pfDropText').textContent = has ? 'ลากไฟล์ PDF ใหม่มาวางเพื่อเปลี่ยน หรือกดเพื่อเลือกไฟล์' : 'ลากไฟล์ PDF ของโปร (เช่น memo ผู้นำเข้า) มาวางที่นี่ หรือกดเพื่อเลือกไฟล์';
+  pdfRenderDraft();
+}
+// ปัญหาของดีลร่าง: ที่ฟังก์ชันตรวจเจอ + ตัวกันที่ฐานข้อมูลจะปฏิเสธตอนบันทึก (รุ่นเลิกขาย · ราคาเซ็ตไม่ต่ำกว่าราคาปกติรวม) — ดีลที่มีปัญหาติ๊กไม่ได้
+function pdfIssues(x, byId) {
+  const out = x.problems.slice(), ps = x.product_ids.map(id => byId.get(id)).filter(Boolean);
+  if (ps.some(q => !q.is_active)) out.push('มีรุ่นเลิกขาย — เข้าโปรไม่ได้');
+  if (x.kind === 'set_price' && ps.length >= 2 && x.set_price != null) {
+    const c = dealCalc({ kind: 'set_price', product_ids: x.product_ids, set_price: x.set_price }, byId);
+    if (c.reg && x.set_price >= c.reg) out.push('ราคาเซ็ต (' + catMoney(x.set_price) + ') ต้องต่ำกว่าราคาปกติรวม (' + catMoney(c.reg) + ')');
+  }
+  return out;
+}
+function pdfDealHtml(x, i, byId) {
+  const names = x.product_ids.map(id => byId.get(id)).filter(Boolean).map(q => escapeHtml(q.model_code || q.name)).concat(x.unmatched.map(u => '<s>' + escapeHtml(u) + '</s>'));
+  const c = x.issues.length ? null : dealCalc(x, byId);
+  const what = x.kind === 'percent' ? 'ลด ' + (x.percent != null ? String(x.percent) + '%' : '?') + (c && c.ok ? ' → ' + catMoney(c.promo) : '') :
+    x.kind === 'set_price' ? 'ราคาเซ็ต ' + (x.set_price != null ? catMoney(x.set_price) : '?') + (c && c.ok ? ' (ปกติรวม ' + catMoney(c.reg) + ')' : '') + (x.label ? ' · ' + escapeHtml(x.label) : '') :
+    'ราคาปกติ + แถม ' + (x.gift_item ? escapeHtml(x.gift_item) : '?') + (x.gift_value != null ? ' (มูลค่า ' + catMoney(x.gift_value) + ')' : '');
+  return '<div class="draft-deal' + (x.issues.length ? ' bad' : '') + '"><label><input type="checkbox" data-i="' + i + '"' + (x.on ? ' checked' : '') + (x.issues.length ? ' disabled' : '') + '>' +
+    '<span class="dd-main"><strong>' + (names.join(' + ') || '(ไม่พบรุ่น)') + '</strong> — ' + what +
+    (x.evidence ? '<span class="dd-sub">ในเอกสาร: ' + escapeHtml(x.evidence) + '</span>' : '') +
+    x.issues.map(t => '<span class="st st-warn" style="margin-top:4px;">⚠ ' + escapeHtml(t) + '</span>').join(' ') + '</span></label></div>';
+}
+function pdfRenderDraft() {
+  const p = cat.pdf, box = cEl('pfDraft');
+  if (!p.deals) { box.hidden = true; box.innerHTML = ''; return; }
+  const byId = new Map(products.map(q => [q.id, q]));
+  const warn = ((p.draft && p.draft.warnings) || []).map(w => '<li>' + escapeHtml(w) + '</li>').join('');
+  box.innerHTML = (warn ? '<div class="alert alert-warn" style="margin:0 0 8px;">คำเตือนจากการอ่านเอกสาร — ตรวจกับต้นฉบับ<ul class="promo-conds" style="margin:4px 0 0;">' + warn + '</ul></div>' : '') +
+    '<span class="lbl" style="margin:0;">ดีลที่อ่านได้จากเอกสาร (ร่าง ' + p.deals.length + ' รายการ) — ติ๊กอันที่จะเพิ่มเข้าโปรนี้ตอนกดบันทึก</span>' +
+    (p.deals.length ? p.deals.map((x, i) => pdfDealHtml(x, i, byId)).join('') : '<div class="empty" style="padding:14px 0;">ไม่พบดีลในเอกสาร — เพิ่มดีลเองหลังบันทึกโปรได้</div>');
+  box.hidden = false;
+}
+async function pdfRead() {
+  const p = cat.pdf;
+  if (!p.file || cat.promoId || !isWriter() || p.busy) return;
+  const tok = ++cat.pdfTok; p.busy = tok;                                 // ผลที่มาช้า (ปิดหน้าต่าง/เปลี่ยนไฟล์/ออกจากระบบ) ถูกทิ้ง
+  pdfRender(); pdfStatus('', 'กำลังส่งให้ Claude อ่าน… (ราว 20–60 วินาที — อย่าปิดหน้าต่างนี้)');
+  let b64;
+  try { b64 = await fileToBase64(p.file); }
+  catch (x) { if (cat.pdf === p) { p.busy = 0; pdfStatus('err', 'อ่านไฟล์จากเครื่องไม่ได้: ' + x.message); pdfRender(); } return; }
+  const r = await callFn('promo-read', { pdf_base64: b64, file_name: pdfBase(p.file.name) });
+  if (cat.pdf !== p || tok !== cat.pdfTok) return;
+  p.busy = 0;
+  if (r.error) { pdfStatus('err', pdfReadErr(r.error)); pdfRender(); return; }
+  pdfApply(r); pdfRender();
+}
+function pdfApply(r) {
+  const p = cat.pdf, d = r.draft, set = (id, v) => { cEl(id).value = v; }, byId = new Map(products.map(q => [q.id, q]));
+  if (d.name) set('pfName', d.name);
+  if (d.code_suggestion) set('pfCode', d.code_suggestion);
+  if (d.starts_on) set('pfStart', d.starts_on);
+  if (d.ends_on) set('pfEnd', d.ends_on);
+  if (d.conditions.length) set('pfConds', d.conditions.join('\n'));
+  set('pfSource', [d.source_note, 'จากไฟล์ PDF: ' + pdfBase(p.file.name)].filter(Boolean).join(' · ').slice(0, 1000));
+  p.draft = d;
+  p.deals = d.deals.map(x => { const y = { ...x, issues: [], on: false }; y.issues = pdfIssues(y, byId); y.on = !y.issues.length; return y; });
+  const missing = [!d.starts_on && 'วันเริ่ม', !d.ends_on && 'วันสิ้นสุด', !d.name && 'ชื่อโปร'].filter(Boolean);
+  pdfStatus('warn', 'อ่านแล้ว — นี่คือร่าง ยังไม่ได้บันทึกอะไร ตรวจชื่อ วันที่ เงื่อนไข และดีลทุกข้อกับต้นฉบับก่อนกดบันทึก' +
+    (missing.length ? ' · เอกสารไม่ระบุ: ' + missing.join(' · ') + ' (ตั้งเองในฟอร์ม)' : '') + (r.usage ? ' · วันนี้อ่าน PDF แล้ว ' + r.usage.used + '/' + r.usage.limit + ' ครั้ง' : ''));
+}
+// เพิ่มดีลที่ติ๊กไว้ทีละดีลหลังโปรถูกบันทึกแล้ว — ดีลที่ฐานข้อมูลปฏิเสธไม่ขวางดีลอื่น (บอกให้เห็นครบว่าเข้าไม่ได้เพราะอะไร)
+async function pdfInsertDeals(promoId) {
+  const picked = (cat.pdf.deals || []).filter(x => x.on), bad = [];
+  let ok = 0, order = 0;
+  for (const x of picked) {
+    const label = (x.product_ids.map(id => (products.find(q => q.id === id) || {}).model_code).filter(Boolean).join(' + ') || 'ดีล') + ' (' + (CAT_KIND[x.kind] || x.kind) + ')';
+    const { data, error } = await db.from('promotion_deals').insert({ promotion_id: promoId, kind: x.kind, product_ids: x.product_ids, percent: x.percent, set_price: x.set_price,
+      gift_item: x.gift_item, gift_value: x.gift_value, label: x.label, sort_order: ++order }).select('id');
+    if (error || !data || !data.length) bad.push(label + ': ' + (error ? catErrText(error) : CAT_NO_ROWS)); else ok++;
+  }
+  return { ok, total: picked.length, bad };
+}
+// เปิดต้นฉบับ: ขอลิงก์อายุสั้น (ถังส่วนตัว) — เปิดแท็บเปล่าก่อนในจังหวะที่กด (กันเบราว์เซอร์บล็อกป๊อปอัป) แล้วค่อยพาไปที่ลิงก์
+async function promoOpenFile(id) {
+  const p = cat.promos.find(x => x.id === id);
+  if (!p || !p.source_file_path || !isWriter()) return;
+  const w = window.open('', '_blank');
+  const { data, error } = await db.storage.from('promo-docs').createSignedUrl(p.source_file_path, 120);
+  if (error || !data || !data.signedUrl) { if (w) w.close(); catFail('เปิดเอกสารต้นฉบับไม่สำเร็จ', error || { message: 'ไม่ได้ลิงก์จากระบบเก็บไฟล์ (ไฟล์อาจถูกลบไปแล้ว หรือยังไม่ได้รัน migration 036)' }); return; }
+  if (w) { w.opener = null; w.location.href = data.signedUrl; } else showToast('⚠️ เบราว์เซอร์บล็อกหน้าต่างใหม่ — อนุญาตป๊อปอัปของเว็บนี้แล้วกดอีกครั้ง');
+}
+
+// ดีล: เลือกรุ่น + ตัวเลข — ตัวอย่างราคาคำนวณสดด้วยสูตรเดียวกับที่บอทเห็น
+function dealPoolIds() {
+  const d = cat.draft, byId = new Map(products.map(p => [p.id, p]));
+  const ok = p => p.is_active && p.model_code && Number(p.sell_price) > 0;
+  const ids = new Set(products.filter(ok).map(p => p.id));
+  d.sel.forEach(id => { if (byId.has(id)) ids.add(id); });           // รุ่นที่อยู่ในดีลเดิมแต่พักอยู่ ยังต้องเห็นเพื่อถอดออกได้
+  return [...ids].map(id => byId.get(id)).sort(byModel);
+}
+function dealPickRender() {
+  const d = cat.draft, box = cEl('dfPick'), single = d.kind !== 'set_price', q = d.q.trim().toLowerCase();
+  const keep = box.scrollTop;
+  const list = dealPoolIds().filter(p => d.sel.includes(p.id) || !q || [p.name, p.sku, p.model_code, p.brand].some(x => String(x || '').toLowerCase().includes(q)));
+  box.innerHTML = list.length ? list.map(p => {
+    const n = d.sel.indexOf(p.id);
+    const bad = !p.is_active ? ' · เลิกขาย' : !p.model_code ? ' · ยังไม่มีรหัสบอท' : !(Number(p.sell_price) > 0) ? ' · ราคา 0' : '';
+    return '<label><input type="' + (single ? 'radio' : 'checkbox') + '" name="dfOne" value="' + p.id + '"' + (n >= 0 ? ' checked' : '') + '>' +
+      '<span class="pk-main">' + escapeHtml(p.name) + '<span class="pk-sub">' + escapeHtml(p.model_code || p.sku) + ' · ' + catMoney(p.sell_price) + escapeHtml(bad) + '</span></span>' +
+      '<span class="pk-ord">' + (n >= 0 && !single ? '#' + (n + 1) : '') + '</span></label>';
+  }).join('') : '<div class="empty" style="padding:16px;">ไม่พบรุ่นที่ตรงกับคำค้น</div>';
+  box.scrollTop = keep;
+  cEl('dfSelHint').textContent = (d.sel.length ? 'เลือกแล้ว ' + d.sel.length + ' รุ่น · ' : '') + 'แสดงเฉพาะรุ่นที่ขายอยู่และมีรหัสบอท';
+}
+// โครงดีลจากสิ่งที่กรอกอยู่ — null ในช่องที่ยังไม่กรอก ให้ dealCalc/ตัวอย่างอ่านได้
+function dealDraftRow() {
+  const d = cat.draft, num = id => { const v = cEl(id).value.trim(); return v === '' ? null : Number(v); };
+  return { kind: d.kind, product_ids: d.sel.slice(), percent: num('dfPercent'), set_price: num('dfSet'), gift_item: cEl('dfGift').value.trim(), gift_value: num('dfGiftVal'), label: cEl('dfLabel').value.trim() };
+}
+function dealPreview() {
+  const d = cat.draft, row = dealDraftRow(), box = cEl('dfPreview');
+  const need = d.kind === 'set_price' ? row.product_ids.length >= 2 && row.set_price > 0 : d.kind === 'percent' ? row.product_ids.length === 1 && row.percent > 0 && row.percent < 100 :
+    row.product_ids.length === 1 && row.gift_item && row.gift_value > 0;
+  if (!need) { box.textContent = 'เลือกรุ่นและกรอกตัวเลขให้ครบ เพื่อดูราคาที่บอทจะเห็น'; return; }
+  const c = dealCalc(row, new Map(products.map(p => [p.id, p])));
+  if (!c.ok) { box.textContent = '⏸ ' + c.why + ' — บันทึกได้ แต่บอทจะยังไม่เห็นดีลนี้'; return; }
+  box.textContent = d.kind === 'gift' ? 'ตัวอย่างที่บอทเห็น: ราคาปกติ ' + catMoney(c.reg) + ' + แถม ' + row.gift_item + ' (มูลค่า ' + catMoney(row.gift_value) + ')' :
+    'ตัวอย่างที่บอทเห็น: ราคาปกติ ' + catMoney(c.reg) + ' → ราคาโปร ' + catMoney(c.promo) + ' (ลด ' + c.disc + ')';
+}
+function dealSync() {
+  const k = cat.draft.kind;
+  cEl('dfRowPercent').hidden = k !== 'percent';
+  cEl('dfRowSet').hidden = k !== 'set_price';
+  cEl('dfRowGift').hidden = k !== 'gift';
+  cEl('dfHow').textContent = k === 'set_price' ? '(เลือกตั้งแต่ 2 รุ่นขึ้นไป)' : '(เลือก 1 รุ่น)';
+  dealPickRender(); dealPreview();
+}
+function dealOpen(promoId, dealId) {
+  if (!isWriter()) return;
+  const pr = cat.promos.find(x => x.id === promoId); if (!pr) return;
+  const d = dealId ? cat.deals.find(x => x.id === dealId) : null;
+  cat.draft = { promoId, dealId: d ? d.id : null, kind: d ? d.kind : 'percent', sel: d ? d.product_ids.slice() : [], q: '' };
+  cEl('dealTitle').textContent = d ? 'แก้ดีล' : 'เพิ่มดีล';
+  cEl('dealPromo').textContent = 'ในโปร: ' + pr.name + ' (' + fmtDate(pr.starts_on) + ' – ' + fmtDate(pr.ends_on) + ')';
+  cEl('dealWarn').textContent = CAT_COLOR_WARN;
+  cEl('dfKind').value = cat.draft.kind;
+  cEl('dfKind').disabled = !!d;                                      // เปลี่ยนแบบโปรของดีลเดิมไม่ได้ (ย้อนกลับไม่ได้) — ลบแล้วเพิ่มใหม่
+  cEl('dfSearch').value = '';
+  const val = v => (v == null ? '' : String(Number(v)));
+  cEl('dfPercent').value = d ? val(d.percent) : '';
+  cEl('dfSet').value = d ? val(d.set_price) : '';
+  cEl('dfLabel').value = d && d.label ? d.label : '';
+  cEl('dfGift').value = d && d.gift_item ? d.gift_item : '';
+  cEl('dfGiftVal').value = d ? val(d.gift_value) : '';
+  cEl('dfErr').hidden = true;
+  dealSync();
+  cEl('dealDlg').showModal();
+}
+async function dealSave() {
+  const d = cat.draft, row = dealDraftRow();
+  const err = m => { const b = cEl('dfErr'); b.textContent = m; b.hidden = false; };
+  const k = d.kind, ids = row.product_ids;
+  let patch;
+  if (k === 'percent') {
+    if (ids.length !== 1) return err('เลือก 1 รุ่นสำหรับโปรลด %');
+    if (!(row.percent > 0 && row.percent < 100)) return err('เปอร์เซ็นต์ที่ลดต้องมากกว่า 0 และน้อยกว่า 100');
+    patch = { percent: Math.round(row.percent * 100) / 100, set_price: null, gift_item: null, gift_value: null, label: null };
+  } else if (k === 'set_price') {
+    if (ids.length < 2) return err('ราคาเซ็ตต้องเลือกตั้งแต่ 2 รุ่นขึ้นไป');
+    if (!(row.set_price > 0)) return err('กรอกราคาเซ็ตเป็นบาท (มากกว่า 0)');
+    const c = dealCalc({ ...row, kind: 'set_price' }, new Map(products.map(p => [p.id, p])));
+    if (c.reg && row.set_price >= c.reg) return err('ราคาเซ็ต (' + catMoney(row.set_price) + ') ต้องต่ำกว่าราคาปกติรวม (' + catMoney(c.reg) + ') — เช็กว่ากรอกตัวเลขถูกหลัก');
+    patch = { percent: null, set_price: Math.round(row.set_price * 100) / 100, gift_item: null, gift_value: null, label: row.label || null };
+  } else {
+    if (ids.length !== 1) return err('เลือก 1 รุ่นสำหรับโปรของแถม');
+    if (!row.gift_item) return err('กรอกชื่อของแถม');
+    if (!(row.gift_value > 0)) return err('กรอกมูลค่าของแถมเป็นบาท (มากกว่า 0) — บอทใช้บอกลูกค้าว่าได้ของมูลค่าเท่าไร');
+    patch = { percent: null, set_price: null, gift_item: row.gift_item, gift_value: Math.round(row.gift_value * 100) / 100, label: null };
+  }
+  const btn = cEl('dfSave'); btn.disabled = true;
+  try {
+    if (d.dealId) {
+      const { data, error } = await db.from('promotion_deals').update({ product_ids: ids, ...patch }).eq('id', d.dealId).select('id');
+      if (error) return err(catErrText(error));
+      if (!data || !data.length) return err(CAT_NO_ROWS);
+      cEl('dealDlg').close();
+      catNote('แก้ดีลแล้ว', { table: 'promotion_deals', id: d.dealId });
+    } else {
+      const order = cat.deals.filter(x => x.promotion_id === d.promoId).reduce((m, x) => Math.max(m, x.sort_order || 0), 0) + 1;
+      const { data, error } = await db.from('promotion_deals').insert({ promotion_id: d.promoId, kind: k, product_ids: ids, sort_order: order, ...patch }).select('id');
+      if (error) return err(catErrText(error));
+      if (!data || !data.length) return err(CAT_NO_ROWS);
+      cEl('dealDlg').close();
+      catNote('เพิ่มดีลแล้ว', null);
+    }
+    await loadCatalog();
+  } finally { btn.disabled = false; }
+}
+function dealDelete(promoId, dealId) {
+  const d = cat.deals.find(x => x.id === dealId); if (!d || !isWriter()) return;
+  const c = dealCalc(d, new Map(products.map(p => [p.id, p])));
+  askConfirm('ลบดีลนี้?', '<p style="margin:0 0 8px;"><strong>' + escapeHtml(c.ps.map(p => p.model_code || p.name).join(' + ') || 'ดีล') + '</strong> — ' + escapeHtml(CAT_KIND[d.kind] || d.kind) + '</p>' +
+    '<p style="margin:0;" class="hint">ลบแล้วย้อนกลับด้วยปุ่มไม่ได้ (ถ้าแค่ไม่อยากให้บอทเห็นชั่วคราว ให้ปิดโปรแทน) · การลบถูกบันทึกในบันทึกการใช้งาน</p>', 'ลบดีล', async () => {
+    const { data, error } = await db.from('promotion_deals').delete().eq('id', dealId).select('id');
+    closeConfirm();
+    if (error || !data || !data.length) { catFail('ลบดีลไม่สำเร็จ', error); return; }
+    catNote('ลบดีลแล้ว', null);
+    await loadCatalog();
+  });
+}
+
+// ส่งออก promotions.json (owner/admin) — ฟังก์ชันของฐานข้อมูลสร้างให้ ไม่คำนวณซ้ำฝั่งหน้าเว็บ
+async function catExportLoad() {
+  const info = cEl('exInfo'), txt = cEl('exText'), eb = cEl('exErr');
+  eb.hidden = true; info.textContent = 'กำลังสร้างไฟล์…'; txt.value = ''; cat.exJson = null;
+  const scope = cEl('exScope').value;
+  const { data, error } = await db.rpc('export_promotions_json', { p_scope: scope });
+  if (scope !== cEl('exScope').value) return;                         // เปลี่ยนตัวเลือกระหว่างรอ
+  if (error) { eb.textContent = 'ส่งออกไม่สำเร็จ: ' + catErrText(error); eb.hidden = false; info.textContent = ''; console.error('[Catalog export]', error); return; }
+  cat.exJson = JSON.stringify(data, null, 2);
+  txt.value = cat.exJson;
+  const n = Array.isArray(data) ? data.length : 0;
+  info.textContent = n ? n + ' โปร · ' + (data.reduce((s, p) => s + ((p.products || []).length), 0)) + ' ดีลที่ใช้ได้' : 'ไม่มีโปรที่ส่งออกได้ในช่วงนี้ (ไฟล์ว่าง [])';
+}
+function catExportOpen() {
+  if (!isWriter()) return;
+  cEl('catExportDlg').showModal();
+  catExportLoad();
+}
+function catExportDownload() {
+  if (cat.exJson == null) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([cat.exJson], { type: 'application/json' }));
+  a.download = 'promotions-' + catToday().replace(/-/g, '') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  showToast('✅ ดาวน์โหลด ' + a.download + ' แล้ว');
+}
+async function catExportCopy() {
+  if (cat.exJson == null) return;
+  try { await navigator.clipboard.writeText(cat.exJson); showToast('✅ คัดลอกแล้ว'); }
+  catch (e) {
+    const t = cEl('exText'); t.focus(); t.select();
+    showToast(document.execCommand && document.execCommand('copy') ? '✅ คัดลอกแล้ว' : '⚠️ คัดลอกไม่ได้ — เลือกข้อความในช่องแล้วกด Ctrl+C');
+  }
+}
+
+// ออกจากระบบ/สลับบัญชี: ล้างสถานะหมวดนี้ออกจากหน้า (DOM ก็ล้าง ไม่ใช่แค่ซ่อน) — แถบย้อนกลับมีชื่อรุ่น/โปร และปุ่มย้อนกลับใช้สิทธิ์ของคนใหม่ไม่ได้
+function catReset() {
+  Object.assign(cat, { tab: 'products', q: '', type: '', status: 'all', promos: [], deals: [], promoErr: '', showOld: false, last: null, draft: null, exJson: null, editId: null, promoId: null, pdf: catPdfNew(), pdfTok: cat.pdfTok + 1 });
+  pdfRender(); pdfStatus();
+  cEl('catList').innerHTML = '<div class="empty">กำลังโหลดรายการสินค้า…</div>';
+  cEl('promoList').innerHTML = '<div class="empty">กำลังโหลดโปรโมชัน…</div>';
+  cEl('catAlert').innerHTML = '';
+  cEl('catUndo').hidden = true; cEl('catUndoText').textContent = ''; cEl('catUndoBtn').hidden = true;
+  cEl('catSearch').value = ''; cEl('catType').value = ''; cEl('promoShowOld').checked = false;
+  document.querySelectorAll('#catStatus button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.status === 'all')));
+  ['catEditDlg', 'promoDlg', 'dealDlg', 'catExportDlg'].forEach(id => { const d = cEl(id); if (d.open) d.close(); });
+  ['cefPrice', 'cefCode', 'pfName', 'pfCode', 'pfConds', 'pfSource', 'dfSearch', 'dfPercent', 'dfSet', 'dfLabel', 'dfGift', 'dfGiftVal', 'exText'].forEach(id => { cEl(id).value = ''; });
+  ['catEditName', 'dealPromo', 'exInfo'].forEach(id => { cEl(id).textContent = ''; });
+  ['cefErr', 'pfErr', 'dfErr', 'exErr'].forEach(id => { cEl(id).hidden = true; });
+  cEl('dfPick').innerHTML = '';
+  cEl('dfPreview').textContent = '';
+}
+
+(function catInit() {
+  cEl('catType').innerHTML = '<option value="">ทุกประเภท</option>' + CAT_BOT.map(k => '<option value="' + k + '">' + escapeHtml(CAT_TH[k] || k) + '</option>').join('') + '<option value="_none">' + CAT_NO_BOT + '</option>';
+  cEl('cefCat').innerHTML = '<option value="">— ไม่ระบุ —</option>' + CAT_BOT.map(k => '<option value="' + k + '">' + escapeHtml(CAT_TH[k] || k) + '</option>').join('');
+  cEl('dfKind').innerHTML = Object.entries(CAT_KIND).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+  cEl('catTabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (!b) return; cat.tab = b.dataset.tab; renderCatalog(); });
+  cEl('catStatus').addEventListener('click', e => {
+    const b = e.target.closest('button[data-status]'); if (!b) return;
+    cat.status = b.dataset.status;
+    document.querySelectorAll('#catStatus button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderCatList();
+  });
+  cEl('catSearch').addEventListener('input', e => { cat.q = e.target.value; renderCatList(); });
+  cEl('catType').addEventListener('change', e => { cat.type = e.target.value; renderCatList(); });
+  cEl('catReload').addEventListener('click', async () => { await Promise.all([loadProducts(), loadCatalog()]); renderAll(); });
+  cEl('catUndoBtn').addEventListener('click', catUndo);
+  cEl('catExport').addEventListener('click', catExportOpen);
+  cEl('promoAdd').addEventListener('click', () => promoOpen(null));
+  cEl('promoShowOld').addEventListener('change', e => { cat.showOld = e.target.checked; renderCatPromos(); });
+  const list = cEl('catList');
+  list.addEventListener('change', e => { const b = e.target.closest('input[data-act="toggle"]'); if (b) catToggle(b.closest('tr').dataset.id, b.checked, b); });
+  list.addEventListener('click', e => { const b = e.target.closest('button[data-act="edit"]'); if (b) catEditOpen(b.closest('tr').dataset.id); });
+  cEl('promoList').addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    const promo = b.closest('.promo').dataset.id, deal = b.closest('.deal') && b.closest('.deal').dataset.deal;
+    ({ dadd: () => dealOpen(promo, null), pedit: () => promoOpen(promo), ptoggle: () => promoToggle(promo), pfile: () => promoOpenFile(promo), dedit: () => dealOpen(promo, deal), ddel: () => dealDelete(promo, deal) })[b.dataset.act]();
+  });
+  cEl('catEditForm').addEventListener('submit', e => { e.preventDefault(); catEditSave(); });
+  cEl('cefCancel').addEventListener('click', () => cEl('catEditDlg').close());
+  cEl('promoForm').addEventListener('submit', e => { e.preventDefault(); promoSave(); });
+  cEl('pfCancel').addEventListener('click', () => cEl('promoDlg').close());
+  cEl('dealForm').addEventListener('submit', e => { e.preventDefault(); dealSave(); });
+  cEl('dfCancel').addEventListener('click', () => cEl('dealDlg').close());
+  cEl('dfKind').addEventListener('change', e => { cat.draft.kind = e.target.value; cat.draft.sel = []; dealSync(); });
+  cEl('dfSearch').addEventListener('input', e => { cat.draft.q = e.target.value; dealPickRender(); });
+  ['dfPercent', 'dfSet', 'dfGift', 'dfGiftVal'].forEach(id => cEl(id).addEventListener('input', dealPreview));
+  cEl('dfPick').addEventListener('change', e => {
+    const i = e.target.closest('input'); if (!i) return;
+    const d = cat.draft;
+    if (d.kind === 'set_price') d.sel = i.checked ? d.sel.concat(i.value) : d.sel.filter(x => x !== i.value);
+    else d.sel = [i.value];
+    dealPickRender(); dealPreview();
+    const again = [...cEl('dfPick').querySelectorAll('input')].find(x => x.value === i.value); if (again) again.focus();
+  });
+  // ลากไฟล์: วางตรงไหนของหน้าต่างโปรก็ได้ (กันเบราว์เซอร์เปิดไฟล์ทับหน้าแอป) · ลากลงแท็บโปรโมชันตรง ๆ = เปิดหน้าต่างเพิ่มโปรพร้อมไฟล์
+  const dlg = cEl('promoDlg'), zone = cEl('pfDrop');
+  const hasFiles = e => !!(e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files'));
+  ['dragenter', 'dragover'].forEach(ev => dlg.addEventListener(ev, e => { if (!hasFiles(e)) return; e.preventDefault(); zone.classList.add('over'); }));
+  dlg.addEventListener('dragleave', e => { if (e.target === dlg || !dlg.contains(e.relatedTarget)) zone.classList.remove('over'); });
+  dlg.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); zone.classList.remove('over'); pdfPick(e.dataTransfer.files); });
+  dlg.addEventListener('close', () => { cat.pdfTok++; cat.pdf = catPdfNew(); pdfStatus(); pdfRender(); zone.classList.remove('over'); });
+  zone.addEventListener('click', () => cEl('pfFile').click());
+  cEl('pfFile').addEventListener('change', e => { pdfPick(e.target.files); e.target.value = ''; });
+  cEl('pfRead').addEventListener('click', pdfRead);
+  cEl('pfPdfView').addEventListener('click', () => promoOpenFile(cat.promoId));
+  cEl('pfPdfRemove').addEventListener('click', () => {
+    const p = cat.pdf;
+    if (p.file) { p.file = null; p.draft = null; p.deals = null; pdfStatus(); } else if (p.existing) p.removeExisting = true;
+    pdfRender();
+  });
+  cEl('pfDraft').addEventListener('change', e => { const i = e.target.closest('input[data-i]'); if (i && cat.pdf.deals) cat.pdf.deals[Number(i.dataset.i)].on = i.checked; });
+  const pane = cEl('catPanePromos');
+  pane.addEventListener('dragover', e => { if (hasFiles(e) && isWriter() && !dlg.open) e.preventDefault(); });
+  pane.addEventListener('drop', e => { if (!hasFiles(e) || !isWriter() || dlg.open) return; e.preventDefault(); promoOpen(null); pdfPick(e.dataTransfer.files); });
+  cEl('exScope').addEventListener('change', catExportLoad);
+  cEl('exClose').addEventListener('click', () => cEl('catExportDlg').close());
+  cEl('exCopy').addEventListener('click', catExportCopy);
+  cEl('exDownload').addEventListener('click', catExportDownload);
+})();
 
 (function opsInit() {
   const opt =(obj, first) => (first ? '<option value="all">' + first + '</option>' : '') + Object.entries(obj).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
@@ -8809,6 +9785,7 @@ function renderLoginAccounts() {
 // และล้างพนักงานขายร่วมที่เลือกไว้ (คนเดิมเลือกไว้ให้บิลของตัวเอง ไม่ใช่ของคนใหม่) — บอกให้รู้ทุกครั้ง
 function onAccountSwitched() {
   opsReset();                    // Ops Board เป็นข้อมูลของเจ้าของ — สลับเป็นคนอื่นต้องไม่ค้างอยู่ในหน้า
+  catReset();                    // หมวดราคา/โปรโมชัน: แถบย้อนกลับ/ฟอร์มค้างของคนเดิมใช้สิทธิ์ของคนใหม่ไม่ได้
   coSellers = [];
   launchDraft = null;
   mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
