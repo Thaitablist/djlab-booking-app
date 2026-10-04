@@ -2904,6 +2904,9 @@ async function loadStats() {
 }
 
 function qtyOf(id) { return stockLevelMap.hasOwnProperty(id) ? stockLevelMap[id] : 0; }
+// products.stocked = false → รุ่นที่เป็นแค่รายการราคา/เลิกขาย (ร้านไม่ได้สต็อก): ไม่ขึ้นผนัง · รายการหมด/ใกล้หมด · ตัวเลือกรับเข้า ถ้าไม่มียอดค้าง
+// (มียอดค้าง = ยังเห็นเสมอ — ของที่มีอยู่จริงต้องไม่หาย) · undefined (หน้าที่ขึ้นก่อนรัน migration 035 — ยังไม่มีคอลัมน์) = แสดงตามเดิม
+function onShelf(p) { return p.stocked !== false || (p.current_qty !== undefined ? p.current_qty : qtyOf(p.id)) !== 0; }
 
 function getMergedProducts() {
   return products.map(p => {
@@ -3147,6 +3150,7 @@ function wallQuery() {
   return wall.mode === 'find' ? document.getElementById('productSearch').value.trim().toLowerCase() : '';
 }
 function wallVisible(p, ignore) {
+  if (!onShelf(p)) return false;                           // stocked = false และไม่มียอดค้าง → ไม่ขึ้นผนัง/รายการหมด-ใกล้หมด
   const q = wallQuery();
   if (q && ![p.name, p.sku, p.barcode_ean13].some(x => String(x || '').toLowerCase().includes(q))) return false;
   if (ignore !== 'flags' && (wall.low || wall.out)) {
@@ -3171,7 +3175,7 @@ function buildWings(merged) {
     });
   }
   // ปีกหมวดมาจากสินค้าทุกตัว (ไม่ใช่แค่ที่ผ่านตัวกรอง) ปีกจึงไม่หายไปมาเวลากดตัวกรอง — จำตำแหน่งได้
-  return [...new Set(merged.map(p => catLabel(p.category)))].sort(catCmp).map(c => {
+  return [...new Set(merged.filter(onShelf).map(p => catLabel(p.category)))].sort(catCmp).map(c => {
     const items = vis.filter(p => catLabel(p.category) === c);
     return { key: 'c:' + c, title: c, cls: '', shelves: [{ label: null, items }], items };
   });
@@ -4006,8 +4010,8 @@ async function rcvConfirm() {
 // ---- นับสต็อก: เลือกขอบเขต → ยิง/กด +− → ลงปรับยอดเฉพาะรุ่นที่ไม่ตรง ------------
 const cnt = { scope: '', picks: [], started: false, ids: [], counted: {}, seen: {}, units: {}, touched: [] };
 function countScopeOptions() {
-  const brands = WALL_BRANDS.filter(b => products.some(p => p.brand === b));
-  const cats = [...new Set(products.map(p => catLabel(p.category)))].sort(catCmp);
+  const brands = WALL_BRANDS.filter(b => products.some(p => p.brand === b && onShelf(p)));
+  const cats = [...new Set(products.filter(onShelf).map(p => catLabel(p.category)))].sort(catCmp);
   return '<optgroup label="ทั้งปีกแบรนด์">' + brands.map(b => '<option value="' + escapeHtml('b:' + b) + '">' + escapeHtml(brandLabel(b)) + '</option>').join('') + '</optgroup>' +
     '<optgroup label="ทั้งหมวด">' + cats.map(c => '<option value="' + escapeHtml('c:' + c) + '">' + escapeHtml(c) + '</option>').join('') + '</optgroup>' +
     '<option value="pick">เลือกรุ่นเอง — คลิกรุ่นบนผนัง</option>';
@@ -4019,7 +4023,7 @@ function scopeLabel(key) {
 // รุ่นที่ปิดใช้งานแล้วแต่ยังมียอดค้าง ต้องนับด้วย ไม่งั้นยอดผีค้างอยู่ตลอดไป
 function scopeIds(key) {
   if (key === 'pick') return cnt.picks.slice();
-  const live = p => p.is_active || qtyOf(p.id) !== 0;
+  const live = p => (p.is_active || qtyOf(p.id) !== 0) && onShelf(p);
   if (key.startsWith('b:')) return products.filter(p => live(p) && p.brand === key.slice(2)).map(p => p.id);
   if (key.startsWith('c:')) return products.filter(p => live(p) && catLabel(p.category) === key.slice(2)).map(p => p.id);
   return [];
@@ -4213,7 +4217,7 @@ function gotoMovement(productId, type) {
 function renderMovementProductOptions() {
   const sel = document.getElementById('movProduct');
   const prevValue = sel.value;
-  const sorted = [...products].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+  const sorted = [...products.filter(onShelf)].sort((a, b) => a.name.localeCompare(b.name, 'th'));
   sel.innerHTML = '<option value="">— เลือกสินค้า —</option>' + sorted.map(p =>
     `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.sku)})${!p.is_active ? ' — ปิดใช้งาน' : ''}</option>`
   ).join('');
@@ -10940,7 +10944,7 @@ function askCodeKind(value, forReceive) {
       '<div class="hint" style="margin:0 0 10px;">เลขใต้แท่งบนกล่อง เหมือนกันทุกกล่องของรุ่นนี้</div>' +
       (isWriter()
         ? '<select id="linkProductSel" class="input"><option value="">— เลือกรุ่นสินค้า —</option>' +
-          products.filter(p => !p.barcode_ean13).map(p =>
+          products.filter(p => !p.barcode_ean13 && onShelf(p)).map(p =>
             '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
           '</select>' +
           '<button class="btn btn-primary" type="button" style="margin-top:8px;" onclick="linkBarcode(\'' + esc + '\')">ผูกเป็นบาร์โค้ดของรุ่น</button>'
@@ -10951,7 +10955,7 @@ function askCodeKind(value, forReceive) {
       '<div class="hint" style="margin:0 0 10px;">สติกเกอร์ SER. NO. ไม่ซ้ำกับเครื่องอื่น ใช้ตอนรับเข้าทีละเครื่อง</div>' +
       (forReceive
         ? '<select id="serialModelSel" class="input"><option value="">— เป็นเครื่องของรุ่น —</option>' +
-          products.filter(p => p.is_active).slice().sort(byModel).map(p =>
+          products.filter(p => p.is_active && onShelf(p)).slice().sort(byModel).map(p =>
             '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
           '</select>' +
           '<button class="btn btn-primary" type="button" style="margin-top:8px;" onclick="rcvSerialFor()">เพิ่มเข้ารอบรับเข้า</button>'

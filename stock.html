@@ -554,6 +554,10 @@
       <input type="checkbox" id="pfActive" checked>
       <label for="pfActive">เปิดใช้งานสินค้านี้</label>
     </div>
+    <div class="form-group checkbox-row" id="pfStockedRow" hidden>
+      <input type="checkbox" id="pfStocked" checked>
+      <label for="pfStocked">ร้านสต็อกรุ่นนี้ (ขึ้นผนังสต็อก) — ปิดไว้ = เป็นแค่รายการราคา</label>
+    </div>
     <button class="btn btn-primary" id="productSaveBtn" onclick="saveProduct()">บันทึกสินค้า</button>
     <div id="pfUnits" style="margin-top:18px;"></div>
   </div>
@@ -834,7 +838,7 @@ function renderAll() {
 }
 
 function renderDashboard() {
-  const merged = getMergedProducts();
+  const merged = getMergedProducts().filter(onShelf);
   const lowStock = merged.filter(p => p.low_stock);
   const totalValue = merged.reduce((s, p) => s + (p.current_qty * (parseFloat(p.sell_price) || 0)), 0);
 
@@ -950,6 +954,9 @@ function thaiDate(d) {
 }
 function nameOf(id) { const p = products.find(x => x.id === id); return p ? p.name : '(ไม่พบสินค้า)'; }
 function qtyOf(id) { return stockLevelMap.hasOwnProperty(id) ? stockLevelMap[id] : 0; }
+// products.stocked = false → รุ่นที่เป็นแค่รายการราคา/เลิกขาย (ร้านไม่ได้สต็อก): ไม่ขึ้นผนัง · รายการหมด/ใกล้หมด · ตัวเลือกรับเข้า ถ้าไม่มียอดค้าง
+// (มียอดค้าง = ยังเห็นเสมอ — ของที่มีอยู่จริงต้องไม่หาย) · undefined (หน้าที่ขึ้นก่อนรัน migration 035 — ยังไม่มีคอลัมน์) = แสดงตามเดิม
+function onShelf(p) { return p.stocked !== false || (p.current_qty !== undefined ? p.current_qty : qtyOf(p.id)) !== 0; }
 
 // จัดตามแบรนด์/หมวด — จำแยกรายคนบนเครื่องนี้ · คีย์เดียวกับ desk.html
 const GROUP_KEY = 'djlab.stockGroup.v1:';
@@ -970,6 +977,7 @@ function setWallGroup(g) {
 }
 
 function wallVisible(p, ignoreFlags) {
+  if (!onShelf(p)) return false;                           // stocked = false และไม่มียอดค้าง → ไม่ขึ้นผนัง/รายการหมด-ใกล้หมด
   const q = wall.mode === 'find' ? (document.getElementById('productSearch').value || '').trim().toLowerCase() : '';
   if (q && ![p.name, p.sku, p.barcode_ean13].some(x => String(x || '').toLowerCase().includes(q))) return false;
   if (!ignoreFlags && (wall.low || wall.out)) {
@@ -988,7 +996,7 @@ function buildWings(merged) {
       return { key: 'b:' + b, title: brandLabel(b), shelves, items: shelves.flatMap(s => s.items) };
     });
   }
-  return [...new Set(merged.map(p => catLabel(p.category)))].sort(catCmp).map(c => {
+  return [...new Set(merged.filter(onShelf).map(p => catLabel(p.category)))].sort(catCmp).map(c => {
     const items = vis.filter(p => catLabel(p.category) === c);
     return { key: 'c:' + c, title: c, shelves: [{ label: null, items }], items };
   });
@@ -1419,13 +1427,13 @@ function askReceiveCode(value) {
     '<div class="alert alert-gold" style="margin-top:12px;">ยังไม่มีอะไรในระบบผูกกับรหัส <strong>' + esc + '</strong></div>' +
     '<div class="card" style="margin:10px 0 0;"><div style="font-weight:700;">ซีเรียลของเครื่องเครื่องนี้ — เป็นของรุ่น</div>' +
       '<select id="serialModelSel" class="form-input" style="margin:8px 0;"><option value="">— เลือกรุ่นสินค้า —</option>' +
-      products.filter(p => p.is_active).slice().sort(byModel).map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('') +
+      products.filter(p => p.is_active && onShelf(p)).slice().sort(byModel).map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('') +
       '</select><button class="btn btn-primary" type="button" onclick="rcvSerialFor()">เพิ่มเข้ารอบรับเข้า</button></div>' +
     '<div class="card" style="margin:10px 0 0;"><div style="font-weight:700;">บาร์โค้ดของรุ่นสินค้า</div>' +
       '<p class="sh-meta" style="margin:4px 0 8px;">เลขใต้แท่งบนกล่อง เหมือนกันทุกกล่อง — ผูกได้เฉพาะเจ้าของร้าน/ผู้ดูแล</p>' +
       (isWriter()
         ? '<select id="linkProductSel" class="form-input" style="margin-bottom:8px;"><option value="">— เลือกรุ่นสินค้า —</option>' +
-          products.filter(p => !p.barcode_ean13).map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('') +
+          products.filter(p => !p.barcode_ean13 && onShelf(p)).map(p => '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>').join('') +
           '</select><button class="btn" type="button" onclick="linkBarcode(\'' + esc + '\')">ผูกเป็นบาร์โค้ดของรุ่น</button>'
         : '<div class="alert alert-plain" style="margin:0;">แจ้งเจ้าของร้านหรือผู้ดูแลระบบให้ผูกให้ก่อน</div>') + '</div>';
 }
@@ -1534,7 +1542,7 @@ function scopeLabel(key) {
 }
 function scopeIds(key) {
   if (key === 'pick') return cnt.picks.slice();
-  const live = p => p.is_active || qtyOf(p.id) !== 0;     // ปิดใช้งานแต่ยังมียอดค้าง ต้องนับด้วย
+  const live = p => (p.is_active || qtyOf(p.id) !== 0) && onShelf(p);     // ปิดใช้งานแต่ยังมียอดค้าง ต้องนับด้วย
   if (key.startsWith('b:')) return products.filter(p => live(p) && p.brand === key.slice(2)).map(p => p.id);
   if (key.startsWith('c:')) return products.filter(p => live(p) && catLabel(p.category) === key.slice(2)).map(p => p.id);
   return [];
@@ -1584,8 +1592,8 @@ function countLines() { return cnt.ids.map(id => { const exp = qtyOf(id), got = 
 function countReason() { return 'นับสต็อก ' + thaiDate(new Date()); }
 function countTrayHtml(note) {
   if (!cnt.started) {
-    const brands = WALL_BRANDS.filter(b => products.some(p => p.brand === b));
-    const cats = [...new Set(products.map(p => catLabel(p.category)))].sort(catCmp);
+    const brands = WALL_BRANDS.filter(b => products.some(p => p.brand === b && onShelf(p)));
+    const cats = [...new Set(products.filter(onShelf).map(p => catLabel(p.category)))].sort(catCmp);
     const opt = (v, t) => '<option value="' + escapeHtml(v) + '"' + (cnt.scope === v ? ' selected' : '') + '>' + escapeHtml(t) + '</option>';
     return '<div class="tray-h"><button type="button" class="tray-open" onclick="toggleTray()" aria-expanded="' + trayOpen + '"><strong>นับสต็อก · ' +
         scopeIds(cnt.scope).length + ' รุ่น</strong>' + (note || '<span>' + escapeHtml(scopeLabel(cnt.scope || 'pick')) + '</span>') + '</button>' +
@@ -1677,7 +1685,7 @@ function countReset() {
 function renderMovementProductOptions() {
   const sel = document.getElementById('movProduct');
   const prevValue = sel.value;
-  const sorted = [...products].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+  const sorted = [...products.filter(onShelf)].sort((a, b) => a.name.localeCompare(b.name, 'th'));
   sel.innerHTML = sorted.map(p =>
     `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.sku)})${!p.is_active ? ' — ปิดใช้งาน' : ''}</option>`
   ).join('');
@@ -1808,7 +1816,7 @@ function openProductModal(productId) {
   const saveBtn = document.getElementById('productSaveBtn');
   const notice = document.getElementById('productModalReadonlyNotice');
 
-  const fields = ['pfSku', 'pfName', 'pfBrand', 'pfCategory', 'pfBarcode', 'pfSell', 'pfReorder', 'pfActive'];
+  const fields = ['pfSku', 'pfName', 'pfBrand', 'pfCategory', 'pfBarcode', 'pfSell', 'pfReorder', 'pfActive', 'pfStocked'];
 
   if (productId) {
     const p = products.find(x => x.id === productId);
@@ -1822,6 +1830,8 @@ function openProductModal(productId) {
     document.getElementById('pfSell').value = p.sell_price;
     document.getElementById('pfReorder').value = p.reorder_point;
     document.getElementById('pfActive').checked = p.is_active;
+    document.getElementById('pfStockedRow').hidden = !('stocked' in p);          // ยังไม่รัน 035 = ไม่มีช่องนี้
+    document.getElementById('pfStocked').checked = p.stocked !== false;
   } else {
     title.textContent = 'เพิ่มสินค้าใหม่';
     document.getElementById('pfSku').value = '';
@@ -1832,6 +1842,7 @@ function openProductModal(productId) {
     document.getElementById('pfSell').value = '';
     document.getElementById('pfReorder').value = '';
     document.getElementById('pfActive').checked = true;
+    document.getElementById('pfStockedRow').hidden = true;                       // รุ่นใหม่ใช้ค่าเริ่มต้นของฐานข้อมูล (stocked = true)
   }
 
   const writer = isWriter();
@@ -1907,6 +1918,7 @@ async function saveProduct() {
   if (isNaN(reorder_point) || reorder_point < 0) { showToast('⚠️ กรุณากรอกจุดสั่งซื้อซ้ำให้ถูกต้อง'); return; }
 
   const payload = { sku, name, brand, category, barcode_ean13, sell_price, reorder_point, is_active };
+  if (!document.getElementById('pfStockedRow').hidden) payload.stocked = document.getElementById('pfStocked').checked;
 
   let error;
   if (editingProductId) {
@@ -2221,7 +2233,7 @@ async function onScanned(code, viaGun) {
       (isWriter()
         ? '<select id="linkProductSel" class="form-input">' +
           '<option value="">— เลือกรุ่นสินค้า —</option>' +
-          products.filter(p => !p.barcode_ean13).map(p =>
+          products.filter(p => !p.barcode_ean13 && onShelf(p)).map(p =>
             '<option value="' + p.id + '">' + escapeHtml(p.name) + ' (' + escapeHtml(p.sku) + ')</option>').join('') +
           '</select>' +
           '<button class="btn btn-primary" style="margin-top:8px;" onclick="linkBarcode(\'' + esc + '\')">ผูกเป็นบาร์โค้ดของรุ่น</button>'
