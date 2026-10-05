@@ -1,0 +1,549 @@
+/**
+ * เทสต์หมวด "งานของฉัน" ของ desk.html (#tasks · Alt+T · Work Checklist · migration 037 + 038)
+ *   รัน: node tests/desk-worklist.mjs
+ *   ถ่ายภาพ: WORK_SHOTS=<โฟลเดอร์> node tests/desk-worklist.mjs
+ *
+ * ตัวรัน CDP เดียวกับ desk-ops · ฐานข้อมูลปลอมอยู่ที่ tests/lib/worklist-mock.mjs (จำลอง RLS + ฟังก์ชัน work_* ตามตารางสิทธิ์ของ 038 ·
+ * ชุดตรวจของ SQL ตัวจริงอยู่ที่ Console/sql-tests/test038.mjs) — ที่นี่ตรวจฝั่งหน้าจอ: ใครเห็นอะไร · ปุ่มไหนโผล่ · ฟอร์มขั้น 1 ไม่มีช่องลิงก์โซเชียล ·
+ * ขั้น 2 ต้องลิงก์ครบ+โดเมนตรง · ส่งอะไรไปที่ฟังก์ชัน · ล้างหน้าตอนสลับบัญชี · Realtime · ยังไม่ได้รัน migration
+ *
+ *  1. พนักงาน (Zen): เมนู/ป้ายชื่อ/ตัวเลขแดง · แท็บที่เห็น · รายการงานของฉัน (กลุ่ม · ป้ายขั้น · รอลงโซเชียล · ความเห็นผู้ตรวจ) · ไม่เห็นใบคนอื่น
+ *  2. ส่งงาน: ขั้น 1 (ไฟล์ · ไม่มีช่องโซเชียล) · ขั้น 2 (ลิงก์ครบ+โดเมน) · ขั้นเดียว · รูป (ย่อ+อัป+เก็บกวาดเมื่อล้ม) · ปุ่มยื่นคำขอ
+ *  3. พนักงานสั่ง/แก้งาน (ใบที่ตัวเองสั่ง) · เลือกผู้รับได้เฉพาะพนักงาน · ไม่มีแท็บตรวจงาน
+ *  4. คำขอ (ผู้ยื่น): ที่ฉันยื่น · แนบใบงาน · ยื่น/ถอน · ถูกปฏิเสธเห็นเหตุผล
+ *  5. ผู้ดูแล (Nui): คิวตรวจเฉพาะงานของพนักงาน · ผ่านขั้นไฟล์/ปิดงาน/ส่งกลับ · กล่องคำขอ ตัดสิน (ปฏิเสธต้องมีเหตุผล · ใครตัดสินก่อน)
+ *  6. เจ้าของ (TiBass): ตรวจได้ทุกใบ · เห็นคำขอทุกใบ แต่เลขแดงนับเฉพาะที่ถึงเจ้าของ · ปิดงาน (work_close)
+ *  7. Realtime · ยังไม่ได้รัน 037/038 · โหลดล้ม · XSS · กันกดซ้ำ · ล้างหน้าตอนออกจากระบบ/สลับบัญชี
+ */
+
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { mkdirSync } from 'node:fs';
+import { HARNESS } from './lib/page-test.mjs';
+import { runCdpPage } from './lib/cdp-page.mjs';
+import { WORK_MOCK } from './lib/worklist-mock.mjs';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const { MOCK: MOCK3 } = await import(pathToFileURL(join(root, 'tests/desk-home3.mjs')).href);
+const SHOTS = process.env.WORK_SHOTS || null;
+const pageRoot = process.env.WORK_ROOT || root;   // ทดสอบหน้าฉบับอื่น (mutation) ได้
+if (SHOTS) mkdirSync(SHOTS, { recursive: true });
+
+const TESTS = `<script>
+window.addEventListener('load', () => setTimeout(runTests, 300));
+${HARNESS}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const $ = id => document.getElementById(id);
+const frames = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+async function login(name) {
+  $('loginEmail').value = name + '@x';
+  $('loginPassword').value = 'x';
+  await doLogin();
+  await sleep(500);
+}
+async function shot(name) {
+  await frames(); await sleep(150);
+  await new Promise(r => { window.__shot = r; console.log('[SHOT] ' + name); });
+}
+const vis = el => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+const rpcs = fn => CALLS.filter(c => c.op === 'rpc' && c.fn === fn);
+const lastRpc = fn => rpcs(fn)[rpcs(fn).length - 1];
+const workCalls = () => CALLS.filter(c => /^work_/.test(c.table || '') || (c.op === 'rpc' && /^work_/.test(c.fn || '')));
+const tab = n => document.querySelector('#workTabs .mail-tab[data-tab="' + n + '"]').click();
+const tabsShown = () => [...document.querySelectorAll('#workTabs .mail-tab')].filter(b => !b.hidden).map(b => b.dataset.tab).join(',');
+const mineIds = () => [...document.querySelectorAll('#workMineList .wk-task')].map(e => e.dataset.id);
+const mineGroups = () => [...document.querySelectorAll('#workMineList .wk-group')].map(g => g.querySelector('h3 > span').firstChild.textContent.trim());
+const groupIds = title => { const g = [...document.querySelectorAll('#workMineList .wk-group')].find(x => x.querySelector('h3 > span').firstChild.textContent.trim() === title); return g ? [...g.querySelectorAll('.wk-task')].map(e => e.dataset.id) : null; };
+const cardOf = (root, id) => document.querySelector(root + ' .wk-task[data-id="' + id + '"]');
+const txt = id => $(id).textContent;
+const toast = () => $('toast').textContent;
+const badge = () => { const b = $('navBadge-tasks'); return b && !b.hidden ? b.textContent : ''; };
+const fatalText = () => (document.getElementById('fatalError') || {}).textContent || '';
+const openMine = id => { cardOf('#workMineList', id).click(); };
+const taskOnServer = id => WORK.tasks.find(t => t.id === id);
+const reqOnServer = id => WORK.reqs.find(r => r.id === id);
+const lastEv = (id, kind) => WORK.events.filter(e => e.task_id === id && (!kind || e.kind === kind)).pop();
+const dlgOpen = id => $(id).open;
+const pngFile = (w, h) => new Promise(res => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.fillStyle = '#3366cc'; g.fillRect(0, 0, w, h); c.toBlob(b => res(new File([b], 'p.png', { type: 'image/png' })), 'image/png'); });
+const setVal = (id, v) => { const e = $(id); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); };
+const closeAll = () => document.querySelectorAll('dialog[open]').forEach(d => d.close());
+const isRed = el => !!el && getComputedStyle(el).color === 'rgb(204, 0, 26)' && Number(getComputedStyle(el).fontWeight) >= 600;      // --red #CC001A ตัวหนา (เจ้าของสั่ง: คำเตือน/ข้อความสำคัญเป็นสีแดง)
+const redTexts = root => [...root.querySelectorAll('.wk-red')].filter(isRed).map(e => e.textContent);
+
+async function runTests() {
+  L('=== งานของฉัน (#tasks) ===');
+  WORK.seed();
+  // ── 1. พนักงาน (Zen) ───────────────────────────────────────────────────
+  await login('zen');
+  const nav = document.querySelector('#navList .nav-item[data-s="tasks"]');
+  ok('พนักงานเห็นเมนู "งานของฉัน" ในกลุ่ม "พนักงาน" (ป้ายเมนู = ชื่อหน้า)', !!nav && nav.querySelector('.lbl').textContent === 'งานของฉัน' && nav.closest('.nav-group').querySelector('.nav-group-title').textContent === 'พนักงาน' && /Alt\\+T/.test(nav.title));
+  ok('ตัวเลขแดงข้างเมนูขึ้นตั้งแต่ล็อกอิน (ไม่ต้องเปิดหมวด): ต้องทำ 4 (เกินกำหนด + ส่งกลับแก้ + รอลงโซเชียล + ขั้นเดียว)', badge() === '4', badge());
+  ok('ล็อกอินแล้วโหลดงาน (ตาราง work_*) แต่ยังไม่เขียนอะไรเลย', workCalls().some(c => c.op === 'select' && c.table === 'work_tasks') && !workCalls().some(c => ['insert', 'update', 'delete'].includes(c.op)) && rpcs('work_create').length === 0);
+  ok('showSection("tasks") สำเร็จ · hash = #tasks · หัวหน้า = งานของฉัน', showSection('tasks') === true && location.hash === '#tasks' && $('pageTitle').textContent === 'งานของฉัน' && !$('sec-tasks').hidden);
+  await sleep(300); await frames();
+  ok('พนักงานเห็นแท็บ งานของฉัน · สั่งงาน · คำขอ — ไม่เห็น "ตรวจงาน"', tabsShown() === 'mine,assign,req', tabsShown());
+  ok('สรุป: ต้องทำ 4 · เกินกำหนด 1 · รอตรวจ 1', txt('workStatTodo') === '4' && txt('workStatLate') === '1' && txt('workStatWait') === '1', [txt('workStatTodo'), txt('workStatLate'), txt('workStatWait')].join('/'));
+  ok('เห็นเฉพาะใบของตัวเอง: ไม่มีใบของ Nutty / Nui / Pran ในรายการ · ใบที่ Zen สั่งให้คนอื่น (d1) ไม่อยู่ในแท็บนี้', ['b1', 'b2', 'b3', 'c1', 'e1', 'd1'].every(id => !mineIds().includes(id)) && mineIds().length === 5, mineIds().join(','));
+  ok('กลุ่มเรียง: ต้องทำก่อน → กำลังจะถึง → ส่งแล้ว รอตรวจ → เสร็จแล้ว 30 วัน', mineGroups().join('|') === 'ต้องทำก่อน|กำลังจะถึง|ส่งแล้ว รอตรวจ|เสร็จแล้ว 30 วันล่าสุด', mineGroups().join('|'));
+  ok('ต้องทำก่อน = เกินกำหนด (a1) + ส่งกลับแก้ (a2) · กำลังจะถึง เรียงตามกำหนด: a4 (26 ชม.) ก่อน a3 (30 ชม.)', groupIds('ต้องทำก่อน').join() === 'a1,a2' && groupIds('กำลังจะถึง').join() === 'a4,a3', groupIds('ต้องทำก่อน').join() + ' / ' + groupIds('กำลังจะถึง').join());
+  const a1 = cardOf('#workMineList', 'a1'), a2 = cardOf('#workMineList', 'a2'), a3 = cardOf('#workMineList', 'a3'), a4 = cardOf('#workMineList', 'a4');
+  ok('a1: ป้าย "เกินกำหนด 2 ชม." + ขอบแดง · ป้ายขั้น "ขั้น 1 จาก 2 · ส่งไฟล์ให้ตรวจก่อน" · ช่อง Instagram = "ลงหลังไฟล์ผ่าน" (ยังไม่ถามลิงก์โซเชียล)', /เกินกำหนด 2 ชม/.test(a1.textContent) && a1.classList.contains('edge-red') && /ขั้น 1 จาก 2 · ส่งไฟล์ให้ตรวจก่อน/.test(a1.textContent) && /Instagram · ลงหลังไฟล์ผ่าน/.test(a1.textContent) && !/ยังไม่แนบลิงก์/.test(a1.textContent));
+  ok('a2: "ส่งกลับแก้" + ขอบเหลือง + ความเห็นผู้ตรวจ + ชื่อผู้ตรวจ', /ส่งกลับแก้/.test(a2.textContent) && a2.classList.contains('edge-warn') && /เสียงเบาไป/.test(a2.textContent) && /Nui/.test(a2.querySelector('.wk-quote').textContent));
+  ok('a3 (ผ่านขั้นไฟล์แล้ว): ป้าย "รอลงโซเชียล" (ไม่ใช่ "ยังไม่ส่ง") · "ขั้น 2 จาก 2" · ช่อง "ยังไม่แนบลิงก์โพสต์" ทั้ง 2 ช่อง · ข้อความตอนผ่าน "ไฟล์ผ่านแล้ว ลงโซเชียลได้เลย" + ชื่อผู้ตรวจ',
+    !!a3.querySelector('.wk-soc') && /รอลงโซเชียล/.test(a3.textContent) && !/ยังไม่ส่ง/.test(a3.textContent) && /ขั้น 2 จาก 2/.test(a3.textContent) && (a3.textContent.match(/ยังไม่แนบลิงก์โพสต์/g) || []).length === 2 && /ไฟล์ผ่านแล้ว ลงโซเชียลได้เลย/.test(a3.querySelector('.wk-quote').textContent) && /Fah/.test(a3.querySelector('.wk-quote').textContent));
+  ok('a4 (โพสต์โซเชียล ขั้นเดียว): "ขั้นเดียว · แนบลิงก์โพสต์ตอนส่ง" + "Facebook · ยังไม่แนบลิงก์"', /ขั้นเดียว · แนบลิงก์โพสต์ตอนส่ง/.test(a4.textContent) && /Facebook · ยังไม่แนบลิงก์/.test(a4.textContent));
+  ok('สถานะเป็นคำเสมอ (ไม่ใช้สีอย่างเดียว): ทุกการ์ดมีป้ายข้อความ .st', [a1, a2, a3, a4].every(c => !!c.querySelector('.st') && c.querySelector('.st').textContent.trim().length > 1));
+  if (${JSON.stringify(!!SHOTS)}) await shot('work-staff-mine.png');
+  const doneBtn = document.querySelector('#workMineList [data-act="toggle-done"]');
+  ok('"เสร็จแล้ว 30 วันล่าสุด" พับไว้ก่อน · กดแสดงแล้วเห็น a6 ขีดฆ่า', !!doneBtn && !mineIds().includes('a6'));
+  doneBtn.click(); await frames();
+  ok('กดแสดง: เห็น a6 (ผ่านแล้ว) — ขอบเขียว/ขีดฆ่า', mineIds().includes('a6') && cardOf('#workMineList', 'a6').classList.contains('done') && /ผ่านแล้ว/.test(cardOf('#workMineList', 'a6').textContent));
+  tab('review'); await frames();
+  ok('พนักงานเรียกแท็บ "ตรวจงาน" ตรง ๆ ไม่ได้: กลับมาที่งานของฉัน', $('workPaneMine').hidden === false && $('workPaneReview').hidden === true);
+
+  // ── 2. ส่งงาน ─────────────────────────────────────────────────────────
+  // ขั้น 1 (a1): ลิงก์ไฟล์/รูปเท่านั้น ไม่มีช่องลิงก์โซเชียล
+  openMine('a1'); await sleep(150);
+  ok('กดการ์ดงานของตัวเอง (ยังไม่ส่ง) → หน้าต่างส่งไฟล์ "ขั้น 1 จาก 2"', dlgOpen('workSubDialog') && txt('workSubTitle') === 'ส่งไฟล์ · ขั้น 1 จาก 2' && txt('workSubGo') === 'ส่งไฟล์ให้ตรวจ');
+  ok('ขั้น 1: ไม่มีช่องลิงก์โซเชียลเลย (ตรงกับกฎ "ตรวจก่อนค่อยลง") · มีคำอธิบาย 2 รอบ · มีช่องลิงก์ไฟล์ + รูป', document.querySelectorAll('#workSubChans input').length === 0 && /ตรวจ 2 รอบ/.test(txt('workSubChans')) && /Instagram/.test(txt('workSubChans')) && vis($('workSubLink')) && !$('workSubFileField').hidden && !$('workSubImgField').hidden);
+  ok('ขั้น 1: ส่งไม่ได้จนกว่าจะมีลิงก์ไฟล์หรือรูป — ปุ่มปิด + บอกว่าขาดอะไร', $('workSubGo').disabled && /ลิงก์ไฟล์หรือรูป/.test(txt('workSubNeed')) && /อย่างน้อย 1 อย่าง/.test(txt('workSubLinkHint')));
+  ok('คำเตือนในหน้าต่างส่งงานเป็นสีแดงตัวหนา: "ส่งแล้วแก้เองไม่ได้" · "ส่งช้า" · "ยังไม่ต้องลง Instagram" · "แนบลิงก์หรือรูปอย่างน้อย 1 อย่าง" · "ยังส่งไม่ได้ — ขาด…"', redTexts($('workSubDialog')).some(t => t === 'ส่งแล้วแก้เองไม่ได้') && redTexts($('workSubDialog')).some(t => t === '"ส่งช้า"') && redTexts($('workSubChans')).some(t => /ยังไม่ต้องลง Instagram/.test(t)) && isRed($('workSubLinkHint')) && isRed($('workSubNeed')) && /ยังส่งไม่ได้/.test(txt('workSubNeed')), JSON.stringify(redTexts($('workSubDialog'))));
+  setVal('workSubLink', 'http://drive.google.com/x');
+  ok('ลิงก์ไม่ใช่ https ถูกปฏิเสธ: ปุ่มยังปิด · บอกให้แก้ลิงก์ไฟล์', $('workSubGo').disabled && /แก้ลิงก์ไฟล์/.test(txt('workSubNeed')));
+  setVal('workSubLink', 'https://drive.google.com/file/d/1FLX4/view'); setVal('workSubNote', 'ไฟล์ตัดเสร็จแล้ว');
+  ok('ลิงก์ Drive ถูกต้อง: ปุ่มเปิด · ไม่มีข้อความขาดอะไร', !$('workSubGo').disabled && txt('workSubNeed') === '');
+  $('workSubForm').requestSubmit(); await sleep(400);
+  const s1 = lastRpc('work_submit');
+  ok('ส่งไฟล์ขั้น 1: work_submit ได้ลิงก์ Drive ไม่มี channel · ไม่มีรูป · มีข้อความ', !!s1 && s1.args.p_task === 'a1' && s1.args.p_links.length === 1 && s1.args.p_links[0].url.indexOf('https://drive.google.com') === 0 && !('channel' in s1.args.p_links[0]) && s1.args.p_image_paths.length === 0 && s1.args.p_note === 'ไฟล์ตัดเสร็จแล้ว', JSON.stringify(s1 && s1.args));
+  ok('ส่งสำเร็จ: หน้าต่างปิด · ข้อความ "ส่งไฟล์แล้ว" · ใบเป็น "รอตรวจ" ที่ฐาน (phase ยัง content) · ตัวเลขแดงเหลือ 3', !dlgOpen('workSubDialog') && /ส่งไฟล์แล้ว/.test(toast()) && taskOnServer('a1').status === 'submitted' && taskOnServer('a1').phase === 'content' && lastEv('a1', 'submitted').phase === 'content' && badge() === '3', badge());
+  ok('a1 ย้ายไปกลุ่ม "ส่งแล้ว รอตรวจ" และสรุปรอตรวจ = 2', groupIds('ส่งแล้ว รอตรวจ').includes('a1') && txt('workStatWait') === '2' && txt('workStatTodo') === '3');
+  // ขั้น 1 + ส่งกลับแก้ (a2): ความเห็นผู้ตรวจในหน้าต่าง · แนบรูป · อัป · ล้มแล้วเก็บกวาด
+  openMine('a2'); await sleep(150);
+  ok('a2 (ส่งกลับแก้ ขั้น 1): หน้าต่างแสดงความเห็นผู้ตรวจ · ยังไม่มีช่องลิงก์โซเชียล', dlgOpen('workSubDialog') && /เสียงเบาไป/.test(txt('workSubTask')) && document.querySelectorAll('#workSubChans input').length === 0);
+  ok('ความเห็นผู้ตรวจที่ "ส่งกลับแก้" หัวข้อเป็นสีแดงตัวหนา (ต้องรีบแก้) · ข้อความ "ไฟล์ผ่านแล้ว" ไม่แดง', isRed(document.querySelector('#workSubTask .wk-quote.warn strong')) && !isRed(cardOf('#workMineList', 'a3') && cardOf('#workMineList', 'a3').querySelector('.wk-quote strong')));
+  const f1 = await pngFile(1600, 900);
+  await workSubPickFiles([f1]); await sleep(300);
+  ok('เลือกรูป: ย่อรูปก่อน (webp/jpeg) · ขึ้นภาพตัวอย่าง 1 รูป · ปุ่มส่งเปิด (รูปเป็นหลักฐานขั้น 1)', workSub.imgs.length === 1 && /image\\/(webp|jpeg)/.test(workSub.imgs[0].blob.type) && document.querySelectorAll('#workSubImgs img').length === 1 && !$('workSubGo').disabled);
+  WORK.fail.rpc_work_submit = 'ฐานข้อมูลล่ม';
+  $('workSubForm').requestSubmit(); await sleep(500);
+  const up1 = WORK.uploads.filter(u => u.path);
+  ok('ส่งไม่สำเร็จ: อัปรูปไปแล้ว 1 ไฟล์ (ชื่อ a2/<uuid> · upsert:false) แต่ฟังก์ชันล้ม → ลบรูปที่อัปทิ้ง ไม่ทิ้งรูปกำพร้า', up1.length === 1 && up1[0].path.indexOf('a2/') === 0 && up1[0].upsert === false && WORK.files.size === 0 && WORK.uploads.some(u => u.removed && u.removed[0] === up1[0].path));
+  ok('ส่งไม่สำเร็จ: หน้าต่างยังเปิด + ข้อความผิดพลาดบอกตามจริง · ใบยัง "ส่งกลับแก้" ที่ฐาน', dlgOpen('workSubDialog') && /ส่งงานไม่สำเร็จ: ฐานข้อมูลล่ม/.test(txt('workSubErr')) && !$('workSubErr').hidden && taskOnServer('a2').status === 'changes');
+  delete WORK.fail.rpc_work_submit;
+  $('workSubForm').requestSubmit(); await sleep(500);
+  const s2 = lastRpc('work_submit');
+  ok('กดส่งใหม่: อัปรูปใหม่ (ชื่อใหม่ ไม่ชนของเดิม) แล้วส่ง · p_image_paths ตรงกับไฟล์ที่อัป · ฐานเห็นไฟล์ 1', !!s2 && s2.args.p_task === 'a2' && s2.args.p_image_paths.length === 1 && s2.args.p_image_paths[0] === WORK.uploads.filter(u => u.path).pop().path && WORK.files.size === 1 && taskOnServer('a2').status === 'submitted');
+  // ขั้น 2 (a3): ลิงก์ครบทุกช่อง + โดเมน
+  openMine('a3'); await sleep(150);
+  ok('a3 (รอลงโซเชียล): หน้าต่าง "ส่งลิงก์โพสต์ · ขั้น 2 จาก 2" · ปุ่ม "ส่งลิงก์ให้ตรวจ" · ช่องลิงก์ Facebook + Instagram · ซ่อนลิงก์ไฟล์/รูป (ขั้นนี้ส่งแค่ลิงก์โพสต์)',
+    dlgOpen('workSubDialog') && txt('workSubTitle') === 'ส่งลิงก์โพสต์ · ขั้น 2 จาก 2' && txt('workSubGo') === 'ส่งลิงก์ให้ตรวจ' && !!$('workSubC-facebook') && !!$('workSubC-instagram') && $('workSubFileField').hidden && $('workSubImgField').hidden);
+  ok('ขั้น 2: ส่งไม่ได้ — บอกว่าขาดลิงก์ทั้ง 2 ช่อง', $('workSubGo').disabled && /ลิงก์ Facebook/.test(txt('workSubNeed')) && /ลิงก์ Instagram/.test(txt('workSubNeed')));
+  setVal('workSubC-facebook', 'https://www.facebook.com/PioneerDjLabSiam/posts/123'); setVal('workSubC-instagram', 'https://www.tiktok.com/@djlabsiam4/video/9');
+  ok('ลิงก์ผิดโดเมน (ช่อง Instagram ใส่ tiktok.com): ✓ ที่ Facebook · ✕ ที่ Instagram บอกเหตุผล · ปุ่มยังปิด', /✓ ลิงก์ตรงกับ Facebook/.test(document.querySelector('[data-msg="facebook"]').textContent) && /✕ ลิงก์นี้ไม่ใช่ของ Instagram/.test(document.querySelector('[data-msg="instagram"]').textContent) && $('workSubGo').disabled && /แก้ลิงก์ Instagram/.test(txt('workSubNeed')));
+  setVal('workSubC-instagram', 'https://user@www.instagram.com/reel/AbC/');
+  ok('ลิงก์ที่มี @ ในโฮสต์ถูกปฏิเสธ (หลอกโดเมน)', $('workSubGo').disabled && /แก้ลิงก์ Instagram/.test(txt('workSubNeed')));
+  setVal('workSubC-instagram', 'https://www.instagram.com/reel/AbC/');
+  ok('ลิงก์ถูกทั้ง 2 ช่อง: ปุ่มเปิด', !$('workSubGo').disabled && txt('workSubNeed') === '');
+  $('workSubForm').requestSubmit(); await sleep(400);
+  const s3 = lastRpc('work_submit');
+  ok('ส่งลิงก์โพสต์: work_submit ได้ลิงก์พร้อม channel ครบ 2 ช่อง · ฐานเก็บเป็นรอตรวจ phase final', !!s3 && s3.args.p_task === 'a3' && s3.args.p_links.length === 2 && s3.args.p_links.some(l => l.channel === 'facebook') && s3.args.p_links.some(l => l.channel === 'instagram') && taskOnServer('a3').status === 'submitted' && lastEv('a3', 'submitted').phase === 'final' && /ส่งงานแล้ว/.test(toast()));
+  // ขั้นเดียว (a4)
+  openMine('a4'); await sleep(150);
+  ok('a4 (โพสต์โซเชียล ขั้นเดียว): หน้าต่าง "ส่งงาน" · ต้องมีช่องลิงก์ Facebook · มีลิงก์ไฟล์+รูป (ไม่บังคับ) · ไม่มีกล่องอธิบาย 2 รอบ', dlgOpen('workSubDialog') && txt('workSubTitle') === 'ส่งงาน' && txt('workSubGo') === 'ส่งงานให้ตรวจ' && !!$('workSubC-facebook') && !$('workSubFileField').hidden && !/ตรวจ 2 รอบ/.test(txt('workSubChans')));
+  ok('a4: ไม่แนบลิงก์ Facebook = ส่งไม่ได้ ถึงจะมีลิงก์ไฟล์', (setVal('workSubLink', 'https://drive.google.com/x'), $('workSubGo').disabled) && /ลิงก์ Facebook/.test(txt('workSubNeed')));
+  ok('a4: ปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้" อยู่ในหน้าต่างส่งงาน (พนักงานไม่ใช่เจ้าของ)', !$('workSubReq').hidden);
+  $('workSubReq').click(); await sleep(150);
+  ok('กดปุ่มยื่นคำขอจากหน้าต่างส่งงาน: เปิดหน้าต่างยื่นคำขอ แนบใบ a4 ให้แล้ว (หน้าต่างส่งงานไม่หาย)', dlgOpen('workReqDialog') && $('workrTask').value === 'a4' && dlgOpen('workSubDialog'));
+  closeAll(); await sleep(100);
+  ok('ปิดหน้าต่างแล้ว ฟอร์มส่งงานถูกล้าง (รูป/สถานะ)', workSub === null && workReq === null);
+  // ใบที่ส่งแล้ว: อ่านอย่างเดียว
+  document.querySelector('[data-act="open"][data-id="a5"]').click(); await sleep(150);
+  ok('การ์ดที่ส่งแล้ว (a5): เปิดหน้าต่างรายละเอียดอ่านอย่างเดียว — ไม่มีปุ่มแก้/ยกเลิก/ปิดงาน/ตรวจ แต่มีปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้"', dlgOpen('workDlg') && !dlgOpen('workSubDialog') && !$('workDlgBody').querySelector('[data-act="edit"],[data-act="cancel"],[data-act="close-task"],[data-act^="rv-"]') && !!$('workDlgBody').querySelector('[data-act="req-new"]'));
+  closeAll();
+  // งานที่ผ่านแล้วส่งซ้ำไม่ได้ (สถานะเปลี่ยนจากเครื่องอื่นหลังโหลด)
+  WORK.tasks.find(t => t.id === 'a4').status = 'cancelled'; WORK.tasks.find(t => t.id === 'a4').closed_at = new Date().toISOString();
+  await loadWork();
+  workSubOpen('a4'); await sleep(100);
+  ok('เปิดส่งงานของใบที่ถูกยกเลิกไปแล้ว (โหลดใหม่แล้วเห็นสถานะจริง): ไม่เปิดหน้าต่าง · บอกให้ทราบ', !dlgOpen('workSubDialog') && /ส่งงานนี้ไม่ได้แล้ว/.test(toast()));
+  WORK.seed(); await loadWork();
+
+  workFormOpen('a5'); await sleep(100);
+  ok('พนักงานเรียกฟอร์มแก้ของใบที่คนอื่นสั่ง (a5) ตรง ๆ: ไม่เปิดฟอร์ม · บอกว่าแก้ไม่ได้', !dlgOpen('workFormDialog') && workForm === null && /แก้ใบงานนี้ไม่ได้/.test(toast()));
+  // ── 3. พนักงานสั่ง/แก้งาน (ใบที่ตัวเองสั่ง) ─────────────────────────────────
+  tab('assign'); await frames();
+  ok('แท็บ "สั่งงาน" ของพนักงาน: หัว "งานที่ฉันสั่ง" · ไม่มีตารางภาพรวมทีม · มีคำอธิบายว่าสั่งได้เฉพาะพนักงานและให้ยื่นคำขอ', txt('workAssignHead') === 'งานที่ฉันสั่ง' && !$('workTeam').querySelector('table') && /พนักงานสั่งงานให้พนักงานด้วยกัน/.test(txt('workTeam')) && /คำขอ/.test(txt('workTeam')));
+  const asgIds = () => [...document.querySelectorAll('#workAll tr.wk-row')].map(r => r.dataset.id);
+  ok('เห็นเฉพาะใบที่ตัวเองสั่ง: d1 (สั่ง Nutty) ใบเดียว — ไม่เห็นใบอื่นของทีม', asgIds().join() === 'd1', asgIds().join());
+  ok('ผู้สั่ง (พนักงาน) มีปุ่ม "แก้ไข" ที่ใบที่ตัวเองสั่ง', !!document.querySelector('#workAll tr[data-id="d1"] [data-act="edit"]'));
+  $('workNew').click(); await sleep(150);
+  const ppl = () => [...document.querySelectorAll('#workfPeople label')];
+  const pplOn = () => ppl().filter(l => !l.classList.contains('off')).map(l => l.querySelector('span:nth-child(3)').textContent.replace(' · ตัวเอง', '')).join();
+  const pplOff = () => ppl().filter(l => l.classList.contains('off')).map(l => l.querySelector('span:nth-child(3)').textContent).join();
+  ok('พนักงานสั่งงาน: เลือกได้เฉพาะพนักงาน (Zen ตัวเอง · Nutty · Pran) — เจ้าของ/ผู้ดูแลเลือกไม่ได้ ขึ้น "สั่งไม่ได้" (ไม่แสดงคนที่ถูกปิดบัญชี)', dlgOpen('workFormDialog') && pplOn().split(',').sort().join() === 'Nutty,Pran,Zen' && pplOff().split(',').sort().join() === 'Fah,Nui,TiBass' && ppl().filter(l => l.classList.contains('off')).every(l => l.querySelector('input').disabled && /สั่งไม่ได้/.test(l.textContent)), pplOn() + ' / ' + pplOff());
+  ok('ชื่อที่ "สั่งไม่ได้" ในรายชื่อผู้รับเป็นสีแดงตัวหนา · ข้อความ "ตรวจงานไม่ได้" ในกติกาเป็นสีแดงตัวหนา · "ยังไม่ได้เลือกผู้รับงาน" เป็นสีแดง', ppl().filter(l => l.classList.contains('off')).every(l => isRed(l.querySelector('.sub'))) && redTexts($('workfRule')).some(t => t === 'ตรวจงานไม่ได้') && isRed($('workfSum')));
+  ok('มีข้อความกติกาของตำแหน่งพนักงาน (สั่งได้เฉพาะพนักงาน · ตรวจไม่ได้ · ให้ยื่นคำขอ)', /พนักงานสั่งงานให้พนักงานด้วยกันได้/.test(txt('workfRule')) && /ยื่น "คำขอ"/.test(txt('workfRule')));
+  ok('ฟอร์มสั่งงาน: ยังไม่เลือกผู้รับ — บอกในกล่องสรุป', /ยังไม่ได้เลือกผู้รับงาน/.test(txt('workfSum')));
+  document.querySelector('#workfKind button[data-kind="photo"]').click();
+  document.querySelector('#workfChans button[data-ch="facebook"]').click();
+  ok('รูป + ช่อง Facebook: บอกว่าตรวจ 2 รอบ (ส่งไฟล์ → รอลงโซเชียล → ลิงก์โพสต์)', /ตรวจ 2 รอบ/.test(txt('workfStage')) && /รอลงโซเชียล/.test(txt('workfStage')));
+  document.querySelector('#workfKind button[data-kind="social_post"]').click();
+  ok('โพสต์โซเชียล + ช่อง Facebook: บอกว่าขั้นเดียว (แนบลิงก์ตอนส่ง)', /ขั้นเดียว/.test(txt('workfStage')) && !/2 รอบ/.test(txt('workfStage')));
+  document.querySelector('#workfKind button[data-kind="photo"]').click();
+  $('workForm').requestSubmit(); await sleep(100);
+  ok('ไม่ใส่หัวข้อ: ไม่ส่ง บอกให้ใส่', /ใส่หัวข้องาน/.test(txt('workfErr')) && !$('workfErr').hidden && rpcs('work_create').length === 0);
+  setVal('workfTitle', 'ถ่ายรูปสินค้าใหม่ลงเพจ');
+  $('workForm').requestSubmit(); await sleep(100);
+  ok('ไม่เลือกผู้รับ: ไม่ส่ง บอกให้เลือก', /เลือกผู้รับงานอย่างน้อย 1 คน/.test(txt('workfErr')) && rpcs('work_create').length === 0);
+  const pick = name => { const l = ppl().find(x => x.textContent.indexOf(name) >= 0); l.querySelector('input').click(); };
+  pick('Nui');
+  ok('คลิกชื่อที่ "สั่งไม่ได้" (Nui) ไม่ติ๊ก — ยังไม่มีผู้รับ', document.querySelectorAll('#workfPeople input:checked').length === 0);
+  pick('Nutty'); pick('Pran');
+  ok('เลือก 2 คน: กล่องสรุป "ระบบจะสร้างใบงาน 2 ใบ" · ปุ่ม "สั่งงาน 2 ใบ"', /ระบบจะสร้างใบงาน 2 ใบ/.test(txt('workfSum')) && txt('workfSave') === 'สั่งงาน 2 ใบ');
+  setVal('workfDate', '2030-01-15'); setVal('workfTime', '09:30'); setVal('workfDetail', 'ถ่ายหน้ากล่อง 4 มุม');
+  $('workForm').requestSubmit(); await sleep(450);
+  const c1 = lastRpc('work_create');
+  ok('สั่งงาน: work_create ส่งผู้รับ 2 คน · ประเภทรูป · ช่อง facebook · กำหนดเวลาไทย (+07:00)', !!c1 && c1.args.p_assignees.join() === 'u3,u6' && c1.args.p_kind === 'photo' && c1.args.p_channels.join() === 'facebook' && c1.args.p_due_at === '2030-01-15T09:30:00+07:00' && c1.args.p_title === 'ถ่ายรูปสินค้าใหม่ลงเพจ', JSON.stringify(c1 && c1.args));
+  ok('สั่งสำเร็จ: ฟอร์มปิด · ข้อความ "สั่งงานแล้ว 2 ใบ" · ฐานสร้าง 2 ใบ phase content (รูป+ช่องทาง) โดยผู้สั่ง = Zen', !dlgOpen('workFormDialog') && /สั่งงานแล้ว 2 ใบ/.test(toast()) && WORK.tasks.filter(t => t.title === 'ถ่ายรูปสินค้าใหม่ลงเพจ').length === 2 && WORK.tasks.filter(t => t.title === 'ถ่ายรูปสินค้าใหม่ลงเพจ').every(t => t.phase === 'content' && t.created_by === 'u2'));
+  ok('ผู้สั่งเห็นใบที่ตัวเองเพิ่งสั่ง (ผู้รับเป็น Nutty/Pran) ในแท็บสั่งงาน → ตอนนี้ 3 ใบ', asgIds().length === 3 && asgIds().includes('d1'), asgIds().join());
+  // แก้/ย้ายใบที่ตัวเองสั่ง
+  document.querySelector('#workAll tr[data-id="d1"] [data-act="edit"]').click(); await sleep(150);
+  const sel = () => $('workfAssignee');
+  ok('แก้ใบ d1: ฟอร์ม "แก้ใบงาน" · ช่องเหตุผลโผล่ · ผู้รับให้เลือกได้เฉพาะ Nutty (ปัจจุบัน) · Pran · Zen — ไม่มีผู้ดูแล/เจ้าของ', dlgOpen('workFormDialog') && txt('workfHead') === 'แก้ใบงาน' && !$('workfReasonField').hidden && !!sel() && [...sel().options].map(o => o.textContent.split(' · ')[0]).sort().join() === 'Nutty,Pran,Zen' && sel().value === 'u3');
+  setVal('workfTitle', 'ช่วยเก็บกล่องที่หลังร้าน (แก้ชื่อ)'); sel().value = 'u6'; setVal('workfReason', 'Nutty ติดงานอื่น');
+  $('workForm').requestSubmit(); await sleep(450);
+  const e1 = lastRpc('work_edit'), r1 = lastRpc('work_reassign');
+  ok('แก้ชื่อ + ย้ายผู้รับ: เรียก work_edit (ชื่อใหม่ + เหตุผล) แล้ว work_reassign (ไป Pran + เหตุผล) ตามลำดับ', !!e1 && e1.args.p_title.indexOf('แก้ชื่อ') > 0 && e1.args.p_note === 'Nutty ติดงานอื่น' && !!r1 && r1.args.p_assignee === 'u6' && r1.args.p_note === 'Nutty ติดงานอื่น' && CALLS.indexOf(e1) < CALLS.indexOf(r1));
+  ok('ฐานเก็บการแก้/ย้ายแล้ว · ฟอร์มปิด · ข้อความ "บันทึกการแก้ไขแล้ว"', taskOnServer('d1').assignee_id === 'u6' && /แก้ชื่อ/.test(taskOnServer('d1').title) && !dlgOpen('workFormDialog') && /บันทึกการแก้ไขแล้ว/.test(toast()) && lastEv('d1', 'reassigned') && lastEv('d1', 'edited'));
+  document.querySelector('#workAll tr[data-id="d1"]').click(); await sleep(150);
+  ok('กดแถวใบที่ตัวเองสั่ง: หน้าต่างรายละเอียดมีปุ่ม แก้ไข/ย้ายผู้รับ + ยกเลิกงาน + ยื่นคำขอ (ผู้สั่งจัดการใบตัวเองได้) แต่ไม่มีปุ่มปิดงาน/ตรวจ', dlgOpen('workDlg') && !!$('workDlgBody').querySelector('[data-act="edit"]') && !!$('workDlgBody').querySelector('[data-act="cancel"]') && !!$('workDlgBody').querySelector('[data-act="req-new"]') && !$('workDlgBody').querySelector('[data-act="close-task"],[data-act^="rv-"]'));
+  $('workDlgBody').querySelector('[data-act="cancel"]').click(); await sleep(150);
+  ok('ยกเลิกงาน: ถามยืนยันก่อน (บอกชื่องาน + ผู้รับ)', dlgOpen('confirmDialog') && /ยกเลิกงานนี้/.test(txt('confirmTitle')) && /Pran/.test(txt('confirmBody')));
+  $('confirmOkBtn').click(); await sleep(400);
+  ok('ยืนยัน: work_cancel · ฐานเป็น cancelled · ข้อความ "ยกเลิกงานแล้ว"', !!lastRpc('work_cancel') && lastRpc('work_cancel').args.p_task === 'd1' && taskOnServer('d1').status === 'cancelled' && /ยกเลิกงานแล้ว/.test(toast()) && !dlgOpen('confirmDialog'));
+  // ใบของคนอื่น: ไม่มีปุ่มจัดการ
+  tab('mine'); await frames(); document.querySelector('[data-act="open"][data-id="a5"]').click(); await sleep(150);
+  ok('ใบที่คนอื่นสั่ง (a5 สั่งโดย Nui): พนักงานผู้รับแก้/ยกเลิกไม่ได้ — ไม่มีปุ่มจัดการ', !$('workDlgBody').querySelector('[data-act="edit"],[data-act="cancel"]'));
+  closeAll();
+  WORK.seed(); await loadWork();
+
+  // ── 4. คำขอ (ผู้ยื่น = พนักงาน Zen) ────────────────────────────────────────
+  tab('req'); await frames();
+  const reqRows = () => [...document.querySelectorAll('#workReqList .wk-task')].map(e => e.dataset.id);
+  const reqRow = id => cardOf('#workReqList', id);
+  ok('แท็บคำขอของพนักงาน: ไม่มีตัวสลับกล่อง (ยื่นได้อย่างเดียว) · ปุ่ม "ยื่นคำขอใหม่" มี · เลขที่แท็บว่าง (ไม่มีคำขอถึงพนักงาน)', $('workReqBoxes').innerHTML === '' && !$('workReqNew').hidden && txt('workReqN') === '');
+  ok('เห็นเฉพาะคำขอของตัวเอง: q1 (รอตอบ) · q3 (ปฏิเสธ) · q6 (อนุมัติ) — ไม่เห็น q2 ของ Nutty / q4 ของ Nui / q5 ของ Pran', reqRows().sort().join() === 'q1,q3,q6', reqRows().join());
+  ok('รอตอบขึ้นก่อน · เลือกใบแรกให้อัตโนมัติ (q1) · ป้ายสถานะเป็นคำ: รอตอบ / ปฏิเสธ / อนุมัติแล้ว', reqRows()[0] === 'q1' && /รอตอบ/.test(reqRow('q1').textContent) && /ปฏิเสธ/.test(reqRow('q3').textContent) && /อนุมัติแล้ว/.test(reqRow('q6').textContent) && reqRow('q1').classList.contains('sel'));
+  ok('รายละเอียด q1: ข้อความ · ใบงานที่แนบ (a1) + ปุ่มเปิดใบงาน · ส่งถึง "ผู้ดูแลทุกคน" บอกว่าใครตอบก่อนเป็นคนตัดสิน · ปุ่มถอนคำขอ · ไม่มีปุ่มอนุมัติ/ปฏิเสธ', /ช่วยย้ายงานถ่ายรูป DDJ-FLX4/.test(txt('workReqDetail')) && /ถ่ายรูปสินค้า DDJ-FLX4 ลง Instagram/.test(txt('workReqDetail')) && !!$('workReqDetail').querySelector('[data-act="open-task"]') && /ผู้ดูแลทุกคน · ใครในกลุ่มตอบก่อนเป็นคนตัดสิน/.test(txt('workReqDetail')) && !!$('workReqDetail').querySelector('[data-act="req-withdraw"]') && !$('workReqDetail').querySelector('[data-act="req-approve"],[data-act="req-reject"]'));
+  reqRow('q3').click(); await frames();
+  ok('คำขอที่ถูกปฏิเสธ (q3): ผู้ยื่นเห็นเหตุผล + ชื่อผู้ตอบ · ไม่มีปุ่มถอน', /เหตุผลที่ปฏิเสธ/.test(txt('workReqDetail')) && /ศุกร์มีคอร์สสองคลาส/.test(txt('workReqDetail')) && /Nui/.test($('workReqDetail').querySelector('.wk-ans').textContent) && !!$('workReqDetail').querySelector('.wk-ans.bad') && !$('workReqDetail').querySelector('[data-act="req-withdraw"]'));
+  ok('กล่อง "เหตุผลที่ปฏิเสธ" ตัวหนังสือเป็นสีแดง (ผู้ยื่นต้องเห็นชัด)', getComputedStyle($('workReqDetail').querySelector('.wk-ans.bad')).color === 'rgb(204, 0, 26)' && isRed($('workReqDetail').querySelector('.wk-ans.bad strong')));
+  reqRow('q6').click(); await frames();
+  ok('คำขอที่อนุมัติ (q6): "อนุมัติแล้ว — รับเรื่อง" + ความเห็น + ชื่อผู้ตอบ (Fah — คนในกลุ่มที่ตอบก่อน)', /อนุมัติแล้ว — รับเรื่อง/.test(txt('workReqDetail')) && /เดี๋ยวเข้าไปดูให้ที่ใบงาน/.test(txt('workReqDetail')) && /Fah/.test($('workReqDetail').querySelector('.wk-ans').textContent) && !!$('workReqDetail').querySelector('.wk-ans.ok'));
+  if (${JSON.stringify(!!SHOTS)}) await shot('work-staff-requests.png');
+  // ยื่นคำขอใหม่
+  $('workReqNew').click(); await sleep(150);
+  const grpChips = () => [...document.querySelectorAll('#workrGroups button')].map(b => b.textContent).join();
+  ok('ยื่นคำขอ (พนักงาน): โหมด "ทั้งกลุ่ม" ก่อน · ตัวเลือกกลุ่ม = ผู้ดูแลทุกคน + เจ้าของ · ช่องเลือกใบงานมีใบของตัวเอง + "ไม่แนบใบงาน" · ปุ่มส่งยังปิด (ไม่มีข้อความ)', dlgOpen('workReqDialog') && grpChips() === 'ผู้ดูแลทุกคน,เจ้าของ' && $('workrGroupField').hidden === false && $('workrUserField').hidden === true && $('workrGo').disabled && $('workrTask').options[0].textContent === 'ไม่แนบใบงาน' && [...$('workrTask').options].some(o => o.value === 'a1') && ![...$('workrTask').options].some(o => ['b1', 'c1', 'e1'].includes(o.value)));
+  ok('โหมด "เลือกเป็นคน": รายชื่อ = ผู้ดูแลและเจ้าของที่ใช้งานอยู่ (Nui · Fah · TiBass) — ไม่มีพนักงาน/ตัวเอง/คนที่ถูกปิด', (document.querySelector('#workrMode button[data-mode="user"]').click(), [...$('workrUser').options].map(o => o.textContent.split(' · ')[0]).sort().join() === 'Fah,Nui,TiBass' && $('workrUserField').hidden === false && $('workrGroupField').hidden === true));
+  document.querySelector('#workrMode button[data-mode="group"]').click();
+  document.querySelector('#workrGroups button[data-group="admin"]').click();
+  setVal('workrBody', '   ');
+  ok('ข้อความเป็นช่องว่าง: ปุ่มส่งยังปิด', $('workrGo').disabled);
+  setVal('workrBody', '   ช่วยเลื่อนกำหนดงานคลิปรีวิวไปพรุ่งนี้ได้มั้ยครับ   '); setVal('workrTask', 'a2');
+  ok('มีข้อความ: ปุ่มเปิด · ข้อความปุ่ม "ส่งคำขอถึง ผู้ดูแลทุกคน" · ตัวนับ', !$('workrGo').disabled && txt('workrGo') === 'ส่งคำขอถึง ผู้ดูแลทุกคน' && /\\d+ \\/ 1000/.test(txt('workrCount')));
+  $('workReqForm').requestSubmit(); await sleep(450);
+  const rc1 = lastRpc('work_request_create');
+  ok('ส่งคำขอ: work_request_create ส่ง ถึงกลุ่ม admin (ไม่ส่ง p_to_user) · แนบใบ a2 · ข้อความตัดช่องว่างหัวท้าย', !!rc1 && rc1.args.p_to_group === 'admin' && rc1.args.p_to_user === null && rc1.args.p_task === 'a2' && rc1.args.p_body === 'ช่วยเลื่อนกำหนดงานคลิปรีวิวไปพรุ่งนี้ได้มั้ยครับ', JSON.stringify(rc1 && rc1.args));
+  ok('สำเร็จ: หน้าต่างปิด · ข้อความ "ส่งคำขอแล้ว" · คำขอใหม่อยู่ในรายการ "รอตอบ" · ฐานเก็บ requester = Zen', !dlgOpen('workReqDialog') && /ส่งคำขอแล้ว/.test(toast()) && reqRows().length === 4 && WORK.reqs.filter(r => r.requester_id === 'u2' && r.to_group === 'admin' && r.task_id === 'a2').length === 1);
+  // ยื่นเป็นรายคน
+  $('workReqNew').click(); await sleep(100);
+  document.querySelector('#workrMode button[data-mode="user"]').click(); setVal('workrUser', 'u1'); setVal('workrBody', 'ขออนุมัติซื้อกล่องใส่หูฟังเพิ่ม');
+  ok('เลือกเป็นคน (TiBass): ข้อความปุ่ม "ส่งคำขอถึง TiBass"', txt('workrGo') === 'ส่งคำขอถึง TiBass' && !$('workrGo').disabled);
+  $('workReqForm').requestSubmit(); await sleep(400);
+  const rc2 = lastRpc('work_request_create');
+  ok('ยื่นเป็นรายคน: p_to_user = เจ้าของ · p_to_group ว่าง · ไม่แนบใบงาน (p_task = null)', rc2.args.p_to_user === 'u1' && rc2.args.p_to_group === null && rc2.args.p_task === null);
+  // ล้มที่ฐาน
+  $('workReqNew').click(); await sleep(100);
+  setVal('workrBody', 'ทดสอบข้อความล้ม'); WORK.fail.rpc_work_request_create = 'ฐานข้อมูลล่ม';
+  $('workReqForm').requestSubmit(); await sleep(350);
+  ok('ส่งคำขอไม่สำเร็จ: หน้าต่างยังเปิด · ข้อความที่พิมพ์ไม่หาย · บอกผิดพลาดตามจริง · ปุ่มกลับมากดได้', dlgOpen('workReqDialog') && $('workrBody').value === 'ทดสอบข้อความล้ม' && /ส่งคำขอไม่สำเร็จ: ฐานข้อมูลล่ม/.test(txt('workrErr')) && !$('workrErr').hidden && !$('workrGo').disabled);
+  delete WORK.fail.rpc_work_request_create; closeAll(); await sleep(100);
+  ok('ปิดหน้าต่างคำขอ: สถานะฟอร์มถูกล้าง', workReq === null);
+  // ถอนคำขอ
+  reqRow('q1').click(); await frames();
+  $('workReqDetail').querySelector('[data-act="req-withdraw"]').click(); await sleep(150);
+  ok('ถอนคำขอ: ถามยืนยันก่อน (บอกผู้รับ + ข้อความคำขอ)', dlgOpen('confirmDialog') && /ถอนคำขอนี้/.test(txt('confirmTitle')) && /ผู้ดูแลทุกคน/.test(txt('confirmBody')) && /ช่วยย้ายงานถ่ายรูป/.test(txt('confirmBody')));
+  $('confirmOkBtn').click(); await sleep(400);
+  ok('ยืนยัน: work_request_withdraw · ฐาน = withdrawn · ในรายการขึ้น "ถอนแล้ว" · ไม่มีปุ่มถอนอีก', lastRpc('work_request_withdraw').args.p_request === 'q1' && reqOnServer('q1').status === 'withdrawn' && /ถอนแล้ว/.test(reqRow('q1').textContent) && /ถอนคำขอแล้ว/.test(toast()));
+  // ปุ่มจากใบงาน
+  tab('mine'); await frames(); document.querySelector('[data-act="open"][data-id="a5"]').click(); await sleep(120);
+  $('workDlgBody').querySelector('[data-act="req-new"]').click(); await sleep(150);
+  ok('ปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้" บนใบงาน: เปิดหน้าต่างคำขอ แนบใบนั้นให้ (a5)', dlgOpen('workReqDialog') && $('workrTask').value === 'a5');
+  closeAll(); await sleep(100);
+  // สิทธิ์ฝั่งหน้าจอ: ใบที่ Zen ไม่ใช่ผู้รับ/ผู้สั่ง ไม่อยู่ในตัวเลือกแนบ — และเรียกฟังก์ชันตรงด้วยใบนั้นก็ถูกฐานปฏิเสธ
+  const bad = await db.rpc('work_request_create', { p_to_user: null, p_to_group: 'admin', p_task: 'e1', p_body: 'ลองแนบใบของ Pran' });
+  ok('ฐานปฏิเสธการแนบใบที่ไม่ใช่ของตัวเอง (กันคนข้ามหน้าจอ)', !!bad.error && /แนบใบงานนี้ไม่ได้/.test(bad.error.message));
+  const bad2 = await db.rpc('work_request_decide', { p_request: 'q2', p_verdict: 'approve', p_note: null });
+  ok('พนักงานตัดสินคำขอไม่ได้ (ฐานปฏิเสธ แม้หน้าจอไม่มีปุ่ม)', !!bad2.error && /ตัดสินคำขอได้เฉพาะ/.test(bad2.error.message));
+  WORK.seed(); await loadWork();
+
+  // ── 5. พนักงานคนอื่น: เห็นเฉพาะที่เกี่ยวกับตัวเอง ───────────────────────────
+  doLogout(); await sleep(400);
+  await login('pran'); showSection('tasks'); await sleep(300);
+  ok('Pran (พนักงาน): เห็นเฉพาะใบของตัวเอง (e1) · ชื่องานของคนอื่นไม่โผล่ที่ไหนในหน้า', mineIds().join() === 'e1' && !/DDJ-FLX4|HDJ-CUE1|Starter Pack|หลังร้าน|สายแจ็ค/.test($('sec-tasks').textContent));
+  tab('req'); await frames();
+  ok('Pran เห็นเฉพาะคำขอของตัวเอง (q5) — ไม่เห็นคำขอที่ถึงผู้ดูแลหรือของคนอื่น', reqRows().join() === 'q5', reqRows().join());
+  doLogout(); await sleep(400);
+  await login('nutty'); showSection('tasks'); await sleep(300);
+  ok('Nutty (พนักงาน): เห็นใบที่ Zen สั่ง (d1) ในงานของฉัน พร้อมชื่อผู้สั่ง · เห็น b1 b2 b3 ของตัวเอง', mineIds().includes('d1') && /สั่งโดย Zen/.test(cardOf('#workMineList', 'd1').textContent) && ['b1', 'b2', 'b3'].every(id => mineIds().includes(id)) && !mineIds().includes('a1'));
+  doLogout(); await sleep(400);
+
+  // ── 6. ผู้ดูแล (Nui) ─────────────────────────────────────────────────────
+  WORK.seed();
+  await login('nui');
+  ok('ผู้ดูแล: ตัวเลขแดง = งานที่ตรวจได้ 3 (a5 b1 b2 — ไม่นับ c1 ที่เป็นงานของผู้ดูแล) + คำขอ pending ที่ถึงตัวเอง 2 (q1 กลุ่มผู้ดูแล · q2 ถึงเฉพาะตัวเอง) = 5', badge() === '5', badge());
+  showSection('tasks'); await sleep(300); await frames();
+  ok('ผู้ดูแลเห็นแท็บ งานของฉัน · ตรวจงาน · สั่งงาน · คำขอ ครบ · เลขที่แท็บตรวจงาน 3 · เลขที่แท็บคำขอ 2', tabsShown() === 'mine,review,assign,req' && txt('workReviewN') === '3' && txt('workReqN') === '2', tabsShown() + ' ' + txt('workReviewN') + ' ' + txt('workReqN'));
+  tab('review'); await frames();
+  const queue = () => [...document.querySelectorAll('#workQueue .wk-task')].map(e => e.dataset.id);
+  ok('คิวรอตรวจของผู้ดูแล: เฉพาะงานของพนักงาน เรียงเก่าสุดก่อน (a5 → b1 → b2) — ไม่มี c1 (งานของผู้ดูแล เจ้าของตรวจ)', queue().join() === 'a5,b1,b2', queue().join());
+  ok('สรุปรอตรวจ = 3 · เลือกใบแรกให้อัตโนมัติ (a5) · รายละเอียดมีปุ่มส่งกลับแก้ + "ผ่าน · ปิดงาน" (งานขั้นเดียว)', txt('workRvWait') === '3' && cardOf('#workQueue', 'a5').classList.contains('sel') && !!$('workDetail').querySelector('[data-act="rv-changes"]') && $('workDetail').querySelector('[data-act="rv-approve"]').textContent === 'ผ่าน · ปิดงาน');
+  ok('ช่องความเห็นของผู้ตรวจ: คำว่า "บังคับ" (เมื่อกดส่งกลับแก้) เป็นสีแดงตัวหนา', redTexts($('workDetail')).some(t => t === 'บังคับ'));
+  cardOf('#workQueue', 'b2').click(); await frames();
+  ok('เลือก b2 (รูป + Facebook ขั้น 1): ป้าย "ขั้น 1 จาก 2" · ปุ่มผ่านเขียนว่า "ผ่านขั้นไฟล์ · ให้ลงโซเชียล" (ไม่ใช่ปิดงาน) · เห็นลิงก์ Drive ที่แนบ + ปุ่มเปิดในแท็บใหม่ (target=_blank rel=noopener)', /ขั้น 1 จาก 2/.test($('workDetail').textContent) && $('workDetail').querySelector('[data-act="rv-approve"]').textContent === 'ผ่านขั้นไฟล์ · ให้ลงโซเชียล' && /drive.google.com\\/file\\/d\\/1HDJX7/.test(txt('workDetail')) && $('workDetail').querySelector('a[target="_blank"]').rel === 'noopener noreferrer');
+  if (${JSON.stringify(!!SHOTS)}) await shot('work-admin-review.png');
+  // ส่งกลับแก้ต้องมีความเห็น
+  $('workDetail').querySelector('[data-act="rv-changes"]').click(); await sleep(100);
+  ok('ส่งกลับแก้โดยไม่มีความเห็น: ไม่ส่งไปฐาน · บอกให้ใส่ความเห็น', rpcs('work_review').length === 0 && /ต้องใส่ความเห็น/.test(txt('workRvErr')) && !$('workRvErr').hidden);
+  $('workRvNote').value = 'ภาพมืดไป ถ่ายใหม่ตอนแสงเยอะ'; $('workDetail').querySelector('[data-act="rv-changes"]').click(); await sleep(400);
+  const rv1 = lastRpc('work_review');
+  ok('ส่งกลับแก้พร้อมความเห็น: work_review changes + ความเห็น · ฐาน = changes · เหตุการณ์เก็บขั้น content · ข้อความ "ส่งกลับแก้แล้ว" · ออกจากคิว', !!rv1 && rv1.args.p_task === 'b2' && rv1.args.p_verdict === 'changes' && rv1.args.p_note === 'ภาพมืดไป ถ่ายใหม่ตอนแสงเยอะ' && taskOnServer('b2').status === 'changes' && lastEv('b2', 'changes_requested').phase === 'content' && /ส่งกลับแก้แล้ว/.test(toast()) && queue().join() === 'a5,b1');
+  // ผ่านขั้นไฟล์ — b1 เป็นขั้นเดียว ผ่าน = ปิดงาน · จำลอง b2 กลับมาส่งใหม่แล้วผ่านขั้นไฟล์
+  WORK.rpc.work_submit('u3', { p_task: 'b2', p_note: 'แก้แล้ว', p_links: [{ url: 'https://drive.google.com/file/d/2' }], p_image_paths: [] });
+  await loadWork(); cardOf('#workQueue', 'b2').click(); await frames();
+  ok('b2 ส่งใหม่เข้าคิวอีกครั้ง (ครั้งที่ 2) — ประวัติเห็นการส่งกลับแก้ก่อนหน้า', queue().includes('b2') && /ครั้งที่ 2/.test(cardOf('#workQueue', 'b2').textContent) && /ส่งกลับแก้ · ขั้นไฟล์/.test(txt('workDetail')));
+  $('workRvNote').value = 'ไฟล์ผ่านแล้ว ลงเพจได้เลย'; $('workDetail').querySelector('[data-act="rv-approve"]').click(); await sleep(400);
+  const rv2 = lastRpc('work_review');
+  ok('ผ่านขั้นไฟล์: ฐาน = รอลงโซเชียล (open + phase final + เหตุการณ์ content_approved) ไม่ใช่ปิดงาน · ข้อความ "ไฟล์ผ่านแล้ว — รอพนักงานลงโซเชียล" · ออกจากคิว', rv2.args.p_verdict === 'approve' && taskOnServer('b2').status === 'open' && taskOnServer('b2').phase === 'final' && !!lastEv('b2', 'content_approved') && !lastEv('b2', 'approved') && /ไฟล์ผ่านแล้ว — รอพนักงานลงโซเชียล/.test(toast()) && !queue().includes('b2'));
+  cardOf('#workQueue', 'a5').click(); await frames();
+  $('workDetail').querySelector('[data-act="rv-approve"]').click(); await sleep(400);
+  ok('ผ่านงานขั้นเดียว (a5): ฐาน = ผ่านแล้ว ปิดงาน มี closed_at · ข้อความ "ตรวจผ่านแล้ว — ปิดงาน"', taskOnServer('a5').status === 'approved' && !!taskOnServer('a5').closed_at && /ตรวจผ่านแล้ว — ปิดงาน/.test(toast()) && queue().join() === 'b1');
+  // ฐานล้ม / มีคนตรวจก่อน
+  WORK.tasks.find(t => t.id === 'b1').status = 'approved';       // อีกเครื่องตรวจไปแล้ว (หน้านี้ยังเห็นเป็นรอตรวจ)
+  $('workDetail').querySelector('[data-act="rv-approve"]').click(); await sleep(450);
+  ok('มีคนตรวจก่อน (สถานะเปลี่ยน): ฐานปฏิเสธ → หน้าโหลดใหม่ ใบออกจากคิว · บอกข้อผิดพลาดตามจริงที่ข้อความเด้ง (ช่องในแผงหายไปพร้อมใบ)', /ตรวจงานไม่สำเร็จ: ตรวจได้เฉพาะงานที่ส่งแล้ว/.test(toast()) && queue().length === 0, toast() + ' / ' + queue().join());
+  WORK.seed(); await loadWork();
+  // c1 (งานของผู้ดูแล) ผู้ดูแลตรวจไม่ได้: เปิดจากแท็บสั่งงานแล้วไม่มีปุ่มตรวจ/ปิดงาน
+  tab('assign'); await frames();
+  const team = () => [...document.querySelectorAll('#workTeam tbody tr td:first-child')].map(e => e.textContent).sort().join();
+  ok('แท็บสั่งงานของผู้ดูแล: หัว "ภาพรวมทีม" · ตารางทีม = ผู้ใช้งานอยู่ 6 คน (ไม่มี Ghost ที่ถูกปิด) · เห็นใบทั้งทีม', txt('workAssignHead') === 'ภาพรวมทีม' && team() === 'Fah,Nui,Nutty,Pran,TiBass,Zen' && [...document.querySelectorAll('#workAll tr.wk-row')].length >= 12, team());
+  document.querySelector('#workAll tr[data-id="c1"]').click(); await sleep(150);
+  ok('c1 (ผู้รับเป็นผู้ดูแล เจ้าของสั่ง): ผู้ดูแลเห็นรายละเอียดได้ แต่ไม่มีปุ่มแก้/ยกเลิก/ปิดงาน/ตรวจ — มีแต่ยื่นคำขอ', dlgOpen('workDlg') && !$('workDlgBody').querySelector('[data-act="edit"],[data-act="cancel"],[data-act="close-task"],[data-act^="rv-"]') && !!$('workDlgBody').querySelector('[data-act="req-new"]') && !document.querySelector('#workAll tr[data-id="c1"] [data-act="edit"]'));
+  closeAll();
+  ok('ผู้ดูแลมีปุ่ม "แก้ไข" ที่ใบของพนักงาน (a1 สั่งโดย Nui · b3 สั่งโดยพนักงานเอง) แต่ไม่มีที่ c1 (ผู้รับเป็นผู้ดูแล)', !!document.querySelector('#workAll tr[data-id="b3"] [data-act="edit"]') && !!document.querySelector('#workAll tr[data-id="a1"] [data-act="edit"]') && !document.querySelector('#workAll tr[data-id="c1"] [data-act="edit"]'));
+  $('workNew').click(); await sleep(150);
+  ok('ผู้ดูแลสั่งงาน: เลือกได้ผู้ดูแล + พนักงาน (รวมตัวเอง) — เจ้าของ "สั่งไม่ได้"', pplOn().split(',').sort().join() === 'Fah,Nui,Nutty,Pran,Zen' && pplOff() === 'TiBass' && /ผู้ดูแลสั่งงานให้ผู้ดูแลและพนักงานได้/.test(txt('workfRule')), pplOn() + ' / ' + pplOff());
+  closeAll();
+  // กล่องคำขอ
+  tab('req'); await frames();
+  const boxBtns = () => [...document.querySelectorAll('#workReqBoxes button')].map(b => b.textContent.replace(/\\s+/g, ' ').trim()).join('|');
+  ok('กล่องคำขอของผู้ดูแล: สลับได้ "ส่งถึงฉัน 2" / "ที่ฉันยื่น" · เริ่มที่ส่งถึงฉัน · ปุ่มยื่นคำขอใหม่มี', /ส่งถึงฉัน 2\\|ที่ฉันยื่น/.test(boxBtns()) && work.reqBox === 'in' && !$('workReqNew').hidden, boxBtns());
+  ok('ส่งถึงฉัน = q1 q2 (รอตอบ เก่าสุดก่อน) + q3 q6 (ตอบแล้ว) — ไม่มี q4 (ของตัวเอง) · ไม่เห็น q5 (ถึงเจ้าของ) เพราะฐานไม่ให้เห็น', reqRows().join() === 'q1,q2,q3,q6' && !WORK.reqs.some(r => r.id === 'q5' && false) && work.reqs.every(r => r.id !== 'q5'), reqRows().join());
+  ok('q1 (ถึงกลุ่มผู้ดูแล) เลือกอัตโนมัติ: เห็นผู้ยื่น Zen + ใบงานที่แนบ + ปุ่ม อนุมัติ · รับเรื่อง / ปฏิเสธ + คำอธิบาย "อนุมัติ = รับเรื่อง ระบบไม่ย้ายงานให้"', /จาก Zen/.test(txt('workReqDetail')) && !!$('workReqDetail').querySelector('[data-act="req-approve"]') && !!$('workReqDetail').querySelector('[data-act="req-reject"]') && /ระบบไม่ย้ายงานหรือเลื่อนกำหนดให้/.test(txt('workReqDetail')) && !$('workReqDetail').querySelector('[data-act="req-withdraw"]'));
+  if (${JSON.stringify(!!SHOTS)}) await shot('work-admin-requests.png');
+  $('workReqDetail').querySelector('[data-act="open-task"]').click(); await sleep(150);
+  ok('คำขอ: "ระบบไม่ย้ายงานหรือเลื่อนกำหนดให้" และ "บังคับเมื่อปฏิเสธ" เป็นสีแดงตัวหนา', redTexts($('workReqDetail')).some(t => t === 'ระบบไม่ย้ายงานหรือเลื่อนกำหนดให้') && redTexts($('workReqDetail')).some(t => t === 'บังคับเมื่อปฏิเสธ'), JSON.stringify(redTexts($('workReqDetail'))));
+  ok('"เปิดใบงาน" จากคำขอ: เปิดหน้าต่างรายละเอียดของใบ a1', dlgOpen('workDlg') && workDlgId === 'a1');
+  closeAll();
+  const decN = rpcs('work_request_decide').length;
+  $('workReqDetail').querySelector('[data-act="req-reject"]').click(); await sleep(100);
+  ok('ปฏิเสธโดยไม่ใส่เหตุผล: ไม่ส่งไปฐาน · บอกว่าผู้ยื่นจะเห็นเหตุผลนี้', rpcs('work_request_decide').length === decN && /ปฏิเสธต้องใส่เหตุผล/.test(txt('workReqErr')) && !$('workReqErr').hidden && reqOnServer('q1').status === 'pending');
+  $('workReqNote').value = 'ช่วงนี้ Nutty ก็ติดงานคอร์ส ให้ลองจัดลำดับเองก่อน'; $('workReqDetail').querySelector('[data-act="req-reject"]').click(); await sleep(400);
+  const d1 = lastRpc('work_request_decide');
+  ok('ปฏิเสธพร้อมเหตุผล: work_request_decide reject + เหตุผล · ฐาน = rejected · ผู้ตัดสิน = Nui · ข้อความ "ปฏิเสธคำขอแล้ว"', d1.args.p_request === 'q1' && d1.args.p_verdict === 'reject' && /จัดลำดับเอง/.test(d1.args.p_note) && reqOnServer('q1').status === 'rejected' && reqOnServer('q1').decided_by === 'u4' && /ปฏิเสธคำขอแล้ว/.test(toast()));
+  ok('หลังตอบ: เลขที่แท็บเหลือ 1 · q1 ย้ายไปส่วน "ตอบแล้ว" · แผงยังโชว์ q1 พร้อมเหตุผลที่ปฏิเสธ (ผู้ตอบเห็นผลของตัวเอง) · ไม่มีปุ่มตอบซ้ำ', txt('workReqN') === '1' && /ปฏิเสธ/.test(reqRow('q1').textContent) && work.reqSel === 'q1' && !!$('workReqDetail').querySelector('.wk-ans.bad') && /จัดลำดับเอง/.test(txt('workReqDetail')) && !$('workReqDetail').querySelector('[data-act="req-approve"],[data-act="req-reject"]'));
+  reqRow('q2').click(); await frames();
+  ok('เลือก q2 (ถึง Nui โดยเฉพาะ): มีปุ่มตอบ · ป้าย "ถึง Nui"', !!$('workReqDetail').querySelector('[data-act="req-approve"]') && /ถึง Nui/.test(txt('workReqDetail')));
+  $('workReqDetail').querySelector('[data-act="req-approve"]').click(); await sleep(400);
+  const d2 = lastRpc('work_request_decide');
+  ok('อนุมัติโดยไม่ใส่ความเห็น (q2 ถึง Nui โดยเฉพาะ): p_note = null · ฐาน = approved · เลขที่แท็บว่าง · ตัวเลขแดงเหลือ 3 (งานรอตรวจเท่านั้น)', d2.args.p_request === 'q2' && d2.args.p_verdict === 'approve' && d2.args.p_note === null && reqOnServer('q2').status === 'approved' && txt('workReqN') === '' && badge() === '3', badge());
+  // ที่ฉันยื่น
+  document.querySelector('#workReqBoxes button[data-box="out"]').click(); await frames();
+  ok('"ที่ฉันยื่น": q4 (ถึงเจ้าของ) รอตอบ + ปุ่มถอน · ผู้ดูแลไม่มีปุ่มตอบคำขอของตัวเอง', reqRows().join() === 'q4' && !!$('workReqDetail').querySelector('[data-act="req-withdraw"]') && !$('workReqDetail').querySelector('[data-act="req-approve"],[data-act="req-reject"]'));
+  $('workReqNew').click(); await sleep(120);
+  ok('ผู้ดูแลยื่นคำขอ: ตัวเลือกกลุ่มมีเฉพาะ "เจ้าของ" · เลือกเป็นคนได้เฉพาะ TiBass (ยื่นถึงผู้ดูแลด้วยกันไม่ได้)', grpChips() === 'เจ้าของ' && (document.querySelector('#workrMode button[data-mode="user"]').click(), [...$('workrUser').options].map(o => o.textContent.split(' · ')[0]).join() === 'TiBass') && [...$('workrTask').options].some(o => o.value === 'e1'), grpChips());
+  closeAll(); await sleep(100);
+  // ใครตัดสินก่อนเป็นผู้ตัดสิน (แย่งกันตอบในกลุ่ม)
+  WORK.seed(); await loadWork(); document.querySelector('#workReqBoxes button[data-box="in"]').click(); await frames();
+  WORK.rpc.work_request_decide('u5', { p_request: 'q1', p_verdict: 'approve', p_note: 'Fah รับเอง' });    // Fah ตอบไปก่อน ขณะที่หน้านี้ยังเห็น q1 เป็นรอตอบ
+  ok('(ตั้งต้น) หน้าของ Nui ยังเห็น q1 รอตอบ ทั้งที่ Fah ตอบไปแล้ว', work.reqs.find(r => r.id === 'q1').status === 'pending' && !!$('workReqDetail').querySelector('[data-act="req-approve"]'));
+  $('workReqDetail').querySelector('[data-act="req-approve"]').click(); await sleep(500);
+  ok('ตอบทับคนที่ตอบไปก่อน: ฐานปฏิเสธ บอกว่า Fah อนุมัติไปแล้ว · หน้าโหลดใหม่ให้เห็นผลจริง ไม่มีปุ่มตอบอีก · ข้อความถูกแสดงให้เห็น', /ตอบคำขอไม่สำเร็จ: คำขอนี้ปิดไปแล้ว \\(อนุมัติแล้วโดย Fah\\)/.test(toast()) && work.reqs.find(r => r.id === 'q1').status === 'approved' && reqOnServer('q1').decided_by === 'u5' && !$('workReqDetail').querySelector('[data-act="req-approve"]'));
+  doLogout(); await sleep(400);
+
+  // ── 7. เจ้าของ (TiBass) ───────────────────────────────────────────────────
+  WORK.seed();
+  await login('tibass');
+  ok('เจ้าของ: ตัวเลขแดง = งานรอตรวจ 4 (a5 b1 b2 + c1 ของผู้ดูแล) + คำขอที่ถึงเจ้าของ 2 (q4 q5) = 6 — ไม่นับคำขอที่ส่งถึงผู้ดูแล (q1 q2) แม้เห็นอยู่', badge() === '6', badge());
+  showSection('tasks'); await sleep(300); tab('review'); await frames();
+  ok('เจ้าของตรวจได้ทุกใบ รวมงานของผู้ดูแล (c1): คิว a5 b1 b2 c1 ตามเวลาส่ง', queue().join() === 'a5,b1,b2,c1' || queue().join() === 'a5,b1,b2,c1', queue().join());
+  cardOf('#workQueue', 'c1').click(); await frames();
+  ok('c1 (งานของผู้ดูแล): เจ้าของมีปุ่ม ผ่าน · ปิดงาน / ส่งกลับแก้ ได้', !!$('workDetail').querySelector('[data-act="rv-approve"]') && !!$('workDetail').querySelector('[data-act="rv-changes"]'));
+  $('workDetail').querySelector('[data-act="rv-approve"]').click(); await sleep(400);
+  ok('เจ้าของผ่านงานของผู้ดูแล: ฐาน = ผ่านแล้ว ปิดงาน', taskOnServer('c1').status === 'approved' && lastRpc('work_review').args.p_task === 'c1');
+  tab('req'); await frames();
+  ok('เจ้าของไม่มีตัวสลับกล่อง (ตอบอย่างเดียว) · ไม่มีปุ่มยื่นคำขอ (สั่งงาน/ย้ายงานเอง) · เลขที่แท็บ 2 (เฉพาะที่ถึงเจ้าของ)', $('workReqBoxes').innerHTML === '' && $('workReqNew').hidden && txt('workReqN') === '2', txt('workReqN'));
+  ok('เจ้าของเห็นคำขอทุกใบ (q1–q6 ยกเว้นที่ยื่นเอง = ไม่มี) รวมที่ถึงผู้ดูแลโดยเฉพาะ (q2) · รอตอบ 4 ก่อน ตอบแล้ว 2', reqRows().sort().join() === 'q1,q2,q3,q4,q5,q6' && reqRows().slice(0, 4).sort().join() === 'q1,q2,q4,q5', reqRows().join());
+  reqRow('q2').click(); await frames();
+  ok('เจ้าของตัดสินแทนได้แม้ส่งถึงผู้ดูแลโดยเฉพาะ (q2 ถึง Nui): มีปุ่มตอบ · ป้าย "ถึง Nui"', !!$('workReqDetail').querySelector('[data-act="req-approve"]') && /ถึง Nui/.test(txt('workReqDetail')));
+  $('workReqNote').value = 'ตกลง ให้ Nui ดูแลต่อ'; $('workReqDetail').querySelector('[data-act="req-approve"]').click(); await sleep(400);
+  ok('เจ้าของอนุมัติ q2: ฐาน = approved · ผู้ตัดสิน = TiBass · เก็บความเห็น', reqOnServer('q2').status === 'approved' && reqOnServer('q2').decided_by === 'u1' && reqOnServer('q2').decision_note === 'ตกลง ให้ Nui ดูแลต่อ');
+  tab('assign'); await frames(); $('workNew').click(); await sleep(150);
+  ok('เจ้าของสั่งงาน: เลือกได้ทุกคนที่ใช้งานอยู่ (6 คน รวมตัวเอง) — ไม่มี "สั่งไม่ได้"', pplOn().split(',').length === 6 && pplOff() === '' && /เจ้าของสั่งงานให้ทุกคนได้/.test(txt('workfRule')), pplOn());
+  closeAll();
+  // ปิดงานขั้น 2 เมื่อช่องโซเชียลถูกแก้ออกหมด (work_close)
+  document.querySelector('#workAll tr[data-id="a3"]').click(); await sleep(150);
+  ok('a3 (รอลงโซเชียล · ยังมีช่อง): ยังไม่มีปุ่ม "ปิดงาน" (ต้องรอลิงก์โพสต์)', !$('workDlgBody').querySelector('[data-act="close-task"]') && !!$('workDlgBody').querySelector('[data-act="edit"]'));
+  ok('เจ้าของไม่มีปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้" บนใบงาน (เจ้าของยื่นคำขอไม่ได้)', !$('workDlgBody').querySelector('[data-act="req-new"]'));
+  $('workDlgBody').querySelector('[data-act="edit"]').click(); await sleep(150);
+  ok('แก้ใบที่ผ่านขั้นไฟล์แล้ว: บอกว่าอยู่ขั้นลิงก์โพสต์เสมอ · เพิ่มช่อง = ต้องแนบเพิ่ม · เอาช่องออกหมด = ปิดงานได้', /อยู่ขั้นลิงก์โพสต์เสมอ/.test(txt('workfStage')) && /ปิดงาน/.test(txt('workfStage')));
+  document.querySelector('#workfChans button[data-ch="facebook"]').click(); document.querySelector('#workfChans button[data-ch="instagram"]').click();
+  $('workForm').requestSubmit(); await sleep(450);
+  const ed = lastRpc('work_edit');
+  ok('เอาช่องออกหมด: work_edit ส่งช่องว่าง · ฐาน = ยังรอลงโซเชียล (phase final · open · ไม่ย้อนกลับขั้น 1)', ed.args.p_channels.length === 0 && taskOnServer('a3').phase === 'final' && taskOnServer('a3').status === 'open');
+  document.querySelector('#workAll tr[data-id="a3"]').click(); await sleep(150);
+  ok('ตอนนี้ a3 ไม่มีช่องให้ลงแล้ว: เจ้าของเห็นปุ่ม "ปิดงาน (ไม่ต้องลงโซเชียลแล้ว)"', !!$('workDlgBody').querySelector('[data-act="close-task"]'));
+  $('workDlgBody').querySelector('[data-act="close-task"]').click(); await sleep(150);
+  ok('กดปิดงาน: ถามยืนยันก่อน', dlgOpen('confirmDialog') && /ปิดงานนี้เลย/.test(txt('confirmTitle')));
+  $('confirmOkBtn').click(); await sleep(400);
+  ok('ยืนยัน: work_close · ฐาน = ผ่านแล้ว · ข้อความ "ปิดงานแล้ว"', lastRpc('work_close').args.p_task === 'a3' && taskOnServer('a3').status === 'approved' && /ปิดงานแล้ว/.test(toast()));
+  closeAll();
+  doLogout(); await sleep(400);
+
+  // ── 8. ผู้ดูแลทำ work_close ได้กับงานของพนักงาน · ปุ่มไม่โผล่เมื่อไม่มีสิทธิ์ตรวจ ──────────────
+  WORK.seed();
+  WORK.tasks.find(t => t.id === 'a3').channels = [];             // a3: ผ่านขั้นไฟล์แล้ว + ไม่มีช่องเหลือ (ผู้รับเป็นพนักงาน Zen)
+  WORK.tasks.push(Object.assign({}, WORK.tasks.find(t => t.id === 'a3'), { id: 'x3', assignee_id: 'u5', title: 'งานของผู้ดูแล Fah ที่ผ่านขั้นไฟล์แล้ว' }));
+  WORK.events.push(Object.assign({}, WORK.events.find(e => e.task_id === 'a3' && e.kind === 'content_approved'), { id: 'ex3', task_id: 'x3' }));
+  await login('nui'); showSection('tasks'); await sleep(300); tab('assign'); await frames();
+  document.querySelector('#workAll tr[data-id="a3"]').click(); await sleep(150);
+  ok('ผู้ดูแลเห็นปุ่ม "ปิดงาน" ที่ใบของพนักงานที่ผ่านขั้นไฟล์แล้วและไม่มีช่องเหลือ', !!$('workDlgBody').querySelector('[data-act="close-task"]'));
+  closeAll();
+  document.querySelector('#workAll tr[data-id="x3"]').click(); await sleep(150);
+  ok('ใบเดียวกันแต่ผู้รับเป็นผู้ดูแล (Fah): ผู้ดูแลไม่มีปุ่มปิดงาน (ตรวจไม่ได้ = ปิดไม่ได้)', !$('workDlgBody').querySelector('[data-act="close-task"]'));
+  closeAll();
+  doLogout(); await sleep(400);
+
+  // ── 9. Realtime · ยังไม่ได้รัน migration · โหลดล้ม ───────────────────────────
+  WORK.seed();
+  await login('zen'); showSection('tasks'); await sleep(300);
+  const subs = WORK.subs.filter(s => s.name === 'desk-work');
+  ok('ฟัง Realtime ของ work_tasks · work_task_events · work_requests ในช่องเดียว (desk-work)', ['work_tasks', 'work_task_events', 'work_requests'].every(t => subs.some(s => s.table === t)), JSON.stringify(subs.map(s => s.table)));
+  const selN = () => CALLS.filter(c => c.op === 'select' && c.table === 'work_tasks').length;
+  let n0 = selN();
+  WORK.fireRt('work_tasks'); WORK.fireRt('work_task_events'); WORK.fireRt('work_requests'); await sleep(900);
+  ok('Realtime ยิงรัว 3 ครั้งติดกัน = โหลดใหม่ครั้งเดียว (รวบ)', selN() - n0 === 1, String(selN() - n0));
+  const before = badge();
+  WORK.tasks.push(Object.assign({}, WORK.tasks.find(t => t.id === 'a4'), { id: 'n1', title: 'งานใหม่ที่เพิ่งถูกสั่ง', created_at: new Date().toISOString() }));
+  WORK.fireRt('work_tasks'); await sleep(900);
+  ok('มีใบใหม่ถึงฉัน: ข้อความเด้ง "มีงานใหม่" · ตัวเลขแดงเพิ่ม 1 · การ์ดโผล่เอง ไม่ต้องรีเฟรช', /มีงานใหม่/.test(toast()) && /งานใหม่ที่เพิ่งถูกสั่ง/.test(toast()) && Number(badge()) === Number(before) + 1 && mineIds().includes('n1'), toast() + ' ' + before + '→' + badge());
+  WORK.rpc.work_review('u4', { p_task: 'a5', p_verdict: 'changes', p_note: 'นับใหม่อีกรอบ' });
+  WORK.fireRt('work_tasks'); await sleep(900);
+  ok('ใบของฉันถูกส่งกลับแก้จากอีกเครื่อง: ข้อความเด้ง "ถูกส่งกลับแก้" · การ์ดย้ายไปกลุ่มต้องทำก่อน พร้อมความเห็น', /ถูกส่งกลับแก้/.test(toast()) && groupIds('ต้องทำก่อน').includes('a5') && /นับใหม่อีกรอบ/.test(cardOf('#workMineList', 'a5').textContent));
+  WORK.rpc.work_request_decide('u4', { p_request: 'q3', p_verdict: 'approve', p_note: null });   // (q3 ปิดไปแล้ว — ต้องล้ม ไม่ทำให้อะไรเปลี่ยน)
+  WORK.reqs.push({ id: 'q8', requester_id: 'u2', to_user_id: 'u4', to_group: null, task_id: null, body: 'ขอเปลี่ยนวันหยุด', status: 'pending', decided_by: null, decision_note: '', closed_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+  await loadWork();
+  WORK.rpc.work_request_decide('u4', { p_request: 'q8', p_verdict: 'reject', p_note: 'วันนั้นมีคอร์ส' });
+  WORK.fireRt('work_requests'); await sleep(900);
+  ok('คำขอของฉันถูกตอบจากอีกเครื่อง: ข้อความเด้ง "คำขอของคุณถูกปฏิเสธ"', /คำขอของคุณถูกปฏิเสธ/.test(toast()), toast());
+  doLogout(); await sleep(400);
+  // ยังไม่ได้รัน 037 / 038
+  WORK.seed(); WORK.missing = true;
+  await login('zen'); showSection('tasks'); await sleep(400);
+  ok('ยังไม่ได้รัน migration: ขึ้นแถบเหลืองบอกให้รัน 037 และ 038 · ไม่มีแถบแดงฟ้อง (ตาราง/คอลัมน์ยังไม่มี = รอได้) · ตัวเลขแดงไม่ขึ้น · รายการงานว่าง', /ต้องรัน migration 037 และ 038/.test(txt('workAlert')) && !!$('workAlert').querySelector('.alert-warn') && !fatalText() && badge() === '' && mineIds().length === 0);
+  doLogout(); await sleep(400);
+  WORK.seed(); WORK.noReq = true;
+  await login('zen'); showSection('tasks'); await sleep(400);
+  ok('รัน 037 แล้วแต่ยังไม่รัน 038 (ตารางคำขอไม่มี): บอกให้รัน 037 และ 038 เช่นกัน — ไม่แสดงงานครึ่ง ๆ กลาง ๆ', /ต้องรัน migration 037 และ 038/.test(txt('workAlert')) && mineIds().length === 0);
+  doLogout(); await sleep(400);
+  WORK.seed(); WORK.fail.select = 'เครือข่ายขาด';
+  await login('zen'); showSection('tasks'); await sleep(400);
+  ok('โหลดล้มด้วยเหตุอื่น: แถบแดง "โหลดงานไม่สำเร็จ" + แถบข้อผิดพลาดบนจอ (ไม่เงียบ) · ไม่โชว์ว่าไม่มีงาน', /โหลดงานไม่สำเร็จ: เครือข่ายขาด/.test(txt('workAlert')) && !!$('workAlert').querySelector('.alert-red') && /โหลดงานของฉันไม่สำเร็จ: เครือข่ายขาด/.test(fatalText()));
+  document.getElementById('fatalError') && document.getElementById('fatalError').remove();
+  delete WORK.fail.select; $('workReload').click(); await sleep(500);
+  ok('กด ↻ รีเฟรช หลังเครือข่ายกลับมา: โหลดได้ แถบแดงหาย', mineIds().length === 5 && txt('workAlert') === '');
+  doLogout(); await sleep(400);
+
+  // ── 10. XSS · ลิงก์อันตราย ────────────────────────────────────────────
+  WORK.seed();
+  const xt = WORK.tasks.find(t => t.id === 'b1'); xt.title = '<img src=x onerror="window.__xss=1">ชื่อทดสอบ'; xt.detail = '<b>ตัวหนา</b><scr' + 'ipt>window.__xss=2</scr' + 'ipt>'; xt.assignee_id = 'u2';
+  WORK.events.filter(e => e.task_id === 'b1' && e.kind === 'submitted').forEach(e => { e.note = '<img src=x onerror="window.__xss=3">'; e.links = [{ url: 'javascript:window.__xss=4' }, { url: 'http://insecure.example.com/x' }, { url: 'https://drive.google.com/ok' }]; });
+  WORK.reqs.find(r => r.id === 'q1').body = '<img src=x onerror="window.__xss=5">คำขอ';
+  await login('zen'); showSection('tasks'); await sleep(300);
+  document.querySelector('[data-act="open"][data-id="b1"]').click(); await sleep(150);
+  const dlg = $('workDlgBody');
+  ok('ข้อความที่มีแท็ก HTML (ชื่อ/รายละเอียด/ข้อความตอนส่ง) แสดงเป็นข้อความ ไม่ถูกรัน · ไม่มี <img>/<script> โผล่', !window.__xss && !document.querySelector('#sec-tasks img[src="x"], #workDlg img[src="x"]') && !dlg.querySelector('script') && /<img src=x/.test(dlg.textContent));
+  ok('ลิงก์หลักฐาน: javascript: และ http:// ไม่เป็นลิงก์ที่กดได้ (แสดงเป็นข้อความเฉย ๆ) · https ปกติเปิดแท็บใหม่ได้ (noopener noreferrer)', dlg.querySelectorAll('a[href]').length === 1 && dlg.querySelector('a[href]').href === 'https://drive.google.com/ok' && dlg.querySelector('a[href]').target === '_blank' && dlg.querySelector('a[href]').rel === 'noopener noreferrer' && /javascript:window/.test(dlg.textContent));
+  closeAll(); tab('req'); await frames();
+  ok('คำขอที่มีแท็ก HTML: แสดงเป็นข้อความเช่นกัน', !window.__xss && /<img src=x/.test(txt('workReqDetail')) && !document.querySelector('#workReqDetail img'));
+
+  // ── 11. กันกดซ้ำ ──────────────────────────────────────────────────────
+  doLogout(); await sleep(400); WORK.seed();
+  await login('nui'); showSection('tasks'); await sleep(300); tab('review'); await frames();
+  let rel = null; WORK.gate = new Promise(r => { rel = r; });
+  const rvN = rpcs('work_review').length;
+  $('workDetail').querySelector('[data-act="rv-approve"]').click(); await sleep(50);
+  const btnA = $('workDetail').querySelector('[data-act="rv-approve"]');
+  ok('กดผ่านแล้วค้างรอฐานข้อมูล: ปุ่มตรวจถูกปิดทันที · กดซ้ำไม่ได้', !btnA || btnA.disabled);
+  workReview('a5', 'approve'); await sleep(50);
+  WORK.gate = null; rel(); await sleep(500);
+  ok('กดผ่านซ้ำระหว่างรอ: ฟังก์ชัน work_review ถูกเรียกครั้งเดียว', rpcs('work_review').length - rvN === 1, String(rpcs('work_review').length - rvN));
+  tab('req'); await frames();
+  let rel2 = null; WORK.gate = new Promise(r => { rel2 = r; });
+  const dcN = rpcs('work_request_decide').length;
+  $('workReqDetail').querySelector('[data-act="req-approve"]').click(); await sleep(50);
+  ok('ตอบคำขอแล้วค้างรอฐานข้อมูล: ปุ่มตอบถูกปิดทันที', [...document.querySelectorAll('#workReqDetail [data-act="req-approve"],#workReqDetail [data-act="req-reject"]')].every(b => b.disabled));
+  workReqDecide(work.reqSel, 'approve'); await sleep(50);
+  WORK.gate = null; rel2(); await sleep(500);
+  ok('ตอบซ้ำระหว่างรอ: work_request_decide ถูกเรียกครั้งเดียว', rpcs('work_request_decide').length - dcN === 1, String(rpcs('work_request_decide').length - dcN));
+  doLogout(); await sleep(400);
+
+  // ── 12. ออกจากระบบ/สลับบัญชี: ล้างทุกอย่างออกจากหน้า ──────────────────────────
+  WORK.seed();
+  await login('nui'); showSection('tasks'); await sleep(300);
+  tab('req'); await frames(); $('workReqNew').click(); await sleep(120);
+  setVal('workrBody', 'ข้อความคำขอที่พิมพ์ค้างไว้ก่อนออกจากระบบ');
+  const leakRe = /ถ่ายรูปสินค้า DDJ-FLX4 ลง|ตัดคลิปรีวิว|โพสต์โปร Starter Pack|ข้อความคำขอที่พิมพ์ค้างไว้|ขออนุมัติซื้อไมค์|ขอหยุดวันจันทร์|ตรวจนับสาย XLR|จัดชั้นวางหูฟัง|อัปเดตรายการราคาหูฟัง/;
+  ok('(ตั้งต้น) ผู้ดูแลเห็นงานและคำขอจริง + หน้าต่างคำขอเปิดพร้อมข้อความที่พิมพ์ค้าง', dlgOpen('workReqDialog') && work.tasks.length > 5 && work.reqs.length > 3 && leakRe.test(document.body.innerText + $('workrBody').value));
+  let relOut = null; WORK.gate = new Promise(r => { relOut = r; });
+  $('workReload').click(); await sleep(60);                                     // โหลดค้างอยู่ แล้วออกจากระบบ
+  doLogout(); await sleep(400);
+  WORK.gate = null; relOut(); await sleep(500);                                 // ผลโหลดของคนเดิมมาถึงหลังออกจากระบบ — ต้องไม่ถูกวาดลงหน้า
+  const leakAt = [...document.querySelectorAll('body *')].filter(e => !/^(SCRIPT|STYLE)$/.test(e.tagName) && e.children.length === 0 && leakRe.test(e.textContent + (e.value || ''))).map(e => (e.id ? '#' + e.id : e.tagName.toLowerCase() + '.' + e.className)).slice(0, 5);
+  ok('ออกจากระบบ: เนื้อหางาน/คำขอถูกล้างออกจากหน้า (DOM + หน่วยความจำ) แม้ผลโหลดมาถึงทีหลัง · ไม่มีข้อความค้างในฟอร์ม', !leakAt.length && work.tasks.length === 0 && work.reqs.length === 0 && work.events.length === 0 && work.people.length === 0 && !work.loaded, leakAt.join(' | '));
+  ok('ออกจากระบบ: หน้าต่างคำขอปิด · ช่องที่พิมพ์ค้างว่าง · ตัวเลขแดงหาย · เปิดแท็บกลับที่งานของฉัน', !dlgOpen('workReqDialog') && $('workrBody').value === '' && workReq === null && badge() === '' && $('workPaneMine').hidden === false && txt('workReqN') === '' && txt('workReviewN') === '');
+  await login('zen');
+  ok('ล็อกอินเป็นพนักงานต่อ: งานของ Nui/คำขอของผู้ดูแลไม่ค้างในหน้า · เห็นแต่ของ Zen', !/ขออนุมัติซื้อไมค์|ขอหยุดวันจันทร์|จัดชั้นวางหูฟัง|อัปเดตรายการราคาหูฟัง|ข้อความคำขอที่พิมพ์ค้างไว้/.test(document.body.innerText + $('workrBody').value) && work.reqs.every(r => r.requester_id === 'u2') && work.tasks.every(t => t.assignee_id === 'u2' || t.created_by === 'u2'), String(work.tasks.length));
+  // สลับบัญชีกลางหน้าต่างที่เปิดค้าง
+  showSection('tasks'); await sleep(300);
+  openMine('a1'); await sleep(120); setVal('workSubLink', 'https://drive.google.com/ค้างไว้');
+  ok('(ตั้งต้น) Zen เปิดหน้าต่างส่งงานค้างไว้', dlgOpen('workSubDialog'));
+  onAccountSwitched(); await sleep(120);
+  ok('สลับบัญชี (onAccountSwitched): หน้าต่างส่งงานปิด · สถานะส่งงานล้าง · ลิงก์ที่พิมพ์ค้างหาย', !dlgOpen('workSubDialog') && workSub === null && $('workSubLink').value === '' && work.tasks.length === 0 && !work.loaded);
+  doLogout(); await sleep(400);
+  // บัญชีที่ถูกปิด
+  await login('ghost');
+  ok('บัญชีที่ถูกปิด (Ghost): เข้าระบบไม่ได้ · ไม่ดึงงานเลย', !!document.getElementById('loginError').textContent && rpcs('work_create').length < 99 && work.tasks.length === 0 && badge() === '');
+
+  done();
+}
+function done() {
+  L('=== สรุป: ' + pass + ' PASS / ' + fail + ' FAIL ===');
+  L(fail ? 'RESULT:FAIL' : 'RESULT:PASS');
+}
+</script>`;
+
+const net = '--host-resolver-rules=MAP * ~NOTFOUND';
+const res = await runCdpPage({ root: pageRoot, file: 'desk.html', mock: MOCK3 + WORK_MOCK, tests: TESTS, width: 1440, height: 900, coarse: false, shotDir: SHOTS, flags: [net] });
+console.log('\n=== desk-worklist: ' + (res.ok ? 'ผ่าน' : 'ไม่ผ่านหรือไม่ได้รันจนจบ') + ' ===');
+process.exit(res.ok ? 0 : 1);

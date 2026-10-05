@@ -1009,6 +1009,109 @@
     .ops-side { flex-direction: row; align-items: center; justify-content: space-between; }
   }
 
+  /* งานของฉัน (#tasks · Work Checklist · 037 + 038) — สถานะเป็นคำเสมอ + ขอบในซ้าย 4px (แดง = เกินกำหนด · เหลือง = ส่งกลับแก้ · เขียว = ผ่าน) ไม่ใช้สีอย่างเดียว */
+  #workAlert { margin-right: var(--calc-clear); }       /* แถบแจ้งเตือนแถวแรกของหมวด — เว้นที่ให้ปุ่มเครื่องคิดเลข */
+  .wk-h2 { font-size: 19px; }
+  .wk-group { margin-bottom: 20px; }
+  .wk-group h3 { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 10px 16px; font-size: 16px;
+    background: var(--head); border: 1px solid var(--line); border-bottom: 2px solid var(--black); }
+  .wk-group h3 .n { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--text2); }
+  .wk-list { background: var(--surface); border: 1px solid var(--line); border-top: 0; }
+  .wk-task { position: relative; padding: 12px 16px; border-bottom: 1px solid var(--line); cursor: pointer; overflow-wrap: anywhere; }
+  .wk-task:last-child { border-bottom: 0; }
+  .wk-task:hover { background: var(--surface2); }
+  .wk-task:focus-visible { outline: 2px solid var(--black); outline-offset: -2px; }
+  .wk-task.sel { background: var(--sel); box-shadow: inset 4px 0 0 var(--black); }
+  .wk-task.edge-red { box-shadow: inset 4px 0 0 var(--red); }
+  .wk-task.edge-warn { box-shadow: inset 4px 0 0 var(--warn); }
+  .wk-task.edge-ok { box-shadow: inset 4px 0 0 var(--ok); }
+  .wk-task.done { color: var(--text2); background: var(--surface2); }
+  .wk-task.done .wk-title { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .wk-top, .wk-meta, .wk-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+  .wk-meta { margin-top: 8px; }
+  .wk-due { font-size: 14px; color: var(--text2); }
+  .wk-title { margin-top: 4px; font-family: var(--font-head); font-size: 16px; font-weight: 600; line-height: 1.4; }
+  .wk-by { margin-top: 6px; font-size: 14px; color: var(--text2); }
+  .wk-kind { display: inline-block; padding: 0 7px; font-size: 14px; font-weight: 600; border: 1px solid var(--black); background: var(--surface); }
+  .wk-stage { display: inline-block; padding: 0 7px; font-size: 14px; font-weight: 600; color: var(--text2); border: 1px solid var(--line-strong); background: var(--surface2); }
+  .wk-chan { display: inline-flex; padding: 2px 8px; font-size: 14px; font-weight: 600; border: 1px solid var(--line-strong); background: var(--surface); }
+  .wk-chan.ok { color: var(--ok); background: var(--ok-soft); border-color: #BFD9C7; }
+  .wk-chan.miss { color: var(--text2); border: 2px dashed var(--line-strong); }
+  .st.wk-wait { background: var(--black); color: #fff; border-color: var(--black); }
+  .st.wk-soc { background: var(--surface); color: var(--black); border: 2px solid var(--black); }
+  .wk-quote { margin-top: 10px; padding: 10px 12px; font-size: 14px; background: var(--surface2); border: 1px solid var(--line-strong); }
+  .wk-quote strong, .wk-quote small { display: block; }
+  .wk-quote small { margin-top: 2px; color: var(--text2); }
+  .wk-split { display: grid; grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 20px; }
+  .wk-split > * { min-width: 0; }
+  .wk-card { padding: 0; }
+  .wk-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: var(--head); border-bottom: 2px solid var(--black);
+    font-family: var(--font-head); font-size: 16px; font-weight: 600; }
+  .wk-card-head .n { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--text2); }
+  .wk-card-body { padding: 16px 18px; }
+  .wk-kv { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 6px 14px; font-size: 15px; }
+  .wk-kv dt { font-size: 14px; font-weight: 600; color: var(--text2); }
+  .wk-sec-h { margin: 18px 0 8px; padding-bottom: 6px; font: 600 14px/1.3 var(--font-body); color: var(--text2); border-bottom: 1px solid var(--line); }
+  .wk-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .wk-link:last-child { border-bottom: 0; }
+  .wk-url { font-size: 14px; word-break: break-all; }
+  .wk-note { font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .wk-tl { list-style: none; padding: 0; margin: 0; }
+  .wk-tl li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .wk-tl li:last-child { border-bottom: 0; }
+  .wk-tl .t { color: var(--text2); }
+  .wk-tiles { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .wk-tilebox { display: grid; gap: 6px; width: 96px; }
+  .wk-tile { display: grid; place-items: center; width: 96px; height: 96px; padding: 4px; overflow: hidden; text-align: center; background: var(--surface); border: 1px solid var(--line-strong); }
+  .wk-tile img { width: 100%; height: 100%; object-fit: contain; }
+  .wk-actions { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 14px 18px; background: var(--surface2); border-top: 2px solid var(--black); }
+  .wk-att { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--line-strong); font-size: 14px; }
+  .wk-att strong { display: block; font: 600 15px/1.35 var(--font-head); }
+  .wk-ans { margin-top: 14px; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line-strong); background: var(--surface2); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .wk-ans.ok { border-color: #BFD9C7; background: var(--ok-soft); color: var(--ok); }
+  .wk-ans.bad { border-color: #F0B8C1; background: var(--red-soft); color: var(--red); }
+  .wk-ans strong, .wk-ans small { display: block; }
+  .wk-ans small { margin-top: 2px; opacity: .85; }
+  .wk-msg { margin-top: 4px; font-size: 14px; font-weight: 600; }
+  .wk-msg.ok { color: var(--ok); }
+  .wk-msg.bad { color: var(--red); }
+  .wk-need { margin-bottom: 10px; font-size: 14px; font-weight: 700; color: var(--red); }
+  .wk-need:empty { display: none; }
+  /* คำเตือน/ข้อความสำคัญ (ห้ามทำ · ทำไม่ได้ · บังคับ · ย้อนกลับไม่ได้) = แดงตัวหนา — ไม่ใช้สีอย่างเดียว ตัวหนาและคำบอกชัดเสมอ */
+  .wk-red { color: var(--red); font-weight: 700; }
+  .wk-people label.off .sub { color: var(--red); font-weight: 600; }
+  .wk-quote.warn strong { color: var(--red); }
+  .wk-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wk-chipbtn { min-height: 44px; padding: 5px 12px; font: 600 14px/1.2 var(--font-body); background: var(--surface); border: 1px solid var(--line-strong); cursor: pointer; }
+  .wk-chipbtn:hover { border-color: var(--black); }
+  .wk-chipbtn[aria-pressed="true"] { background: var(--black); color: #fff; border-color: var(--black); }
+  #workfKind button { min-width: 44px; }
+  .seg button .n { margin-left: 6px; padding: 0 7px; font-family: var(--font-head); font-size: 14px; background: var(--red); color: #fff; }
+  .wk-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; align-items: start; }
+  .wk-people { border: 1px solid var(--line-strong); }
+  .wk-people label { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 12px; border-bottom: 1px solid var(--line); cursor: pointer; font-size: 15px; }
+  .wk-people label:last-child { border-bottom: 0; }
+  .wk-people label.on { background: var(--sel); box-shadow: inset 4px 0 0 var(--black); }
+  .wk-people label.off { cursor: not-allowed; color: var(--text2); background: var(--surface2); }
+  .wk-people label.off .cb { border-color: var(--line-strong); background: var(--surface2); }
+  .wk-people input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .wk-people .cb { display: grid; place-items: center; flex: none; width: 22px; height: 22px; border: 2px solid var(--black); background: #fff; font-size: 14px; font-weight: 700; line-height: 1; }
+  .wk-people label.on .cb { background: var(--black); color: #fff; }
+  .wk-people label.on .cb::before { content: "✓"; }
+  .wk-people input:focus-visible + .cb { outline: 2px solid var(--black); outline-offset: 2px; }
+  .wk-people .sub { margin-left: auto; font-size: 14px; color: var(--text2); }
+  .wk-row .wk-meta { margin-top: 4px; }
+  #workSubDialog { max-width: 640px; }
+  #workDlg { max-width: 820px; }
+  #workFormDialog { max-width: 920px; }
+  #workReqDialog { max-width: 640px; }
+  @media (max-width: 900px) { .wk-split, .wk-form-grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 640px) {
+    .wk-kv { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .wk-kv dd { margin-bottom: 8px; }
+    .wk-tl li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  }
+
   /* ราคาและโปรโมชัน (#catalog · migration 035) — รายการสินค้าตามประเภท + เช็คบ็อกซ์ขายอยู่/เลิกขาย + กล่องโปร
      สถานะเป็นคำ + สัญลักษณ์เสมอ (.st) · ช่องติ๊กอยู่ในป้ายกว้าง ≥ 44 แตะที่ไหนในป้ายก็ติ๊กได้ · ไม่มีขอบสีข้างซ้าย */
   #catAlert { margin-right: var(--calc-clear); }       /* แถบแจ้งเตือนแถวแรกอยู่ในกล่องนี้ (ไม่ใช่ลูกตรงของหมวด) — เว้นที่ให้ปุ่มเครื่องคิดเลขเหมือน .section > .alert:first-child */
@@ -2086,6 +2189,47 @@
           </div>
         </section>
 
+        <!-- ============ งานของฉัน — Work Checklist พนักงานรายบุคคล (migration 037 + 038) ============ -->
+        <section class="section" id="sec-tasks" hidden aria-label="งานของฉัน เช็กลิสต์งานที่ได้รับมอบหมาย คำขอ">
+          <div id="workAlert"></div>
+          <div class="toolbar calc-clear">
+            <div class="mail-tabs" id="workTabs" role="tablist" aria-label="ส่วนของหน้า" style="margin:0; flex:1;">
+              <button class="mail-tab" type="button" role="tab" data-tab="mine" aria-selected="true">งานของฉัน</button>
+              <button class="mail-tab" type="button" role="tab" data-tab="review" aria-selected="false" hidden>ตรวจงาน <span class="n" id="workReviewN"></span></button>
+              <button class="mail-tab" type="button" role="tab" data-tab="assign" aria-selected="false">สั่งงาน</button>
+              <button class="mail-tab" type="button" role="tab" data-tab="req" aria-selected="false">คำขอ <span class="n" id="workReqN"></span></button>
+            </div>
+            <button class="btn" id="workReload" type="button">↻ รีเฟรช</button>
+          </div>
+          <div id="workPaneMine">
+            <div class="stats" aria-label="สรุปงานของฉัน">
+              <div class="stat"><div class="stat-value" id="workStatTodo">0</div><div class="stat-label">ต้องทำ (ยังไม่ส่ง)</div></div>
+              <div class="stat"><div class="stat-value" id="workStatLate">0</div><div class="stat-label">เกินกำหนด</div></div>
+              <div class="stat"><div class="stat-value" id="workStatWait">0</div><div class="stat-label">ส่งแล้ว รอตรวจ</div></div>
+            </div>
+            <div id="workMineList"><div class="empty">กำลังโหลดงาน…</div></div>
+          </div>
+          <div id="workPaneReview" hidden>
+            <div class="stats stats-4" aria-label="สรุปการตรวจงาน">
+              <div class="stat"><div class="stat-value" id="workRvWait">0</div><div class="stat-label">รอตรวจ (ที่ฉันตรวจได้)</div></div>
+              <div class="stat"><div class="stat-value" id="workRvLate">0</div><div class="stat-label">เกินกำหนด (ยังไม่ส่ง)</div></div>
+              <div class="stat"><div class="stat-value" id="workRvLateSub">0</div><div class="stat-label">ส่งช้า 7 วันล่าสุด</div></div>
+              <div class="stat"><div class="stat-value" id="workRvDone">0</div><div class="stat-label">ผ่านแล้ว 7 วันล่าสุด</div></div>
+            </div>
+            <div class="wk-split"><div id="workQueue"></div><div id="workDetail"></div></div>
+          </div>
+          <div id="workPaneAssign" hidden>
+            <div class="toolbar"><h2 class="wk-h2" id="workAssignHead">ภาพรวมทีม</h2><button class="btn btn-primary" id="workNew" type="button" style="margin-left:auto;">+ สั่งงานใหม่</button></div>
+            <div id="workTeam"></div>
+            <div class="toolbar wk-chips" id="workFilter" role="group" aria-label="สถานะงาน"></div>
+            <div id="workAll"></div>
+          </div>
+          <div id="workPaneReq" hidden>
+            <div class="toolbar"><div id="workReqBoxes"></div><button class="btn btn-primary" id="workReqNew" type="button" style="margin-left:auto;">+ ยื่นคำขอใหม่</button></div>
+            <div class="wk-split"><div id="workReqList"></div><div id="workReqDetail"></div></div>
+          </div>
+        </section>
+
         <!-- ============ Ops Board (เฉพาะเจ้าของร้าน) ============ -->
         <section class="section" id="sec-ops" hidden aria-label="Ops Board กระดานงานภายในร้าน">
           <div id="opsAlert"></div>
@@ -2418,6 +2562,96 @@
     <button class="btn" type="button" id="exCopy">คัดลอก</button>
     <button class="btn btn-primary" type="button" id="exDownload">ดาวน์โหลดไฟล์</button>
   </div>
+</dialog>
+
+<dialog id="workSubDialog" aria-labelledby="workSubTitle">
+  <div class="dlg-head"><h2 id="workSubTitle">ส่งงาน</h2></div>
+  <form class="dlg-body" id="workSubForm" novalidate>
+    <div id="workSubTask"></div>
+    <div id="workSubChans"></div>
+    <div class="field" id="workSubFileField"><label class="lbl" for="workSubLink">ลิงก์ไฟล์ <span class="hint" id="workSubLinkHint" style="margin:0;">ไม่บังคับ</span></label>
+      <input class="input" id="workSubLink" inputmode="url" autocomplete="off" placeholder="วางลิงก์ Google Drive ของไฟล์วิดีโอตัวเต็ม">
+      <div class="hint">วิดีโอไม่ต้องอัปโหลดเข้าระบบ (ไฟล์ใหญ่ — เพดานต่อไฟล์ 50 MB) ให้ตั้งสิทธิ์ลิงก์ Drive ให้ผู้ตรวจเปิดดูได้ แล้ววางลิงก์ตรงนี้</div></div>
+    <div class="field" id="workSubImgField"><span class="lbl">รูปประกอบ <span class="hint" style="margin:0;">ไม่บังคับ · สูงสุด 6 รูป</span></span>
+      <div class="wk-tiles" id="workSubImgs"></div>
+      <button type="button" class="btn" id="workSubPick">แตะเพื่อถ่ายรูปหรือเลือกรูป</button>
+      <input type="file" id="workSubFile" accept="image/*" multiple hidden>
+      <div class="hint">ระบบย่อรูปให้ก่อนส่ง · เก็บไว้เป็นหลักฐานในระบบร้าน</div></div>
+    <div class="field"><label class="lbl" for="workSubNote">ข้อความถึงผู้ตรวจ <span class="hint" style="margin:0;">ไม่บังคับ</span></label>
+      <textarea class="input" id="workSubNote" rows="3" maxlength="1000"></textarea></div>
+    <div class="alert alert-plain"><strong class="wk-red">ส่งแล้วแก้เองไม่ได้</strong> — ถ้าส่งผิด ผู้ตรวจจะส่งกลับให้แก้ · งานที่ส่งหลังกำหนดจะติดป้าย <strong class="wk-red">"ส่งช้า"</strong> ให้เห็น ไม่ใช่การปิดกั้น</div>
+    <div id="workSubNeed" class="wk-need" role="status" aria-live="polite"></div>
+    <div id="workSubErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="workSubCancel">ปิด (Esc)</button>
+      <button class="btn" type="button" id="workSubReq">ยื่นคำขอเกี่ยวกับงานนี้</button>
+      <button class="btn btn-primary" id="workSubGo" type="submit" disabled>ส่งงานให้ตรวจ</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="workFormDialog" aria-labelledby="workfHead">
+  <div class="dlg-head"><h2 id="workfHead">สั่งงานใหม่</h2></div>
+  <form class="dlg-body" id="workForm" novalidate>
+    <div class="wk-form-grid">
+      <div>
+        <div class="field"><label class="lbl" for="workfTitle">หัวข้องาน *</label><input class="input" id="workfTitle" maxlength="160" autocomplete="off" placeholder="เช่น ถ่ายรูปสินค้าใหม่ลง Instagram"></div>
+        <div class="field"><label class="lbl" for="workfDetail">รายละเอียด</label><textarea class="input" id="workfDetail" rows="3" maxlength="2000"></textarea></div>
+        <div class="field"><span class="lbl">ประเภทงาน</span>
+          <div class="seg" id="workfKind" role="group" aria-label="ประเภทงาน">
+            <button type="button" data-kind="photo" aria-pressed="true">รูป</button><button type="button" data-kind="video" aria-pressed="false">วิดีโอ</button><button type="button" data-kind="social_post" aria-pressed="false">โพสต์โซเชียล</button><button type="button" data-kind="other" aria-pressed="false">อื่น ๆ</button>
+          </div></div>
+        <div class="field"><span class="lbl">ช่องทางที่ต้องลง <span class="hint" style="margin:0;">เลือกได้หลายช่อง</span></span>
+          <div class="wk-chips" id="workfChans" role="group" aria-label="ช่องทางโซเชียล">
+            <button type="button" class="wk-chipbtn" data-ch="facebook" aria-pressed="false">Facebook</button><button type="button" class="wk-chipbtn" data-ch="instagram" aria-pressed="false">Instagram</button><button type="button" class="wk-chipbtn" data-ch="tiktok" aria-pressed="false">TikTok</button><button type="button" class="wk-chipbtn" data-ch="youtube" aria-pressed="false">YouTube</button>
+          </div>
+          <div class="hint" id="workfStage"></div></div>
+        <div class="row2">
+          <div class="field"><label class="lbl" for="workfDate">วันที่ส่ง</label><input type="date" class="input" id="workfDate"></div>
+          <div class="field"><label class="lbl" for="workfTime">เวลา <span class="hint" style="margin:0;">เวลาไทย</span></label><input type="time" class="input" id="workfTime"></div>
+        </div>
+        <div class="wk-chips" style="margin:-6px 0 16px;"><button type="button" class="wk-chipbtn" data-quick="today">วันนี้ 18:00</button><button type="button" class="wk-chipbtn" data-quick="tomorrow">พรุ่งนี้ 12:00</button><button type="button" class="wk-chipbtn" data-quick="none">ไม่มีกำหนด</button></div>
+        <div class="field"><label class="lbl" for="workfRefs">ลิงก์ตัวอย่าง / ไฟล์อ้างอิง <span class="hint" style="margin:0;">ไม่บังคับ · บรรทัดละลิงก์ · สูงสุด 5</span></label><textarea class="input" id="workfRefs" rows="2" placeholder="วางลิงก์ Drive หรือภาพตัวอย่างงานที่อยากได้"></textarea></div>
+      </div>
+      <div>
+        <div class="field"><span class="lbl" id="workfPeopleLabel">มอบให้</span><div id="workfPeople"></div></div>
+        <div class="field" id="workfReasonField" hidden><label class="lbl" for="workfReason">เหตุผลที่แก้ <span class="hint" style="margin:0;">ไม่บังคับ · ลงประวัติ</span></label><input class="input" id="workfReason" maxlength="500" autocomplete="off"></div>
+        <div class="alert alert-plain" id="workfSum" role="status"></div>
+        <div class="alert alert-plain" id="workfRule"></div>
+      </div>
+    </div>
+    <div id="workfErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="workfCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="workfSave" type="submit">สั่งงาน</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="workDlg" aria-labelledby="workDlgTitle">
+  <div class="dlg-head"><h2 id="workDlgTitle">รายละเอียดงาน</h2></div>
+  <div class="dlg-body" id="workDlgBody"></div>
+  <div class="dlg-foot"><button class="btn" type="button" onclick="document.getElementById('workDlg').close()">ปิด (Esc)</button></div>
+</dialog>
+
+<dialog id="workReqDialog" aria-labelledby="workrHead">
+  <div class="dlg-head"><h2 id="workrHead">ยื่นคำขอ</h2></div>
+  <form class="dlg-body" id="workReqForm" novalidate>
+    <div class="field"><span class="lbl">ถึงใคร <span class="hint" style="margin:0;">ส่งทั้งกลุ่ม = ใครในกลุ่มตอบก่อนเป็นคนตัดสิน · เจ้าของเห็นคำขอทุกใบ</span></span>
+      <div class="seg" id="workrMode" role="group" aria-label="ส่งถึง">
+        <button type="button" data-mode="group" aria-pressed="true">ทั้งกลุ่ม</button><button type="button" data-mode="user" aria-pressed="false">เลือกเป็นคน</button>
+      </div></div>
+    <div class="field" id="workrGroupField"><div class="wk-chips" id="workrGroups" role="group" aria-label="กลุ่มผู้รับ"></div></div>
+    <div class="field" id="workrUserField" hidden><label class="lbl" for="workrUser">ผู้รับ</label><select class="input" id="workrUser"></select></div>
+    <div class="field"><label class="lbl" for="workrTask">ใบงานที่เกี่ยวข้อง <span class="hint" style="margin:0;">ไม่บังคับ</span></label><select class="input" id="workrTask"></select></div>
+    <div class="field"><label class="lbl" for="workrBody">ข้อความคำขอ</label><textarea class="input" id="workrBody" rows="4" maxlength="1000" placeholder="เช่น ช่วยย้ายงานนี้ไปให้แพรได้มั้ยครับ ตอนนี้ติดงานอื่นอยู่"></textarea><div class="hint" id="workrCount" style="text-align:right;">0 / 1000</div></div>
+    <div class="alert alert-plain"><strong class="wk-red">อนุมัติ = ผู้รับรับเรื่อง</strong> — <strong class="wk-red">ระบบไม่ย้ายงานหรือเลื่อนกำหนดให้เอง</strong> ผู้อนุมัติจะไปทำที่หน้าใบงาน · ถ้าถูกปฏิเสธจะเห็นเหตุผล · ถอนคำขอได้ตอนที่ยังไม่มีคนตอบ</div>
+    <div id="workrErr" class="alert alert-red" role="alert" hidden></div>
+    <div class="dlg-foot" style="padding:0;">
+      <button class="btn" type="button" id="workrCancel">ปิด (Esc)</button>
+      <button class="btn btn-primary" id="workrGo" type="submit" disabled>ส่งคำขอ</button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
@@ -2820,6 +3054,8 @@ const SECTIONS = [
   { id: 'calendar', hash: 'calendar',      group: 'พนักงาน',     icon: 'calendar', label: 'ปฏิทิน', key: 'C' },
   // S = staff-only (ห้อง Discord) · ไม่ใช้ D เพราะ Alt+D ของ Chrome บนวินโดวส์คือไปที่แถบที่อยู่
   { id: 'discord',  hash: 'discord',       group: 'พนักงาน',     icon: 'discord', label: 'Discord', key: 'S' },
+  // T = งานของฉัน (Work Checklist · migration 037/038) — ทุกตำแหน่งเข้าได้ · แท็บ "ตรวจงาน" ในหน้าเห็นเฉพาะเจ้าของ/ผู้ดูแล · ป้ายเมนูกับชื่อหน้าเป็นคำเดียวกันตามที่เจ้าของสั่ง
+  { id: 'tasks',    hash: 'tasks',         group: 'พนักงาน',     icon: 'tasks', label: 'งานของฉัน', key: 'T' },
   { id: 'products', hash: 'stock',         group: 'สต็อกสินค้า', icon: 'products', label: 'สินค้า', key: '1' },
   { id: 'movement', hash: 'stock-move',    group: 'สต็อกสินค้า', icon: 'movement', label: 'รับเข้า / ตัดออก / ปรับยอด', short: 'เข้า-ออก/ปรับยอด', key: '2' },
   { id: 'moves',    hash: 'stock-history', group: 'สต็อกสินค้า', icon: 'moves', label: 'ประวัติการเคลื่อนไหว', short: 'ประวัติสต๊อก', key: '3' },
@@ -2855,6 +3091,7 @@ const NAV_ICONS = {
   admin:     '<ellipse cx="10" cy="5" rx="6.5" ry="2.5"/><path d="M3.5 5v10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V5M3.5 10c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5"/>',
   ops:       '<rect x="3" y="3" width="14" height="14"/><path d="M6.5 7.5l1.5 1.5 2.5-3M6.5 13h7"/>',
   catalog:   '<path d="M3 3.5h6.5l7.5 7.5-6 6L3 9.5z"/><path d="M6.8 7h.01"/>',
+  tasks:     '<rect x="4" y="3.5" width="12" height="14"/><path d="M7.5 3.5V2h5v1.5M7 9l1.5 1.5L11 8M7 14h6"/>',
 };
 function navIcon(k) { return '<svg class="ico-svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false">' + (NAV_ICONS[k] || '') + '</svg>'; }
 const HOME = 'home';   // หมวดเริ่มต้นหลังล็อกอิน และที่ที่ถูกส่งกลับเมื่อเปิดหมวดที่ไม่มีสิทธิ์
@@ -2950,6 +3187,7 @@ async function handleAuthState(session) {
   if (!session) {
     opsReset();                     // ออกจากระบบ = ล้าง Ops Board ออกจากหน้า (ข้อมูลภายในร้าน)
     catReset();                     // และล้างหมวดราคา/โปรโมชัน (แถบย้อนกลับ ฟอร์มที่พิมพ์ค้าง)
+    workReset();                    // และล้างงานของฉัน/คำขอ (ใบงาน ประวัติ รูปหลักฐาน ฟอร์มที่พิมพ์ค้าง)
     dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
     closeCam();                     // ออกจากระบบ = ปิดกล้อง (iPad) ด้วย
     document.getElementById('loginOverlay').style.display = 'flex';
@@ -3011,6 +3249,7 @@ async function handleAuthState(session) {
 
   loadAll();
   loadStaffHome();
+  loadWork();                     // ตัวเลขแดงข้างเมนู "งานของฉัน" ต้องขึ้นตั้งแต่ล็อกอิน ไม่ต้องรอเปิดหมวด
   dcStart();
 }
 
@@ -3056,6 +3295,11 @@ async function initSupabaseSync() {
       loadHomeToday();
       if (current === 'calendar') loadCalendar();
     })
+    .subscribe();
+  db.channel('desk-work')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_tasks' }, () => workScheduleReload())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_task_events' }, () => workScheduleReload())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_requests' }, () => workScheduleReload())
     .subscribe();
 }
 
@@ -5058,8 +5302,8 @@ function renderNav() {
       html += '<div class="nav-group"><div class="nav-group-title">' + escapeHtml(group) + '</div>';
     }
     const key = sectionKey(s);
-    // ตัวเลขแดงข้างเมนู = ข้อความที่ "ฉัน" ยังไม่ได้อ่าน (กระดาน · Discord) / อีเมลที่ยังไม่ได้เปิด (กล่องจดหมาย)
-    const badge = s.id === 'board' || s.id === 'mail' || s.id === 'discord' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
+    // ตัวเลขแดงข้างเมนู = ข้อความที่ "ฉัน" ยังไม่ได้อ่าน (กระดาน · Discord) / อีเมลที่ยังไม่ได้เปิด (กล่องจดหมาย) / งานที่ต้องทำ+รอตรวจ+คำขอที่ส่งถึงฉัน (งานของฉัน)
+    const badge = s.id === 'board' || s.id === 'mail' || s.id === 'discord' || s.id === 'tasks' ? '<span class="nbadge" id="navBadge-' + s.id + '" hidden></span>' : '';
     html += '<button class="nav-item" type="button" data-s="' + s.id + '" onclick="showSection(\'' + s.id + '\')"' +
       ' title="' + escapeHtml(s.label) + (key ? ' (' + key + ')' : '') + '">' +
       '<span class="ico" aria-hidden="true">' + navIcon(s.icon) + '</span><span class="lbl">' + escapeHtml(s.short || s.label) + '</span>' +
@@ -5134,6 +5378,7 @@ function showSection(id, mode) {
     if (id === 'admin' && !adLoaded) adLoadAll();
     if (id === 'ops') loadOps();
     if (id === 'catalog') { renderCatalog(); loadCatalog(); }
+    if (id === 'tasks') { renderWork(); loadWork(); }
     if (id === 'mail') loadMailList();
     if (id === 'pos') renderSellers();
     if (id === 'calendar') loadCalendar();
@@ -8763,16 +9008,17 @@ async function loadStaff() {
 }
 
 function updateNavBadges() {
-  const set = (id, n) => {
+  const set = (id, n, what) => {
     const el = document.getElementById('navBadge-' + id);
     if (!el) return;
     el.hidden = !n;
     el.textContent = n || '';
-    el.setAttribute('aria-label', 'ยังไม่ได้อ่าน ' + (n || 0));
+    el.setAttribute('aria-label', (what || 'ยังไม่ได้อ่าน') + ' ' + (n || 0));
   };
   set('board', myUnread().length);
   set('mail', mailState.status === 'ok' ? mailState.unseen : 0);
   set('discord', dc.unread);
+  set('tasks', workBadgeCount(), 'ต้องทำ');
 }
 
 // ---------------------------------------------------------------------------
@@ -9786,6 +10032,7 @@ function renderLoginAccounts() {
 function onAccountSwitched() {
   opsReset();                    // Ops Board เป็นข้อมูลของเจ้าของ — สลับเป็นคนอื่นต้องไม่ค้างอยู่ในหน้า
   catReset();                    // หมวดราคา/โปรโมชัน: แถบย้อนกลับ/ฟอร์มค้างของคนเดิมใช้สิทธิ์ของคนใหม่ไม่ได้
+  workReset();                   // งานของฉัน/คำขอ: ใบงาน คำขอ รูปหลักฐานของคนเดิมต้องไม่ค้าง (คอมหน้าร้านใช้ร่วมกันหลายคน)
   coSellers = [];
   launchDraft = null;
   mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
@@ -11846,6 +12093,915 @@ function toggleCalc(fromButton) {
   if (saved && saved.open) openCalc(false);    // เปิดค้างไว้ครั้งก่อน = เปิดไว้ให้ แต่ไม่แย่งโฟกัสจากช่องยิงบาร์โค้ด
   else renderCalc();
 })();
+
+// ===========================================================================
+// งานของฉัน — Work Checklist พนักงานรายบุคคล (#tasks · Alt+T · migration 037 + 038)
+// ดีไซน์: console-workspace/DESIGN-staff-worklist.md (หัวข้อ A ชนะข้อความเก่า) · ภาพตัวอย่าง: console-workspace/mockups/staff-worklist/
+//
+// ทุกตำแหน่งเห็นแท็บ งานของฉัน · สั่งงาน · คำขอ — "ตรวจงาน" เห็นเฉพาะเจ้าของ/ผู้ดูแล (ผู้ดูแลตรวจได้เฉพาะงานของพนักงาน)
+// สิทธิ์ตัวจริงอยู่ที่ฐานข้อมูล: เบราว์เซอร์อ่านได้อย่างเดียว (RLS) ทุกการเขียนผ่านฟังก์ชัน work_create / work_submit / work_review / work_edit /
+// work_reassign / work_cancel / work_close / work_request_create / work_request_decide / work_request_withdraw — ฟังก์ชัน workCan* ข้างล่างแค่ซ่อน/โชว์ปุ่ม
+// งานรูป/วิดีโอที่ระบุช่องโซเชียล = ตรวจ 2 รอบ (phase 'content' = ส่งไฟล์ → ผ่าน → "รอลงโซเชียล" phase 'final' = แนบลิงก์โพสต์ครบทุกช่อง → ผ่าน = ปิดงาน)
+// "เกินกำหนด / ใกล้ถึงกำหนด / ส่งช้า" ไม่ได้เก็บในฐาน — คิดสดที่นี่จาก due_at (เวลาไทยเสมอ)
+// ตัวเลขแดงข้างเมนู = งานของฉันที่ยังไม่ส่ง (รวมส่งกลับแก้/รอลงโซเชียล) + งานที่รอฉันตรวจ (เฉพาะที่ตรวจได้) + คำขอ pending ที่ส่งถึงฉัน
+// ===========================================================================
+const WORK_COLS = 'id, title, detail, kind, channels, ref_links, assignee_id, created_by, due_at, status, phase, batch_id, submitted_at, closed_at, created_at, updated_at';
+const WORK_EV_COLS = 'id, task_id, kind, actor_id, note, links, image_paths, phase, created_at';
+const WORK_REQ_COLS = 'id, requester_id, to_user_id, to_group, task_id, body, status, decided_by, decision_note, closed_at, created_at, updated_at';
+const WORK_KIND = { photo: 'รูป', video: 'วิดีโอ', social_post: 'โพสต์โซเชียล', other: 'อื่น ๆ' };
+const WORK_CHAN = { facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube' };
+const WORK_ROLE = { owner: 'เจ้าของร้าน', admin: 'ผู้ดูแลระบบ', staff: 'พนักงาน' };
+const WORK_GROUP = { owner: 'เจ้าของ', admin: 'ผู้ดูแลทุกคน' };
+const WORK_EV_LABEL = { created: 'สั่งงาน', submitted: 'ส่งงาน', content_approved: 'ผ่านขั้นไฟล์ → รอลงโซเชียล', approved: 'ตรวจผ่าน', changes_requested: 'ส่งกลับแก้', edited: 'แก้ใบงาน', reassigned: 'ย้ายผู้รับ', cancelled: 'ยกเลิกงาน' };
+const WORK_REQ_ST = { pending: ['รอตอบ', 'st wk-wait'], approved: ['อนุมัติแล้ว', 'st st-ok'], rejected: ['ปฏิเสธ', 'st st-bad'], withdrawn: ['ถอนแล้ว', 'st st-off'] };
+// ลิงก์: กติกาเดียวกับ work_link_ok ในฐานข้อมูล (https เท่านั้น · ไม่มี @ ในโฮสต์ · ถ้าระบุช่องทางต้องเป็นโดเมนของช่องนั้น) — ฐานข้อมูลตรวจซ้ำเสมอ
+const WORK_URL_RE = /^https:\/\/[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?([/?#][^\s\u0000-\u001f\u007f]*)?$/;
+const WORK_HOST = { facebook: /(^|\.)(facebook\.com|fb\.com|fb\.me|fb\.watch)$/, instagram: /(^|\.)instagram\.com$/, tiktok: /(^|\.)tiktok\.com$/, youtube: /(^|\.)(youtube\.com|youtu\.be)$/ };
+const WORK_NO_TABLE = /does not exist|schema cache|could not find the table|could not find the .* column/i;   // ยังไม่ได้รัน 037/038 (ตาราง/คอลัมน์ยังไม่มี)
+const WORK_BUCKET = 'work-evidence';
+const WORK_SOON_MS = 3 * 3600000;      // "ใกล้ถึงกำหนด" = เหลือไม่ถึง 3 ชม. (ค่าตั้งต้นข้อ 8)
+const WORK_MAX_IMG = 6;
+
+function workBlank() { return { loaded: false, missing: false, error: '', tasks: [], events: [], reqs: [], people: [], tab: 'mine', sel: null, reqSel: null, reqBox: '', filter: 'all', doneOpen: false, signed: {}, rt: null }; }
+let work = workBlank();
+let workSub = null;       // หน้าต่างส่งงาน: { id, imgs: [{ blob, url }], busy }
+let workForm = null;      // หน้าต่างสั่งงาน/แก้: { id|null, kind, channels:Set, busy }
+let workReq = null;       // หน้าต่างยื่นคำขอ: { mode: 'group'|'user', group, busy }
+let workDlgId = null;     // หน้าต่างรายละเอียดใบงาน
+let workBusy = false;     // กำลังตรวจ/ตัดสิน/ยกเลิก — กันกดซ้ำ
+
+const workMine = () => work.tasks.filter(t => t.assignee_id === currentUserId);
+const workTask = id => work.tasks.find(t => t.id === id) || null;
+const workPerson = id => work.people.find(p => p.id === id) || null;
+const workName = id => { const p = workPerson(id); return p ? p.full_name : 'ไม่ทราบชื่อ'; };
+const workRoleOf = id => { const p = workPerson(id); return p ? (WORK_ROLE[p.role] || p.role) : ''; };
+const workEvents = id => work.events.filter(e => e.task_id === id);
+const workLastEv = (id, kind) => workEvents(id).filter(e => e.kind === kind).pop() || null;
+const workOpenish = t => t.status === 'open' || t.status === 'changes';
+
+// ── สิทธิ์ (สำเนาฝั่งหน้าจอของ work_can_* ในฐาน — ใช้ซ่อน/โชว์ปุ่มเท่านั้น ฐานข้อมูลบังคับซ้ำทุกครั้ง · ใช้ตำแหน่งปัจจุบันของผู้รับ ไม่ใช่ตอนสั่ง) ──
+const workMyRole = () => (currentAdmin ? currentAdmin.role : '');
+const workActiveRole = id => { const p = workPerson(id); return p && p.is_active ? p.role : ''; };
+function workCanAssign(id) {                       // สั่งงานให้ id ได้ไหม: เจ้าของทุกคน · ผู้ดูแล = ผู้ดูแล+พนักงาน · พนักงาน = พนักงานเท่านั้น
+  const r = workActiveRole(id), me = workMyRole();
+  return me === 'owner' ? !!r : me === 'admin' ? (r === 'admin' || r === 'staff') : me === 'staff' ? r === 'staff' : false;
+}
+function workCanReview(assigneeId) {               // ตรวจงานของ assigneeId ได้ไหม: เจ้าของทุกใบ · ผู้ดูแลเฉพาะผู้รับที่เป็นพนักงาน · พนักงานไม่ได้
+  const me = workMyRole();
+  return me === 'owner' || (me === 'admin' && workActiveRole(assigneeId) === 'staff');
+}
+function workCanManage(t) {                        // แก้/ย้าย/ยกเลิก: เจ้าของทุกใบ · ผู้สั่งของใบนั้น · ผู้ดูแลใบที่ผู้รับเป็นพนักงาน
+  const me = workMyRole();
+  return me === 'owner' || t.created_by === currentUserId || (me === 'admin' && workActiveRole(t.assignee_id) === 'staff');
+}
+const workHasContentOk = id => workEvents(id).some(e => e.kind === 'content_approved');
+const workPost = t => t.phase === 'final' && workHasContentOk(t.id);                    // ผ่านขั้นไฟล์แล้ว = ขั้น 2 (รอลงโซเชียล)
+const workStaged = t => t.phase === 'content' || workHasContentOk(t.id);                // งาน 2 ขั้น
+const workReviewable = t => t.status === 'submitted' && workCanReview(t.assignee_id);
+const workCanClose = t => workOpenish(t) && t.phase === 'final' && !(t.channels || []).length && workHasContentOk(t.id) && workCanReview(t.assignee_id);
+const workCanEdit = t => ['open', 'changes', 'submitted'].includes(t.status) && workCanManage(t);
+
+// ── เวลา (ไทยเสมอ ไม่พึ่งเขตเวลาของเครื่อง · ไทยไม่มี DST จึงบวก 7 ชม. ตรง ๆ) ──
+function workBkk(ms) {
+  const s = ms + 7 * 3600000, d = new Date(s);
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes(), dow: d.getUTCDay(), day: Math.floor(s / 86400000) };
+}
+const workHm = b => String(b.h).padStart(2, '0') + ':' + String(b.mi).padStart(2, '0');
+function workWhen(iso) {
+  if (!iso) return 'ไม่มีกำหนด';
+  const b = workBkk(Date.parse(iso)), n = workBkk(Date.now()), dd = b.day - n.day;
+  if (dd === 0) return 'วันนี้ ' + workHm(b);
+  if (dd === 1) return 'พรุ่งนี้ ' + workHm(b);
+  if (dd === -1) return 'เมื่อวาน ' + workHm(b);
+  return THAI_DAYS[b.dow] + ' ' + b.d + ' ' + THAI_MONTHS[b.m] + (b.y !== n.y ? ' ' + (b.y + 543) : '') + ' ' + workHm(b);
+}
+function workDt(iso) { const b = workBkk(Date.parse(iso)); return THAI_DAYS[b.dow] + ' ' + b.d + ' ' + THAI_MONTHS[b.m] + ' ' + (b.y + 543) + ' ' + workHm(b); }
+function workSpan(ms) {
+  const m = Math.max(1, Math.floor(ms / 60000));
+  if (m < 60) return m + ' นาที';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + ' ชม.' + (m % 60 ? ' ' + (m % 60) + ' นาที' : '');
+  return Math.floor(h / 24) + ' วัน' + (h % 24 ? ' ' + (h % 24) + ' ชม.' : '');
+}
+const workOverdue = t => workOpenish(t) && !!t.due_at && Date.parse(t.due_at) < Date.now();
+const workSoon = t => workOpenish(t) && !!t.due_at && Date.parse(t.due_at) >= Date.now() && Date.parse(t.due_at) - Date.now() < WORK_SOON_MS;
+const workLate = t => !!t.due_at && !!t.submitted_at && (t.status === 'submitted' || t.status === 'approved') && Date.parse(t.submitted_at) > Date.parse(t.due_at);
+function workDueCmp(a, b) {
+  if (a.due_at && b.due_at && a.due_at !== b.due_at) return Date.parse(a.due_at) - Date.parse(b.due_at);
+  if (a.due_at && !b.due_at) return -1;
+  if (!a.due_at && b.due_at) return 1;
+  return Date.parse(a.created_at) - Date.parse(b.created_at);
+}
+// ส่งงานครั้งที่เท่าไหร่ของใบนี้ (นับจากประวัติ)
+const workRound = id => workEvents(id).filter(e => e.kind === 'submitted').length;
+
+// ── ลิงก์ ──
+function workLinkOk(url, channel) {
+  if (typeof url !== 'string' || url.length > 500 || !WORK_URL_RE.test(url)) return false;
+  if (!channel) return true;
+  const re = WORK_HOST[channel];
+  return !!re && re.test(url.match(/^https:\/\/([^/?#:]+)/)[1].toLowerCase());
+}
+const workHref = u => (typeof u === 'string' && WORK_URL_RE.test(u)) ? u : '';
+
+// ── คำขอ: ใครเป็นผู้รับ/ตัดสินได้ (สำเนาฝั่งหน้าจอของ work_request_decide) ──
+const workReqForMe = r => r.requester_id !== currentUserId && (r.to_user_id === currentUserId || r.to_group === workMyRole());   // "ส่งถึงฉัน" — ตัวเลขแดงนับเฉพาะอย่างนี้
+const workReqCanDecide = r => r.status === 'pending' && (workMyRole() === 'owner' || workMyRole() === 'admin') && r.requester_id !== currentUserId &&
+  (workMyRole() === 'owner' || r.to_user_id === currentUserId || r.to_group === workMyRole());
+const workReqToLabel = r => r.to_group ? (WORK_GROUP[r.to_group] || r.to_group) : workName(r.to_user_id);
+const workReqBoxes = () => { const me = workMyRole(), b = []; if (me === 'owner' || me === 'admin') b.push('in'); if (me === 'admin' || me === 'staff') b.push('out'); return b; };
+const workReqPendingForMe = () => work.reqs.filter(r => r.status === 'pending' && workReqForMe(r));
+
+// ── โหลด ──
+async function loadWork() {
+  if (!currentUserId) return;
+  const uid = currentUserId;
+  const [t, e, q, p] = await Promise.all([
+    db.from('work_tasks').select(WORK_COLS).order('created_at', { ascending: false }).limit(500),
+    db.from('work_task_events').select(WORK_EV_COLS).order('created_at', { ascending: false }).limit(3000),     // ใหม่สุดก่อนแล้วกลับด้านทีหลัง — ถ้าเกินเพดาน ตัดของเก่าทิ้ง ไม่ใช่ของใหม่
+    db.from('work_requests').select(WORK_REQ_COLS).order('created_at', { ascending: false }).limit(500),
+    db.from('admins').select('id, full_name, role, is_active').order('full_name'),
+  ]);
+  if (uid !== currentUserId) return;                       // สลับบัญชี/ออกจากระบบระหว่างโหลด — ทิ้งผล ไม่เอามาแสดง
+  const before = work.loaded ? { ids: new Set(work.tasks.map(x => x.id)), status: new Map(work.tasks.map(x => [x.id, x.status])),
+    reqIds: new Set(work.reqs.map(x => x.id)), reqStatus: new Map(work.reqs.map(x => [x.id, x.status])) } : null;
+  work.loaded = true;
+  const bad = t.error || e.error || q.error;
+  if (bad) {
+    console.error('[Work load]', bad);
+    work.tasks = []; work.events = []; work.reqs = [];
+    work.missing = WORK_NO_TABLE.test(bad.message || '');
+    work.error = work.missing ? '' : 'โหลดงานไม่สำเร็จ: ' + bad.message;
+    if (work.error && current === 'tasks') showFatalError('โหลดงานของฉันไม่สำเร็จ: ' + bad.message);
+  } else {
+    work.missing = false; work.error = '';
+    work.tasks = t.data || []; work.events = (e.data || []).slice().reverse(); work.reqs = q.data || [];
+  }
+  if (p.error) console.error('[Work people]', p.error); else work.people = p.data || [];
+  workNotify(before);
+  renderWork();
+}
+// มีของใหม่ถึงฉัน (ใบใหม่ · ถูกส่งกลับแก้ · มีงานรอตรวจ · คำขอใหม่ · คำขอของฉันถูกตอบ) → ข้อความสั้นหนึ่งบรรทัด (เฉพาะรอบที่โหลดต่อจากรอบก่อน ไม่ใช่ตอนเข้าครั้งแรก)
+function workNotify(before) {
+  if (!before) return;
+  const msgs = [];
+  const fresh = work.tasks.filter(t => t.assignee_id === currentUserId && !before.ids.has(t.id));
+  if (fresh.length) msgs.push('📌 มีงานใหม่ ' + (fresh.length === 1 ? '"' + fresh[0].title + '"' : fresh.length + ' ใบ'));
+  const back = work.tasks.filter(t => t.assignee_id === currentUserId && t.status === 'changes' && before.status.get(t.id) && before.status.get(t.id) !== 'changes');
+  if (back.length) msgs.push('↩ ถูกส่งกลับแก้ ' + (back.length === 1 ? '"' + back[0].title + '"' : back.length + ' ใบ'));
+  const rv = work.tasks.filter(t => workReviewable(t) && before.status.get(t.id) !== 'submitted');
+  if (rv.length) msgs.push('🔔 มีงานรอตรวจ ' + rv.length + ' ใบ');
+  const rq = work.reqs.filter(r => r.status === 'pending' && workReqForMe(r) && !before.reqIds.has(r.id));
+  if (rq.length) msgs.push('📨 มีคำขอใหม่ถึงคุณ ' + rq.length + ' ใบ');
+  const ans = work.reqs.filter(r => r.requester_id === currentUserId && r.status !== 'pending' && r.status !== 'withdrawn' && before.reqStatus.get(r.id) === 'pending');
+  if (ans.length) msgs.push('💬 คำขอของคุณถูก' + (ans.length === 1 ? (ans[0].status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ') : 'ตอบแล้ว ' + ans.length + ' ใบ'));
+  if (msgs.length) showToast(msgs.join(' · '));
+}
+function workBadgeCount() {
+  if (!work.loaded || work.missing || work.error) return 0;
+  return workMine().filter(workOpenish).length + work.tasks.filter(workReviewable).length + workReqPendingForMe().length;
+}
+function workScheduleReload() {              // Realtime: รวบหลายการเปลี่ยนแปลงติดกันเป็นการโหลดครั้งเดียว
+  if (!currentUserId) return;
+  clearTimeout(work.rt);
+  work.rt = setTimeout(() => { work.rt = null; loadWork(); }, 400);
+}
+
+// ── ออกจากระบบ / สลับบัญชี: งานของคนก่อนต้องไม่ค้างในหน้า (DOM ก็ล้าง ไม่ใช่แค่ซ่อน — คอมหน้าร้านใช้ร่วมกันหลายคน) ──
+function workReset() {
+  clearTimeout(work.rt);
+  workSubFree();
+  work = workBlank(); workSub = null; workForm = null; workReq = null; workDlgId = null; workBusy = false;
+  ['workMineList', 'workQueue', 'workDetail', 'workTeam', 'workAll', 'workAlert', 'workDlgBody', 'workSubTask', 'workSubChans', 'workSubImgs', 'workfPeople', 'workReqList', 'workReqDetail', 'workReqBoxes', 'workrGroups', 'workrUser', 'workrTask'].forEach(id => { document.getElementById(id).innerHTML = ''; });
+  document.getElementById('workMineList').innerHTML = '<div class="empty">กำลังโหลดงาน…</div>';
+  ['workStatTodo', 'workStatLate', 'workStatWait', 'workRvWait', 'workRvLate', 'workRvLateSub', 'workRvDone'].forEach(id => { document.getElementById(id).textContent = '0'; });
+  ['workReviewN', 'workReqN'].forEach(id => { document.getElementById(id).textContent = ''; });
+  ['workSubLink', 'workSubNote', 'workfTitle', 'workfDetail', 'workfDate', 'workfTime', 'workfRefs', 'workfReason', 'workrBody'].forEach(id => { document.getElementById(id).value = ''; });
+  ['workSubErr', 'workfErr', 'workrErr'].forEach(id => { const e = document.getElementById(id); e.hidden = true; e.textContent = ''; });
+  ['workSubDialog', 'workFormDialog', 'workDlg', 'workReqDialog'].forEach(id => { const d = document.getElementById(id); if (d.open) d.close(); });
+  closeConfirm();                                  // หน้าต่างยืนยันยกเลิกงานเก็บชื่องานไว้ใน DOM
+  document.getElementById('confirmTitle').textContent = 'ยืนยัน';
+  document.getElementById('confirmBody').innerHTML = '';
+  workTab('mine');
+  updateNavBadges();
+}
+
+// ── วาด ──
+function workPills(t) {
+  const p = [];
+  if (t.status === 'cancelled') p.push('<span class="st st-off">ยกเลิกแล้ว</span>');
+  else if (t.status === 'approved') p.push('<span class="st st-ok">ผ่านแล้ว</span>');
+  else if (t.status === 'submitted') p.push('<span class="st wk-wait">รอตรวจ</span>');
+  else if (t.status === 'changes') p.push('<span class="st st-warn">ส่งกลับแก้</span>');
+  else if (workPost(t)) p.push('<span class="st wk-soc">รอลงโซเชียล</span>');
+  else if (!workOverdue(t) && !workSoon(t)) p.push('<span class="st st-off">ยังไม่ส่ง</span>');
+  if (workOverdue(t)) p.push('<span class="st st-bad">เกินกำหนด ' + workSpan(Date.now() - Date.parse(t.due_at)) + '</span>');
+  else if (workSoon(t)) p.push('<span class="st st-warn">ใกล้ถึงกำหนด</span>');
+  if (workLate(t)) p.push('<span class="st st-bad">ส่งช้า ' + workSpan(Date.parse(t.submitted_at) - Date.parse(t.due_at)) + '</span>');
+  return p.join('');
+}
+// ป้ายขั้น: งาน 2 ขั้นบอกว่าอยู่ขั้นไหน · งานขั้นเดียวที่มีช่องทางบอกว่าต้องแนบลิงก์ตอนส่ง
+function workStageTag(t) {
+  if (t.phase === 'content') return '<span class="wk-stage">ขั้น 1 จาก 2 · ส่งไฟล์ให้ตรวจก่อน</span>';
+  if (workHasContentOk(t.id)) return '<span class="wk-stage">ขั้น 2 จาก 2 · ลิงก์โพสต์</span>';
+  return (t.channels || []).length ? '<span class="wk-stage">ขั้นเดียว · แนบลิงก์โพสต์ตอนส่ง</span>' : '';
+}
+// ช่องทางที่สั่ง → ขั้น 1: ลงหลังไฟล์ผ่าน · ขั้นลิงก์โพสต์: แนบลิงก์แล้วหรือยัง (ดูจากการส่งรอบล่าสุด)
+function workChips(t) {
+  const last = workLastEv(t.id, 'submitted'), got = new Set((last && last.phase !== 'content' ? (last.links || []) : []).map(l => l.channel).filter(Boolean));
+  return '<span class="wk-kind">' + escapeHtml(WORK_KIND[t.kind] || t.kind) + '</span>' + workStageTag(t) +
+    (t.channels || []).map(c => t.phase === 'content' ? '<span class="wk-chan miss">' + escapeHtml(WORK_CHAN[c] || c) + ' · ลงหลังไฟล์ผ่าน</span>'
+      : got.has(c) ? '<span class="wk-chan ok">' + escapeHtml(WORK_CHAN[c] || c) + ' · แนบแล้ว</span>'
+      : '<span class="wk-chan miss">' + escapeHtml(WORK_CHAN[c] || c) + ' · ยังไม่แนบลิงก์' + (workPost(t) ? 'โพสต์' : '') + '</span>').join('');
+}
+function workQuoteHtml(t) {
+  // ความเห็นล่าสุดที่ถึงผู้รับ: ส่งกลับแก้ (ผู้รับต้องแก้) หรือผ่านขั้นไฟล์ (ข้อความตอนผ่าน)
+  const q = t.status === 'changes' ? workLastEv(t.id, 'changes_requested') : workPost(t) && t.status === 'open' ? workLastEv(t.id, 'content_approved') : null;
+  if (!q || !q.note) return '';
+  return '<div class="wk-quote' + (q.kind === 'content_approved' ? '' : ' warn') + '"><strong>' + (q.kind === 'content_approved' ? 'ไฟล์ผ่านแล้ว ลงโซเชียลได้เลย' : 'ความเห็นจากผู้ตรวจ') + '</strong>' + escapeHtml(q.note) +
+    '<small>' + escapeHtml(workName(q.actor_id)) + ' · ' + escapeHtml(workDt(q.created_at)) + '</small></div>';
+}
+function workCardHtml(t, by) {
+  const edge = t.status === 'changes' ? ' edge-warn' : workOverdue(t) ? ' edge-red' : t.status === 'approved' ? ' edge-ok' : '';
+  return '<div class="wk-task' + edge + (t.status === 'approved' ? ' done' : '') + '" role="button" tabindex="0" data-act="open" data-id="' + escapeHtml(t.id) + '">' +
+    '<div class="wk-top">' + workPills(t) + '<span class="wk-due">' + (t.due_at ? 'กำหนด ' + escapeHtml(workWhen(t.due_at)) : 'ไม่มีกำหนด') + '</span></div>' +
+    '<div class="wk-title">' + escapeHtml(t.title) + '</div>' +
+    '<div class="wk-meta">' + workChips(t) + '</div>' +
+    '<div class="wk-by">' + by + '</div>' + workQuoteHtml(t) + '</div>';
+}
+const workGroup = (title, list, html, extra) => list.length || extra
+  ? '<section class="wk-group"><h3><span>' + title + ' <span class="n">' + list.length + ' งาน</span></span>' + (extra || '') + '</h3>' + (html === null ? '' : '<div class="wk-list">' + html + '</div>') + '</section>' : '';
+
+function renderWorkMine() {
+  const el = document.getElementById('workMineList'), mine = workMine(), open = mine.filter(workOpenish);
+  const first = open.filter(t => t.status === 'changes' || workOverdue(t)).sort(workDueCmp);
+  const soon = open.filter(t => !(t.status === 'changes' || workOverdue(t))).sort(workDueCmp);
+  const wait = mine.filter(t => t.status === 'submitted').sort((a, b) => Date.parse(a.submitted_at) - Date.parse(b.submitted_at));
+  const done = mine.filter(t => t.status === 'approved' && t.closed_at && Date.parse(t.closed_at) >= Date.now() - 30 * 86400000)
+    .sort((a, b) => Date.parse(b.closed_at) - Date.parse(a.closed_at));
+  const set = (id, n) => { document.getElementById(id).textContent = n; };
+  set('workStatTodo', open.length); set('workStatLate', open.filter(workOverdue).length); set('workStatWait', wait.length);
+  document.getElementById('workStatLate').classList.toggle('ops-red', open.some(workOverdue));
+  const by = t => 'สั่งโดย ' + escapeHtml(workName(t.created_by)) + ' · ' + escapeHtml(workDt(t.created_at));
+  const card = t => workCardHtml(t, by(t));
+  const toggle = '<button type="button" class="btn btn-sm" data-act="toggle-done" aria-expanded="' + work.doneOpen + '">' + (work.doneOpen ? 'ซ่อน' : 'แสดง') + '</button>';
+  if (!mine.length) { el.innerHTML = '<div class="empty">ยังไม่มีงานที่มอบหมายให้คุณ — เมื่อมีคนสั่งงาน จะขึ้นที่นี่และมีตัวเลขแดงข้างเมนู</div>'; return; }
+  el.innerHTML =
+    workGroup('ต้องทำก่อน', first, first.map(card).join('')) +
+    workGroup('กำลังจะถึง', soon, soon.map(card).join('')) +
+    workGroup('ส่งแล้ว รอตรวจ', wait, wait.map(card).join('')) +
+    workGroup('เสร็จแล้ว 30 วันล่าสุด', done, work.doneOpen ? done.map(card).join('') : null, done.length ? toggle : '') +
+    (!open.length && !wait.length && !done.length ? '<div class="empty">ไม่มีงานค้าง</div>' : '');
+}
+
+function workQueueList() { return work.tasks.filter(workReviewable).sort((a, b) => Date.parse(a.submitted_at) - Date.parse(b.submitted_at)); }
+function renderWorkReview() {
+  const week = Date.now() - 7 * 86400000, q = workQueueList();
+  const set = (id, n) => { document.getElementById(id).textContent = n; };
+  set('workRvWait', q.length);
+  set('workRvLate', work.tasks.filter(t => workOverdue(t)).length);
+  set('workRvLateSub', work.tasks.filter(t => workLate(t) && Date.parse(t.submitted_at) >= week).length);
+  set('workRvDone', work.tasks.filter(t => t.status === 'approved' && t.closed_at && Date.parse(t.closed_at) >= week).length);
+  document.getElementById('workReviewN').textContent = q.length ? q.length : '';
+  if (!q.some(t => t.id === work.sel)) work.sel = q.length ? q[0].id : null;
+  document.getElementById('workQueue').innerHTML = '<section class="card wk-card"><div class="wk-card-head">คิวรอตรวจ <span class="n">เก่าสุดก่อน</span></div>' +
+    (q.length ? q.map(t => workCardHtml(t, escapeHtml(workName(t.assignee_id)) + ' · ' + escapeHtml(workRoleOf(t.assignee_id)) + ' · ครั้งที่ ' + workRound(t.id)).replace('class="wk-task', 'class="wk-task' + (t.id === work.sel ? ' sel' : ''))).join('') : '<div class="empty">ไม่มีงานรอตรวจ</div>') + '</section>';
+  const t = workTask(work.sel), old = document.getElementById('workRvNote');
+  const draft = old && old.dataset.for === work.sel ? old.value : '';          // ผู้ตรวจพิมพ์ความเห็นค้างอยู่ แล้ว Realtime วาดหน้าใหม่ — ต้องไม่ทำข้อความหาย
+  document.getElementById('workDetail').innerHTML = t ? workDetailHtml(t, 'review') : '';
+  const nb = document.getElementById('workRvNote');
+  if (nb && draft) nb.value = draft;
+  if (t) workLoadImgs(document.getElementById('workDetail'));
+}
+
+function workTeamRows() {
+  const wk = Date.now() - 7 * 86400000;
+  return work.people.filter(p => p.is_active).map(p => {
+    const mine = work.tasks.filter(t => t.assignee_id === p.id);
+    return { p, open: mine.filter(workOpenish).length, late: mine.filter(workOverdue).length, wait: mine.filter(t => t.status === 'submitted').length,
+      done: mine.filter(t => t.status === 'approved' && t.closed_at && Date.parse(t.closed_at) >= wk).length };
+  });
+}
+const WORK_FILTERS = { all: 'ทั้งหมด', open: 'ยังไม่ส่ง', submitted: 'รอตรวจ', changes: 'ส่งกลับแก้', approved: 'ผ่านแล้ว', cancelled: 'ยกเลิก' };
+const workFilterMatch = (t, f) => f === 'all' || (f === 'open' ? t.status === 'open' : t.status === f);
+// แท็บ "สั่งงาน": เจ้าของ/ผู้ดูแลเห็นทั้งทีม · พนักงานเห็นเฉพาะใบที่ตัวเองสั่ง
+const workAssignScope = () => (isManager() ? work.tasks : work.tasks.filter(t => t.created_by === currentUserId));
+function renderWorkAssign() {
+  const mgr = isManager(), scope = workAssignScope();
+  document.getElementById('workAssignHead').textContent = mgr ? 'ภาพรวมทีม' : 'งานที่ฉันสั่ง';
+  document.getElementById('workTeam').innerHTML = mgr
+    ? '<section class="card wk-card"><table class="data"><thead><tr><th>ชื่อ</th><th>ตำแหน่ง</th><th class="num">ยังไม่ส่ง</th><th class="num">เกินกำหนด</th><th class="num">รอตรวจ</th><th class="num">ผ่านแล้ว 7 วัน</th></tr></thead><tbody>' +
+      workTeamRows().map(r => '<tr><td><strong>' + escapeHtml(r.p.full_name) + '</strong></td><td>' + escapeHtml(WORK_ROLE[r.p.role] || r.p.role) + '</td><td class="num">' + r.open + '</td><td class="num' + (r.late ? ' ops-red' : '') + '">' + r.late + '</td><td class="num">' + r.wait + '</td><td class="num">' + r.done + '</td></tr>').join('') +
+      '</tbody></table></section>'
+    : '<div class="alert alert-plain">พนักงานสั่งงานให้พนักงานด้วยกัน (รวมตัวเอง) ได้ · เห็นเฉพาะใบที่ตัวเองสั่ง · <strong class="wk-red">ตรวจงานไม่ได้</strong> — งานที่ส่งแล้วผู้ดูแลหรือเจ้าของเป็นคนตรวจ · ต้องการให้ผู้ดูแลช่วยเรื่องงาน ยื่น "คำขอ" ได้ที่แท็บคำขอ</div>';
+  document.getElementById('workFilter').innerHTML = Object.entries(WORK_FILTERS).map(([k, v]) =>
+    '<button type="button" class="chip' + (work.filter === k ? ' on' : '') + '" data-act="filter" data-f="' + k + '" aria-pressed="' + (work.filter === k) + '">' + v + ' ' + scope.filter(t => workFilterMatch(t, k)).length + '</button>').join('');
+  const list = scope.filter(t => workFilterMatch(t, work.filter)).sort((a, b) => {
+    const ar = workOpenish(a) || a.status === 'submitted' ? 0 : 1, br = workOpenish(b) || b.status === 'submitted' ? 0 : 1;
+    return ar - br || (ar === 0 ? workDueCmp(a, b) : Date.parse(b.updated_at) - Date.parse(a.updated_at));
+  });
+  document.getElementById('workAll').innerHTML = list.length
+    ? '<section class="card wk-card"><table class="data"><thead><tr><th>งาน</th><th>ผู้รับ</th><th>สถานะ</th><th>กำหนดส่ง</th><th></th></tr></thead><tbody>' +
+      list.map(t => '<tr class="wk-row" data-act="detail" data-id="' + escapeHtml(t.id) + '"><td><strong>' + escapeHtml(t.title) + '</strong><div class="wk-meta">' + workChips(t) + '</div></td><td>' + escapeHtml(workName(t.assignee_id)) +
+        '</td><td><div class="wk-pills">' + workPills(t) + '</div></td><td>' + escapeHtml(t.due_at ? workWhen(t.due_at) : 'ไม่มีกำหนด') + '</td><td>' +
+        (workCanEdit(t) ? '<button type="button" class="btn btn-sm" data-act="edit" data-id="' + escapeHtml(t.id) + '">แก้ไข</button>' : '') + '</td></tr>').join('') +
+      '</tbody></table></section>'
+    : '<div class="empty">ไม่มีงานในหมวดนี้</div>';
+}
+
+// หลักฐานของการส่งรอบหนึ่ง (ลิงก์เปิดในแท็บใหม่ · รูปผ่านลิงก์ชั่วคราว)
+function workEvidenceHtml(ev) {
+  const links = ((ev && ev.links) || []).map(l => {
+    const href = workHref(l.url);
+    return '<div class="wk-link"><div><strong>' + escapeHtml(l.channel ? (WORK_CHAN[l.channel] || l.channel) : 'ลิงก์ไฟล์ (เช่น Drive)') + '</strong><div class="wk-url">' + escapeHtml(l.url) + '</div></div>' +
+      (href ? '<a class="btn btn-sm" href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer">เปิดในแท็บใหม่</a>' : '') + '</div>';
+  }).join('');
+  const imgs = ((ev && ev.image_paths) || []).map(p => '<div class="wk-tile" data-path="' + escapeHtml(p) + '"><span class="hint">กำลังโหลดรูป…</span></div>').join('');
+  return links + (imgs ? '<div class="wk-tiles">' + imgs + '</div>' : '');
+}
+function workEvLabel(e, t) {
+  const stage = workStaged(t) && ['submitted', 'changes_requested', 'approved'].includes(e.kind) && e.phase ? (e.phase === 'content' ? ' · ขั้นไฟล์' : ' · ขั้นลิงก์โพสต์') : '';
+  return (WORK_EV_LABEL[e.kind] || e.kind) + stage;
+}
+// รายละเอียดใบงาน: ใช้ร่วมกันทั้งแผงตรวจงานและหน้าต่างดู (mode: review = ปุ่มผ่าน/ส่งกลับ · manage = แก้/ยกเลิก/ปิดงาน · view = อ่านอย่างเดียว) · ทุกโหมดมีปุ่มยื่นคำขอ (ยกเว้นเจ้าของ)
+function workDetailHtml(t, mode) {
+  const evs = workEvents(t.id), last = workLastEv(t.id, 'submitted');
+  const refs = (t.ref_links || []).map(l => { const h = workHref(l.url); return '<div class="wk-link"><div class="wk-url">' + escapeHtml(l.url) + '</div>' + (h ? '<a class="btn btn-sm" href="' + escapeHtml(h) + '" target="_blank" rel="noopener noreferrer">เปิดในแท็บใหม่</a>' : '') + '</div>'; }).join('');
+  const hist = evs.slice().reverse().map(e => '<li><span class="t">' + escapeHtml(workDt(e.created_at)) + '</span><span><strong>' + escapeHtml(workEvLabel(e, t)) + '</strong> · ' + escapeHtml(workName(e.actor_id)) +
+    (e.kind === 'submitted' ? ' · ครั้งที่ ' + (evs.filter(x => x.kind === 'submitted' && Date.parse(x.created_at) <= Date.parse(e.created_at)).length) : '') +
+    (e.note ? '<div class="wk-note">' + escapeHtml(e.note) + '</div>' : '') + '</span></li>').join('');
+  const reqBtn = !isOwner() ? '<button type="button" class="btn" data-act="req-new" data-id="' + escapeHtml(t.id) + '">ยื่นคำขอเกี่ยวกับงานนี้</button>' : '';
+  let actions = '';
+  if (mode === 'review') {
+    actions = '<div class="wk-actions"><div class="field" style="flex:1; margin:0"><label class="lbl" for="workRvNote">ความเห็นถึงพนักงาน <span class="hint" style="margin:0">— <strong class="wk-red">บังคับ</strong>เมื่อกด "ส่งกลับแก้"</span></label><textarea id="workRvNote" class="input" rows="2" maxlength="1000" data-for="' + escapeHtml(t.id) + '"></textarea></div>' +
+      '<button type="button" class="btn" data-act="rv-changes" data-id="' + escapeHtml(t.id) + '">ส่งกลับแก้</button>' +
+      '<button type="button" class="btn btn-primary" data-act="rv-approve" data-id="' + escapeHtml(t.id) + '">' + (t.phase === 'content' ? 'ผ่านขั้นไฟล์ · ให้ลงโซเชียล' : 'ผ่าน · ปิดงาน') + '</button></div>' +
+      '<div id="workRvErr" class="alert alert-red" role="alert" hidden style="margin:0 18px 14px"></div>';
+  } else {
+    const b = [];
+    if (mode === 'manage' && workCanEdit(t)) b.push('<button type="button" class="btn" data-act="edit" data-id="' + escapeHtml(t.id) + '">แก้ไข / ย้ายผู้รับ</button><button type="button" class="btn btn-danger" data-act="cancel" data-id="' + escapeHtml(t.id) + '">ยกเลิกงาน</button>');
+    if (mode === 'manage' && workCanClose(t)) b.push('<button type="button" class="btn btn-primary" data-act="close-task" data-id="' + escapeHtml(t.id) + '">ปิดงาน (ไม่ต้องลงโซเชียลแล้ว)</button>');
+    if (reqBtn && t.status !== 'cancelled') b.push(reqBtn);
+    actions = b.length ? '<div class="wk-actions">' + b.join('') + '</div>' : '';
+  }
+  const stage1 = last && last.phase === 'final' ? evs.filter(e => e.kind === 'submitted' && e.phase === 'content').pop() : null;      // ขั้นลิงก์โพสต์: ให้เห็นไฟล์ที่ผ่านขั้น 1 มาด้วย
+  return '<section class="card wk-card"><div class="wk-card-head"><span>' + escapeHtml(t.title) + '</span><span class="wk-pills">' + workPills(t) + '</span></div><div class="wk-card-body">' +
+    '<dl class="wk-kv"><dt>ผู้รับงาน</dt><dd>' + escapeHtml(workName(t.assignee_id)) + ' · ' + escapeHtml(workRoleOf(t.assignee_id)) + '</dd>' +
+    '<dt>สั่งโดย</dt><dd>' + escapeHtml(workName(t.created_by)) + ' · ' + escapeHtml(workDt(t.created_at)) + '</dd>' +
+    '<dt>ประเภท · ช่องทาง</dt><dd>' + workChips(t) + '</dd>' +
+    '<dt>กำหนดส่ง</dt><dd>' + escapeHtml(t.due_at ? workWhen(t.due_at) : 'ไม่มีกำหนด') + '</dd>' +
+    (t.submitted_at ? '<dt>ส่งเมื่อ</dt><dd>' + escapeHtml(workDt(t.submitted_at)) + '</dd>' : '') + '</dl>' +
+    (t.detail ? '<h4 class="wk-sec-h">รายละเอียดงาน</h4><div class="wk-note">' + escapeHtml(t.detail) + '</div>' : '') +
+    (refs ? '<h4 class="wk-sec-h">ลิงก์ตัวอย่างจากผู้สั่ง</h4>' + refs : '') +
+    (last ? '<h4 class="wk-sec-h">หลักฐานที่แนบ' + (workStaged(t) ? (last.phase === 'content' ? ' (ขั้นไฟล์' : ' (ขั้นลิงก์โพสต์') + ' · ส่งครั้งที่ ' + workRound(t.id) + ')' : ' (ส่งครั้งที่ ' + workRound(t.id) + ')') + '</h4>' + workEvidenceHtml(last) +
+      '<p class="hint">ลิงก์เปิดในแท็บใหม่เท่านั้น ระบบไม่ฝังหน้าเว็บของคนอื่นไว้ในคอนโซล · รูปเปิดผ่านลิงก์ชั่วคราวอายุสั้น</p>' +
+      (last.note ? '<h4 class="wk-sec-h">ข้อความจากพนักงาน</h4><div class="wk-note">' + escapeHtml(last.note) + '</div>' : '') : '') +
+    (stage1 ? '<h4 class="wk-sec-h">ไฟล์ที่ผ่านขั้น 1 แล้ว</h4>' + workEvidenceHtml(stage1) : '') +
+    '<h4 class="wk-sec-h">ประวัติ</h4><ul class="wk-tl">' + hist + '</ul></div>' + actions + '</section>';
+}
+// รูปหลักฐาน: ขอลิงก์ชั่วคราวทีละรูป (ถังส่วนตัว) แล้วค่อยใส่ <img> — เปลี่ยนบัญชีระหว่างรอ = ทิ้งผล
+async function workLoadImgs(root) {
+  const uid = currentUserId;
+  for (const el of root.querySelectorAll('.wk-tile[data-path]')) {
+    const path = el.dataset.path, hit = work.signed[path];
+    let url = hit && hit.exp > Date.now() ? hit.url : null;
+    if (!url) {
+      const { data, error } = await db.storage.from(WORK_BUCKET).createSignedUrl(path, 600);
+      if (uid !== currentUserId) return;
+      if (error || !data) { console.error('[Work sign]', error); el.innerHTML = '<span class="hint">เปิดรูปนี้ไม่ได้</span>'; continue; }
+      url = data.signedUrl; work.signed[path] = { url, exp: Date.now() + 540000 };
+    }
+    if (!el.isConnected) continue;
+    const img = document.createElement('img');
+    img.alt = 'รูปหลักฐาน'; img.src = url; img.loading = 'lazy';
+    el.replaceChildren(img);
+  }
+}
+
+// ── คำขอ ──
+function workReqRowHtml(r, box) {
+  const st = WORK_REQ_ST[r.status] || [r.status, 'st st-off'];
+  const edge = r.status === 'rejected' ? ' edge-red' : r.status === 'approved' ? ' edge-ok' : '';
+  const head = box === 'in' ? 'จาก ' + escapeHtml(workName(r.requester_id)) + ' · ' + escapeHtml(workRoleOf(r.requester_id)) : 'ถึง ' + escapeHtml(workReqToLabel(r));
+  const toPill = box === 'in' ? '<span class="wk-chan">ถึง ' + escapeHtml(workReqToLabel(r)) + '</span>' : '';
+  return '<div class="wk-task' + (r.id === work.reqSel ? ' sel' : '') + edge + '" role="button" tabindex="0" data-act="req-open" data-id="' + escapeHtml(r.id) + '">' +
+    '<div class="wk-top"><span class="' + st[1] + '">' + st[0] + '</span>' + toPill + '<span class="wk-due">' + escapeHtml(workWhen(r.created_at)) + '</span></div>' +
+    '<div class="wk-title">' + head + '</div><div class="wk-by">' + escapeHtml(r.body.length > 90 ? r.body.slice(0, 90) + '…' : r.body) + '</div></div>';
+}
+function workReqDetailHtml(r) {
+  const st = WORK_REQ_ST[r.status] || [r.status, 'st st-off'], t = r.task_id ? workTask(r.task_id) : null;
+  const att = r.task_id ? '<h4 class="wk-sec-h">ใบงานที่เกี่ยวข้อง</h4>' + (t
+    ? '<div class="wk-att"><div style="flex:1; min-width:0"><strong>' + escapeHtml(t.title) + '</strong>ผู้รับ ' + escapeHtml(workName(t.assignee_id)) + ' · ' + (t.due_at ? 'กำหนด ' + escapeHtml(workWhen(t.due_at)) : 'ไม่มีกำหนด') + '</div><button type="button" class="btn btn-sm" data-act="open-task" data-id="' + escapeHtml(t.id) + '">เปิดใบงาน</button></div>'
+    : '<div class="hint">ใบงานที่แนบเปิดดูไม่ได้ (ถูกลบหรือไม่มีสิทธิ์ดู)</div>') : '';
+  let ans = '';
+  if (r.status === 'approved') ans = '<div class="wk-ans ok"><strong>อนุมัติแล้ว — รับเรื่อง</strong>' + (r.decision_note ? escapeHtml(r.decision_note) : 'ผู้ตอบไม่ได้ใส่ความเห็น') + '<small>' + escapeHtml(workName(r.decided_by)) + ' · ' + escapeHtml(workDt(r.closed_at)) + '</small></div>';
+  else if (r.status === 'rejected') ans = '<div class="wk-ans bad"><strong>เหตุผลที่ปฏิเสธ</strong>' + escapeHtml(r.decision_note) + '<small>' + escapeHtml(workName(r.decided_by)) + ' · ' + escapeHtml(workDt(r.closed_at)) + '</small></div>';
+  else if (r.status === 'withdrawn') ans = '<div class="wk-ans"><strong>ผู้ยื่นถอนคำขอแล้ว</strong><small>' + escapeHtml(workDt(r.closed_at)) + '</small></div>';
+  let actions = '';
+  if (workReqCanDecide(r)) {
+    actions = '<div class="wk-actions"><div class="field" style="flex:1; margin:0"><label class="lbl" for="workReqNote">ความเห็น <span class="hint" style="margin:0">— ไม่บังคับเมื่ออนุมัติ · <strong class="wk-red">บังคับเมื่อปฏิเสธ</strong></span></label><textarea id="workReqNote" class="input" rows="2" maxlength="1000" data-for="' + escapeHtml(r.id) + '"></textarea></div>' +
+      '<button type="button" class="btn" data-act="req-reject" data-id="' + escapeHtml(r.id) + '">ปฏิเสธ</button><button type="button" class="btn btn-primary" data-act="req-approve" data-id="' + escapeHtml(r.id) + '">อนุมัติ · รับเรื่อง</button></div>' +
+      '<div id="workReqErr" class="alert alert-red" role="alert" hidden style="margin:0 18px 14px"></div>';
+  } else if (r.status === 'pending' && r.requester_id === currentUserId) {
+    actions = '<div class="wk-actions"><button type="button" class="btn" data-act="req-withdraw" data-id="' + escapeHtml(r.id) + '">ถอนคำขอ</button><span class="hint" style="margin:0">ถอนได้ตอนที่ยังไม่มีคนตอบ</span></div>';
+  }
+  return '<section class="card wk-card"><div class="wk-card-head"><span>' + (r.requester_id === currentUserId ? 'คำขอของฉัน' : 'จาก ' + escapeHtml(workName(r.requester_id)) + ' · ' + escapeHtml(workRoleOf(r.requester_id))) + '</span>' +
+    '<span class="wk-pills"><span class="wk-chan">ถึง ' + escapeHtml(workReqToLabel(r)) + '</span><span class="' + st[1] + '">' + st[0] + '</span></span></div><div class="wk-card-body">' +
+    '<div class="wk-note">' + escapeHtml(r.body) + '</div>' + att +
+    '<dl class="wk-kv" style="margin-top:14px"><dt>ผู้ยื่น</dt><dd>' + escapeHtml(workName(r.requester_id)) + ' · ' + escapeHtml(workRoleOf(r.requester_id)) + ' · ' + escapeHtml(workDt(r.created_at)) + '</dd>' +
+    '<dt>ส่งถึง</dt><dd>' + escapeHtml(workReqToLabel(r)) + (r.to_group ? ' · ใครในกลุ่มตอบก่อนเป็นคนตัดสิน' : '') + '</dd></dl>' + ans +
+    (workReqCanDecide(r) ? '<p class="hint">อนุมัติ = รับเรื่อง <strong class="wk-red">ระบบไม่ย้ายงานหรือเลื่อนกำหนดให้</strong> — ผู้อนุมัติไปทำเองที่หน้าใบงาน</p>' : '') + '</div>' + actions + '</section>';
+}
+function renderWorkReq() {
+  const boxes = workReqBoxes();
+  if (!boxes.includes(work.reqBox)) work.reqBox = boxes[0] || 'out';
+  const pend = workReqPendingForMe().length;
+  document.getElementById('workReqN').textContent = pend ? pend : '';
+  document.getElementById('workReqNew').hidden = isOwner();
+  document.getElementById('workReqBoxes').innerHTML = boxes.length > 1 ? '<div class="seg" role="group" aria-label="กล่องคำขอ">' + boxes.map(b =>
+    '<button type="button" data-act="req-box" data-box="' + b + '" aria-pressed="' + (work.reqBox === b) + '">' + (b === 'in' ? 'ส่งถึงฉัน' + (pend ? ' <span class="n">' + pend + '</span>' : '') : 'ที่ฉันยื่น') + '</button>').join('') + '</div>' : '';
+  const mine = work.reqBox === 'in' ? work.reqs.filter(r => r.requester_id !== currentUserId) : work.reqs.filter(r => r.requester_id === currentUserId);
+  const wait = mine.filter(r => r.status === 'pending').sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+  const done = mine.filter(r => r.status !== 'pending').sort((a, b) => Date.parse(b.closed_at || b.updated_at) - Date.parse(a.closed_at || a.updated_at)).slice(0, 30);
+  if (!mine.some(r => r.id === work.reqSel)) work.reqSel = wait.length ? wait[0].id : done.length ? done[0].id : null;
+  const box = work.reqBox;
+  document.getElementById('workReqList').innerHTML = '<section class="card wk-card"><div class="wk-card-head">รอตอบ <span class="n">' + wait.length + ' คำขอ' + (box === 'in' ? ' · เก่าสุดก่อน' : '') + '</span></div>' +
+    (wait.length ? wait.map(r => workReqRowHtml(r, box)).join('') : '<div class="empty">' + (box === 'in' ? 'ไม่มีคำขอที่รอคุณตอบ' : 'ไม่มีคำขอที่รอตอบ') + '</div>') +
+    (done.length ? '<h3 class="wk-card-head" style="font-size:14px">ตอบแล้ว / ถอนแล้ว <span class="n">ล่าสุด ' + done.length + ' คำขอ</span></h3>' + done.map(r => workReqRowHtml(r, box)).join('') : '') + '</section>';
+  const r = work.reqs.find(x => x.id === work.reqSel), old = document.getElementById('workReqNote');
+  const draft = old && old.dataset.for === work.reqSel ? old.value : '';          // ผู้ตัดสินพิมพ์ความเห็นค้างอยู่แล้ว Realtime วาดใหม่ — ต้องไม่ทำข้อความหาย
+  document.getElementById('workReqDetail').innerHTML = r ? workReqDetailHtml(r) : '';
+  const nb = document.getElementById('workReqNote');
+  if (nb && draft) nb.value = draft;
+}
+
+function workTab(name) {
+  if (name === 'review' && !isManager()) name = 'mine';
+  work.tab = name;
+  document.querySelectorAll('#workTabs .mail-tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+  [['mine', 'workPaneMine'], ['review', 'workPaneReview'], ['assign', 'workPaneAssign'], ['req', 'workPaneReq']].forEach(([k, id]) => { document.getElementById(id).hidden = k !== name; });
+}
+function renderWork() {
+  const mgr = isManager();
+  document.querySelectorAll('#workTabs .mail-tab[data-tab="review"]').forEach(b => { b.hidden = !mgr; });
+  if (!mgr && work.tab === 'review') workTab('mine');
+  const al = document.getElementById('workAlert');
+  al.innerHTML = work.missing ? '<div class="alert alert-warn">ยังไม่ได้ติดตั้ง Work Checklist ในฐานข้อมูล — ต้องรัน migration 037 และ 038 ก่อน</div>'
+    : work.error ? '<div class="alert alert-red">' + escapeHtml(work.error) + '</div>' : '';
+  if (work.loaded && !work.missing && !work.error) {
+    renderWorkMine();
+    if (mgr) renderWorkReview();
+    renderWorkAssign();
+    renderWorkReq();
+  } else if (work.loaded) document.getElementById('workMineList').innerHTML = '';
+  if (workDlgId) { const t = workTask(workDlgId); if (t) { document.getElementById('workDlgBody').innerHTML = workDetailHtml(t, workDetailMode(t)); workLoadImgs(document.getElementById('workDlgBody')); } }
+  updateNavBadges();
+}
+
+// ── ตรวจงาน / ยกเลิก / ปิดงาน / เปิดรายละเอียด ──
+async function workRpc(fn, args) {
+  try { return await db.rpc(fn, args); }
+  catch (e) { return { error: { message: e.message } }; }
+}
+async function workReview(id, verdict) {
+  if (workBusy) return;
+  const t = workTask(id), noteEl = document.getElementById('workRvNote'), err = document.getElementById('workRvErr');
+  if (!t || !noteEl) return;
+  const note = noteEl.value.trim(), wasContent = t.phase === 'content';
+  err.hidden = true;
+  if (verdict === 'changes' && !note) { err.textContent = 'ส่งกลับแก้ต้องใส่ความเห็นถึงพนักงานก่อน'; err.hidden = false; noteEl.focus(); return; }
+  const uid = currentUserId;
+  workBusy = true;
+  document.querySelectorAll('#workDetail [data-act^="rv-"]').forEach(b => { b.disabled = true; });
+  const { error } = await workRpc('work_review', { p_task: id, p_verdict: verdict, p_note: note || null });
+  workBusy = false;
+  if (uid !== currentUserId) return;
+  if (error) {
+    console.error('[Work review]', error);
+    await loadWork();                                      // สถานะอาจเปลี่ยนไปแล้ว (มีคนตรวจก่อน) — โหลดใหม่ให้เห็นของจริง
+    const e2 = document.getElementById('workRvErr');
+    if (e2) { e2.textContent = 'ตรวจงานไม่สำเร็จ: ' + error.message; e2.hidden = false; }
+    else showToast('⚠️ ตรวจงานไม่สำเร็จ: ' + error.message);        // โหลดใหม่แล้วใบออกจากคิว (มีคนตรวจก่อน) ช่องแจ้งในแผงหายไปด้วย — ต้องไม่เงียบ
+    return;
+  }
+  showToast(verdict === 'approve' ? (wasContent ? '✅ ไฟล์ผ่านแล้ว — รอพนักงานลงโซเชียล' : '✅ ตรวจผ่านแล้ว — ปิดงาน') : '↩ ส่งกลับแก้แล้ว');
+  await loadWork();
+}
+function workAskCancel(id) {
+  const t = workTask(id);
+  if (!t) return;
+  askConfirm('ยกเลิกงานนี้?', '<p><strong>' + escapeHtml(t.title) + '</strong></p><p class="hint">ผู้รับ: ' + escapeHtml(workName(t.assignee_id)) + ' · <strong class="wk-red">ใบที่ยกเลิกยังอยู่ในประวัติ แต่ส่ง/ตรวจต่อไม่ได้</strong></p>', 'ยกเลิกงาน', async () => {
+    const uid = currentUserId;
+    const { error } = await workRpc('work_cancel', { p_task: id, p_note: null });
+    if (uid !== currentUserId) return;
+    closeConfirm();
+    if (error) { console.error('[Work cancel]', error); showFatalError('ยกเลิกงานไม่สำเร็จ: ' + error.message); await loadWork(); return; }
+    showToast('✅ ยกเลิกงานแล้ว');
+    await loadWork();
+  });
+}
+function workAskClose(id) {
+  const t = workTask(id);
+  if (!t) return;
+  askConfirm('ปิดงานนี้เลย?', '<p><strong>' + escapeHtml(t.title) + '</strong></p><p class="hint">ไฟล์ผ่านการตรวจแล้ว และช่องโซเชียลที่ต้องลงถูกแก้ออกหมดแล้ว — <strong class="wk-red">ปิดงานโดยไม่ต้องรอลิงก์โพสต์</strong> (ลงประวัติว่าปิดโดยใคร)</p>', 'ปิดงาน', async () => {
+    const uid = currentUserId;
+    const { error } = await workRpc('work_close', { p_task: id, p_note: null });
+    if (uid !== currentUserId) return;
+    closeConfirm();
+    if (error) { console.error('[Work close]', error); showFatalError('ปิดงานไม่สำเร็จ: ' + error.message); await loadWork(); return; }
+    showToast('✅ ปิดงานแล้ว');
+    await loadWork();
+  });
+}
+// เปิดหน้าต่างรายละเอียด: manage = มีปุ่มจัดการที่ฉันทำได้ · view = อ่านอย่างเดียว (ปุ่มจริงยังกรองด้วย workCan* อีกชั้น)
+const workDetailMode = t => (workCanManage(t) || workCanClose(t) ? 'manage' : 'view');
+function workOpenDetail(id) {
+  const t = workTask(id);
+  if (!t) return;
+  workDlgId = id;
+  document.getElementById('workDlgTitle').textContent = 'รายละเอียดงาน';
+  document.getElementById('workDlgBody').innerHTML = workDetailHtml(t, workDetailMode(t));
+  const d = document.getElementById('workDlg');
+  if (!d.open) d.showModal();
+  workLoadImgs(document.getElementById('workDlgBody'));
+}
+
+// ── ส่งงาน (ผู้รับ) — ขั้น 1 = ไฟล์ (ลิงก์ Drive/รูป ไม่มีช่องลิงก์โซเชียล) · ขั้นลิงก์โพสต์ = ลิงก์ครบทุกช่อง · งานขั้นเดียว = ลิงก์ครบทุกช่อง + ไฟล์/รูปไม่บังคับ ──
+function workSubFree() { if (workSub) workSub.imgs.forEach(i => URL.revokeObjectURL(i.url)); }
+function workSubOpen(id) {
+  const t = workTask(id);
+  if (!t || t.assignee_id !== currentUserId || !workOpenish(t)) { showToast('⚠️ ส่งงานนี้ไม่ได้แล้ว — สถานะเปลี่ยนไป'); return; }
+  workSubFree();
+  workSub = { id, imgs: [], busy: false };
+  const content = t.phase === 'content', post = workPost(t) && (t.channels || []).length > 0;       // post = ขั้นลิงก์โพสต์ล้วน (ไม่ต้องมีไฟล์/รูป)
+  const last = workLastEv(id, 'submitted'), prev = {};
+  ((last && last.phase !== 'content' ? last.links : []) || []).forEach(l => { if (l.channel) prev[l.channel] = l.url; });          // ส่งกลับแก้: ใส่ลิงก์รอบก่อนไว้ให้ แก้เฉพาะที่ผิด
+  document.getElementById('workSubTitle').textContent = content ? 'ส่งไฟล์ · ขั้น 1 จาก 2' : post ? 'ส่งลิงก์โพสต์ · ขั้น 2 จาก 2' : 'ส่งงาน';
+  document.getElementById('workSubGo').textContent = content ? 'ส่งไฟล์ให้ตรวจ' : post ? 'ส่งลิงก์ให้ตรวจ' : 'ส่งงานให้ตรวจ';
+  document.getElementById('workSubFileField').hidden = post;
+  document.getElementById('workSubImgField').hidden = post;
+  document.getElementById('workSubLinkHint').textContent = content ? 'แนบลิงก์หรือรูปอย่างน้อย 1 อย่าง' : 'ไม่บังคับ';
+  document.getElementById('workSubLinkHint').classList.toggle('wk-red', content);
+  document.getElementById('workSubReq').hidden = isOwner();
+  document.getElementById('workSubTask').innerHTML = '<div class="wk-top">' + workPills(t) + '<span class="wk-due">' + (t.due_at ? 'กำหนด ' + escapeHtml(workWhen(t.due_at)) : 'ไม่มีกำหนด') + '</span></div>' +
+    '<div class="wk-title">' + escapeHtml(t.title) + '</div><div class="wk-meta">' + workChips(t) + '</div>' +
+    '<div class="wk-by">สั่งโดย ' + escapeHtml(workName(t.created_by)) + ' · ' + escapeHtml(workDt(t.created_at)) + '</div>' +
+    (t.detail ? '<div class="wk-note">' + escapeHtml(t.detail) + '</div>' : '') + workQuoteHtml(t);
+  let chans = '';
+  if (content) chans = '<div class="alert alert-plain"><strong>งานนี้ตรวจ 2 รอบ</strong> — รอบนี้ส่ง<strong>ไฟล์</strong>ให้ตรวจก่อน <strong class="wk-red">ยังไม่ต้องลง ' + t.channels.map(c => escapeHtml(WORK_CHAN[c] || c)).join(' / ') + '</strong>' +
+    ' · เมื่อไฟล์ผ่านแล้วงานจะขึ้นป้าย "รอลงโซเชียล" ค่อยลงโพสต์แล้วกลับมาแนบลิงก์โพสต์ในรอบที่ 2</div>';
+  else if ((t.channels || []).length) chans = '<h3 class="wk-sec-h" style="margin-top:0">ลิงก์โพสต์ที่ลงแล้ว</h3><p class="hint" style="margin-top:0">' + (post ? 'ไฟล์ผ่านการตรวจแล้ว รอบนี้' : 'งานนี้') + 'สั่งให้ลง ' + t.channels.length + ' ช่อง ต้องแนบลิงก์ให้ครบทุกช่อง ระบบเช็กให้ว่าลิงก์เป็นของช่องนั้นจริง (ไม่ได้เปิดลิงก์ไปตรวจแทนผู้ตรวจ)</p>' +
+    t.channels.map(c => '<div class="field"><label class="lbl" for="workSubC-' + c + '">' + escapeHtml(WORK_CHAN[c] || c) + '</label><input class="input" id="workSubC-' + c + '" data-chan="' + c + '" inputmode="url" autocomplete="off" value="' + escapeHtml(prev[c] || '') + '" placeholder="วางลิงก์โพสต์ ' + escapeHtml(WORK_CHAN[c] || c) + '"><div class="wk-msg" data-msg="' + c + '"></div></div>').join('');
+  document.getElementById('workSubChans').innerHTML = chans;
+  document.getElementById('workSubLink').value = '';
+  document.getElementById('workSubNote').value = '';
+  document.getElementById('workSubErr').hidden = true;
+  workSubRender();
+  const d = document.getElementById('workSubDialog');
+  if (!d.open) d.showModal();
+}
+function workSubCheck() {
+  const t = workSub && workTask(workSub.id);
+  if (!t) return { ok: false, links: [], need: [] };
+  const links = [], need = [];
+  if (t.phase === 'final') (t.channels || []).forEach(c => {            // ขั้น 1 ไม่มีช่องลิงก์โซเชียล · ขั้นสุดท้ายต้องครบทุกช่อง (ตรงกับ work_submit)
+    const v = document.getElementById('workSubC-' + c).value.trim(), msg = document.querySelector('#workSubChans [data-msg="' + c + '"]');
+    if (!v) { msg.textContent = ''; msg.className = 'wk-msg'; need.push('ลิงก์ ' + (WORK_CHAN[c] || c)); return; }
+    if (workLinkOk(v, c)) { msg.textContent = '✓ ลิงก์ตรงกับ ' + (WORK_CHAN[c] || c); msg.className = 'wk-msg ok'; links.push({ url: v, channel: c }); }
+    else { msg.textContent = '✕ ลิงก์นี้ไม่ใช่ของ ' + (WORK_CHAN[c] || c) + ' — ต้องขึ้นต้น https:// และเป็นโดเมนของช่องนั้น'; msg.className = 'wk-msg bad'; need.push('แก้ลิงก์ ' + (WORK_CHAN[c] || c)); }
+  });
+  const other = document.getElementById('workSubLink').value.trim();
+  if (other && !document.getElementById('workSubFileField').hidden) { if (workLinkOk(other, null)) links.push({ url: other }); else need.push('แก้ลิงก์ไฟล์ (ต้องขึ้นต้น https://)'); }
+  const note = document.getElementById('workSubNote').value.trim();
+  const hasEv = links.length > 0 || workSub.imgs.length > 0;
+  if (!hasEv && !need.length && (t.kind !== 'other' || !note)) need.push(t.kind === 'other' ? 'ข้อความหรือหลักฐาน' : t.phase === 'content' ? 'ลิงก์ไฟล์หรือรูป' : 'ลิงก์หรือรูป');
+  return { ok: need.length === 0, links, need, note };
+}
+function workSubRender() {
+  if (!workSub) return;
+  document.getElementById('workSubImgs').innerHTML = workSub.imgs.map((im, i) => '<div class="wk-tilebox"><div class="wk-tile"><img src="' + im.url + '" alt="รูปที่แนบ ' + (i + 1) + '"></div>' +
+    '<button type="button" class="btn" data-act="sub-rm" data-i="' + i + '">ลบรูป</button></div>').join('');
+  document.getElementById('workSubPick').disabled = workSub.imgs.length >= WORK_MAX_IMG;
+  const chk = workSubCheck();
+  document.getElementById('workSubNeed').textContent = chk.ok ? '' : 'ยังส่งไม่ได้ — ขาด/ต้องแก้: ' + chk.need.join(' · ');
+  document.getElementById('workSubGo').disabled = !chk.ok || workSub.busy;
+}
+async function workSubPickFiles(files) {
+  if (!workSub) return;
+  const s = workSub, room = WORK_MAX_IMG - s.imgs.length, list = [...files];
+  if (list.length > room) showToast('⚠️ แนบรูปได้ไม่เกิน ' + WORK_MAX_IMG + ' รูป');
+  for (const f of list.slice(0, Math.max(0, room))) {
+    try { const blob = await shrinkPhoto(f); if (workSub !== s) return; s.imgs.push({ blob, url: URL.createObjectURL(blob) }); }
+    catch (e) { showToast('⚠️ ' + e.message); }
+  }
+  if (workSub === s) workSubRender();
+}
+async function workSubmit() {
+  const s = workSub, err = document.getElementById('workSubErr'), btn = document.getElementById('workSubGo');
+  if (!s || s.busy) return;
+  const chk = workSubCheck();
+  if (!chk.ok) { workSubRender(); return; }
+  const uid = currentUserId, uploaded = [], t = workTask(s.id), wasContent = !!t && t.phase === 'content';
+  s.busy = true; btn.disabled = true; err.hidden = true;
+  try {
+    for (const im of s.imgs) {
+      // ถังไม่มี policy แก้ไฟล์ → ต้อง upsert:false และตั้งชื่อใหม่ทุกครั้ง · อัปรูปให้เสร็จก่อนค่อยเรียกฟังก์ชันส่งงาน
+      const path = s.id + '/' + crypto.randomUUID() + (im.blob.type === 'image/webp' ? '.webp' : '.jpg');
+      const up = await db.storage.from(WORK_BUCKET).upload(path, im.blob, { contentType: im.blob.type, upsert: false });
+      if (up.error) throw new Error('อัปโหลดรูปไม่สำเร็จ: ' + up.error.message);
+      uploaded.push(path);
+    }
+    const { error } = await db.rpc('work_submit', { p_task: s.id, p_note: chk.note || null, p_links: chk.links, p_image_paths: uploaded });
+    if (error) throw new Error(error.message);
+  } catch (e) {
+    console.error('[Work submit]', e);
+    if (uploaded.length) { try { await db.storage.from(WORK_BUCKET).remove(uploaded); } catch (x) { console.error('[Work cleanup]', x); } }   // ไม่ทิ้งรูปกำพร้าไว้ในถัง
+    if (workSub === s) { s.busy = false; err.textContent = 'ส่งงานไม่สำเร็จ: ' + e.message; err.hidden = false; workSubRender(); }
+    if (uid === currentUserId) loadWork();                   // สถานะอาจเปลี่ยนไปแล้ว (เช่น ถูกยกเลิก)
+    return;
+  }
+  if (workSub !== s || uid !== currentUserId) return;
+  workSubFree(); workSub = null;
+  document.getElementById('workSubDialog').close();
+  showToast(wasContent ? '✅ ส่งไฟล์แล้ว — รอผู้ตรวจ' : '✅ ส่งงานแล้ว — รอผู้ตรวจ');
+  await loadWork();
+}
+
+// ── สั่งงาน / แก้ใบงาน ──
+function workDueIso(date, time) { return date ? date + 'T' + (time || '18:00') + ':00+07:00' : null; }
+function workDueParts(iso) { if (!iso) return { date: '', time: '' }; const b = workBkk(Date.parse(iso)); return { date: b.y + '-' + String(b.m + 1).padStart(2, '0') + '-' + String(b.d).padStart(2, '0'), time: workHm(b) }; }
+const WORK_RULE = {
+  owner: 'เจ้าของสั่งงานให้ทุกคนได้ · ตรวจงานได้ทุกใบ',
+  admin: 'ผู้ดูแลสั่งงานให้ผู้ดูแลและพนักงานได้ (<strong class="wk-red">สั่งเจ้าของไม่ได้</strong>) · ตรวจได้เฉพาะงานของพนักงาน — <strong class="wk-red">งานของผู้ดูแลเจ้าของเป็นคนตรวจ</strong>',
+  staff: 'พนักงานสั่งงานให้พนักงานด้วยกันได้ (รวมตัวเอง) · <strong class="wk-red">ตรวจงานไม่ได้</strong> — งานที่ส่งแล้วผู้ดูแลหรือเจ้าของเป็นคนตรวจ · ต้องการให้ผู้ดูแลช่วย ยื่น "คำขอ" ได้ที่แท็บคำขอ',
+};
+function workFormSync() {
+  const f = workForm;
+  document.querySelectorAll('#workfKind button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.kind === f.kind)));
+  document.querySelectorAll('#workfChans button').forEach(b => b.setAttribute('aria-pressed', String(f.channels.has(b.dataset.ch))));
+  const n = [...document.querySelectorAll('#workfPeople input[type=checkbox]:checked')].length;
+  const sum = document.getElementById('workfSum');
+  sum.textContent = f.id ? '' : n ? 'ระบบจะสร้างใบงาน ' + n + ' ใบ — ต่างคนต่างส่งและถูกตรวจแยกกัน' : 'ยังไม่ได้เลือกผู้รับงาน';
+  sum.classList.toggle('wk-red', !f.id && !n);
+  document.getElementById('workfSave').textContent = f.id ? 'บันทึกการแก้ไข' : (n > 1 ? 'สั่งงาน ' + n + ' ใบ' : 'สั่งงาน');
+  document.querySelectorAll('#workfPeople label').forEach(l => l.classList.toggle('on', !!l.querySelector('input:checked')));
+  const t = f.id ? workTask(f.id) : null, chans = f.channels.size > 0;
+  const two = (f.kind === 'photo' || f.kind === 'video') && chans;
+  document.getElementById('workfStage').textContent = t && workHasContentOk(t.id) ? 'ไฟล์ผ่านขั้น 1 แล้ว — งานนี้อยู่ขั้นลิงก์โพสต์เสมอ เพิ่มช่อง = พนักงานต้องแนบลิงก์เพิ่ม · เอาช่องออกหมด = ผู้ตรวจกด "ปิดงาน" ได้'
+    : two ? 'งานนี้ตรวจ 2 รอบ: ส่งไฟล์ให้ตรวจก่อน → ผ่านแล้วขึ้น "รอลงโซเชียล" → ลงแล้วแนบลิงก์โพสต์ให้ครบทุกช่อง → ตรวจอีกรอบ = ปิดงาน'
+    : chans ? 'ขั้นเดียว: พนักงานแนบลิงก์โพสต์ให้ครบทุกช่องที่เลือกตอนส่งงาน' : '';
+}
+function workFormOpen(id) {
+  const t = id ? workTask(id) : null;
+  if (id && (!t || !workCanEdit(t))) { showToast('⚠️ แก้ใบงานนี้ไม่ได้แล้ว — สถานะเปลี่ยนไปหรือไม่มีสิทธิ์'); return; }
+  workForm = { id: t ? t.id : null, kind: t ? t.kind : 'photo', channels: new Set(t ? t.channels : []), busy: false };
+  document.getElementById('workfHead').textContent = t ? 'แก้ใบงาน' : 'สั่งงานใหม่';
+  document.getElementById('workfTitle').value = t ? t.title : '';
+  document.getElementById('workfDetail').value = t ? t.detail : '';
+  const due = workDueParts(t && t.due_at);
+  document.getElementById('workfDate').value = due.date; document.getElementById('workfTime').value = due.time;
+  document.getElementById('workfRefs').value = t ? (t.ref_links || []).map(l => l.url).join('\n') : '';
+  document.getElementById('workfReason').value = '';
+  document.getElementById('workfReasonField').hidden = !t;
+  document.getElementById('workfRule').innerHTML = (WORK_RULE[workMyRole()] || '') + ' · ทุกการแก้ไขหลังสั่งงานลงประวัติ';          // ข้อความตายตัวจากค่าคงที่ข้างบน ไม่มีข้อมูลของผู้ใช้
+  const active = work.people.filter(p => p.is_active);
+  const open = p => work.tasks.filter(x => x.assignee_id === p.id && workOpenish(x)).length;
+  if (t) {
+    const canMove = workOpenish(t);
+    document.getElementById('workfPeopleLabel').textContent = 'ผู้รับงาน';
+    document.getElementById('workfPeople').innerHTML = canMove
+      ? '<select id="workfAssignee" class="input">' + active.filter(p => workCanAssign(p.id) || p.id === t.assignee_id).map(p => '<option value="' + escapeHtml(p.id) + '"' + (p.id === t.assignee_id ? ' selected' : '') + '>' + escapeHtml(p.full_name) + ' · ' + escapeHtml(WORK_ROLE[p.role] || p.role) + '</option>').join('') + '</select>'
+      : '<div class="hint">' + escapeHtml(workName(t.assignee_id)) + ' — ย้ายผู้รับได้เฉพาะงานที่ยังไม่ส่ง</div>';
+  } else {
+    document.getElementById('workfPeopleLabel').textContent = 'มอบให้ — เลือกได้หลายคน';
+    document.getElementById('workfPeople').innerHTML = '<div class="wk-people">' + active.map(p => workCanAssign(p.id)
+      ? '<label><input type="checkbox" value="' + escapeHtml(p.id) + '"><span class="cb" aria-hidden="true"></span><span>' + escapeHtml(p.full_name) + (p.id === currentUserId ? ' · ตัวเอง' : '') + '</span><span class="sub">' + escapeHtml(WORK_ROLE[p.role] || p.role) + ' · งานค้าง ' + open(p) + '</span></label>'
+      : '<label class="off"><input type="checkbox" value="' + escapeHtml(p.id) + '" disabled><span class="cb" aria-hidden="true"></span><span>' + escapeHtml(p.full_name) + '</span><span class="sub">' + escapeHtml(WORK_ROLE[p.role] || p.role) + ' · สั่งไม่ได้</span></label>').join('') + '</div>';
+  }
+  document.getElementById('workfErr').hidden = true;
+  workFormSync();
+  const d = document.getElementById('workFormDialog');
+  if (!d.open) d.showModal();
+  if (document.getElementById('workDlg').open) document.getElementById('workDlg').close();
+}
+async function workFormSave() {
+  const f = workForm, err = document.getElementById('workfErr'), btn = document.getElementById('workfSave');
+  if (!f || f.busy) return;
+  const fail = m => { err.textContent = m; err.hidden = false; };
+  err.hidden = true;
+  const title = document.getElementById('workfTitle').value.trim(), detail = document.getElementById('workfDetail').value.trim();
+  if (!title) { fail('ใส่หัวข้องานก่อนบันทึก'); document.getElementById('workfTitle').focus(); return; }
+  const date = document.getElementById('workfDate').value, time = document.getElementById('workfTime').value;
+  if (!date && time) { fail('ใส่วันที่ส่งด้วย (หรือล้างเวลาออกถ้าไม่มีกำหนด)'); return; }
+  const refUrls = document.getElementById('workfRefs').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (refUrls.length > 5) { fail('ลิงก์ตัวอย่างใส่ได้ไม่เกิน 5 ลิงก์'); return; }
+  const badRef = refUrls.find(u => !workLinkOk(u, null));
+  if (badRef) { fail('ลิงก์ตัวอย่างต้องขึ้นต้น https:// — แก้ลิงก์นี้ก่อน: ' + badRef); return; }
+  const channels = [...f.channels].sort(), refs = refUrls.map(url => ({ url })), dueIso = workDueIso(date, time), uid = currentUserId;
+  f.busy = true; btn.disabled = true;
+  try {
+    if (!f.id) {
+      const people = [...document.querySelectorAll('#workfPeople input[type=checkbox]:checked')].map(i => i.value);
+      if (!people.length) { fail('เลือกผู้รับงานอย่างน้อย 1 คน'); return; }
+      const { data, error } = await db.rpc('work_create', { p_title: title, p_detail: detail, p_kind: f.kind, p_channels: channels, p_assignees: people, p_due_at: dueIso, p_ref_links: refs });
+      if (error) { console.error('[Work create]', error); fail('สั่งงานไม่สำเร็จ: ' + error.message); return; }
+      document.getElementById('workFormDialog').close(); workForm = null;
+      showToast('✅ สั่งงานแล้ว ' + (Array.isArray(data) ? data.length : people.length) + ' ใบ');
+    } else {
+      const t = workTask(f.id);
+      if (!t) { fail('ไม่พบใบงานนี้แล้ว'); return; }
+      const sel = document.getElementById('workfAssignee'), toId = sel ? sel.value : t.assignee_id;
+      const same = JSON.stringify(t.channels) === JSON.stringify(channels) && JSON.stringify((t.ref_links || []).map(l => l.url)) === JSON.stringify(refUrls) && (t.due_at ? Date.parse(t.due_at) : null) === (dueIso ? Date.parse(dueIso) : null);
+      const edited = !(same && t.title === title && t.detail === detail && t.kind === f.kind);
+      const moved = toId !== t.assignee_id, reason = document.getElementById('workfReason').value.trim() || null;
+      if (!edited && !moved) { fail('ไม่มีอะไรเปลี่ยน'); return; }
+      if (edited) {
+        const r = await db.rpc('work_edit', { p_task: f.id, p_title: title, p_detail: detail, p_kind: f.kind, p_channels: channels, p_due_at: dueIso, p_ref_links: refs, p_note: reason });
+        if (r.error) { console.error('[Work edit]', r.error); fail('แก้ใบงานไม่สำเร็จ: ' + r.error.message); return; }
+      }
+      if (moved) {
+        const r = await db.rpc('work_reassign', { p_task: f.id, p_assignee: toId, p_note: reason });
+        if (r.error) { console.error('[Work reassign]', r.error); fail((edited ? 'แก้ใบงานแล้ว แต่' : '') + 'ย้ายผู้รับไม่สำเร็จ: ' + r.error.message); await loadWork(); return; }
+      }
+      document.getElementById('workFormDialog').close(); workForm = null;
+      showToast('✅ บันทึกการแก้ไขแล้ว');
+    }
+    if (uid === currentUserId) await loadWork();
+  } catch (e) {
+    console.error('[Work form]', e);
+    fail('ติดต่อฐานข้อมูลไม่สำเร็จ: ' + e.message);
+  } finally { if (workForm === f) { f.busy = false; btn.disabled = false; } }
+}
+
+// ── ยื่นคำขอ / ตัดสิน / ถอน ──
+// ผู้รับที่ยื่นถึงได้: ผู้ดูแล → เจ้าของ · พนักงาน → เจ้าของหรือผู้ดูแล (เจ้าของยื่นไม่ได้) — สำเนาฝั่งหน้าจอของ work_request_create
+const workReqRoles = () => (workMyRole() === 'admin' ? ['owner'] : workMyRole() === 'staff' ? ['admin', 'owner'] : []);
+function workReqSync() {
+  const r = workReq;
+  document.querySelectorAll('#workrMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === r.mode)));
+  document.getElementById('workrGroupField').hidden = r.mode !== 'group';
+  document.getElementById('workrUserField').hidden = r.mode !== 'user';
+  document.querySelectorAll('#workrGroups button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.group === r.group)));
+  const body = document.getElementById('workrBody').value.trim();
+  document.getElementById('workrCount').textContent = document.getElementById('workrBody').value.length + ' / 1000';
+  const to = r.mode === 'group' ? (WORK_GROUP[r.group] || '') : (document.getElementById('workrUser').selectedOptions[0] ? document.getElementById('workrUser').selectedOptions[0].textContent.split(' · ')[0] : '');
+  document.getElementById('workrGo').textContent = to ? 'ส่งคำขอถึง ' + to : 'ส่งคำขอ';
+  document.getElementById('workrGo').disabled = r.busy || !body || (r.mode === 'group' ? !r.group : !document.getElementById('workrUser').value);
+}
+function workReqOpen(taskId) {
+  if (isOwner()) { showToast('เจ้าของร้านยื่นคำขอไม่ได้ — สั่งงานหรือย้ายงานได้เลย'); return; }
+  const roles = workReqRoles();
+  workReq = { mode: 'group', group: roles[0] || '', busy: false };
+  document.getElementById('workrGroups').innerHTML = roles.map(g => '<button type="button" class="wk-chipbtn" data-group="' + g + '" aria-pressed="false">' + escapeHtml(WORK_GROUP[g]) + '</button>').join('');
+  const people = work.people.filter(p => p.is_active && p.id !== currentUserId && roles.includes(p.role));
+  document.getElementById('workrUser').innerHTML = people.map(p => '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.full_name) + ' · ' + escapeHtml(WORK_ROLE[p.role] || p.role) + '</option>').join('');
+  // ใบงานที่แนบได้: ใบที่ฉันเป็นผู้รับ/ผู้สั่ง (ผู้ดูแลเห็นทุกใบ) — ยังไม่ปิดขึ้นก่อน
+  const cand = work.tasks.filter(t => t.status !== 'cancelled' && (t.assignee_id === currentUserId || t.created_by === currentUserId || workMyRole() === 'admin'))
+    .sort((a, b) => (workOpenish(a) || a.status === 'submitted' ? 0 : 1) - (workOpenish(b) || b.status === 'submitted' ? 0 : 1) || Date.parse(b.updated_at) - Date.parse(a.updated_at)).slice(0, 60);
+  document.getElementById('workrTask').innerHTML = '<option value="">ไม่แนบใบงาน</option>' + cand.map(t => '<option value="' + escapeHtml(t.id) + '"' + (t.id === taskId ? ' selected' : '') + '>' + escapeHtml(t.title) + ' · ' + escapeHtml(workName(t.assignee_id)) + '</option>').join('');
+  document.getElementById('workrBody').value = '';
+  document.getElementById('workrErr').hidden = true;
+  workReqSync();
+  const d = document.getElementById('workReqDialog');
+  if (!d.open) d.showModal();
+}
+async function workReqSave() {
+  const r = workReq, err = document.getElementById('workrErr'), btn = document.getElementById('workrGo');
+  if (!r || r.busy) return;
+  const body = document.getElementById('workrBody').value.trim();
+  err.hidden = true;
+  if (!body) { err.textContent = 'ใส่ข้อความคำขอก่อน'; err.hidden = false; return; }
+  const uid = currentUserId, task = document.getElementById('workrTask').value || null;
+  r.busy = true; btn.disabled = true;
+  const { error } = await workRpc('work_request_create', { p_to_user: r.mode === 'user' ? document.getElementById('workrUser').value : null, p_to_group: r.mode === 'group' ? r.group : null, p_task: task, p_body: body });
+  if (uid !== currentUserId) return;
+  r.busy = false;
+  if (error) { console.error('[Work request]', error); err.textContent = 'ส่งคำขอไม่สำเร็จ: ' + error.message; err.hidden = false; workReqSync(); return; }
+  document.getElementById('workReqDialog').close(); workReq = null;
+  showToast('✅ ส่งคำขอแล้ว — รอผู้รับตอบ');
+  work.reqBox = 'out'; work.reqSel = null; workTab('req');
+  await loadWork();
+}
+async function workReqDecide(id, verdict) {
+  if (workBusy) return;
+  const r = work.reqs.find(x => x.id === id), noteEl = document.getElementById('workReqNote'), err = document.getElementById('workReqErr');
+  if (!r || !noteEl) return;
+  const note = noteEl.value.trim();
+  err.hidden = true;
+  if (verdict === 'reject' && !note) { err.textContent = 'ปฏิเสธต้องใส่เหตุผล — ผู้ยื่นจะเห็นเหตุผลนี้'; err.hidden = false; noteEl.focus(); return; }
+  const uid = currentUserId;
+  workBusy = true;
+  document.querySelectorAll('#workReqDetail [data-act^="req-a"], #workReqDetail [data-act="req-reject"]').forEach(b => { b.disabled = true; });
+  const { error } = await workRpc('work_request_decide', { p_request: id, p_verdict: verdict, p_note: note || null });
+  workBusy = false;
+  if (uid !== currentUserId) return;
+  if (error) {
+    console.error('[Work request decide]', error);
+    await loadWork();                                      // มีคนในกลุ่มตอบก่อน/ผู้ยื่นถอนไปแล้ว — โหลดใหม่ให้เห็นของจริง
+    const e2 = document.getElementById('workReqErr');
+    if (e2) { e2.textContent = 'ตอบคำขอไม่สำเร็จ: ' + error.message; e2.hidden = false; }
+    else showToast('⚠️ ตอบคำขอไม่สำเร็จ: ' + error.message);        // คำขอถูกตอบ/ถอนไปแล้ว → หน้าโหลดใหม่ ปุ่ม/ช่องแจ้งหายไป — ต้องบอกผู้ใช้
+    return;
+  }
+  showToast(verdict === 'approve' ? '✅ อนุมัติแล้ว — รับเรื่อง' : '↩ ปฏิเสธคำขอแล้ว');
+  await loadWork();
+}
+function workReqAskWithdraw(id) {
+  const r = work.reqs.find(x => x.id === id);
+  if (!r) return;
+  askConfirm('ถอนคำขอนี้?', '<p class="hint">ถึง ' + escapeHtml(workReqToLabel(r)) + '</p><div class="wk-note">' + escapeHtml(r.body) + '</div>', 'ถอนคำขอ', async () => {
+    const uid = currentUserId;
+    const { error } = await workRpc('work_request_withdraw', { p_request: id });
+    if (uid !== currentUserId) return;
+    closeConfirm();
+    if (error) { console.error('[Work request withdraw]', error); showFatalError('ถอนคำขอไม่สำเร็จ: ' + error.message); await loadWork(); return; }
+    showToast('✅ ถอนคำขอแล้ว');
+    await loadWork();
+  });
+}
+
+// ── เหตุการณ์ของหน้านี้ (กดแล้วทำงานด้วย data-act — ไม่ฝังข้อความของผู้ใช้ลงใน onclick) ──
+function workClick(e) {
+  const a = e.target.closest('[data-act]');
+  if (!a) return;
+  const holder = a.closest('[data-id]'), act = a.dataset.act, id = a.dataset.id || (holder && holder.dataset.id);
+  if (act === 'open') {
+    const t = workTask(id);
+    if (!t) return;
+    if (a.closest('#workQueue')) { work.sel = id; renderWorkReview(); }
+    else if (t.assignee_id === currentUserId && workOpenish(t) && a.closest('#workPaneMine')) workSubOpen(id);
+    else workOpenDetail(id);
+  }
+  else if (act === 'detail') { if (!e.target.closest('button')) workOpenDetail(id); }
+  else if (act === 'edit') workFormOpen(id);
+  else if (act === 'cancel') workAskCancel(id);
+  else if (act === 'close-task') workAskClose(id);
+  else if (act === 'rv-approve') workReview(id, 'approve');
+  else if (act === 'rv-changes') workReview(id, 'changes');
+  else if (act === 'filter') { work.filter = a.dataset.f; renderWorkAssign(); }
+  else if (act === 'toggle-done') { work.doneOpen = !work.doneOpen; renderWorkMine(); }
+  else if (act === 'req-new') workReqOpen(id || null);
+  else if (act === 'req-open') { work.reqSel = id; renderWorkReq(); }
+  else if (act === 'req-box') { work.reqBox = a.dataset.box; work.reqSel = null; renderWorkReq(); }
+  else if (act === 'req-approve') workReqDecide(id, 'approve');
+  else if (act === 'req-reject') workReqDecide(id, 'reject');
+  else if (act === 'req-withdraw') workReqAskWithdraw(id);
+  else if (act === 'open-task') workOpenDetail(id);
+}
+document.getElementById('sec-tasks').addEventListener('click', workClick);
+document.getElementById('sec-tasks').addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.wk-task[data-act]')) { e.preventDefault(); workClick({ target: e.target }); }
+});
+document.getElementById('workDlg').addEventListener('click', workClick);
+document.getElementById('workDlg').addEventListener('close', () => { workDlgId = null; });
+document.getElementById('workTabs').addEventListener('click', e => { const b = e.target.closest('.mail-tab'); if (b) { workTab(b.dataset.tab); renderWork(); } });
+document.getElementById('workNew').addEventListener('click', () => workFormOpen(null));
+document.getElementById('workReload').addEventListener('click', () => loadWork());
+document.getElementById('workReqNew').addEventListener('click', () => workReqOpen(null));
+// หน้าต่างส่งงาน
+document.getElementById('workSubChans').addEventListener('input', workSubRender);
+document.getElementById('workSubLink').addEventListener('input', workSubRender);
+document.getElementById('workSubNote').addEventListener('input', workSubRender);
+document.getElementById('workSubPick').addEventListener('click', () => { const i = document.getElementById('workSubFile'); i.value = ''; i.click(); });
+document.getElementById('workSubFile').addEventListener('change', e => workSubPickFiles(e.target.files || []));
+document.getElementById('workSubImgs').addEventListener('click', e => {
+  const b = e.target.closest('[data-act="sub-rm"]');
+  if (!b || !workSub) return;
+  const [gone] = workSub.imgs.splice(Number(b.dataset.i), 1);
+  if (gone) URL.revokeObjectURL(gone.url);
+  workSubRender();
+});
+document.getElementById('workSubForm').addEventListener('submit', e => { e.preventDefault(); workSubmit(); });
+document.getElementById('workSubCancel').addEventListener('click', () => document.getElementById('workSubDialog').close());
+document.getElementById('workSubReq').addEventListener('click', () => { if (workSub) workReqOpen(workSub.id); });
+document.getElementById('workSubDialog').addEventListener('close', () => { workSubFree(); workSub = null; });
+// หน้าต่างสั่งงาน/แก้
+document.getElementById('workFormDialog').addEventListener('click', e => {
+  const k = e.target.closest('#workfKind button'), c = e.target.closest('#workfChans button'), q = e.target.closest('[data-quick]');
+  if (k) { workForm.kind = k.dataset.kind; workFormSync(); }
+  else if (c) { workForm.channels.has(c.dataset.ch) ? workForm.channels.delete(c.dataset.ch) : workForm.channels.add(c.dataset.ch); workFormSync(); }
+  else if (q) {
+    const pad = x => String(x).padStart(2, '0');
+    const ymd = days => { const b = workBkk(Date.now() + days * 86400000); return b.y + '-' + pad(b.m + 1) + '-' + pad(b.d); };
+    const v = { today: [ymd(0), '18:00'], tomorrow: [ymd(1), '12:00'], none: ['', ''] }[q.dataset.quick];
+    document.getElementById('workfDate').value = v[0]; document.getElementById('workfTime').value = v[1];
+  }
+});
+document.getElementById('workFormDialog').addEventListener('change', e => { if (e.target.closest('#workfPeople')) workFormSync(); });
+document.getElementById('workForm').addEventListener('submit', e => { e.preventDefault(); workFormSave(); });
+document.getElementById('workfCancel').addEventListener('click', () => document.getElementById('workFormDialog').close());
+document.getElementById('workFormDialog').addEventListener('close', () => { workForm = null; });
+// หน้าต่างยื่นคำขอ
+document.getElementById('workReqDialog').addEventListener('click', e => {
+  const m = e.target.closest('#workrMode button'), g = e.target.closest('#workrGroups button');
+  if (m) { workReq.mode = m.dataset.mode; workReqSync(); }
+  else if (g) { workReq.group = g.dataset.group; workReqSync(); }
+});
+document.getElementById('workReqDialog').addEventListener('input', () => { if (workReq) workReqSync(); });
+document.getElementById('workReqDialog').addEventListener('change', () => { if (workReq) workReqSync(); });
+document.getElementById('workReqForm').addEventListener('submit', e => { e.preventDefault(); workReqSave(); });
+document.getElementById('workrCancel').addEventListener('click', () => document.getElementById('workReqDialog').close());
+document.getElementById('workReqDialog').addEventListener('close', () => { workReq = null; });
 
 setInterval(tickHome, 1000);
 renderNav();
