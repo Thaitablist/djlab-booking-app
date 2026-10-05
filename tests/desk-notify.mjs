@@ -107,6 +107,8 @@ async function login(email) {
 
 async function runTests() {
   L('=== แจ้งเตือนงานบนเครื่องนี้ (Web Push) ===');
+  const REAL_KEY = NOTIF_VAPID_PUBLIC_KEY;          // ค่าที่อยู่ในไฟล์จริง — เก็บไว้ตรวจ แล้วล้างให้เทสต์สถานะ "ยังไม่พร้อม" ข้างล่างทำงานได้
+  NOTIF_VAPID_PUBLIC_KEY = '';
   setSw(false);
   await login('owner@djlab.com');
   showSection('tasks');
@@ -128,7 +130,9 @@ async function runTests() {
   setUa(CHROME_UA);
   notifRender();
   ok('ยังไม่ตั้ง VAPID public key: "ยังไม่พร้อม" (ข้อความธรรมดา ไม่ใช่ error) · ไม่มีปุ่มเปิด', notifState() === 'no-key' && txt('notifBtnState') === 'ยังไม่พร้อม' && /ยังไม่พร้อมใช้งาน/.test(txt('notifStatus')) && !vis('notifEnable'), txt('notifStatus'));
-  ok('ค่า public key ว่างในไฟล์จริง (ห้ามมีค่าเดามาก่อนเจ้าของส่ง)', NOTIF_VAPID_PUBLIC_KEY === '');
+  ok('ค่า public key ในไฟล์จริงตรงกับที่เจ้าของส่งมา 5 ต.ค. 69 (ผิดตัวเดียว = ทุกเครื่องสมัครกับคีย์ที่บอทเซ็นไม่ได้)', REAL_KEY === 'BP0MIu2GxccYoiLr8HG20e-nHrtLZ9BbscHZbRdfx5IWXQfdiuTFraE19uRMm6eBVH0-B0Td40kFsjzc_zeVSVI', REAL_KEY);
+  NOTIF_VAPID_PUBLIC_KEY = REAL_KEY;
+  ok('คีย์จริงผ่านด่านรูปแบบ · ถอดรหัสได้ 65 ไบต์ ขึ้นต้น 0x04 (P-256 แบบไม่บีบ)', notifKeyOk() && notifKeyBytes().length === 65 && notifKeyBytes()[0] === 4);
   NOTIF_VAPID_PUBLIC_KEY = KEY;
   ok('ถอดรหัสคีย์ได้ 65 ไบต์ (รูปแบบ public key ของ P-256)', notifKeyBytes().length === 65);
   notifRender();
