@@ -12755,6 +12755,7 @@ function workFormOpen(id) {
   const t = id ? workTask(id) : null;
   if (id && (!t || !workCanEdit(t))) { showToast('⚠️ แก้ใบงานนี้ไม่ได้แล้ว — สถานะเปลี่ยนไปหรือไม่มีสิทธิ์'); return; }
   workForm = { id: t ? t.id : null, kind: t ? t.kind : 'photo', channels: new Set(t ? t.channels : []), busy: false };
+  document.getElementById('workfSave').disabled = false;          // ฟอร์มใหม่ = ปุ่มกดได้เสมอ ไม่รับสถานะค้างจากรอบก่อน
   document.getElementById('workfHead').textContent = t ? 'แก้ใบงาน' : 'สั่งงานใหม่';
   document.getElementById('workfTitle').value = t ? t.title : '';
   document.getElementById('workfDetail').value = t ? t.detail : '';
@@ -12830,7 +12831,7 @@ async function workFormSave() {
   } catch (e) {
     console.error('[Work form]', e);
     fail('ติดต่อฐานข้อมูลไม่สำเร็จ: ' + e.message);
-  } finally { if (workForm === f) { f.busy = false; btn.disabled = false; } }
+  } finally { f.busy = false; btn.disabled = false; }      // ปล่อยปุ่มทุกทาง — สร้างสำเร็จแล้ว workForm ถูกตั้งเป็น null ถ้าเช็ก workForm === f ปุ่มจะค้างสีเทาจนรีโหลดหน้า (บั๊กจริง 5 ต.ค.)
 }
 
 // ── ยื่นคำขอ / ตัดสิน / ถอน ──
