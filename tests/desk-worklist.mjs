@@ -611,6 +611,25 @@ async function runTests() {
   closeAll(); await sleep(100);
   doLogout(); await sleep(400);
 
+  // (g01) ตาราง "สั่งงาน": เฉพาะงานที่ผ่านแล้วเป็นเขียวทั้งแถว (เจ้าของ 5 ต.ค. 69 "ตาลาย แยกงานที่เสร็จให้ชัด") — ยกเลิก/รอตรวจ/ส่งกลับแก้/ยังไม่ส่ง ไม่เขียว
+  WORK.seed();
+  WORK.tasks.push(mkTask('zd2', { title: 'ผ่านแล้วอีกใบ', status: 'approved', closed_at: hAgo(1) }), mkTask('zc1', { title: 'ใบที่ยกเลิกแล้ว', status: 'cancelled', closed_at: hAgo(1) }));
+  await login('nui'); showSection('tasks'); await sleep(300); tab('assign'); await frames();
+  const rowEl = id => document.querySelector('#workAll tr[data-id="' + id + '"]');
+  const GREEN = 'rgb(232, 242, 235)', GREEN_BAR = 'rgb(31, 107, 58)';
+  const doneIds = [...document.querySelectorAll('#workAll tr.wk-row')].filter(r => r.classList.contains('wk-done')).map(r => r.dataset.id).sort().join();
+  ok('ตารางสั่งงาน: แถวที่ติดป้ายเขียวมีเฉพาะงานที่ผ่านแล้ว (a6 · zd2) — ไม่รวมยกเลิก/รอตรวจ/ส่งกลับแก้/ยังไม่ส่ง', doneIds === 'a6,zd2', doneIds);
+  ok('แถวผ่านแล้ว (a6 · zd2): พื้นแถวเขียวอ่อนทั้งแถว', ['a6', 'zd2'].every(id => getComputedStyle(rowEl(id)).backgroundColor === GREEN), getComputedStyle(rowEl('a6')).backgroundColor);
+  ok('แถวผ่านแล้ว: มีแถบเขียวเข้มชิดซ้าย', ['a6', 'zd2'].every(id => getComputedStyle(rowEl(id).cells[0]).boxShadow.indexOf(GREEN_BAR) >= 0), getComputedStyle(rowEl('a6').cells[0]).boxShadow);
+  ok('แถวที่ไม่ใช่ผ่านแล้ว (ยกเลิก zc1 · รอตรวจ a5 · ส่งกลับแก้ a2 · ยังไม่ส่ง a1): พื้นไม่เขียว ไม่มีแถบ',
+    ['zc1', 'a5', 'a2', 'a1'].every(id => getComputedStyle(rowEl(id)).backgroundColor !== GREEN && getComputedStyle(rowEl(id).cells[0]).boxShadow === 'none'), ['zc1', 'a5', 'a2', 'a1'].map(id => getComputedStyle(rowEl(id)).backgroundColor).join('|'));
+  ok('แถวผ่านแล้วยังบอกเป็นคำ "ผ่านแล้ว" ในป้าย (ไม่พึ่งสีอย่างเดียว) · ป้ายพื้นขาวอ่านชัดบนพื้นเขียว', /ผ่านแล้ว/.test(rowEl('a6').querySelector('.wk-pills').textContent) && getComputedStyle(rowEl('a6').querySelector('.st-ok')).backgroundColor === 'rgb(255, 255, 255)');
+  ok('ป้ายสถานะของงานอื่นไม่เปลี่ยน: ใบที่ยกเลิกยังเป็นป้ายเทา "ยกเลิกแล้ว"', !!rowEl('zc1').querySelector('.st-off') && /ยกเลิกแล้ว/.test(rowEl('zc1').querySelector('.wk-pills').textContent));
+  if (${JSON.stringify(!!SHOTS)}) { rowEl('a6').scrollIntoView({ block: 'center' }); await shot('work-assign-done-green.png'); }
+  document.querySelector('#workFilter [data-f="approved"]').click(); await frames();
+  ok('กรอง "ผ่านแล้ว": ทุกแถวที่เหลือเขียว (a6 · zd2)', [...document.querySelectorAll('#workAll tr.wk-row')].length === 2 && [...document.querySelectorAll('#workAll tr.wk-row')].every(r => getComputedStyle(r).backgroundColor === GREEN));
+  doLogout(); await sleep(400);
+
   // (s09 · s19) ขั้นลิงก์โพสต์: ช่องลิงก์ไฟล์ที่ซ่อนอยู่ไม่ถูกส่ง · ลิงก์ที่ใส่ไว้ล่วงหน้าเฉพาะจากการส่งขั้นลิงก์โพสต์ครั้งก่อน (ไม่ใช่ขั้นไฟล์)
   WORK.seed();
   WORK.events.push({ id: 'pre1', task_id: 'a3', kind: 'submitted', actor_id: 'u2', note: '', links: [{ url: 'https://www.facebook.com/old-stage1-link', channel: 'facebook' }], image_paths: [], phase: 'content', created_at: nowIso() });

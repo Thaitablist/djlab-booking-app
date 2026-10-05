@@ -1109,6 +1109,11 @@
   .wk-people input:focus-visible + .cb { outline: 2px solid var(--black); outline-offset: 2px; }
   .wk-people .sub { margin-left: auto; font-size: 14px; color: var(--text2); }
   .wk-row .wk-meta { margin-top: 4px; }
+  /* ตาราง "สั่งงาน": งานที่ผ่านแล้ว = เขียวทั้งแถว + แถบเขียวซ้าย (เจ้าของ 5 ต.ค. 69 — ตารางตาลาย แยกงานที่เสร็จให้ชัด) · ยังมีคำ "ผ่านแล้ว" ในป้าย ไม่พึ่งสีอย่างเดียว
+     พื้นใช้ --ok-soft (ตัวหนังสือจาง text3 ยังได้ 4.6:1 · เขียวเข้มกว่านี้จะต่ำกว่า 4.5) · ตัวเลือก tr.wk-row.wk-done เฉพาะเจาะจงกว่า table.data tbody tr:hover เสมอ → เมาส์ชี้แล้วเขียวไม่หาย ไม่ขึ้นกับลำดับบรรทัด · ป้ายเป็นพื้นขาวไม่กลืนกับพื้นเขียว */
+  table.data tbody tr.wk-row.wk-done { background: var(--ok-soft); }
+  table.data tbody tr.wk-row.wk-done td:first-child { box-shadow: inset 4px 0 0 var(--ok); }
+  .wk-row.wk-done .st-ok { background: #fff; }
   #workSubDialog { max-width: 640px; }
   #workDlg { max-width: 820px; }
   #workFormDialog { max-width: 920px; }
@@ -12454,7 +12459,7 @@ function renderWorkAssign() {
   });
   document.getElementById('workAll').innerHTML = list.length
     ? '<section class="card wk-card"><table class="data"><thead><tr><th>งาน</th><th>ผู้รับ</th><th>สถานะ</th><th>กำหนดส่ง</th><th></th></tr></thead><tbody>' +
-      list.map(t => '<tr class="wk-row" data-act="detail" data-id="' + escapeHtml(t.id) + '"><td><strong>' + escapeHtml(t.title) + '</strong><div class="wk-meta">' + workChips(t) + '</div></td><td>' + escapeHtml(workName(t.assignee_id)) +
+      list.map(t => '<tr class="wk-row' + (t.status === 'approved' ? ' wk-done' : '') + '" data-act="detail" data-id="' + escapeHtml(t.id) + '"><td><strong>' + escapeHtml(t.title) + '</strong><div class="wk-meta">' + workChips(t) + '</div></td><td>' + escapeHtml(workName(t.assignee_id)) +
         '</td><td><div class="wk-pills">' + workPills(t) + '</div></td><td>' + escapeHtml(t.due_at ? workWhen(t.due_at) : 'ไม่มีกำหนด') + '</td><td>' +
         (workCanEdit(t) ? '<button type="button" class="btn btn-sm" data-act="edit" data-id="' + escapeHtml(t.id) + '">แก้ไข</button>' : '') + '</td></tr>').join('') +
       '</tbody></table></section>'
