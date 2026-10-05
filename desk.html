@@ -6291,12 +6291,17 @@ function setTimer(h, m) {
   timerReset();
   updateTimerDisplay();
 }
+// ขอสิทธิ์แจ้งเตือนครั้งแรก (ตอนหมดเวลาจะมีป้ายเด้งนอกหน้าเว็บ) — ถามเฉพาะที่ยังไม่เคยตอบ · ถามไม่ได้ก็ไม่เป็นไร ยังมีเสียงกับข้อความบนจอ
+function askNotifyPermission() {
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) { /* เบราว์เซอร์นี้ไม่ให้ถาม */ }
+}
 function timerAction() {
   if (!timerRunning) {
     const h = parseInt(document.getElementById('timerHours').value, 10);
     const m = parseInt(document.getElementById('timerMins').value, 10);
     if (h === 0 && m === 0) { showToast('⚠️ กรุณาตั้งเวลา'); return; }
     if (timerRemaining === 0) { timerTotal = h * 3600 + m * 60; timerRemaining = timerTotal; }
+    askNotifyPermission();   // ทุกทางที่กดเริ่ม (การ์ดจับเวลา · ปุ่มเริ่มจับเวลาในรายการจอง) — เบราว์เซอร์ยอมให้ถามเฉพาะตอนผู้ใช้เพิ่งกด
     startTimer();
   } else {
     pauseTimer();
@@ -6382,9 +6387,12 @@ function restoreTimer() {
   document.getElementById('timerLabel').textContent = 'หยุดชั่วคราว';
   updateTimerDisplay();
 }
+// กลับมาที่หน้านี้ (สลับแอป · เปิดจากแคชย้อนกลับของเบราว์เซอร์ bfcache) แล้วจอตัวนับต้องตรงนาฬิกาจริงทันที ไม่รอรอบตัวนับถัดไป
+function resumeTimerView() { if (timerRunning) { runTimerTicker(); syncTimer(); } }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && timerRunning) { runTimerTicker(); syncTimer(); }
+  if (document.visibilityState === 'visible') resumeTimerView();
 });
+window.addEventListener('pageshow', resumeTimerView);
 function updateTimerDisplay() {
   const h = Math.floor(timerRemaining / 3600), m = Math.floor((timerRemaining % 3600) / 60), sec = timerRemaining % 60;
   document.getElementById('timerDisplay').textContent = h > 0
@@ -6396,9 +6404,11 @@ function updateTimerDisplay() {
   bar.style.background = progress < 0.1 ? 'var(--red)' : 'var(--black)';
 }
 function triggerTimerAlert() {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('DJ LAB SIAM — หมดเวลาซ้อม', { body: 'เวลาซ้อมสิ้นสุดแล้ว กรุณาตรวจสอบห้องซ้อม' });
-  }
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('DJ LAB SIAM — หมดเวลาซ้อม', { body: 'เวลาซ้อมสิ้นสุดแล้ว กรุณาตรวจสอบห้องซ้อม' });
+    }
+  } catch (e) { /* มือถือบางรุ่นห้ามสร้างตรง ๆ (ต้องผ่าน service worker) — ต้องไม่ขวางเสียงกับข้อความบนจอ */ }
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     for (let i = 0; i < 3; i++) {
@@ -6417,8 +6427,7 @@ async function startTimerFromBooking(id) {
   const b = bookings.find(x => x.id === id);
   if (!b) return;
   setTimer(b.hours, 0);
-  timerAction();
-  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  timerAction();                       // ขอสิทธิ์แจ้งเตือนอยู่ใน timerAction แล้ว
   await setBookingStatus(id, 'active', null, 'เริ่มจับเวลาแล้ว แต่บันทึกสถานะ "กำลังใช้งาน" ไม่สำเร็จ');
 }
 
@@ -8843,11 +8852,16 @@ async function adSaveRow() {
   if (adColumns.some(c => c.column_name === 'updated_at')) payload.updated_at = new Date().toISOString();
   const btn = document.getElementById('adSaveBtn');
   if (btn) btn.disabled = true;
-  const { error } = adEditingRow
-    ? await db.from(adTable.name).update(payload).eq('id', adEditingRow.id)
+  // แก้แถว: ขอแถวที่ถูกแก้กลับมานับ — ถ้าสิทธิ์ (RLS) ปฏิเสธ ฐานข้อมูลไม่ฟ้อง error แต่ "ไม่แก้อะไรเลย" (0 แถว) → ห้ามขึ้น "บันทึกเรียบร้อย" หลอก (กฎข้อ 8)
+  const { data: saved, error } = adEditingRow
+    ? await db.from(adTable.name).update(payload).eq('id', adEditingRow.id).select('id')
     : await db.from(adTable.name).insert(payload);
   if (btn) btn.disabled = false;
   if (error) { console.error('[Save row]', error); showFatalError('บันทึกไม่สำเร็จ: ' + error.message); return; }
+  if (adEditingRow && !(saved && saved.length)) {
+    showFatalError('บันทึกไม่สำเร็จ: ฐานข้อมูลไม่ได้แก้แถวนี้ (ไม่มีสิทธิ์แก้ หรือแถวถูกลบ/เปลี่ยนไปแล้ว) — ข้อมูลยังเหมือนเดิม');
+    return;
+  }
   closeDetail();
   showToast('✅ บันทึกเรียบร้อยแล้ว');
   await adLoadAll();
@@ -8860,8 +8874,9 @@ function adDeleteRow() {
   askConfirm('ยืนยันการลบ', '<div class="alert alert-red">ลบแถวนี้ออกจากตาราง ' + escapeHtml(adTable.label) +
     ' อย่างถาวร กู้คืนไม่ได้ ถ้ามีข้อมูลอื่นอ้างถึงแถวนี้อยู่ ฐานข้อมูลจะปฏิเสธการลบเอง</div>', 'ยืนยันลบแถวนี้', async () => {
       if (!canDeleteRow()) return;
-      const { error } = await db.from(adTable.name).delete().eq('id', row.id);
+      const { data: gone, error } = await db.from(adTable.name).delete().eq('id', row.id).select('id');
       if (error) { console.error('[Delete row]', error); showFatalError('ลบไม่สำเร็จ: ' + error.message); return; }
+      if (!(gone && gone.length)) { showFatalError('ลบไม่สำเร็จ: ฐานข้อมูลไม่ได้ลบแถวนี้ (ไม่มีสิทธิ์ลบ หรือแถวถูกลบไปแล้ว) — ข้อมูลยังเหมือนเดิม'); return; }
       closeConfirm();
       closeDetail();
       showToast('✅ ลบแถวเรียบร้อยแล้ว');

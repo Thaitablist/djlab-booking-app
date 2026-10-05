@@ -6,22 +6,20 @@
  * rpc / insert / update / delete / contains ทุกครั้งไว้ใน CALLS
  *
  * การยืนยันการจองต้อง "เขียนเหมือนหน้าจองเดิม" เพราะ trigger ในฐานข้อมูลส่ง LINE หาลูกค้า
- * จากการเขียนนั้น — ชุดนี้จึงอ่านคอลัมน์ที่หน้าเดิมเขียนจากไฟล์จริง แล้วเทียบกับที่ desk.html เขียน
- * ถ้าวันหนึ่งหน้าเดิมเปลี่ยน เทสต์นี้จะฟ้องให้ตามไปแก้ desk.html ด้วย
+ * จากการเขียนนั้น — ชุดนี้เทียบคอลัมน์ที่ desk.html เขียนกับค่าคงที่ OLD_CONFIRM_KEYS (ตรึงจากหน้าจองเดิมก่อนเลิกใช้)
  */
 
-import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runPage, HARNESS } from './lib/page-test.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-// คอลัมน์ที่หน้าจองเดิมเขียนตอนยืนยัน — อ่านจากโค้ดจริง ไม่พิมพ์ตามความจำ
-const oldPage = readFileSync(join(root, 'DJ_LAB_SIAM_BookingApp.html'), 'utf8');
-const m = oldPage.match(/async function confirmBooking[\s\S]*?\.update\(\{([\s\S]*?)\}\)/);
-if (!m) { console.error('หา confirmBooking ในหน้าจองเดิมไม่เจอ — เทสต์เทียบการเขียนไม่ได้'); process.exit(1); }
-const OLD_CONFIRM_KEYS = [...m[1].matchAll(/(\w+)\s*:/g)].map(x => x[1]).sort();
+// คอลัมน์ที่การยืนยันการจองต้องเขียน (เรียงตามตัวอักษร) — เดิมอ่านจาก confirmBooking ของหน้าจองเดิม (DJ_LAB_SIAM_BookingApp.html)
+// เลิกใช้หน้านั้นแล้ว (5 ต.ค. 69 · ไฟล์เหลือเป็นหน้าพาไป) จึงตรึงเป็นค่าคงที่ — ที่มาจริงคือ trigger trg_notify_booking_confirmed
+// (stock-app 004: ยิง LINE หาลูกค้าเมื่อ confirmed เปลี่ยน false → true) · confirmed_by/confirmed_at คือร่องรอยว่าใครยืนยันเมื่อไหร่
+// ⚠️ ถ้าเปลี่ยนคอลัมน์ที่เขียนตอนยืนยัน ต้องแก้ทั้ง desk.html และค่าคงที่นี้ และตรวจ trigger ในฐานข้อมูลด้วย
+const OLD_CONFIRM_KEYS = ['confirmed', 'confirmed_at', 'confirmed_by'];
 
 const MOCK = `<script>
 const CALLS = [];
@@ -89,9 +87,10 @@ function builder(table) {
     async single() { return { data: q._rows[0] || null, error: null }; },
     then(res, rej) { return Promise.resolve({ data: q._head ? null : q._rows, error: null, count: q._rows.length }).then(res, rej); },
     insert(payload) { CALLS.push({ op: 'insert', table, payload }); q._rows = [Object.assign({ id: 'new-' + CALLS.length }, payload)]; return q; },
-    update(payload) { CALLS.push({ op: 'update', table, payload, q }); return q; },
+    // RLS_BLOCK = ตารางที่ฐานข้อมูลปฏิเสธ "เงียบ ๆ": ไม่มี error แต่ไม่แก้/ไม่ลบอะไร (ขอแถวกลับมาได้ 0 แถว) — จำลองสิทธิ์ที่หายไปกลางทาง
+    update(payload) { CALLS.push({ op: 'update', table, payload, q }); if (window.RLS_BLOCK && window.RLS_BLOCK.has(table)) q._rows = []; return q; },
     upsert(payload) { CALLS.push({ op: 'upsert', table, payload }); return q; },
-    delete() { CALLS.push({ op: 'delete', table }); return q; },
+    delete() { CALLS.push({ op: 'delete', table }); if (window.RLS_BLOCK && window.RLS_BLOCK.has(table)) q._rows = []; return q; },
   };
   const eq0 = q.eq;
   q.eq = (col, val) => { const last = CALLS[CALLS.length - 1]; if (last && last.q === q) last.where = { col, val }; return eq0(col, val); };
@@ -301,6 +300,31 @@ async function runTests() {
   await adSaveRow();
   const pu = CALLS.find(c => c.op === 'update' && c.table === 'products');
   ok('ตารางสินค้าแก้ได้ ส่ง update ไปที่ products', !!pu && pu.payload.name === 'DDJ-FLX4 (ใหม่)', JSON.stringify(pu && pu.payload));
+
+  // ── RLS ปฏิเสธเงียบ ๆ: ฐานข้อมูลไม่ฟ้อง error แต่ไม่แก้/ไม่ลบอะไร (0 แถว) — ห้ามขึ้นสำเร็จหลอก (กฎข้อ 8) ──
+  window.RLS_BLOCK = new Set(['products']);
+  document.getElementById('toast').textContent = '';
+  const fe0 = document.getElementById('fatalError'); if (fe0) fe0.remove();
+  adOpenRow(adRows[0]);
+  document.getElementById('fld_name').value = 'ชื่อที่ฐานข้อมูลจะไม่รับ';
+  await adSaveRow();
+  const fe1 = document.getElementById('fatalError');
+  ok('บันทึกแล้วฐานข้อมูลแก้ 0 แถว (RLS ปฏิเสธเงียบ ๆ): ขึ้นแถบแดงบอกว่าไม่ได้บันทึก', !!fe1 && /ไม่ได้แก้แถวนี้/.test(fe1.textContent), fe1 && fe1.textContent);
+  ok('...ไม่ขึ้น "บันทึกเรียบร้อย" และแผงยังเปิดอยู่ให้แก้ต่อ', txt('toast').indexOf('บันทึกเรียบร้อย') === -1 && !!document.getElementById('adSaveBtn'), txt('toast'));
+  if (fe1) fe1.remove();
+  await adSelectTable('products');
+  adOpenRow(adRows[0]);
+  adDeleteRow();
+  await runConfirm();
+  const fe2 = document.getElementById('fatalError');
+  ok('ลบแล้วฐานข้อมูลลบ 0 แถว: ขึ้นแถบแดงบอกว่าไม่ได้ลบ · ไม่ขึ้น "ลบแถวเรียบร้อย"', !!fe2 && /ไม่ได้ลบแถวนี้/.test(fe2.textContent) && txt('toast').indexOf('ลบแถวเรียบร้อย') === -1, fe2 && fe2.textContent);
+  if (fe2) fe2.remove();
+  closeConfirm();
+  window.RLS_BLOCK = null;
+  adOpenRow(adRows[0]);
+  adDeleteRow();
+  await runConfirm();
+  ok('ลบปกติ (ฐานข้อมูลลบ 1 แถว): ขึ้น "ลบแถวเรียบร้อย" · ไม่มีแถบแดง', txt('toast').indexOf('ลบแถวเรียบร้อย') !== -1 && !document.getElementById('fatalError'), txt('toast'));
 
   showSection('products');
   openProduct('p1');

@@ -1,8 +1,9 @@
 // DJ LAB SIAM — Service Worker
-// Version: 5.0.0 — bumped so devices pick up the new brand icons instead of
-// serving the previous ones from cache.
+// Version: 6.0.0 — the old booking app page (DJ_LAB_SIAM_BookingApp.html) was retired on 5 Oct 2569 and
+// is now a tiny redirect page to desk.html#booking. Bumped so devices drop the cached old app and the
+// offline fallback no longer points at a page that redirects (an uncached desk.html would loop).
 
-const CACHE_NAME = 'djlab-booking-v5';
+const CACHE_NAME = 'djlab-booking-v6';
 const ASSETS = [
   './DJ_LAB_SIAM_BookingApp.html',
   './book.html',
@@ -33,6 +34,16 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+function offlinePage() {
+  return new Response(
+    '<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>DJ LAB SIAM</title><body style="font:18px/1.6 system-ui,sans-serif;padding:32px;max-width:520px;margin:auto">' +
+    '<h1 style="font-size:22px">ตอนนี้ไม่มีอินเทอร์เน็ต</h1>' +
+    '<p>คอนโซลร้าน DJ LAB SIAM ต้องใช้อินเทอร์เน็ต ลองใหม่เมื่อมีสัญญาณ</p>',
+    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
+}
+
 self.addEventListener('fetch', event => {
   // Skip non-GET and cross-origin
   if (event.request.method !== 'GET') return;
@@ -51,9 +62,12 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() =>
-        caches.match(event.request).then(cached =>
-          cached || caches.match('./DJ_LAB_SIAM_BookingApp.html')
-        )
+        // Offline: the page itself if cached → the console (desk.html) if cached → a plain notice.
+        // NEVER fall back to DJ_LAB_SIAM_BookingApp.html here: it only redirects to desk.html, so an
+        // uncached desk.html would send the browser round in circles.
+        caches.match(event.request)
+          .then(cached => cached || caches.match('./desk.html'))
+          .then(cached => cached || offlinePage())
       )
     );
     return;
@@ -91,6 +105,6 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow('./DJ_LAB_SIAM_BookingApp.html')
+    clients.openWindow('./desk.html#booking')
   );
 });
