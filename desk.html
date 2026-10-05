@@ -293,6 +293,14 @@
   .tl-block.done { background: var(--surface2); color: var(--text2); border: 1px solid var(--line-strong); }
   .tl-block.cancelled { background: repeating-linear-gradient(45deg, var(--surface2) 0 6px, var(--surface) 6px 12px);
     color: var(--text3); text-decoration: line-through; border: 1px dashed var(--line-strong); }
+  /* การจองที่ยืนยันแล้ว (รอเข้าใช้) = เขียว ทั้งก้อนไทม์ไลน์และแถวตาราง (เจ้าของสั่ง 6 ต.ค. 69) · ยังมีคำ "ยืนยันแล้ว" (ป้ายในแถว · ชื่อ/aria-label ของก้อน · ✓ หน้าชื่อ) ไม่พึ่งสีอย่างเดียว
+     พื้น --ok-soft (ตัวหนังสือ text2 บนพื้นนี้ ≥ 4.5:1) · สองคลาสบน tr (0,3,3) เพื่อชนะ tr:hover และ tr.sel (0,2,3) ด้วยความเฉพาะเจาะจง ไม่ขึ้นกับลำดับบรรทัด — เมาส์ชี้/เลือกแถวแล้วเขียวไม่หาย
+     แถวที่เลือกอยู่: แถบซ้ายเปลี่ยนเป็นดำ (ยังเห็นว่าเลือกอยู่) · ป้ายสถานะพื้นขาวไม่กลืนกับพื้นเขียว */
+  .tl-block.confirmed { background: var(--ok-soft); border-color: var(--ok); }
+  table.data tbody tr.bk-row.bk-confirmed { background: var(--ok-soft); }
+  table.data tbody tr.bk-row.bk-confirmed td:first-child { box-shadow: inset 4px 0 0 var(--ok); }
+  table.data tbody tr.bk-row.bk-confirmed.sel td:first-child { box-shadow: inset 4px 0 0 var(--black); }
+  .bk-confirmed .st-ok { background: #fff; }
   .tl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); pointer-events: none; }
 
   .mcal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
@@ -1991,7 +1999,7 @@
                 <button class="btn btn-primary" type="button" onclick="openBookingForm()">+ จองห้องใหม่</button>
               </div>
               <div id="bkTimeline"></div>
-              <p class="hint">กรอบเข้ม = ยืนยันแล้ว · ◷ พื้นเหลือง = รอยืนยัน · ▶ พื้นดำ = กำลังใช้งาน · ✓ พื้นเทา = ใช้บริการแล้ว · ลายเส้น = ยกเลิก</p>
+              <p class="hint">✓ พื้นเขียว = ยืนยันแล้ว (รอเข้าใช้) · ◷ พื้นเหลือง = รอยืนยัน · ▶ พื้นดำ = กำลังใช้งาน · ✓ พื้นเทา = ใช้บริการแล้ว · ลายเส้น = ยกเลิก</p>
             </div>
             <div>
               <div class="card">
@@ -3482,7 +3490,8 @@ function markSortHeaders(t) {
 document.querySelectorAll('.th').forEach(b => b.addEventListener('click', () => sortBy(b.dataset.t, b.dataset.k)));
 
 // วาดแถวใหม่แล้วพยายามคงแถวที่เลือกไว้ (ข้อมูล realtime เข้ามาระหว่างใช้งานได้ตลอด)
-function fillTable(t, rows, rowHtml, emptyText) {
+// rowCls(r) (ไม่บังคับ) = คลาสเพิ่มของ <tr> แถวนั้น — ไม่ส่ง = ผลเหมือนเดิมทุกตัวอักษร
+function fillTable(t, rows, rowHtml, emptyText, rowCls) {
   const v = view[t];
   const selId = v.rows[v.sel] ? v.rows[v.sel].id : null;
   v.rows = rows;
@@ -3490,8 +3499,11 @@ function fillTable(t, rows, rowHtml, emptyText) {
   const el = document.getElementById(v.tbody);
   const cols = el.closest('table').querySelectorAll('th').length;
   el.innerHTML = rows.length
-    ? rows.map((r, i) => '<tr data-i="' + i + '"' + (i === v.sel ? ' class="sel"' : '') +
-        ' onclick="pickRow(\'' + t + '\', ' + i + ')">' + rowHtml(r) + '</tr>').join('')
+    ? rows.map((r, i) => {
+        const cl = ((rowCls ? rowCls(r) : '') + (i === v.sel ? ' sel' : '')).trim();
+        return '<tr data-i="' + i + '"' + (cl ? ' class="' + cl + '"' : '') +
+          ' onclick="pickRow(\'' + t + '\', ' + i + ')">' + rowHtml(r) + '</tr>';
+      }).join('')
     : '<tr><td colspan="' + cols + '"><div class="empty">' + emptyText + '</div></td></tr>';
   markSortHeaders(t);
 }
@@ -6013,9 +6025,12 @@ async function loadBookingSettings() {
   updateCostPreview();
 }
 
+// ยืนยันแล้วและยังไม่เข้าใช้/ไม่ยกเลิก = "ยืนยันแล้ว (รอเข้าใช้)" → เขียว (ก้อนไทม์ไลน์ · แถวตาราง · ป้าย) — ที่ใช้งาน/ใช้แล้ว/ยกเลิกมีสีของสถานะตัวเอง
+const bkIsConfirmed = b => !!b.confirmed && b.status !== 'cancelled' && b.status !== 'done' && b.status !== 'active';
 function bkStatusHtml(b) {
   const s = BK_STATUS[b.status] || { t: b.status, cls: 'st-off', i: '•' };
-  return '<span class="badges"><span class="st ' + s.cls + '">' + s.i + ' ' + escapeHtml(s.t) + '</span>' +
+  return '<span class="badges">' + (bkIsConfirmed(b) ? '<span class="st st-ok">✓ ยืนยันแล้ว</span>' : '') +
+    '<span class="st ' + s.cls + '">' + s.i + ' ' + escapeHtml(s.t) + '</span>' +
     (!b.confirmed && b.status !== 'cancelled' ? '<span class="st st-warn">◷ รอยืนยัน</span>' : '') + '</span>';
 }
 
@@ -6074,8 +6089,8 @@ function renderTimeline() {
         const start = h + m / 60 - TL_START;
         const left = Math.max(0, start) / TL_HOURS * 100;
         const width = Math.max(2, (Math.min(TL_HOURS, start + b.hours) - Math.max(0, start)) / TL_HOURS * 100);
-        const cls = b.status === 'cancelled' ? 'cancelled' : b.status === 'done' ? 'done' : b.status === 'active' ? 'active' : (!b.confirmed ? 'pending' : '');
-        const icon = b.status === 'cancelled' ? '✕' : b.status === 'done' ? '✓' : b.status === 'active' ? '▶' : (!b.confirmed ? '◷' : '');
+        const cls = b.status === 'cancelled' ? 'cancelled' : b.status === 'done' ? 'done' : b.status === 'active' ? 'active' : (!b.confirmed ? 'pending' : 'confirmed');
+        const icon = b.status === 'cancelled' ? '✕' : b.status === 'done' ? '✓' : b.status === 'active' ? '▶' : (!b.confirmed ? '◷' : '✓');
         const span = shortTime(b.start_time) + '–' + addHours(b.start_time, b.hours);
         const stText = b.status === 'cancelled' ? 'ยกเลิก' : b.status === 'done' ? 'ใช้บริการแล้ว' : b.status === 'active' ? 'กำลังใช้งาน' : (!b.confirmed ? 'รอยืนยัน' : 'ยืนยันแล้ว');
         return '<button type="button" class="tl-block ' + cls + '" style="left:' + left.toFixed(2) + '%;width:' + width.toFixed(2) + '%;"' +
@@ -6132,7 +6147,8 @@ function renderBookingTable() {
     '<td class="col-opt">' + escapeHtml((b.room || '').split(' (')[0]) + '</td>' +
     '<td class="num">' + formatMoney(b.cost) + '</td>' +
     '<td>' + bkStatusHtml(b) + '</td>',
-    'ไม่พบการจองที่ตรงกับเงื่อนไข');
+    'ไม่พบการจองที่ตรงกับเงื่อนไข',
+    b => 'bk-row' + (bkIsConfirmed(b) ? ' bk-confirmed' : ''));
 }
 ['bkSearch', 'fBkStatus', 'fBkMonth'].forEach(id => document.getElementById(id).addEventListener('input', renderBookingTable));
 
@@ -6148,7 +6164,7 @@ function openBooking(id) {
       : '<div class="alert alert-warn">⚠ การจองนี้ไม่มีช่องทาง LINE ของลูกค้า กดยืนยันแล้วระบบจะไม่ส่งข้อความให้ — ต้องติดต่อลูกค้าเองตามข้อมูลด้านบน</div>')
     : '';
   openDetail(b.customer_name,
-    '<div style="margin-bottom:14px;">' + bkStatusHtml(b) + (b.confirmed ? ' <span class="st st-ok">✓ ยืนยันแล้ว</span>' : '') + '</div>' +
+    '<div style="margin-bottom:14px;">' + bkStatusHtml(b) + (b.confirmed && !bkIsConfirmed(b) ? ' <span class="st st-ok">✓ ยืนยันแล้ว</span>' : '') + '</div>' +
     '<dl class="kv">' +
       '<dt>ติดต่อ</dt><dd>' + escapeHtml(b.contact || '—') + '</dd>' +
       '<dt>วันที่</dt><dd>' + fmtDateDow(b.date) + '</dd>' +

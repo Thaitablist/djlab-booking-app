@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runPage, HARNESS } from './lib/page-test.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = process.env.BK_ROOT || join(dirname(fileURLToPath(import.meta.url)), '..');   // BK_ROOT = ทดสอบหน้าฉบับอื่น (mutation)
 
 // คอลัมน์ที่การยืนยันการจองต้องเขียน (เรียงตามตัวอักษร) — เดิมอ่านจาก confirmBooking ของหน้าจองเดิม (DJ_LAB_SIAM_BookingApp.html)
 // เลิกใช้หน้านั้นแล้ว (5 ต.ค. 69 · ไฟล์เหลือเป็นหน้าพาไป) จึงตรึงเป็นค่าคงที่ — ที่มาจริงคือ trigger trg_notify_booking_confirmed
@@ -204,6 +204,79 @@ async function runTests() {
   ok('บรรทัดแรกของก้อนคือเวลาเริ่ม (อย่างน้อยต้องเห็นเวลา)', !!blk && blk.querySelector('.tl-time').textContent.indexOf('13:00') === 0);
   ok('ข้อความในก้อนตัดท้ายด้วย … ไม่ตัดกลางตัวอักษร', !!blk &&
     [...blk.children].every(sp => getComputedStyle(sp).textOverflow === 'ellipsis' && getComputedStyle(sp).whiteSpace === 'nowrap'));
+
+  // ── การจองที่ยืนยันแล้ว (รอเข้าใช้) = เขียว (เจ้าของสั่ง 6 ต.ค. 69): ก้อนไทม์ไลน์ + แถวตาราง · ยังมีคำกำกับ ไม่พึ่งสีอย่างเดียว · ตัวหนังสือคอนทราสต์ ≥ 4.5:1 ──
+  // (เขียนโดยไม่ใช้แบ็กสแลช/แบ็กทิก/ดอลลาร์วงเล็บ เพราะอยู่ในสตริงเทมเพลตของไฟล์นี้)
+  {
+    const room = 'Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)';
+    const mk = (id, name, hh, status, confirmed) => ({ id, customer_name: name, contact: '0800000000', date: TODAY, start_time: hh + ':00:00', hours: 1,
+      room, cost: 800, status, confirmed, source: 'staff', line_user_id: null, customer_id: null });
+    bookings.push(mk('g1', 'ใบเขียว', '18', 'upcoming', true), mk('g2', 'กำลังใช้ห้อง', '19', 'active', true),
+      mk('g3', 'ใช้บริการแล้ว', '12', 'done', true), mk('g4', 'ยกเลิกแล้ว', '17', 'cancelled', true));
+    renderBookings();
+    const GREEN = 'rgb(232, 242, 235)', GREEN_LINE = 'rgb(31, 107, 58)', INK = 'rgb(15, 15, 15)', WHITE = 'rgb(255, 255, 255)';
+    const css = (el, p) => getComputedStyle(el)[p];
+    const num = s => (s.match(/[0-9.]+/g) || []).map(Number);
+    const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const bgOf = el => { for (let e = el; e; e = e.parentElement) { const c = num(css(e, 'backgroundColor')); if (c.length === 3 || (c.length === 4 && c[3] > 0)) return c.slice(0, 3); } return [255, 255, 255]; };
+    // คอนทราสต์ต่ำสุดของข้อความทุกชิ้นใน el เทียบพื้นจริง (ไล่หาพื้นขึ้นไปจากตัวข้อความเอง)
+    const minContrast = el => { let m = 99; [el].concat([...el.querySelectorAll('*')]).forEach(e => {
+      if ([...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) m = Math.min(m, ratio(num(css(e, 'color')).slice(0, 3), bgOf(e))); }); return m; };
+    const blockOf = name => [...document.querySelectorAll('#bkTimeline .tl-block')].find(b => (b.title || '').indexOf(name) === 0);
+    const rowOf = name => [...document.querySelectorAll('#bookingRows tr[data-i]')].find(r => r.querySelector('strong') && r.querySelector('strong').textContent === name);
+    const g1 = blockOf('ใบเขียว'), g2 = blockOf('กำลังใช้ห้อง'), g3 = blockOf('ใช้บริการแล้ว'), g4 = blockOf('ยกเลิกแล้ว'), p1 = blockOf('ลูกค้า LINE'), p2 = blockOf('ลูกค้าเว็บ');
+
+    ok('ก้อนไทม์ไลน์ที่ยืนยันแล้ว (รอเข้าใช้): พื้นเขียวอ่อน ขอบเขียวเข้ม',
+      !!g1 && g1.classList.contains('confirmed') && css(g1, 'backgroundColor') === GREEN && css(g1, 'borderTopColor') === GREEN_LINE, g1 && css(g1, 'backgroundColor') + ' ' + css(g1, 'borderTopColor'));
+    ok('ก้อนสีเขียวยังมีคำกำกับ: ✓ หน้าชื่อ · title และ aria-label บอก "ยืนยันแล้ว"',
+      !!g1 && g1.textContent.indexOf('✓ ใบเขียว') !== -1 && g1.title.endsWith(' · ยืนยันแล้ว') && g1.getAttribute('aria-label').endsWith(' ยืนยันแล้ว'), g1 && g1.textContent);
+    ok('ก้อนสีเขียว: ตัวหนังสือทุกชิ้นคอนทราสต์ ≥ 4.5:1 กับพื้น', !!g1 && minContrast(g1) >= 4.5, g1 && minContrast(g1));
+    ok('มีก้อนเขียวเพียงก้อนเดียว (ยืนยันแล้ว + รอเข้าใช้) — ที่เหลือไม่เขียว', document.querySelectorAll('#bkTimeline .tl-block.confirmed').length === 1 &&
+      [p1, p2, g2, g3, g4].every(b => !!b && !b.classList.contains('confirmed') && css(b, 'backgroundColor') !== GREEN));
+    ok('สถานะอื่นคงสีเดิม: รอยืนยัน = เหลืองอ่อน · กำลังใช้ = ดำ · ใช้แล้ว = เทาอ่อน',
+      css(p1, 'backgroundColor') === 'rgb(251, 241, 220)' && css(g2, 'backgroundColor') === INK && css(g3, 'backgroundColor') === 'rgb(250, 249, 246)',
+      [p1, g2, g3].map(b => css(b, 'backgroundColor')).join(' | '));
+
+    const r1 = rowOf('ใบเขียว');
+    ok('แถวตารางที่ยืนยันแล้ว (รอเข้าใช้): พื้นเขียวอ่อน · แถบซ้ายเขียวเข้ม',
+      !!r1 && r1.classList.contains('bk-confirmed') && css(r1, 'backgroundColor') === GREEN && css(r1.cells[0], 'boxShadow').indexOf(GREEN_LINE) !== -1, r1 && css(r1, 'backgroundColor') + ' ' + css(r1.cells[0], 'boxShadow'));
+    ok('แถวเขียวยังมีคำ "ยืนยันแล้ว" (ป้ายเขียวพื้นขาว) และ "รอเข้าใช้" ครบ',
+      !!r1 && r1.textContent.indexOf('✓ ยืนยันแล้ว') !== -1 && r1.textContent.indexOf('รอเข้าใช้') !== -1 && css(r1.querySelector('.st-ok'), 'backgroundColor') === WHITE, r1 && r1.textContent);
+    ok('แถวเขียว: ตัวหนังสือทุกชิ้นคอนทราสต์ ≥ 4.5:1 กับพื้นจริง', !!r1 && minContrast(r1) >= 4.5, r1 && minContrast(r1));
+    const rest = ['ลูกค้า LINE', 'ลูกค้าเว็บ', 'กำลังใช้ห้อง', 'ใช้บริการแล้ว', 'ยกเลิกแล้ว', 'ลูกค้าประจำ'].map(rowOf);
+    ok('แถวอื่นไม่เขียว (รอยืนยัน 2 · กำลังใช้ · ใช้แล้ว 2 · ยกเลิก) และมีแถวเขียวแถวเดียว',
+      rest.every(r => !!r && !r.classList.contains('bk-confirmed') && css(r, 'backgroundColor') !== GREEN) && document.querySelectorAll('#bookingRows tr.bk-confirmed').length === 1);
+    ok('แถวรอยืนยันไม่มีป้าย "ยืนยันแล้ว" (เหลืองเท่านั้น)', [rest[0], rest[1]].every(r => r.textContent.indexOf('ยืนยันแล้ว') === -1 && r.textContent.indexOf('รอยืนยัน') !== -1));
+
+    const idx = Number(r1.getAttribute('data-i'));
+    selectRow('bookings', idx, true);
+    const r1s = document.querySelectorAll('#bookingRows tr')[idx];
+    ok('แถวเขียวที่ถูกเลือก: ยังเขียว · แถบซ้ายเปลี่ยนเป็นดำ (เห็นว่าเลือกอยู่)',
+      r1s.classList.contains('sel') && css(r1s, 'backgroundColor') === GREEN && css(r1s.cells[0], 'boxShadow').indexOf(INK) !== -1 && css(r1s.cells[0], 'boxShadow').indexOf(GREEN_LINE) === -1, css(r1s, 'backgroundColor') + ' ' + css(r1s.cells[0], 'boxShadow'));
+    renderBookingTable();    // วาดตารางใหม่ (เช่น พิมพ์ค้นหา) ต้องจำแถวที่เลือกไว้ — ทั้งคลาส sel และสีเขียว
+    const r1r = document.querySelectorAll('#bookingRows tr')[Number(rowOf('ใบเขียว').getAttribute('data-i'))];
+    ok('วาดตารางใหม่แล้ว แถวเขียวที่เลือกอยู่ยังถูกเลือก (sel) · ยังเขียว · แถบซ้ายดำ',
+      r1r.classList.contains('sel') && r1r.classList.contains('bk-confirmed') && css(r1r, 'backgroundColor') === GREEN && css(r1r.cells[0], 'boxShadow').indexOf(INK) !== -1, r1r.className);
+    const spec = sel => { const ids = (sel.match(/#[A-Za-z0-9_-]+/g) || []).length, cls = (sel.match(/[.][A-Za-z0-9_-]+|:[a-z-]+/g) || []).length, el = (sel.match(/(^|[ >+~])[a-z][a-z0-9]*/g) || []).length; return ids * 10000 + cls * 100 + el; };
+    const rules = []; for (const ss of document.styleSheets) { try { for (const r of ss.cssRules) if (r.selectorText) rules.push(r); } catch (e) { /* ชีตข้ามโดเมน */ } }
+    const greenRule = rules.find(r => r.selectorText === 'table.data tbody tr.bk-row.bk-confirmed');
+    const hoverRule = rules.find(r => r.selectorText === 'table.data tbody tr:hover'), selRule = rules.find(r => r.selectorText === 'table.data tbody tr.sel');
+    ok('พื้นเขียวของแถวชนะ tr:hover และ tr.sel ด้วยความเฉพาะเจาะจง (เมาส์ชี้/เลือกแล้วเขียวไม่หาย · ไม่ขึ้นกับลำดับบรรทัด)',
+      !!greenRule && !!hoverRule && !!selRule && spec(greenRule.selectorText) > spec(hoverRule.selectorText) && spec(greenRule.selectorText) > spec(selRule.selectorText),
+      [greenRule, hoverRule, selRule].map(r => r && spec(r.selectorText)).join(' / '));
+
+    openBooking('g1');
+    const dOnce = s => (document.getElementById('detailBody').innerHTML.match(/✓ ยืนยันแล้ว/g) || []).length === 1;
+    ok('แผงรายละเอียดของใบเขียว: ป้าย "ยืนยันแล้ว" ขึ้นครั้งเดียว (ไม่ซ้ำ) · ไม่มีปุ่มยืนยัน', dOnce() && !document.getElementById('bkConfirmBtn'), document.getElementById('detailBody').innerHTML.length);
+    openBooking('g3');
+    ok('แผงรายละเอียดของใบที่ใช้แล้ว (ยืนยันแล้ว): ยังมีป้าย "ยืนยันแล้ว" ครั้งเดียวเหมือนเดิม', dOnce());
+    ok('คำอธิบายสีใต้ไทม์ไลน์บอกว่า พื้นเขียว = ยืนยันแล้ว', [...document.querySelectorAll('p.hint')].some(p => p.textContent.indexOf('✓ พื้นเขียว = ยืนยันแล้ว') !== -1));
+
+    bookings = bookings.filter(b => ['g1', 'g2', 'g3', 'g4'].indexOf(b.id) === -1);
+    renderBookings();
+    ok('เอาการจองทดสอบออกแล้ว ไม่มีแถว/ก้อนเขียวเหลือ', document.querySelectorAll('#bookingRows tr.bk-confirmed, #bkTimeline .tl-block.confirmed').length === 0);
+  }
 
   // ── ย้อนกลับระหว่างหมวด ────────────────────────────────────────────────
   showSection('products');
