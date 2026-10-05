@@ -1085,6 +1085,10 @@
   .wk-chipbtn { min-height: 44px; padding: 5px 12px; font: 600 14px/1.2 var(--font-body); background: var(--surface); border: 1px solid var(--line-strong); cursor: pointer; }
   .wk-chipbtn:hover { border-color: var(--black); }
   .wk-chipbtn[aria-pressed="true"] { background: var(--black); color: #fff; border-color: var(--black); }
+  /* ปุ่มตั้งวันด่วน = "ปุ่มกด" (กรอบประ ไม่มีสถานะเลือก) คนละแบบกับชิปช่องทางที่ติ๊กเลือกได้ (กรอบทึบ · เลือกแล้ว = พื้นดำ + ✓ นำหน้า) */
+  .wk-quick { align-items: center; margin: -6px 0 16px; }
+  .wk-quickbtn { min-height: 44px; padding: 5px 12px; font: 600 14px/1.2 var(--font-body); background: transparent; border: 1px dashed var(--black); cursor: pointer; }
+  .wk-quickbtn:hover { background: var(--sel); }
   #workfKind button { min-width: 44px; }
   .seg button .n { margin-left: 6px; padding: 0 7px; font-family: var(--font-head); font-size: 14px; background: var(--red); color: #fff; }
   .wk-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; align-items: start; }
@@ -2605,12 +2609,13 @@
           <div class="wk-chips" id="workfChans" role="group" aria-label="ช่องทางโซเชียล">
             <button type="button" class="wk-chipbtn" data-ch="facebook" aria-pressed="false">Facebook</button><button type="button" class="wk-chipbtn" data-ch="instagram" aria-pressed="false">Instagram</button><button type="button" class="wk-chipbtn" data-ch="tiktok" aria-pressed="false">TikTok</button><button type="button" class="wk-chipbtn" data-ch="youtube" aria-pressed="false">YouTube</button>
           </div>
+          <div class="hint" id="workfChanSum" role="status"></div>
           <div class="hint" id="workfStage"></div></div>
         <div class="row2">
           <div class="field"><label class="lbl" for="workfDate">วันที่ส่ง</label><input type="date" class="input" id="workfDate"></div>
           <div class="field"><label class="lbl" for="workfTime">เวลา <span class="hint" style="margin:0;">เวลาไทย</span></label><input type="time" class="input" id="workfTime"></div>
         </div>
-        <div class="wk-chips" style="margin:-6px 0 16px;"><button type="button" class="wk-chipbtn" data-quick="today">วันนี้ 18:00</button><button type="button" class="wk-chipbtn" data-quick="tomorrow">พรุ่งนี้ 12:00</button><button type="button" class="wk-chipbtn" data-quick="none">ไม่มีกำหนด</button></div>
+        <div class="wk-chips wk-quick" role="group" aria-label="ตั้งกำหนดส่งเร็ว"><span class="hint" style="margin:0;">ตั้งเร็ว:</span><button type="button" class="wk-quickbtn" data-quick="today">วันนี้ 18:00</button><button type="button" class="wk-quickbtn" data-quick="tomorrow">พรุ่งนี้ 12:00</button><button type="button" class="wk-quickbtn" data-quick="none">ไม่มีกำหนด</button></div>
         <div class="field"><label class="lbl" for="workfRefs">ลิงก์ตัวอย่าง / ไฟล์อ้างอิง <span class="hint" style="margin:0;">ไม่บังคับ · บรรทัดละลิงก์ · สูงสุด 5</span></label><textarea class="input" id="workfRefs" rows="2" placeholder="วางลิงก์ Drive หรือภาพตัวอย่างงานที่อยากได้"></textarea></div>
       </div>
       <div>
@@ -12735,10 +12740,17 @@ const WORK_RULE = {
   admin: 'ผู้ดูแลสั่งงานให้ผู้ดูแลและพนักงานได้ (<strong class="wk-red">สั่งเจ้าของไม่ได้</strong>) · ตรวจได้เฉพาะงานของพนักงาน — <strong class="wk-red">งานของผู้ดูแลเจ้าของเป็นคนตรวจ</strong>',
   staff: 'พนักงานสั่งงานให้พนักงานด้วยกันได้ (รวมตัวเอง) · <strong class="wk-red">ตรวจงานไม่ได้</strong> — งานที่ส่งแล้วผู้ดูแลหรือเจ้าของเป็นคนตรวจ · ต้องการให้ผู้ดูแลช่วย ยื่น "คำขอ" ได้ที่แท็บคำขอ',
 };
+// ชิปที่ติ๊กเลือกได้: เลือกแล้วมี ✓ นำหน้า (เป็นตัวอักษร) — ไม่ให้แยกจากปุ่มที่แค่โฟกัสด้วยสีพื้นอย่างเดียว
+function wkChipMark(b, on) { if (!b.dataset.label) b.dataset.label = b.textContent; b.textContent = (on ? '✓ ' : '') + b.dataset.label; }
 function workFormSync() {
   const f = workForm;
   document.querySelectorAll('#workfKind button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.kind === f.kind)));
-  document.querySelectorAll('#workfChans button').forEach(b => b.setAttribute('aria-pressed', String(f.channels.has(b.dataset.ch))));
+  const chanBtns = [...document.querySelectorAll('#workfChans button')];
+  chanBtns.forEach(b => { const on = f.channels.has(b.dataset.ch); b.setAttribute('aria-pressed', String(on)); wkChipMark(b, on); });
+  const chosen = chanBtns.filter(b => f.channels.has(b.dataset.ch)).map(b => b.dataset.label), chanSum = document.getElementById('workfChanSum');
+  if (chosen.length) chanSum.textContent = 'เลือกแล้ว: ' + chosen.join(', ');
+  else if (f.kind !== 'other') chanSum.innerHTML = '<strong class="wk-red">ยังไม่ได้เลือกช่องทาง</strong> — งานนี้ไม่ต้องแนบลิงก์โพสต์ และตรวจรอบเดียว';       // คำเตือนบนหน้าจอเท่านั้น ฐานข้อมูลยอมให้ไม่มีช่องทาง (= ขั้นเดียว)
+  else chanSum.textContent = '';
   const n = [...document.querySelectorAll('#workfPeople input[type=checkbox]:checked')].length;
   const sum = document.getElementById('workfSum');
   sum.textContent = f.id ? '' : n ? 'ระบบจะสร้างใบงาน ' + n + ' ใบ — ต่างคนต่างส่งและถูกตรวจแยกกัน' : 'ยังไม่ได้เลือกผู้รับงาน';
@@ -12842,7 +12854,7 @@ function workReqSync() {
   document.querySelectorAll('#workrMode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === r.mode)));
   document.getElementById('workrGroupField').hidden = r.mode !== 'group';
   document.getElementById('workrUserField').hidden = r.mode !== 'user';
-  document.querySelectorAll('#workrGroups button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.group === r.group)));
+  document.querySelectorAll('#workrGroups button').forEach(b => { const on = b.dataset.group === r.group; b.setAttribute('aria-pressed', String(on)); wkChipMark(b, on); });
   const body = document.getElementById('workrBody').value.trim();
   document.getElementById('workrCount').textContent = document.getElementById('workrBody').value.length + ' / 1000';
   const to = r.mode === 'group' ? (WORK_GROUP[r.group] || '') : (document.getElementById('workrUser').selectedOptions[0] ? document.getElementById('workrUser').selectedOptions[0].textContent.split(' · ')[0] : '');

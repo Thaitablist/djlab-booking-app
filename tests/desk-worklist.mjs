@@ -220,6 +220,8 @@ async function runTests() {
   ok('ยกเลิกงาน: ถามยืนยันก่อน (บอกชื่องาน + ผู้รับ)', dlgOpen('confirmDialog') && /ยกเลิกงานนี้/.test(txt('confirmTitle')) && /Pran/.test(txt('confirmBody')));
   $('confirmOkBtn').click(); await sleep(400);
   ok('ยืนยัน: work_cancel · ฐานเป็น cancelled · ข้อความ "ยกเลิกงานแล้ว"', !!lastRpc('work_cancel') && lastRpc('work_cancel').args.p_task === 'd1' && taskOnServer('d1').status === 'cancelled' && /ยกเลิกงานแล้ว/.test(toast()) && !dlgOpen('confirmDialog'));
+  tab('assign'); await frames();
+  ok('ใบที่ยกเลิกแล้ว (d1): แถวขึ้น "ยกเลิกแล้ว" และไม่มีปุ่ม "แก้ไข" (ผู้สั่งก็แก้ใบที่ปิดแล้วไม่ได้)', !!document.querySelector('#workAll tr[data-id="d1"]') && /ยกเลิกแล้ว/.test(document.querySelector('#workAll tr[data-id="d1"]').textContent) && !document.querySelector('#workAll tr[data-id="d1"] [data-act="edit"]'));
   // ใบของคนอื่น: ไม่มีปุ่มจัดการ
   tab('mine'); await frames(); document.querySelector('[data-act="open"][data-id="a5"]').click(); await sleep(150);
   ok('ใบที่คนอื่นสั่ง (a5 สั่งโดย Nui): พนักงานผู้รับแก้/ยกเลิกไม่ได้ — ไม่มีปุ่มจัดการ', !$('workDlgBody').querySelector('[data-act="edit"],[data-act="cancel"]'));
@@ -242,11 +244,12 @@ async function runTests() {
   if (${JSON.stringify(!!SHOTS)}) await shot('work-staff-requests.png');
   // ยื่นคำขอใหม่
   $('workReqNew').click(); await sleep(150);
-  const grpChips = () => [...document.querySelectorAll('#workrGroups button')].map(b => b.textContent).join();
+  const grpChips = () => [...document.querySelectorAll('#workrGroups button')].map(b => b.dataset.label || b.textContent).join();
   ok('ยื่นคำขอ (พนักงาน): โหมด "ทั้งกลุ่ม" ก่อน · ตัวเลือกกลุ่ม = ผู้ดูแลทุกคน + เจ้าของ · ช่องเลือกใบงานมีใบของตัวเอง + "ไม่แนบใบงาน" · ปุ่มส่งยังปิด (ไม่มีข้อความ)', dlgOpen('workReqDialog') && grpChips() === 'ผู้ดูแลทุกคน,เจ้าของ' && $('workrGroupField').hidden === false && $('workrUserField').hidden === true && $('workrGo').disabled && $('workrTask').options[0].textContent === 'ไม่แนบใบงาน' && [...$('workrTask').options].some(o => o.value === 'a1') && ![...$('workrTask').options].some(o => ['b1', 'c1', 'e1'].includes(o.value)));
   ok('โหมด "เลือกเป็นคน": รายชื่อ = ผู้ดูแลและเจ้าของที่ใช้งานอยู่ (Nui · Fah · TiBass) — ไม่มีพนักงาน/ตัวเอง/คนที่ถูกปิด', (document.querySelector('#workrMode button[data-mode="user"]').click(), [...$('workrUser').options].map(o => o.textContent.split(' · ')[0]).sort().join() === 'Fah,Nui,TiBass' && $('workrUserField').hidden === false && $('workrGroupField').hidden === true));
   document.querySelector('#workrMode button[data-mode="group"]').click();
   document.querySelector('#workrGroups button[data-group="admin"]').click();
+  ok('ปุ่มกลุ่มผู้รับ: เลือกแล้วมี ✓ นำหน้า (ผู้ดูแลทุกคน) · ปุ่มที่ไม่เลือกไม่มี', document.querySelector('#workrGroups button[data-group="admin"]').textContent === '✓ ผู้ดูแลทุกคน' && document.querySelector('#workrGroups button[data-group="owner"]').textContent === 'เจ้าของ');
   setVal('workrBody', '   ');
   ok('ข้อความเป็นช่องว่าง: ปุ่มส่งยังปิด', $('workrGo').disabled);
   setVal('workrBody', '   ช่วยเลื่อนกำหนดงานคลิปรีวิวไปพรุ่งนี้ได้มั้ยครับ   '); setVal('workrTask', 'a2');
@@ -531,6 +534,94 @@ async function runTests() {
   onAccountSwitched(); await sleep(120);
   ok('สลับบัญชี (onAccountSwitched): หน้าต่างส่งงานปิด · สถานะส่งงานล้าง · ลิงก์ที่พิมพ์ค้างหาย', !dlgOpen('workSubDialog') && workSub === null && $('workSubLink').value === '' && work.tasks.length === 0 && !work.loaded);
   doLogout(); await sleep(400);
+  // ── 12b. ฟังก์ชันสิทธิ์ฝั่งหน้าจอ ตรวจตรง ๆ (หน้าจอบางกรณีเข้าไม่ถึง: ตำแหน่งเปลี่ยนระหว่างทาง · ใบที่ไม่เคยผ่านขั้นไฟล์) ──
+  WORK.seed();
+  await login('tibass'); showSection('tasks'); await sleep(300);
+  const asRole = (role, fn) => { const keep = currentAdmin; currentAdmin = Object.assign({}, keep, { role }); try { return fn(); } finally { currentAdmin = keep; } };
+  const mkT = (id, o) => Object.assign({ id, status: 'open', phase: 'final', channels: [], assignee_id: 'u3', created_by: 'u1' }, o);
+  work.events.push({ id: 'wb-e1', task_id: 'wb-ok', kind: 'content_approved', actor_id: 'u1', note: '', links: [], image_paths: [], phase: 'content', created_at: new Date().toISOString() });
+  ok('ปุ่มปิดงาน (workCanClose): ผ่านขั้นไฟล์แล้ว + ไม่มีช่องเหลือ + รอลงโซเชียล = ปิดได้ (open · changes)', workCanClose(mkT('wb-ok')) && workCanClose(mkT('wb-ok', { status: 'changes' })));
+  ok('ปิดงานไม่ได้: ใบที่ไม่เคยผ่านขั้นไฟล์ (ไม่มีเหตุการณ์ content_approved) · ยังมีช่องโซเชียล · ยังอยู่ขั้น 1', !workCanClose(mkT('wb-none')) && !workCanClose(mkT('wb-ok', { channels: ['facebook'] })) && !workCanClose(mkT('wb-ok', { phase: 'content' })));
+  ok('ปิดงานไม่ได้: สถานะ รอตรวจ / ผ่านแล้ว / ยกเลิก (ต้องใช้ปุ่มตรวจ ไม่ใช่ปุ่มปิดงานข้ามการตรวจ)', ['submitted', 'approved', 'cancelled'].every(st => !workCanClose(mkT('wb-ok', { status: st }))));
+  ok('ปิดงานไม่ได้: ผู้ดูแลกับใบที่ผู้รับเป็นผู้ดูแล (ตรวจไม่ได้ = ปิดไม่ได้) · พนักงานปิดไม่ได้เลย', asRole('admin', () => !workCanClose(mkT('wb-ok', { assignee_id: 'u5' })) && workCanClose(mkT('wb-ok', { assignee_id: 'u2' }))) && asRole('staff', () => !workCanClose(mkT('wb-ok'))));
+  ok('ปุ่มแก้ (workCanEdit): ใบ open / changes / submitted แก้ได้ · ผ่านแล้ว / ยกเลิก แก้ไม่ได้ แม้เป็นเจ้าของ', ['open', 'changes', 'submitted'].every(st => workCanEdit(mkT('wb1', { status: st }))) && ['approved', 'cancelled'].every(st => !workCanEdit(mkT('wb1', { status: st }))));
+  const mkR = o => Object.assign({ id: 'wr', requester_id: 'u9', to_user_id: null, to_group: null, status: 'pending' }, o);
+  ok('ตัดสินคำขอ (workReqCanDecide): เจ้าของตัดสินได้ทุกใบที่ไม่ใช่ของตัวเอง · ใบของตัวเองตัดสินไม่ได้แม้เป็นเจ้าของ (ถูกเลื่อนตำแหน่งทีหลัง)', workReqCanDecide(mkR({ to_group: 'admin' })) && !workReqCanDecide(mkR({ requester_id: currentUserId, to_group: 'owner' })));
+  ok('ตัดสินคำขอ: ผู้ดูแลตัดสินได้เฉพาะที่ถึงตัวเอง/กลุ่มผู้ดูแล · ถึงเจ้าของตัดสินไม่ได้', asRole('admin', () => workReqCanDecide(mkR({ to_group: 'admin' })) && workReqCanDecide(mkR({ to_user_id: currentUserId })) && !workReqCanDecide(mkR({ to_group: 'owner' })) && !workReqCanDecide(mkR({ requester_id: currentUserId, to_group: 'admin' }))));
+  ok('ตัดสินคำขอ: พนักงานตัดสินไม่ได้เลย แม้คำขอระบุชื่อเขาโดยตรง (ถูกลดตำแหน่งทีหลัง) · คำขอที่ปิดแล้วตัดสินไม่ได้', asRole('staff', () => !workReqCanDecide(mkR({ to_user_id: currentUserId })) && !workReqCanDecide(mkR({ to_group: 'staff' }))) && ['approved', 'rejected', 'withdrawn'].every(st => !workReqCanDecide(mkR({ to_group: 'admin', status: st }))));
+  ok('คำขอที่ "ส่งถึงฉัน" (workReqForMe): ของตัวเองไม่นับ แม้ตำแหน่งตัวเองตรงกลุ่มผู้รับ (ผู้ยื่นถูกเลื่อนตำแหน่งทีหลัง) · ถึงชื่อตัวเอง/กลุ่มของตัวเองนับ', asRole('admin', () => !workReqForMe(mkR({ requester_id: currentUserId, to_group: 'admin' })) && workReqForMe(mkR({ to_group: 'admin' })) && workReqForMe(mkR({ to_user_id: currentUserId })) && !workReqForMe(mkR({ to_group: 'owner' }))));
+  doLogout(); await sleep(400);
+
+  // ผู้ยื่นที่ถูกเลื่อนเป็นผู้ดูแลทีหลัง: คำขอค้างของตัวเอง (ถึงกลุ่มผู้ดูแล) ต้องไม่ขึ้นปุ่มตอบ/ไม่นับเป็นเลขแดง — ตรวจผ่านหน้าจอจริง
+  WORK.seed(); FAKE.admins.find(a => a.id === 'u2').role = 'admin';
+  await login('zen'); showSection('tasks'); await sleep(300); tab('req'); await frames();
+  ok('Zen ถูกเลื่อนเป็นผู้ดูแล: ตัวเลขแดง = งานของตัวเอง 4 + งานพนักงานรอตรวจ 2 (b1 b2) + คำขอที่ถึงตัวเอง 0 (q1 ของตัวเองไม่นับ) = 6', badge() === '6', badge());
+  document.querySelector('#workReqBoxes button[data-box="out"]').click(); await frames();
+  ok('คำขอค้างของตัวเอง (q1 ถึงกลุ่มผู้ดูแล ซึ่งตอนนี้ตัวเองอยู่ในกลุ่ม): ไม่มีปุ่ม อนุมัติ/ปฏิเสธ — มีแต่ปุ่มถอนคำขอ', work.reqSel === 'q1' && !$('workReqDetail').querySelector('[data-act="req-approve"],[data-act="req-reject"]') && !!$('workReqDetail').querySelector('[data-act="req-withdraw"]'));
+  doLogout(); await sleep(400);
+  FAKE.admins.find(a => a.id === 'u2').role = 'staff';
+
+  // ── 12c. ผู้ตรวจดูใบที่อยู่ขั้นลิงก์โพสต์ (ป้ายขั้นในหลักฐาน/ประวัติ · ไฟล์ที่ผ่านขั้น 1) + ปุ่มปิดงานไม่โผล่ผิดสถานะ ──
+  WORK.seed();
+  const stg2 = WORK.tasks.find(t => t.id === 'a3');
+  stg2.channels = []; stg2.status = 'submitted'; stg2.submitted_at = new Date().toISOString();            // ผ่านขั้นไฟล์แล้ว ไม่มีช่องเหลือ แล้วส่งขั้น 2 เข้ามา (รอตรวจ)
+  WORK.events.push({ id: 'x-e1', task_id: 'a3', kind: 'submitted', actor_id: 'u2', note: 'ลงเพจแล้วครับ', links: [{ url: 'https://drive.google.com/file/d/LINKFINAL/view' }], image_paths: [], phase: 'final', created_at: new Date().toISOString() });
+  await login('nui'); showSection('tasks'); await sleep(300); tab('review'); await frames();
+  cardOf('#workQueue', 'a3').click(); await frames();
+  const rvTxt = txt('workDetail');
+  ok('ผู้ตรวจดูใบขั้นลิงก์โพสต์: หัวข้อหลักฐานบอก "ขั้นลิงก์โพสต์ · ส่งครั้งที่ 2" · ประวัติบอก "ส่งงาน · ขั้นลิงก์โพสต์" และ "ส่งงาน · ขั้นไฟล์" · มีส่วน "ไฟล์ที่ผ่านขั้น 1 แล้ว" · ปุ่มผ่านเป็น "ผ่าน · ปิดงาน"', /หลักฐานที่แนบ \\(ขั้นลิงก์โพสต์ · ส่งครั้งที่ 2\\)/.test(rvTxt) && /ส่งงาน · ขั้นลิงก์โพสต์/.test(rvTxt) && /ส่งงาน · ขั้นไฟล์/.test(rvTxt) && /ไฟล์ที่ผ่านขั้น 1 แล้ว/.test(rvTxt) && /LINKFINAL/.test(rvTxt) && $('workDetail').querySelector('[data-act="rv-approve"]').textContent === 'ผ่าน · ปิดงาน', rvTxt.slice(0, 200));
+  tab('assign'); await frames();
+  document.querySelector('#workAll tr[data-id="a3"]').click(); await sleep(150);
+  ok('ใบที่รอตรวจอยู่ (ส่งขั้น 2 แล้ว ไม่มีช่องเหลือ): ไม่มีปุ่ม "ปิดงาน" (ต้องกด ตรวจ → ผ่าน ไม่ใช่ปิดงานข้ามการตรวจ)', !$('workDlgBody').querySelector('[data-act="close-task"]'));
+  closeAll();
+  doLogout(); await sleep(400);
+  WORK.seed();
+  await login('tibass'); showSection('tasks'); await sleep(300); tab('assign'); await frames();
+  document.querySelector('#workAll tr[data-id="b3"]').click(); await sleep(150);
+  ok('ใบขั้นเดียวที่ไม่มีช่องทาง (b3 รอทำ · ไม่เคยผ่านขั้นไฟล์): เจ้าของไม่เห็นปุ่ม "ปิดงาน" แต่มีปุ่มแก้ไข', !$('workDlgBody').querySelector('[data-act="close-task"]') && !!$('workDlgBody').querySelector('[data-act="edit"]'));
+  closeAll();
+  doLogout(); await sleep(400);
+
+  // ── 13b. ปุ่มช่องทาง: เลือกแล้ว ✓ นำหน้า · บรรทัดสรุป/คำเตือนแดง · ปุ่มตั้งวันด่วนหน้าตาต่างจากชิป (เจ้าของอนุมัติ 5 ต.ค.) ──
+  WORK.seed();
+  await login('tibass'); showSection('tasks'); await sleep(300); tab('assign'); await frames();
+  $('workNew').click(); await sleep(150);
+  const chipTxt = ch => document.querySelector('#workfChans button[data-ch="' + ch + '"]').textContent;
+  const chanSumEl = () => $('workfChanSum');
+  ok('ฟอร์มใหม่ (ประเภทรูป ยังไม่เลือกช่องทาง): ไม่มีปุ่มไหนมี ✓ · มีคำเตือนแดง "ยังไม่ได้เลือกช่องทาง" (ตัวหนา) + บอกผลว่าไม่ต้องแนบลิงก์/ตรวจรอบเดียว', ['facebook', 'instagram', 'tiktok', 'youtube'].every(c => chipTxt(c).indexOf('✓') < 0) && /ยังไม่ได้เลือกช่องทาง/.test(txt('workfChanSum')) && /ตรวจรอบเดียว/.test(txt('workfChanSum')) && redTexts(chanSumEl()).some(t => t === 'ยังไม่ได้เลือกช่องทาง'));
+  document.querySelector('#workfChans button[data-ch="youtube"]').click();
+  ok('เลือก YouTube: ปุ่มเป็น "✓ YouTube" พื้นดำ · ปุ่มอื่นไม่มี ✓ · บรรทัดสรุป "เลือกแล้ว: YouTube" · คำเตือนแดงหาย', chipTxt('youtube') === '✓ YouTube' && chipTxt('facebook') === 'Facebook' && txt('workfChanSum') === 'เลือกแล้ว: YouTube' && !chanSumEl().querySelector('.wk-red') && getComputedStyle(document.querySelector('#workfChans button[data-ch="youtube"]')).backgroundColor === 'rgb(15, 15, 15)');
+  document.querySelector('#workfChans button[data-ch="facebook"]').click();
+  ok('เลือกสองช่อง: สรุปเรียงตามปุ่ม "เลือกแล้ว: Facebook, YouTube" · ทั้งสองปุ่มมี ✓', txt('workfChanSum') === 'เลือกแล้ว: Facebook, YouTube' && chipTxt('facebook') === '✓ Facebook' && chipTxt('youtube') === '✓ YouTube');
+  document.querySelector('#workfChans button[data-ch="youtube"]').click();
+  ok('กดซ้ำเพื่อยกเลิก YouTube: ✓ หาย · พื้นไม่ดำ · สรุปเหลือ Facebook (ตรงกับสถานะ ไม่ใช่แค่โฟกัส)', chipTxt('youtube') === 'YouTube' && getComputedStyle(document.querySelector('#workfChans button[data-ch="youtube"]')).backgroundColor !== 'rgb(15, 15, 15)' && txt('workfChanSum') === 'เลือกแล้ว: Facebook');
+  document.querySelector('#workfChans button[data-ch="facebook"]').click();
+  document.querySelector('#workfKind button[data-kind="video"]').click();
+  ok('วิดีโอ/โพสต์โซเชียลที่ยังไม่เลือกช่องทาง: ขึ้นคำเตือนแดงเหมือนกัน', /ยังไม่ได้เลือกช่องทาง/.test(txt('workfChanSum')) && (document.querySelector('#workfKind button[data-kind="social_post"]').click(), /ยังไม่ได้เลือกช่องทาง/.test(txt('workfChanSum'))));
+  document.querySelector('#workfKind button[data-kind="other"]').click();
+  ok('งานประเภท "อื่น ๆ" ที่ไม่เลือกช่องทาง: ไม่ขึ้นคำเตือน (งานนี้ไม่มีโซเชียลเป็นปกติ)', txt('workfChanSum') === '');
+  document.querySelector('#workfKind button[data-kind="video"]').click();
+  ok('คำเตือนเป็นแค่ข้อความบนหน้าจอ ไม่บล็อกการสั่งงาน: ไม่เลือกช่องทางก็ยังกดสั่งได้ (ฐานยอมให้เป็นงานขั้นเดียว)', !$('workfSave').disabled);
+  // ปุ่มตั้งวันด่วน: คนละแบบกับชิปที่เลือกได้
+  const qb = [...document.querySelectorAll('#workFormDialog [data-quick]')];
+  ok('ปุ่มตั้งวันด่วน (3 ปุ่ม): ไม่ใช่ชิปเลือกได้ (ไม่มี aria-pressed · ไม่ใช่ .wk-chipbtn) · กรอบประ · มีป้าย "ตั้งเร็ว:" · สูง ≥ 44px', qb.length === 3 && qb.every(b => !b.hasAttribute('aria-pressed') && !b.classList.contains('wk-chipbtn') && getComputedStyle(b).borderTopStyle === 'dashed' && b.getBoundingClientRect().height >= 43.5) && /ตั้งเร็ว:/.test(document.querySelector('#workFormDialog .wk-quick').textContent));
+  document.querySelector('#workFormDialog [data-quick="tomorrow"]').click();
+  ok('กด "พรุ่งนี้ 12:00": ใส่วันที่พรุ่งนี้ + เวลา 12:00 · ปุ่มไม่ติดสถานะเลือก (ไม่ดำ ไม่มี ✓)', /^\\d{4}-\\d{2}-\\d{2}$/.test($('workfDate').value) && $('workfTime').value === '12:00' && getComputedStyle(document.querySelector('#workFormDialog [data-quick="tomorrow"]')).backgroundColor !== 'rgb(15, 15, 15)' && document.querySelector('#workFormDialog [data-quick="tomorrow"]').textContent === 'พรุ่งนี้ 12:00');
+  document.querySelector('#workFormDialog [data-quick="none"]').click();
+  ok('กด "ไม่มีกำหนด": ล้างวันที่และเวลา', $('workfDate').value === '' && $('workfTime').value === '');
+  // ภาพตัวอย่างฟอร์ม (ถ่ายเมื่อสั่ง WORK_SHOTS)
+  setVal('workfTitle', 'ตัด Short จาก Podcast EP2'); setVal('workfDetail', 'ตัด Short EP2 อย่างน้อย 3 VDO');
+  document.querySelector('#workfChans button[data-ch="youtube"]').click(); document.querySelector('#workfChans button[data-ch="tiktok"]').click();
+  document.querySelector('#workFormDialog [data-quick="today"]').click();
+  [...document.querySelectorAll('#workfPeople label')].find(x => x.textContent.indexOf('Nutty') >= 0).querySelector('input').click();
+  if (${JSON.stringify(!!SHOTS)}) await shot('work-form-chips.png');
+  // แก้ใบ: ปุ่มช่องทางของใบเดิมมี ✓ ตรงกับช่องที่เลือกไว้
+  closeAll(); await sleep(100);
+  workFormOpen('a3'); await sleep(150);
+  ok('เปิดแก้ใบที่ระบุช่อง Facebook + Instagram: ปุ่มทั้งสองมี ✓ · สรุป "เลือกแล้ว: Facebook, Instagram"', chipTxt('facebook') === '✓ Facebook' && chipTxt('instagram') === '✓ Instagram' && chipTxt('tiktok') === 'TikTok' && txt('workfChanSum') === 'เลือกแล้ว: Facebook, Instagram');
+  closeAll(); await sleep(100);
+  doLogout(); await sleep(400);
+
   // ── 13. ใช้ฟอร์มซ้ำหลายรอบในหน้าเดียว (บั๊กจากการใช้งานจริง 5 ต.ค.: สั่งงานใบแรกได้ ใบถัดไปปุ่ม "สั่งงาน" เป็นสีเทากดไม่ได้ จนกว่าจะรีโหลดหน้า) ──
   // เทสต์เดิมใช้ form.requestSubmit() ซึ่งข้ามปุ่มที่ถูกปิด — ชุดนี้กดปุ่มจริงทุกครั้ง และไม่รีโหลดหน้าระหว่างรอบ
   WORK.seed();
@@ -547,9 +638,13 @@ async function runTests() {
     document.querySelector('#workfChans button[data-ch="' + chan + '"]').click();
     pickPerson(who);
     if (between) between();
+    const chip = document.querySelector('#workfChans button[data-ch="' + chan + '"]');
+    const chipOn = chip.getAttribute('aria-pressed') === 'true' && getComputedStyle(chip).backgroundColor === 'rgb(15, 15, 15)' && getComputedStyle(chip).color === 'rgb(255, 255, 255)';   // เลือกแล้ว = พื้นดำตัวขาว (ไม่ใช่แค่กรอบโฟกัส)
+    const othersOff = [...document.querySelectorAll('#workfChans button')].filter(x => x !== chip).every(x => x.getAttribute('aria-pressed') === 'false' && getComputedStyle(x).backgroundColor !== 'rgb(15, 15, 15)');
     const readyBtn = !saveBtn().disabled;
     saveBtn().click(); await sleep(450);
-    return { fresh, readyBtn, calls: rpcs('work_create').length - n0, closed: !dlgOpen('workFormDialog'), toast: toast() };
+    const sent = lastRpc('work_create');
+    return { fresh, readyBtn, chipOn, othersOff, sentChan: sent ? sent.args.p_channels.join() : '', calls: rpcs('work_create').length - n0, closed: !dlgOpen('workFormDialog'), toast: toast() };
   };
   const cr1 = await createRound('ตัด Short จาก Podcast EP2', 'Nui', 'video', 'youtube');
   ok('สั่งงานใบที่ 1: ฟอร์มใหม่ (ปุ่มกดได้ · ไม่มีค่าค้าง) → กดปุ่ม "สั่งงาน" จริง → work_create 1 ครั้ง · ฟอร์มปิด · ข้อความ "สั่งงานแล้ว 1 ใบ"', cr1.fresh.open && cr1.fresh.btnOn && cr1.fresh.titleEmpty && cr1.fresh.noneChecked && cr1.fresh.headNew && cr1.readyBtn && cr1.calls === 1 && cr1.closed && /สั่งงานแล้ว 1 ใบ/.test(cr1.toast), JSON.stringify(cr1));
@@ -560,6 +655,7 @@ async function runTests() {
   WORK.fireRt('work_tasks'); WORK.fireRt('work_task_events'); await sleep(900);
   const cr3 = await createRound('จัดโต๊ะห้องซ้อมใหม่', 'Nutty', 'other', 'tiktok');
   ok('สั่งงานใบที่ 3 หลัง Realtime รีโหลดคั่น: ปุ่มกดได้ → ส่งได้ · ฟอร์มปิด', cr3.fresh.btnOn && cr3.fresh.titleEmpty && cr3.readyBtn && cr3.calls === 1 && cr3.closed, JSON.stringify(cr3));
+  ok('ปุ่มช่องทางที่เลือก (ทั้ง 3 รอบ ในหน้าเดียวไม่รีโหลด): ขึ้นพื้นดำตัวขาว + aria-pressed=true · ปุ่มอื่นไม่ดำ · ช่องที่ส่งไปฟังก์ชันตรงกับที่เลือก (youtube / facebook / tiktok)', [cr1, cr2, cr3].every(x => x.chipOn && x.othersOff) && cr1.sentChan === 'youtube' && cr2.sentChan === 'facebook' && cr3.sentChan === 'tiktok', JSON.stringify([cr1, cr2, cr3]));
   const created = WORK.tasks.filter(t => ['ตัด Short จาก Podcast EP2', 'ถ่ายรูปหน้าร้านลงเพจ', 'จัดโต๊ะห้องซ้อมใหม่'].includes(t.title));
   ok('ฐานเก็บครบ 3 ใบ (ผู้รับ Nui · Pran · Nutty ตามที่เลือก) · ผู้สั่ง = เจ้าของ · ใบวิดีโอ/รูปที่มีช่องทาง = ขั้น 1', created.length === 3 && created.find(t => t.title.indexOf('Short') >= 0).assignee_id === 'u4' && created.find(t => t.title.indexOf('หน้าร้าน') >= 0).assignee_id === 'u6' && created.find(t => t.title.indexOf('โต๊ะ') >= 0).assignee_id === 'u3' && created.every(t => t.created_by === 'u1') && created.filter(t => t.phase === 'content').length === 2);
   // Realtime เข้ามาตอนฟอร์มเปิดค้างอยู่: ที่กรอก/ติ๊กไว้ต้องไม่หาย และกดส่งได้
