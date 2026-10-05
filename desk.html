@@ -2036,7 +2036,7 @@
             </div>
           </div>
           <div class="toolbar">
-            <input type="search" id="bkSearch" class="input grow" placeholder="ค้นหาชื่อผู้จอง / ข้อมูลติดต่อ / ห้อง" autocomplete="off" aria-label="ค้นหาการจอง">
+            <input type="search" id="bkSearch" class="input grow" placeholder="ค้นหาชื่อผู้จอง / ข้อมูลติดต่อ / ห้อง / รหัสจอง" autocomplete="off" aria-label="ค้นหาการจอง">
             <select id="fBkStatus" class="input" aria-label="สถานะการจอง">
               <option value="">ทุกสถานะ</option>
               <option value="pending">◷ รอยืนยัน</option>
@@ -5997,6 +5997,16 @@ const BK_STATUS = {
   done:      { t: 'ใช้บริการแล้ว', cls: 'st-off', i: '✓' },
   cancelled: { t: 'ยกเลิก', cls: 'st-bad', i: '✕' },
 };
+// ข้อมูลของการจองที่มาจากเว็บ (migration 041 · ว่างทั้งหมดในการจองที่พนักงานบันทึก/หน้าเดิม): ที่มาเป็นรายการปิดของฐาน (entry_ref) · ภาษาที่ลูกค้าใช้ตอนจอง (contact_lang)
+const BK_ENTRY = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', maps: 'Google Maps', website: 'เว็บไซต์ djlabsiam.com', line: 'LINE', other: 'อื่น ๆ' };
+const BK_LANG = { th: 'ไทย', en: 'English' };
+// รหัสจอง (public_ref) ที่พนักงานพิมพ์/วางได้หลายแบบ (ตัวพิมพ์เล็ก · เว้นวรรค · ไม่มีขีด · ไม่มี DJ นำหน้า) → เทียบเฉพาะตัวอักษร+ตัวเลข และต้องมี ≥ 4 ตัว (ไม่ให้คำสั้น ๆ ไปชนรหัสมั่ว)
+const bkRefKey = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const bkRefMatch = (b, q) => { const k = bkRefKey(q); return k.length >= 4 && bkRefKey(b.public_ref).includes(k); };
+// เบอร์: พนักงานพิมพ์แบบไทย (0812345678 · 081-234-5678) แต่ฐานเก็บ E.164 (+66812345678) → เทียบเฉพาะตัวเลข ตัด 0 นำหน้าของที่พิมพ์ทิ้ง · ต้อง ≥ 4 ตัว
+// ข้อความที่มีตัวอักษรไม่นับเป็นเบอร์ (กันเลขในชื่อ/รหัสไปชนเบอร์) · เบอร์ต่างประเทศพิมพ์ทั้ง +1 415… หรือ 415… ก็เจอ
+const bkDigits = s => String(s || '').replace(/[^0-9]/g, '');
+const bkPhoneMatch = (b, q) => { const k = bkDigits(q).replace(/^0/, ''); return /^[0-9+() -]+$/.test(q) && k.length >= 4 && bkDigits(b.contact_phone_e164).includes(k); };
 // ช่วงแกนเวลาปรับตามวัน: เริ่มที่เวลาเปิดร้าน 12:00–20:00 ขยายเฉพาะเมื่อมีการจองนอกช่วง
 // ยิ่งแคบ ก้อน 1 ชม. ยิ่งกว้างพอให้อ่านเวลาเริ่มได้เต็ม ๆ
 let TL_START = 12, TL_HOURS = 8;
@@ -6138,11 +6148,11 @@ function renderBookingTable() {
   const rows = bookings.filter(b =>
     (!mo || b.date.startsWith(mo)) &&
     (!st || (st === 'pending' ? (!b.confirmed && b.status !== 'cancelled') : b.status === st)) &&
-    (!q || [b.customer_name, b.contact, b.room].some(x => (x || '').toLowerCase().includes(q))));
+    (!q || [b.customer_name, b.contact, b.room].some(x => (x || '').toLowerCase().includes(q)) || bkRefMatch(b, q) || bkPhoneMatch(b, q)));
   fillTable('bookings', sortRows('bookings', rows), b =>
     '<td class="nowrap">' + fmtDateDow(b.date) + '</td>' +
     '<td class="nowrap">' + shortTime(b.start_time) + '–' + addHours(b.start_time, b.hours) + ' <span class="sub">(' + b.hours + ' ชม.)</span></td>' +
-    '<td><strong>' + escapeHtml(b.customer_name) + '</strong></td>' +
+    '<td><strong>' + escapeHtml(b.customer_name) + '</strong>' + (b.public_ref ? '<div class="sub">' + escapeHtml(b.public_ref) + '</div>' : '') + '</td>' +
     '<td class="col-opt">' + escapeHtml(b.contact || '—') + '</td>' +
     '<td class="col-opt">' + escapeHtml((b.room || '').split(' (')[0]) + '</td>' +
     '<td class="num">' + formatMoney(b.cost) + '</td>' +
@@ -6167,6 +6177,12 @@ function openBooking(id) {
     '<div style="margin-bottom:14px;">' + bkStatusHtml(b) + (b.confirmed && !bkIsConfirmed(b) ? ' <span class="st st-ok">✓ ยืนยันแล้ว</span>' : '') + '</div>' +
     '<dl class="kv">' +
       '<dt>ติดต่อ</dt><dd>' + escapeHtml(b.contact || '—') + '</dd>' +
+      (b.public_ref ? '<dt>รหัสจอง</dt><dd><strong>' + escapeHtml(b.public_ref) + '</strong></dd>' : '') +
+      (b.contact_phone_e164 ? '<dt>เบอร์โทร</dt><dd>' + escapeHtml(b.contact_phone_e164) + (b.contact_country ? ' <span class="sub">(' + escapeHtml(b.contact_country) + ')</span>' : '') + '</dd>' : '') +
+      (b.contact_email ? '<dt>อีเมล</dt><dd>' + escapeHtml(b.contact_email) + '</dd>' : '') +
+      (b.contact_lang ? '<dt>ภาษาลูกค้า</dt><dd>' + escapeHtml(BK_LANG[b.contact_lang] || b.contact_lang) + '</dd>' : '') +
+      (b.entry_ref ? '<dt>ลูกค้ามาจาก</dt><dd>' + escapeHtml(BK_ENTRY[b.entry_ref] || b.entry_ref) + '</dd>' : '') +
+      (b.anonymized_at ? '<dt>ข้อมูลส่วนตัว</dt><dd><strong>ล้างข้อมูลส่วนตัวแล้ว</strong> เมื่อ ' + fmtDate(new Date(b.anonymized_at).toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' })) + '</dd>' : '') +
       '<dt>วันที่</dt><dd>' + fmtDateDow(b.date) + '</dd>' +
       '<dt>เวลา</dt><dd>' + shortTime(b.start_time) + ' — ' + addHours(b.start_time, b.hours) + ' (' + b.hours + ' ชั่วโมง)</dd>' +
       '<dt>Setup</dt><dd>' + escapeHtml(b.room) + '</dd>' +

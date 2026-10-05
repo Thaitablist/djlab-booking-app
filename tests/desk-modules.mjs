@@ -278,6 +278,83 @@ async function runTests() {
     ok('เอาการจองทดสอบออกแล้ว ไม่มีแถว/ก้อนเขียวเหลือ', document.querySelectorAll('#bookingRows tr.bk-confirmed, #bkTimeline .tl-block.confirmed').length === 0);
   }
 
+  // ── ข้อมูลของการจองที่มาจากเว็บ (migration 041): รหัสจอง · เบอร์ E.164 + ประเทศ · อีเมล · ภาษา · ที่มา · ล้างข้อมูลแล้ว + ค้นด้วยรหัสจอง ──
+  // (ไม่ใช้แบ็กสแลช/แบ็กทิก/ดอลลาร์วงเล็บ เพราะอยู่ในสตริงเทมเพลตของไฟล์นี้)
+  {
+    const room = 'Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)';
+    const EVIL = '<img src=x onerror=window.__xss=1>@mail.co';        // อีเมลที่ฐานรับได้ (ห้ามช่องว่าง/@ ซ้ำเท่านั้น) → ต้องแสดงเป็นข้อความ ไม่ใช่แท็ก
+    const base = { room, hours: 1, cost: 800, line_user_id: null, customer_id: null };
+    bookings.push(
+      Object.assign({ id: 'w1', customer_name: 'ลูกค้าเว็บใหม่', contact: '+66812345678 · ' + EVIL, date: TODAY, start_time: '14:00:00', status: 'upcoming', confirmed: false, source: 'online_web',
+        public_ref: 'DJ-ABCDE-FGHJK', contact_phone_e164: '+66812345678', contact_country: 'TH', contact_email: EVIL, contact_lang: 'en', entry_ref: 'instagram' }, base),
+      Object.assign({ id: 'w2', customer_name: 'ลูกค้าออนไลน์ (ล้างข้อมูลแล้ว)', contact: null, date: '2025-01-10', start_time: '15:00:00', status: 'done', confirmed: true, source: 'online_line',
+        public_ref: 'DJ-ZZZZZ-22222', contact_phone_e164: null, contact_country: null, contact_email: null, contact_lang: 'th', entry_ref: 'other', anonymized_at: '2026-03-01T18:30:00Z' }, base),
+      Object.assign({ id: 'w3', customer_name: 'ลูกค้ามาจากที่ไม่รู้จัก', contact: '0800000001', date: TODAY, start_time: '17:00:00', status: 'upcoming', confirmed: true, source: 'online_web',
+        public_ref: 'DJ-QQQQQ-33333', entry_ref: 'newsletter', contact_lang: 'fr' }, base),
+      // เบอร์ต่างประเทศ: ช่องติดต่อเป็นข้อความอื่น (ไม่มีตัวเลขเบอร์) → ค้นเบอร์เจอได้จากคอลัมน์ contact_phone_e164 เท่านั้น
+      Object.assign({ id: 'w4', customer_name: 'ลูกค้าต่างชาติ', contact: 'โทรหลัง 6 โมง', date: TODAY, start_time: '19:00:00', status: 'upcoming', confirmed: false, source: 'online_web',
+        public_ref: 'DJ-MMMMM-44444', contact_phone_e164: '+14155550123', contact_country: 'US', contact_lang: 'en', entry_ref: 'tiktok' }, base));
+    renderBookings();
+    const kv = label => { const dt = [...document.querySelectorAll('#detailBody dt')].find(x => x.textContent === label); return dt ? dt.nextElementSibling.textContent : null; };
+    const labels = () => [...document.querySelectorAll('#detailBody dt')].map(x => x.textContent);
+    const names = () => [...document.querySelectorAll('#bookingRows tr[data-i] strong')].map(x => x.textContent);
+    const search = v => { const el = document.getElementById('bkSearch'); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); return names(); };
+    const eq2 = (a, b) => JSON.stringify(a.slice().sort()) === JSON.stringify(b.slice().sort());
+
+    openBooking('w1');
+    ok('แผงรายละเอียดการจองเว็บ: รหัสจอง · เบอร์ E.164 พร้อมประเทศ · อีเมล · ภาษา · ลูกค้ามาจาก',
+      kv('รหัสจอง') === 'DJ-ABCDE-FGHJK' && kv('เบอร์โทร') === '+66812345678 (TH)' && kv('อีเมล') === EVIL && kv('ภาษาลูกค้า') === 'English' && kv('ลูกค้ามาจาก') === 'Instagram',
+      JSON.stringify(['รหัสจอง', 'เบอร์โทร', 'อีเมล', 'ภาษาลูกค้า', 'ลูกค้ามาจาก'].map(kv)));
+    ok('อีเมลที่มีแท็ก/สคริปต์แสดงเป็นข้อความ ไม่กลายเป็นองค์ประกอบ (ไม่มี img · ไม่รันสคริปต์)', !document.querySelector('#detailBody img') && window.__xss === undefined && !document.querySelector('#bookingRows img'));
+    ok('ช่องทางยังขึ้น "จองผ่านเว็บ" และแถว "ติดต่อ" เดิมยังอยู่', kv('ช่องทาง') === 'จองผ่านเว็บ' && kv('ติดต่อ') !== null);
+    ok('ค่าที่ฐานไม่มีในรายการ (ที่มา/ภาษา) แสดงตามที่เก็บ ไม่ว่าง ไม่พัง', (openBooking('w3'), kv('ลูกค้ามาจาก') === 'newsletter' && kv('ภาษาลูกค้า') === 'fr'), kv('ลูกค้ามาจาก') + ' / ' + kv('ภาษาลูกค้า'));
+    ok('ที่มาที่เป็นรายการอื่นของฐาน แปลเป็นชื่อ: other → อื่น ๆ', (openBooking('w2'), kv('ลูกค้ามาจาก') === 'อื่น ๆ' && kv('ภาษาลูกค้า') === 'ไทย'));
+    ok('ป้ายที่มา = รายการปิดของฐาน 8 แบบ (ชื่อตามที่ตกลง) · ภาษา th/en',
+      JSON.stringify(BK_ENTRY) === JSON.stringify({ instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', maps: 'Google Maps', website: 'เว็บไซต์ djlabsiam.com', line: 'LINE', other: 'อื่น ๆ' }) &&
+      JSON.stringify(BK_LANG) === JSON.stringify({ th: 'ไทย', en: 'English' }));
+    ok('ใบที่ล้างข้อมูลแล้ว: บอก "ล้างข้อมูลส่วนตัวแล้ว" พร้อมวันที่ไทย (เวลาไทย: 18:30 UTC = วันถัดไป) · ไม่มีเบอร์/อีเมล',
+      kv('ข้อมูลส่วนตัว').indexOf('ล้างข้อมูลส่วนตัวแล้ว') !== -1 && kv('ข้อมูลส่วนตัว').indexOf('2 มี.ค.') !== -1 && labels().indexOf('เบอร์โทร') === -1 && labels().indexOf('อีเมล') === -1, kv('ข้อมูลส่วนตัว'));
+    openBooking('b3');
+    ok('การจองที่พนักงานบันทึก/หน้าเดิม (ไม่มีข้อมูลเว็บ): ไม่โผล่แถวรหัสจอง/เบอร์/อีเมล/ภาษา/ที่มา/ข้อมูลส่วนตัว',
+      ['รหัสจอง', 'เบอร์โทร', 'อีเมล', 'ภาษาลูกค้า', 'ลูกค้ามาจาก', 'ข้อมูลส่วนตัว'].every(l => labels().indexOf(l) === -1), labels().join());
+
+    const cell = name => [...document.querySelectorAll('#bookingRows tr[data-i]')].find(r => r.querySelector('strong').textContent === name).cells[2];
+    ok('ตาราง: ใต้ชื่อมีรหัสจอง (ตัวเล็กแบบ sub) เฉพาะใบที่มีรหัส', cell('ลูกค้าเว็บใหม่').querySelector('.sub').textContent === 'DJ-ABCDE-FGHJK' && !cell('ลูกค้าประจำ').querySelector('.sub') && !cell('ลูกค้า LINE').querySelector('.sub'));
+    ok('ช่องค้นหาบอกว่าค้นด้วยรหัสจองได้', document.getElementById('bkSearch').placeholder.indexOf('รหัสจอง') !== -1, document.getElementById('bkSearch').placeholder);
+
+    const only = list => list.length === 1 && list[0] === 'ลูกค้าเว็บใหม่';
+    ok('ค้นด้วยรหัสเต็ม DJ-ABCDE-FGHJK → เจอใบนั้นใบเดียว', only(search('DJ-ABCDE-FGHJK')), search('DJ-ABCDE-FGHJK').join());
+    ok('ค้นด้วยรหัสตัวพิมพ์เล็ก dj-abcde-fghjk → เจอ', only(search('dj-abcde-fghjk')));
+    ok('ค้นด้วยรหัสที่ไม่มี DJ- และไม่มีขีด (abcdefghjk) → เจอ', only(search('abcdefghjk')));
+    ok('ค้นด้วยรหัสที่ลูกค้าพิมพ์เว้นวรรค (" DJ ABCDE FGHJK ") → เจอ', only(search(' DJ ABCDE FGHJK ')));
+    ok('ค้นด้วยบางส่วนของรหัส (fghjk · 5 ตัว) → เจอ', only(search('fghjk')));
+    ok('ค้นด้วยบางส่วนที่สั้นเกิน (abc · 3 ตัว) → ไม่ไปชนรหัส ไม่เจออะไร', search('abc').length === 0, search('abc').join());
+    ok('ค้นด้วยรหัสของใบที่ล้างข้อมูลแล้ว → เจอใบนั้น (ใช้ตามเรื่องกับลูกค้าที่ถามย้อนหลัง)', (() => { const r = search('ZZZZZ-22222'); return r.length === 1 && r[0] === 'ลูกค้าออนไลน์ (ล้างข้อมูลแล้ว)'; })());
+    ok('ค้นรหัสที่ไม่มีอยู่ → ไม่เจอ แสดงข้อความว่าไม่พบ', search('DJ-NNNNN-NNNNN').length === 0 && document.getElementById('bookingRows').textContent.indexOf('ไม่พบการจอง') !== -1);
+    ok('ค้นแบบเดิมยังใช้ได้: ชื่อ (ลูกค้าเว็บ → 2 ใบ) · ข้อมูลติดต่อ · อีเมลที่อยู่ในช่องติดต่อ',
+      eq2(search('ลูกค้าเว็บ'), ['ลูกค้าเว็บใหม่', 'ลูกค้าเว็บ']) && search('0800000001').join() === 'ลูกค้ามาจากที่ไม่รู้จัก' && only(search('@mail.co')), search('ลูกค้าเว็บ').join());
+    // ค้นเบอร์: พนักงานพิมพ์แบบไทย แต่ฐานเก็บ E.164 (+66…)
+    const has = (list, n) => list.indexOf(n) !== -1;
+    ok('ค้นเบอร์แบบไทย 0812345678 → เจอใบเว็บ (+66812345678) ด้วย พร้อมใบที่เก็บเบอร์ท้องถิ่นไว้ในช่องติดต่อ · ไม่เจอเบอร์อื่น',
+      (() => { const r = search('0812345678'); return has(r, 'ลูกค้าเว็บใหม่') && has(r, 'ลูกค้า LINE') && has(r, 'ลูกค้าประจำ') && !has(r, 'ลูกค้าเว็บ') && !has(r, 'ลูกค้าต่างชาติ'); })(), search('0812345678').join());
+    ok('ค้นเบอร์มีขีด/วงเล็บ/เว้นวรรค และแบบสากล (081-234-5678 · (081) 234 5678 · 81 234 5678 · +66 81 234 5678 · 66812345678 · 812345678) → เจอใบเว็บ',
+      ['081-234-5678', '(081) 234 5678', '81 234 5678', '+66 81 234 5678', '66812345678', '812345678'].every(q => has(search(q), 'ลูกค้าเว็บใหม่')),
+      ['081-234-5678', '(081) 234 5678', '81 234 5678', '+66 81 234 5678', '66812345678', '812345678'].filter(q => !has(search(q), 'ลูกค้าเว็บใหม่')).join(' | '));
+    ok('ค้นบางส่วนของเบอร์: 08123 (เลขที่เทียบ 4 ตัว) → เจอ · 0812 (เทียบได้ 3 ตัว) → ไม่เดาเบอร์ของใบเว็บ',
+      has(search('08123'), 'ลูกค้าเว็บใหม่') && !has(search('0812'), 'ลูกค้าเว็บใหม่'));
+    ok('เบอร์ต่างเลขท้าย (0812345679) หรือต่างเลขหน้า (9812345678 · 1812345678) ไม่เจอใบเว็บ · เบอร์อื่น (0899999999) เจอเฉพาะใบของเขา',
+      ['0812345679', '9812345678', '1812345678'].every(q => !has(search(q), 'ลูกค้าเว็บใหม่')) && search('0899999999').join() === 'ลูกค้าเว็บ');
+    ok('ข้อความที่ปนตัวอักษร (x812345678) ไม่นับเป็นเบอร์ → ไม่ไปเจอใบเว็บ', !has(search('x812345678'), 'ลูกค้าเว็บใหม่'));
+    ok('เบอร์ต่างประเทศ (4155550123 · +1 (415) 555-0123) → เจอใบนั้นใบเดียว แม้ช่องติดต่อไม่มีเลขเบอร์',
+      search('4155550123').join() === 'ลูกค้าต่างชาติ' && search('+1 (415) 555-0123').join() === 'ลูกค้าต่างชาติ', search('4155550123').join());
+    search('');
+    ok('ล้างช่องค้นหาแล้วเห็นครบทุกใบอีกครั้ง (7 ใบ)', names().length === 7, names().length);
+
+    bookings = bookings.filter(b => ['w1', 'w2', 'w3', 'w4'].indexOf(b.id) === -1);
+    renderBookings();
+    ok('เอาการจองทดสอบออกแล้ว ไม่เหลือรหัสจองในตาราง', document.querySelectorAll('#bookingRows tr[data-i] td:nth-child(3) .sub').length === 0 && names().length === 3, names().length);
+  }
+
   // ── ย้อนกลับระหว่างหมวด ────────────────────────────────────────────────
   showSection('products');
   showSection('booking');
