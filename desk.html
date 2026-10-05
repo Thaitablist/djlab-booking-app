@@ -9280,6 +9280,7 @@ const ICON_PATHS = {
   out:    '<path d="M26 8h14v14M40 8L22 26"/><path d="M34 28v12H8V14h12"/>',
   inbox:  '<path d="M6 28h10l3 5h10l3-5h10"/><path d="M6 28l5-11h5M42 28l-5-11h-5M6 28v12h36V28"/><path d="M24 5v19M17.5 17.5L24 24l6.5-6.5"/>',
   adduser:'<circle cx="19" cy="15" r="7"/><path d="M5 40c0-8 6-13 14-13 3 0 5.6.8 7.6 2.1"/><path d="M36 26v14M29 33h14"/>',
+  tasks:  '<rect x="10" y="8" width="28" height="34"/><path d="M18 8V4h12v4M17 22l4 4 8-7M17 34h14"/>',
   qr:     '<rect x="7" y="7" width="13" height="13"/><rect x="28" y="7" width="13" height="13"/><rect x="7" y="28" width="13" height="13"/><path d="M13.5 13.5h.01M34.5 13.5h.01M13.5 34.5h.01" stroke-width="5"/><path d="M28 28h6v6M41 28v6M28 41h6M37 37v4h4"/>',
 };
 function iconSvg(k) { return '<svg viewBox="0 0 48 48" aria-hidden="true">' + (ICON_PATHS[k] || '') + '</svg>'; }
@@ -9300,6 +9301,8 @@ const LAUNCH_ITEMS = [
   { key: 'receive',  t: 'สินค้ารับเข้า', icon: 'inbox', color: '#00897B', go: () => openReceive(), badge: () => rcvTotal() },
   { key: 'register', t: 'สร้างลิงก์สมัครสมาชิก', icon: 'adduser', color: '#7986CB', go: () => openCodeModal() },
   { key: 'payqr',    t: 'QR รับเงิน',  icon: 'qr',     color: '#33B679', go: () => openPayQr(null) },
+  // เจ้าของสั่ง 5 ต.ค. 69 "เพิ่มทางลัดของเมนูใหม่" — ไอคอนเดียวกับเมนู "งานของฉัน" · ตัวเลขมุม = เลขแดงข้างเมนูนั้น (workBadgeCount) · สีน้ำตาลไม่ชนตัวอื่น
+  { key: 'tasks',    t: 'งานของฉัน',   icon: 'tasks',  color: '#6D4C41', go: () => showSection('tasks'), badge: () => workBadgeCount() },
   // ห้อง staff-only ของ Discord — สีเทาอมฟ้าเป็นกลาง (ไม่ใช้สีหรือโลโก้ของ Discord) · ตัวเลขมุม = ข้อความที่ฉันยังไม่ได้อ่าน
   { key: 'discord',  t: 'Discord',     icon: 'chat',   color: '#455A64', go: () => showSection('discord'), badge: () => dc.unread },
 ].concat(MAIL_BOXES.filter(b => b.key !== 'inbox').map(b => ({
@@ -12440,7 +12443,8 @@ function workTeamRows() {
   });
 }
 const WORK_FILTERS = { all: 'ทั้งหมด', open: 'ยังไม่ส่ง', submitted: 'รอตรวจ', changes: 'ส่งกลับแก้', approved: 'ผ่านแล้ว', cancelled: 'ยกเลิก' };
-const workFilterMatch = (t, f) => f === 'all' || (f === 'open' ? t.status === 'open' : t.status === f);
+// "ทั้งหมด" ไม่รวมงานที่ยกเลิก (เจ้าของสั่ง 5 ต.ค. 69 — ลบออกจากลิส) · ไม่ได้ลบจากฐาน (ประวัติเก็บตลอด · เบราว์เซอร์ลบใบงานไม่ได้) · ดูได้ที่ชิป "ยกเลิก"
+const workFilterMatch = (t, f) => f === 'all' ? t.status !== 'cancelled' : (f === 'open' ? t.status === 'open' : t.status === f);
 // แท็บ "สั่งงาน": เจ้าของ/ผู้ดูแลเห็นทั้งทีม · พนักงานเห็นเฉพาะใบที่ตัวเองสั่ง
 const workAssignScope = () => (isManager() ? work.tasks : work.tasks.filter(t => t.created_by === currentUserId));
 function renderWorkAssign() {
@@ -12613,6 +12617,7 @@ function renderWork() {
   } else if (work.loaded) document.getElementById('workMineList').innerHTML = '';
   if (workDlgId) { const t = workTask(workDlgId); if (t) { document.getElementById('workDlgBody').innerHTML = workDetailHtml(t, workDetailMode(t)); workLoadImgs(document.getElementById('workDlgBody')); } }
   updateNavBadges();
+  if (current === HOME && !launchDraft) renderLauncher();     // ตัวเลขบนไอคอนลัด "งานของฉัน" ต้องตามเลขข้างเมนู (งานโหลดหลังหน้าแรกวาดแล้ว)
 }
 
 // ── ตรวจงาน / ยกเลิก / ปิดงาน / เปิดรายละเอียด ──

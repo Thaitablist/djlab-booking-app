@@ -221,7 +221,11 @@ async function runTests() {
   $('confirmOkBtn').click(); await sleep(400);
   ok('ยืนยัน: work_cancel · ฐานเป็น cancelled · ข้อความ "ยกเลิกงานแล้ว"', !!lastRpc('work_cancel') && lastRpc('work_cancel').args.p_task === 'd1' && taskOnServer('d1').status === 'cancelled' && /ยกเลิกงานแล้ว/.test(toast()) && !dlgOpen('confirmDialog'));
   tab('assign'); await frames();
-  ok('ใบที่ยกเลิกแล้ว (d1): แถวขึ้น "ยกเลิกแล้ว" และไม่มีปุ่ม "แก้ไข" (ผู้สั่งก็แก้ใบที่ปิดแล้วไม่ได้)', !!document.querySelector('#workAll tr[data-id="d1"]') && /ยกเลิกแล้ว/.test(document.querySelector('#workAll tr[data-id="d1"]').textContent) && !document.querySelector('#workAll tr[data-id="d1"] [data-act="edit"]'));
+  const filterChipTxt = f => document.querySelector('#workFilter [data-f="' + f + '"]').textContent;
+  ok('ใบที่ยกเลิกแล้ว (d1): หายจากรายการ "ทั้งหมด" (เจ้าของสั่ง 5 ต.ค. 69 "ลบออกจากลิส") · ชิป "ทั้งหมด" ไม่นับใบที่ยกเลิก · ชิป "ยกเลิก" นับ 1', !document.querySelector('#workAll tr[data-id="d1"]') && filterChipTxt('all') === 'ทั้งหมด ' + asgIds().length && filterChipTxt('cancelled') === 'ยกเลิก 1', filterChipTxt('all') + ' | ' + filterChipTxt('cancelled'));
+  document.querySelector('#workFilter [data-f="cancelled"]').click(); await frames();
+  ok('กดชิป "ยกเลิก": ยังเห็นใบที่ยกเลิก (d1) — ข้อมูลไม่ได้ถูกลบ · แถวขึ้น "ยกเลิกแล้ว" และไม่มีปุ่ม "แก้ไข" (ผู้สั่งก็แก้ใบที่ปิดแล้วไม่ได้)', !!document.querySelector('#workAll tr[data-id="d1"]') && /ยกเลิกแล้ว/.test(document.querySelector('#workAll tr[data-id="d1"]').textContent) && !document.querySelector('#workAll tr[data-id="d1"] [data-act="edit"]'));
+  document.querySelector('#workFilter [data-f="all"]').click(); await frames();
   // ใบของคนอื่น: ไม่มีปุ่มจัดการ
   tab('mine'); await frames(); document.querySelector('[data-act="open"][data-id="a5"]').click(); await sleep(150);
   ok('ใบที่คนอื่นสั่ง (a5 สั่งโดย Nui): พนักงานผู้รับแก้/ยกเลิกไม่ได้ — ไม่มีปุ่มจัดการ', !$('workDlgBody').querySelector('[data-act="edit"],[data-act="cancel"]'));
@@ -621,13 +625,55 @@ async function runTests() {
   ok('ตารางสั่งงาน: แถวที่ติดป้ายเขียวมีเฉพาะงานที่ผ่านแล้ว (a6 · zd2) — ไม่รวมยกเลิก/รอตรวจ/ส่งกลับแก้/ยังไม่ส่ง', doneIds === 'a6,zd2', doneIds);
   ok('แถวผ่านแล้ว (a6 · zd2): พื้นแถวเขียวอ่อนทั้งแถว', ['a6', 'zd2'].every(id => getComputedStyle(rowEl(id)).backgroundColor === GREEN), getComputedStyle(rowEl('a6')).backgroundColor);
   ok('แถวผ่านแล้ว: มีแถบเขียวเข้มชิดซ้าย', ['a6', 'zd2'].every(id => getComputedStyle(rowEl(id).cells[0]).boxShadow.indexOf(GREEN_BAR) >= 0), getComputedStyle(rowEl('a6').cells[0]).boxShadow);
-  ok('แถวที่ไม่ใช่ผ่านแล้ว (ยกเลิก zc1 · รอตรวจ a5 · ส่งกลับแก้ a2 · ยังไม่ส่ง a1): พื้นไม่เขียว ไม่มีแถบ',
-    ['zc1', 'a5', 'a2', 'a1'].every(id => getComputedStyle(rowEl(id)).backgroundColor !== GREEN && getComputedStyle(rowEl(id).cells[0]).boxShadow === 'none'), ['zc1', 'a5', 'a2', 'a1'].map(id => getComputedStyle(rowEl(id)).backgroundColor).join('|'));
+  ok('แถวที่ไม่ใช่ผ่านแล้ว (รอตรวจ a5 · ส่งกลับแก้ a2 · ยังไม่ส่ง a1): พื้นไม่เขียว ไม่มีแถบ',
+    ['a5', 'a2', 'a1'].every(id => getComputedStyle(rowEl(id)).backgroundColor !== GREEN && getComputedStyle(rowEl(id).cells[0]).boxShadow === 'none'), ['a5', 'a2', 'a1'].map(id => getComputedStyle(rowEl(id)).backgroundColor).join('|'));
+  ok('ใบที่ยกเลิก (zc1) ไม่อยู่ในรายการ "ทั้งหมด" · ผ่านแล้ว/รอตรวจ/ส่งกลับแก้/ยังไม่ส่ง ยังอยู่ครบ (a6 · zd2 · a5 · a2 · a1)', !rowEl('zc1') && ['a6', 'zd2', 'a5', 'a2', 'a1'].every(id => !!rowEl(id)));
   ok('แถวผ่านแล้วยังบอกเป็นคำ "ผ่านแล้ว" ในป้าย (ไม่พึ่งสีอย่างเดียว) · ป้ายพื้นขาวอ่านชัดบนพื้นเขียว', /ผ่านแล้ว/.test(rowEl('a6').querySelector('.wk-pills').textContent) && getComputedStyle(rowEl('a6').querySelector('.st-ok')).backgroundColor === 'rgb(255, 255, 255)');
-  ok('ป้ายสถานะของงานอื่นไม่เปลี่ยน: ใบที่ยกเลิกยังเป็นป้ายเทา "ยกเลิกแล้ว"', !!rowEl('zc1').querySelector('.st-off') && /ยกเลิกแล้ว/.test(rowEl('zc1').querySelector('.wk-pills').textContent));
+  document.querySelector('#workFilter [data-f="cancelled"]').click(); await frames();
+  ok('ชิป "ยกเลิก": ใบที่ยกเลิก (zc1) พื้นไม่เขียว ไม่มีแถบ · ยังเป็นป้ายเทา "ยกเลิกแล้ว" (ไม่ปะปนกับงานที่ผ่านแล้ว)', getComputedStyle(rowEl('zc1')).backgroundColor !== GREEN && getComputedStyle(rowEl('zc1').cells[0]).boxShadow === 'none' && !!rowEl('zc1').querySelector('.st-off') && /ยกเลิกแล้ว/.test(rowEl('zc1').querySelector('.wk-pills').textContent) && !rowEl('a6'));
+  document.querySelector('#workFilter [data-f="all"]').click(); await frames();
   if (${JSON.stringify(!!SHOTS)}) { rowEl('a6').scrollIntoView({ block: 'center' }); await shot('work-assign-done-green.png'); }
   document.querySelector('#workFilter [data-f="approved"]').click(); await frames();
   ok('กรอง "ผ่านแล้ว": ทุกแถวที่เหลือเขียว (a6 · zd2)', [...document.querySelectorAll('#workAll tr.wk-row')].length === 2 && [...document.querySelectorAll('#workAll tr.wk-row')].every(r => getComputedStyle(r).backgroundColor === GREEN));
+  doLogout(); await sleep(400);
+
+  // (h01) ทางลัดหน้าแรก "งานของฉัน" (เจ้าของสั่ง 5 ต.ค. 69 "เพิ่มทางลัดของเมนูใหม่") — ไอคอนลัด 2×2 ที่แต่ละคนเลือกเอง
+  WORK.seed();
+  await login('zen'); await sleep(300);
+  const tkItem = LAUNCH_ITEMS.find(x => x.key === 'tasks');
+  ok('มีรายการ "งานของฉัน" ในไอคอนลัดสำเร็จรูป: ชื่อ · ไอคอนเส้นที่วาดจริง · สี · ตัวเลขมุม', !!tkItem && tkItem.t === 'งานของฉัน' && tkItem.icon === 'tasks' && typeof ICON_PATHS.tasks === 'string' && ICON_PATHS.tasks.length > 40 && /^#[0-9A-F]{6}$/.test(tkItem.color) && typeof tkItem.badge === 'function');
+  ok('สีของ "งานของฉัน" ไม่ชนไอคอนลัดตัวอื่น', !!tkItem && LAUNCH_ITEMS.filter(x => x.key !== 'tasks' && x.color.toUpperCase() === tkItem.color.toUpperCase()).length === 0, tkItem && tkItem.color);
+  ok('ค่าตั้งต้นของไอคอนลัดไม่เปลี่ยน (ยังเป็น 4 ตัวเดิม — ไม่บังคับเพิ่มให้ทุกคน)', LAUNCH_DEFAULT.join() === 'pos,mail,booking,calendar', LAUNCH_DEFAULT.join());
+  showSection('home'); await sleep(100);
+  homePrefs.launcher = ['tasks', 'pos', 'mail', 'calendar']; renderLauncher(); await frames();
+  const lTile = () => document.querySelector('#launcher .lt[data-key="tasks"]');
+  const navN = () => { const b = $('navBadge-tasks'); return b.hidden ? 0 : Number(b.textContent); };
+  const tileN = () => { const b = lTile().querySelector('.badge'); return b ? Number(b.textContent) : 0; };
+  ok('หน้าแรกแสดงไอคอน "งานของฉัน" เป็นปุ่มจริง · ชื่อใต้ไอคอน · มีเส้นไอคอนวาดอยู่ · ป้ายอ่านออกเสียงบอกจำนวนที่รออยู่', !!lTile() && lTile().tagName === 'BUTTON' && lTile().querySelector('.lt-label').textContent === 'งานของฉัน' && lTile().querySelectorAll('svg > *').length >= 2 && /รออยู่/.test(lTile().getAttribute('aria-label')), lTile() && lTile().getAttribute('aria-label'));
+  ok('ตัวเลขบนไอคอน = ตัวเลขแดงข้างเมนู "งานของฉัน" และไม่ใช่ 0 (Zen มีงานค้าง)', navN() > 0 && tileN() === navN(), tileN() + '/' + navN());
+  ok('เส้นไอคอนขาว/ดำอ่านชัดบนพื้นสี (≥ 3:1) แบบเดียวกับไอคอนลัดอื่น', contrastRatio(tkItem.color, launchInk(tkItem.color)) >= 3);
+  const navBefore = navN();
+  WORK.tasks.push(mkTask('zl1', { title: 'ใบใหม่ของ Zen', assignee_id: 'u2', created_by: 'u4' }));
+  await loadWork(); await frames();
+  ok('งานใหม่เข้ามาตอนอยู่หน้าแรก: ตัวเลขบนไอคอนเพิ่มตามเลขข้างเมนู โดยไม่ต้องรีเฟรชหน้า', navN() === navBefore + 1 && tileN() === navN(), navBefore + ' → ' + navN() + '/' + tileN());
+  toggleLaunchEdit(); await frames();
+  const optT = [...$('ltSel0').options].find(o => o.value === 'tasks');
+  ok('โหมดแก้ไขไอคอน: เลือก "งานของฉัน" ได้จากรายการ', !!optT && optT.textContent === 'งานของฉัน');
+  const selBefore = $('ltSel2'); selBefore.focus();
+  await loadWork(); await frames();
+  ok('งานโหลดใหม่ระหว่างที่กำลังแก้ไอคอน: ไม่วาดช่องเลือกใหม่ — ช่องที่กำลังโฟกัสยังเป็นตัวเดิมและยังโฟกัสอยู่ (ไม่ล้างกลางทางที่ผู้ใช้เลือกอยู่)', $('ltSel2') === selBefore && document.activeElement === selBefore && document.querySelectorAll('#launcher select').length === 4);
+  { const s = $('ltSel1'); s.value = 'tasks'; s.dispatchEvent(new Event('change')); }
+  CALLS.length = 0;
+  await saveLauncher(); await sleep(100);
+  { const up = CALLS.find(c => c.op === 'upsert' && c.table === 'staff_home');
+    ok('บันทึกเลือก "งานของฉัน" ลง staff_home ได้ (ฐานไม่ตรวจชื่อรหัส — migration 028)', !!up && up.payload.launcher.includes('tasks') && up.payload.launcher.length <= 4, JSON.stringify(up && up.payload)); }
+  homePrefs.launcher = ['tasks', 'pos', 'mail', 'calendar']; showSection('home'); renderLauncher(); await frames();
+  lTile().click(); await sleep(200);
+  ok('กดไอคอน → ไปหมวด "งานของฉัน" (ไม่ใช่หมวดอื่น)', current === 'tasks', current);
+  showSection('home'); await sleep(100);
+  WORK.tasks.forEach(t => { if (t.assignee_id === 'u2') { t.status = 'approved'; t.closed_at = new Date().toISOString(); } });
+  await loadWork(); await frames();
+  ok('ไม่มีงานค้าง: ไอคอนไม่มีป้ายตัวเลข · ป้ายอ่านออกเสียงไม่บอกจำนวน', navN() === 0 && !lTile().querySelector('.badge') && !/รออยู่/.test(lTile().getAttribute('aria-label')), lTile().getAttribute('aria-label'));
   doLogout(); await sleep(400);
 
   // (s09 · s19) ขั้นลิงก์โพสต์: ช่องลิงก์ไฟล์ที่ซ่อนอยู่ไม่ถูกส่ง · ลิงก์ที่ใส่ไว้ล่วงหน้าเฉพาะจากการส่งขั้นลิงก์โพสต์ครั้งก่อน (ไม่ใช่ขั้นไฟล์)
