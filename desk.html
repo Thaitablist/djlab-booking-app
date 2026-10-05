@@ -1079,6 +1079,10 @@
   .wk-need:empty { display: none; }
   /* คำเตือน/ข้อความสำคัญ (ห้ามทำ · ทำไม่ได้ · บังคับ · ย้อนกลับไม่ได้) = แดงตัวหนา — ไม่ใช้สีอย่างเดียว ตัวหนาและคำบอกชัดเสมอ */
   .wk-red { color: var(--red); font-weight: 700; }
+  /* แจ้งเตือนงานบนเครื่องนี้ (Web Push) */
+  #notifDevices { margin: 0; padding: 0; list-style: none; }
+  #notifDevices li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  #notifSteps { margin: 8px 0 0; padding-left: 22px; }
   .wk-people label.off .sub { color: var(--red); font-weight: 600; }
   .wk-quote.warn strong { color: var(--red); }
   .wk-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -2204,6 +2208,7 @@
               <button class="mail-tab" type="button" role="tab" data-tab="req" aria-selected="false">คำขอ <span class="n" id="workReqN"></span></button>
             </div>
             <button class="btn" id="workReload" type="button">↻ รีเฟรช</button>
+            <button class="btn" id="notifBtn" type="button" aria-haspopup="dialog">🔔 แจ้งเตือน: <span id="notifBtnState">ปิด</span></button>
           </div>
           <div id="workPaneMine">
             <div class="stats" aria-label="สรุปงานของฉัน">
@@ -2657,6 +2662,26 @@
       <button class="btn btn-primary" id="workrGo" type="submit" disabled>ส่งคำขอ</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="notifDialog" aria-labelledby="notifHead">
+  <div class="dlg-head"><h2 id="notifHead">แจ้งเตือนงานบนเครื่องนี้</h2></div>
+  <div class="dlg-body">
+    <div id="notifStatus" role="status"></div>
+    <div id="notifWarn" class="alert alert-warn" role="status" hidden></div>
+    <div id="notifErr" class="alert alert-red" role="alert" hidden></div>
+    <div id="notifInfo" class="alert alert-plain" role="status" hidden></div>
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin:14px 0;">
+      <button class="btn btn-primary" id="notifEnable" type="button" hidden>เปิดแจ้งเตือนบนเครื่องนี้</button>
+      <button class="btn" id="notifTest" type="button" hidden>ส่งแจ้งเตือนทดสอบ</button>
+      <button class="btn" id="notifDisable" type="button" hidden>ปิดบนเครื่องนี้</button>
+    </div>
+    <div class="hint" style="margin-bottom:12px;">ส่งเฉพาะเรื่องของคุณ: งานที่ได้รับ · งานรอตรวจ · คำขอ (คำขอไม่แสดงเนื้อหา) · ไม่ส่งช่วง 21:00–10:00 น. จะส่งให้ตอน 10:00</div>
+    <div class="lbl">เครื่องของฉันที่เปิดแจ้งเตือนอยู่</div>
+    <ul id="notifDevices"><li class="hint">ยังไม่ได้โหลด</li></ul>
+    <div class="hint">ถอดได้เฉพาะเครื่องที่ใช้อยู่ตอนนี้ — เครื่องอื่นให้กดปิดจากเครื่องนั้น · ออกจากระบบแล้วเครื่องนี้จะถอดออกจากบัญชีของคุณเอง (คอมหน้าร้านใช้ร่วมกันหลายคน) และผูกคืนอัตโนมัติเมื่อคุณกลับมาเข้าสู่ระบบ</div>
+  </div>
+  <div class="dlg-foot"><button class="btn" id="notifClose" type="button">ปิด (Esc)</button></div>
 </dialog>
 
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" onclose="confirmFn = null">
@@ -3172,7 +3197,8 @@ function doLogout() {
   // คนอื่นที่จำไว้ยังอยู่ครบ · อยากแค่เปลี่ยนคนให้ใช้ "สลับบัญชี"
   if (currentUserId) forgetAccount(currentUserId);
   closePlayer();
-  db.auth.signOut();
+  // ถอดเครื่องนี้ออกจากคนที่กำลังออกก่อน (session ยังใช้ได้) — ไม่มีเครื่องผูกไว้ = ไม่หน่วงเลย
+  notifUnlink().finally(() => db.auth.signOut());
 }
 
 function isWriter() {
@@ -3193,6 +3219,7 @@ async function handleAuthState(session) {
     opsReset();                     // ออกจากระบบ = ล้าง Ops Board ออกจากหน้า (ข้อมูลภายในร้าน)
     catReset();                     // และล้างหมวดราคา/โปรโมชัน (แถบย้อนกลับ ฟอร์มที่พิมพ์ค้าง)
     workReset();                    // และล้างงานของฉัน/คำขอ (ใบงาน ประวัติ รูปหลักฐาน ฟอร์มที่พิมพ์ค้าง)
+    notifReset();                   // และล้างหน้าต่างแจ้งเตือน (รายการเครื่อง/ข้อความของคนก่อน)
     dcStop();                       // ออกจากระบบ = หยุดดึงข้อความ Discord และล้างที่ค้างในหน่วยความจำ
     closeCam();                     // ออกจากระบบ = ปิดกล้อง (iPad) ด้วย
     document.getElementById('loginOverlay').style.display = 'flex';
@@ -3256,6 +3283,7 @@ async function handleAuthState(session) {
   loadStaffHome();
   loadWork();                     // ตัวเลขแดงข้างเมนู "งานของฉัน" ต้องขึ้นตั้งแต่ล็อกอิน ไม่ต้องรอเปิดหมวด
   dcStart();
+  notifSync();                    // คนนี้เคยเปิดแจ้งเตือนบนเครื่องนี้ → ผูกเครื่องคืนให้ (เงียบ ๆ)
 }
 
 async function initSupabaseSync() {
@@ -9997,6 +10025,7 @@ async function pinSwitch(a, pin) {
   // PIN ผ่าน — เก็บ token ล่าสุดของคนที่ใช้อยู่ก่อน แล้วค่อยสลับ client หลัก
   const { data: { session: cur } } = await db.auth.getSession();
   if (cur) keepRememberedToken(cur);
+  await notifUnlink();                                  // ถอดเครื่องนี้ออกจากคนเดิมก่อนเปลี่ยน session (คนใหม่ผูกคืนเองตอนเข้า ถ้าเคยเปิดไว้)
   const { error: setErr } = await db.auth.setSession({ access_token: ref.session.access_token, refresh_token: ref.session.refresh_token });
   if (setErr) { console.error('[PIN switch set]', setErr); return { ok: false, reason: 'error', message: setErr.message }; }
   return { ok: true };
@@ -10025,6 +10054,7 @@ async function startAddAccount(prefillId) {
   if (d.open) d.close();
   const { data: { session: cur } } = await db.auth.getSession();
   if (cur) keepRememberedToken(cur);
+  await notifUnlink();                                  // อีกคนกำลังจะเข้า — ถอดเครื่องนี้ออกจากคนเดิมก่อน (กดยกเลิกแล้วผูกคืน)
   addingAccount = currentUserId;
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginEmail').value = '';
@@ -10038,6 +10068,7 @@ function cancelAddAccount() {
   addingAccount = null;
   document.getElementById('loginCancelBtn').hidden = true;
   document.getElementById('loginOverlay').style.display = 'none';
+  notifSync();                                          // ไม่เพิ่มบัญชีแล้ว คนเดิมยังใช้อยู่ — ผูกเครื่องคืน
 }
 function renderLoginAccounts() {
   const box = document.getElementById('loginAccounts');
@@ -10053,6 +10084,7 @@ function onAccountSwitched() {
   opsReset();                    // Ops Board เป็นข้อมูลของเจ้าของ — สลับเป็นคนอื่นต้องไม่ค้างอยู่ในหน้า
   catReset();                    // หมวดราคา/โปรโมชัน: แถบย้อนกลับ/ฟอร์มค้างของคนเดิมใช้สิทธิ์ของคนใหม่ไม่ได้
   workReset();                   // งานของฉัน/คำขอ: ใบงาน คำขอ รูปหลักฐานของคนเดิมต้องไม่ค้าง (คอมหน้าร้านใช้ร่วมกันหลายคน)
+  notifReset();                  // หน้าต่างแจ้งเตือน: รายการเครื่อง/ข้อความของคนเดิมต้องไม่ค้าง
   coSellers = [];
   launchDraft = null;
   mySales = { loaded: false, error: '', today: 0, todayN: 0, month: 0, monthN: 0 };
@@ -13030,6 +13062,260 @@ document.getElementById('workReqDialog').addEventListener('change', () => { if (
 document.getElementById('workReqForm').addEventListener('submit', e => { e.preventDefault(); workReqSave(); });
 document.getElementById('workrCancel').addEventListener('click', () => document.getElementById('workReqDialog').close());
 document.getElementById('workReqDialog').addEventListener('close', () => { workReq = null; });
+
+// ===========================================================================
+// แจ้งเตือนงานบนเครื่องนี้ (Web Push) — ปุ่ม "🔔 แจ้งเตือน" ในหน้า "งานของฉัน"
+//   ส่ง = บอท Railway (อ่านกล่องแจ้งเตือนจาก migration 039) · รับ = desk-sw.js (scope ./desk.html) · ที่นี่ = ผูกเครื่องกับคนที่ล็อกอินอยู่
+//   ดีไซน์: console-workspace/DESIGN-worklist-notifications.md หัวข้อ 7
+//   ผูกเครื่องกับ "คนที่ล็อกอินอยู่ตอนนี้" เท่านั้น: ออกจากระบบ/สลับบัญชี = ถอดเครื่องออกจากคนเดิม (คอมหน้าร้านใช้ร่วมกัน — แจ้งเตือนของ A ห้ามเด้งตอน B ใช้อยู่)
+//   · จำว่าใครเคยเปิดบนเครื่องนี้ใน localStorage → กลับมาล็อกอินแล้วผูกคืนให้เอง (ถ้าเบราว์เซอร์ยังอนุญาต)
+// ===========================================================================
+// ⚠️ VAPID public key (ค่าสาธารณะ ไม่ลับ — private key อยู่ที่บอทบน Railway เท่านั้น ห้ามใส่ในหน้านี้) · เจ้าของจะส่งค่าให้ภายหลัง
+//    ว่าง = ระบบยังไม่พร้อม → ปุ่มบอกตรง ๆ ไม่ใช่ error · ใช้ let เพื่อให้เทสต์ใส่ค่าได้ · เปลี่ยนคู่คีย์ = ทุกเครื่องต้องเปิดใหม่ (หน้านี้ตรวจและขึ้น "ต้องเปิดแจ้งเตือนใหม่")
+let NOTIF_VAPID_PUBLIC_KEY = '';
+const NOTIF_SW_URL = './desk-sw.js';
+const NOTIF_SW_SCOPE = './desk.html';
+const NOTIF_OPT_KEY = 'djlab.notif.optin.v1:';            // + id ผู้ใช้ — คนนี้เคยเปิดแจ้งเตือนบนเครื่องนี้ (ความสะดวกของเครื่อง ไม่ใช่ข้อมูลร้าน)
+const NOTIF_NO_FN = /could not find the function|schema cache|PGRST202|does not exist/i;   // ยังไม่ได้รัน 039
+function notifBlank() { return { busy: false, err: '', warn: '', info: '', sub: null, devices: null, bound: false }; }
+let notif = notifBlank();
+
+const notifIos = () => /iPad|iPhone|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const notifStandalone = () => navigator.standalone === true || (!!window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+const notifSupported = () => !!(navigator.serviceWorker && 'PushManager' in window && 'Notification' in window);
+const notifKeyOk = () => /^[A-Za-z0-9_-]{87}$/.test(NOTIF_VAPID_PUBLIC_KEY);        // public key P-256 แบบไม่บีบ = 65 ไบต์ = base64url 87 ตัว
+function notifOptGet(uid) { try { return !!uid && localStorage.getItem(NOTIF_OPT_KEY + uid) === '1'; } catch (e) { return false; } }
+function notifOptSet(uid, on) { try { if (on) localStorage.setItem(NOTIF_OPT_KEY + uid, '1'); else localStorage.removeItem(NOTIF_OPT_KEY + uid); } catch (e) { /* โหมดส่วนตัว — ผูกได้ แค่ไม่จำข้ามการปิดหน้า */ } }
+function notifKeyBytes() {
+  const s = NOTIF_VAPID_PUBLIC_KEY + '='.repeat((4 - NOTIF_VAPID_PUBLIC_KEY.length % 4) % 4);
+  return Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+}
+// subscription เดิมสมัครด้วยคีย์คนละชุดกับที่หน้านี้ใช้ (หมุนคู่คีย์) = ส่งไปไม่ถึง ต้องสมัครใหม่
+function notifSubMatchesKey(sub) {
+  const k = sub && sub.options && sub.options.applicationServerKey;
+  if (!k) return true;
+  const a = new Uint8Array(k), b = notifKeyBytes();
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+function notifLabel() {
+  const ua = navigator.userAgent || '';
+  const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'เบราว์เซอร์';
+  const os = /iPhone/.test(ua) ? 'iPhone' : (/iPad/.test(ua) || notifIos()) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : '';
+  return br + (os ? ' · ' + os : '');                     // สั้นเสมอ — ฐานตัดที่ 60 ตัวให้เองอยู่แล้ว
+}
+
+// ลงทะเบียน desk-sw.js (หรือหาที่ลงไว้แล้ว) แล้วรอจนพร้อมรับ push
+async function notifRegistration() {
+  const reg = await navigator.serviceWorker.register(NOTIF_SW_URL, { scope: NOTIF_SW_SCOPE });
+  if (reg.active) return reg;
+  const w = reg.installing || reg.waiting;
+  if (!w) return reg;
+  await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('ตัวรับแจ้งเตือนเริ่มทำงานไม่ทัน ลองใหม่อีกครั้ง')), 10000);
+    const check = () => {
+      if (w.state === 'activated') { clearTimeout(t); resolve(); }
+      else if (w.state === 'redundant') { clearTimeout(t); reject(new Error('ติดตั้งตัวรับแจ้งเตือนไม่สำเร็จ')); }
+    };
+    w.addEventListener('statechange', check);
+    check();
+  });
+  return reg;
+}
+// subscription ของเครื่องนี้ (ถ้ามี) — ไม่ลงทะเบียนอะไรใหม่ · นับเฉพาะตัวของ desk-sw.js (sw.js ของแอปเดิมไม่เคยสมัคร push)
+async function notifCurrentSub() {
+  if (!notifSupported()) return null;
+  try {
+    const reg = await navigator.serviceWorker.getRegistration(NOTIF_SW_SCOPE);
+    if (!reg || !reg.active || !/desk-sw\.js$/.test(reg.active.scriptURL || '')) return null;
+    return await reg.pushManager.getSubscription();
+  } catch (e) { return null; }
+}
+// สร้าง/ใช้ subscription แล้วบันทึกลงฐาน (push_subscribe ย้ายเจ้าของ endpoint เดิมมาเป็นคนที่ล็อกอินอยู่ — คอมหน้าร้านสลับบัญชี) · คืน { sub, made }
+async function notifSubscribeAndLink(uid) {
+  const reg = await notifRegistration();
+  let sub = await reg.pushManager.getSubscription(), made = null;
+  if (sub && !notifSubMatchesKey(sub)) { await sub.unsubscribe(); sub = null; }
+  if (!sub) { sub = made = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: notifKeyBytes() }); }
+  const j = sub.toJSON();
+  const { error } = await db.rpc('push_subscribe', { p_endpoint: sub.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_label: notifLabel() });
+  if (error || uid !== currentUserId) {
+    if (made) { try { await made.unsubscribe(); } catch (e) { /* ถอยกลับไม่ได้ ก็ไม่เป็นไร ฐานไม่รู้จักเครื่องนี้ จะไม่มีใครส่งถึง */ } }
+    if (error) throw error;
+    return null;                                          // สลับบัญชีระหว่างทาง — ทิ้ง ไม่ผูกให้คนผิด
+  }
+  return { sub, made };
+}
+
+function notifState() {
+  if (notifIos() && !notifStandalone()) return 'ios-install';
+  if (!notifSupported()) return 'unsupported';
+  if (!notifKeyOk()) return 'no-key';
+  if (Notification.permission === 'denied') return 'blocked';
+  if (notif.sub && !notifSubMatchesKey(notif.sub)) return 'rekey';
+  if (notif.sub && Notification.permission === 'granted' && notifOptGet(currentUserId)) return 'on';
+  return 'off';
+}
+const NOTIF_BTN_WORD = { on: 'เปิดอยู่', off: 'ปิด', 'ios-install': 'ปิด', unsupported: 'ใช้ไม่ได้', 'no-key': 'ยังไม่พร้อม', blocked: 'ถูกบล็อก', rekey: 'ต้องเปิดใหม่' };
+function notifStatusHtml(st) {
+  switch (st) {
+    case 'ios-install': return '<strong class="wk-red">iPhone / iPad ต้องเพิ่มแอปลงหน้าจอโฮมก่อน จึงจะรับแจ้งเตือนได้</strong>' +
+      '<ol id="notifSteps"><li>เปิดหน้านี้ใน Safari แล้วแตะปุ่มแชร์</li><li>เลือก "เพิ่มลงหน้าจอโฮม"</li><li>เปิดแอปจากไอคอนที่เพิ่มไว้ แล้วกลับมากดเปิดแจ้งเตือนที่นี่อีกครั้ง</li></ol>' +
+      '<div class="hint">ต้องใช้ iOS 16.4 ขึ้นไป · คนที่ไม่กดอนุญาตจะไม่ได้รับแจ้งเตือน (ไม่ใช่ข้อผิดพลาด)</div>';
+    case 'unsupported': return '<strong>เครื่องนี้ไม่รองรับการแจ้งเตือน</strong> — ใช้ Chrome / Edge / Firefox บนคอมหรือ Android ได้';
+    case 'no-key': return '<strong>ระบบแจ้งเตือนยังไม่พร้อมใช้งาน</strong> — รอตั้งค่าฝั่งร้านให้เสร็จก่อน';
+    case 'blocked': return '<strong class="wk-red">เครื่องนี้ปิดการแจ้งเตือนไว้</strong> — เปิดที่การตั้งค่าของเบราว์เซอร์ (ไอคอนกุญแจข้างที่อยู่เว็บ → การแจ้งเตือน → อนุญาต) แล้วกลับมากดเปิดอีกครั้ง';
+    case 'rekey': return '<strong class="wk-red">ต้องเปิดแจ้งเตือนใหม่</strong> — ระบบเปลี่ยนรหัสรับแจ้งเตือน เครื่องนี้จึงรับไม่ได้จนกว่าจะกดเปิดอีกครั้ง';
+    case 'on': return '<strong>เปิดอยู่บนเครื่องนี้</strong> (' + escapeHtml(notifLabel()) + ')';
+    default: return '<strong>ยังไม่ได้เปิดแจ้งเตือนบนเครื่องนี้</strong> — กดปุ่มด้านล่าง แล้วเลือก "อนุญาต" ที่หน้าต่างของเบราว์เซอร์';
+  }
+}
+function notifSetBox(id, text) { const e = document.getElementById(id); e.hidden = !text; e.textContent = text || ''; }
+function notifRender() {
+  const st = notifState();
+  document.getElementById('notifBtnState').textContent = NOTIF_BTN_WORD[st] || 'ปิด';
+  document.getElementById('notifStatus').innerHTML = notifStatusHtml(st);
+  notifSetBox('notifErr', notif.err); notifSetBox('notifWarn', notif.warn); notifSetBox('notifInfo', notif.info);
+  const en = document.getElementById('notifEnable'), ds = document.getElementById('notifDisable'), ts = document.getElementById('notifTest');
+  en.hidden = !(st === 'off' || st === 'rekey'); ds.hidden = st !== 'on'; ts.hidden = st !== 'on';
+  [en, ds, ts].forEach(b => { b.disabled = notif.busy; });
+  const ul = document.getElementById('notifDevices');
+  ul.textContent = '';
+  const add = (text, cls) => { const li = document.createElement('li'); if (cls) li.className = cls; li.textContent = text; ul.appendChild(li); };
+  if (notif.devices === null) add('ยังไม่ได้โหลด', 'hint');
+  else if (!notif.devices.length) add('ยังไม่มีเครื่องที่เปิดแจ้งเตือน', 'hint');
+  else notif.devices.forEach(d => add((d.label || 'ไม่ทราบเครื่อง') + ' · ผูกเมื่อ ' + workDt(d.created_at) + (d.last_ok_at ? ' · ส่งถึงล่าสุด ' + workDt(d.last_ok_at) : ' · ยังไม่เคยส่งถึง')));
+}
+function notifSet(p) { Object.assign(notif, p); notifRender(); }
+function notifFail(prefix, e) {
+  console.error('[Notif]', e);
+  if (NOTIF_NO_FN.test((e && e.message) || '')) notifSet({ warn: 'ฐานข้อมูลยังไม่มีระบบแจ้งเตือน — แจ้งผู้จัดการระบบให้รัน migration 039 ก่อน', err: '' });
+  else notifSet({ err: prefix + ': ' + ((e && e.message) || e), warn: '' });
+}
+async function notifRefresh() {
+  notif.sub = await notifCurrentSub();
+  notifRender();
+}
+async function notifLoadDevices() {
+  const uid = currentUserId;
+  const { data, error } = await db.rpc('push_my_devices');
+  if (uid !== currentUserId) return;
+  if (error) { notif.devices = null; notifFail('โหลดรายการเครื่องไม่สำเร็จ', error); return; }
+  notifSet({ devices: data || [] });
+}
+async function notifOpen() {
+  document.getElementById('notifDialog').showModal();
+  notifSet({ err: '', warn: '', info: '' });
+  await notifRefresh();
+  if (notifSupported() && notifKeyOk()) await notifLoadDevices();
+}
+
+// เปิดแจ้งเตือน — ต้องมาจากการกดของผู้ใช้ (เบราว์เซอร์ถึงยอมให้ถามสิทธิ์)
+async function notifEnable() {
+  if (notif.busy || !currentUserId) return;
+  const uid = currentUserId;
+  notifSet({ busy: true, err: '', warn: '', info: '' });
+  try {
+    if (!notifSupported() || !notifKeyOk()) return;
+    if (Notification.permission === 'default') await Notification.requestPermission();
+    if (uid !== currentUserId) return;
+    if (Notification.permission !== 'granted') {
+      if (Notification.permission === 'default') notif.info = 'ยังไม่ได้กดอนุญาต — กดปุ่มเปิดอีกครั้ง แล้วเลือก "อนุญาต" ที่หน้าต่างของเบราว์เซอร์';
+      return;                                             // denied = สถานะ "ถูกบล็อก" บอกอยู่แล้ว
+    }
+    notifBindMessages();
+    const r = await notifSubscribeAndLink(uid);
+    if (!r) return;
+    notifOptSet(uid, true);
+    notif.sub = r.sub;
+    showToast('🔔 เปิดแจ้งเตือนบนเครื่องนี้แล้ว');
+  } catch (e) {
+    notifFail('เปิดแจ้งเตือนไม่สำเร็จ', e);
+  } finally {
+    notif.busy = false;
+    if (uid === currentUserId) { await notifRefresh(); notifLoadDevices(); }
+  }
+}
+// ปิดบนเครื่องนี้ — ถอดจากฐานก่อน สำเร็จแล้วค่อยถอดจากเบราว์เซอร์ (ไม่ให้สองฝั่งเพี้ยนกัน)
+async function notifDisable() {
+  if (notif.busy || !currentUserId) return;
+  const uid = currentUserId;
+  notifSet({ busy: true, err: '', warn: '', info: '' });
+  try {
+    const sub = notif.sub || await notifCurrentSub();
+    if (sub) {
+      const { error } = await db.rpc('push_unsubscribe', { p_endpoint: sub.endpoint });
+      if (error) throw error;
+      try { await sub.unsubscribe(); } catch (e) { /* ฐานถอดแล้ว เบราว์เซอร์ถอดไม่ได้ก็ไม่มีใครส่งถึง */ }
+    }
+    notifOptSet(uid, false);
+    notif.sub = null;
+    showToast('ปิดแจ้งเตือนบนเครื่องนี้แล้ว');
+  } catch (e) {
+    notifFail('ปิดแจ้งเตือนไม่สำเร็จ', e);
+  } finally {
+    notif.busy = false;
+    if (uid === currentUserId) { await notifRefresh(); notifLoadDevices(); }
+  }
+}
+async function notifTest() {
+  if (notif.busy || !currentUserId) return;
+  notifSet({ busy: true, err: '', warn: '', info: '' });
+  try {
+    const { error } = await db.rpc('work_notify_test');
+    if (error) {
+      if (NOTIF_NO_FN.test(error.message || '')) notifFail('ส่งทดสอบไม่สำเร็จ', error);
+      else notifSet({ warn: error.message });             // ข้อความไทยจากฐาน เช่น "ระบบแจ้งเตือนยังไม่เปิดใช้งาน" · "ส่งทดสอบได้นาทีละครั้ง"
+    } else notifSet({ info: 'ส่งทดสอบแล้ว — ป้ายควรขึ้นภายใน 1 นาที (ถ้าไม่ขึ้น: ฝั่งเซิร์ฟเวอร์อาจยังไม่เปิดส่ง หรือเครื่องนี้ยังไม่ได้รับสิทธิ์แจ้งเตือน)' });
+  } catch (e) { notifFail('ส่งทดสอบไม่สำเร็จ', e); }
+  finally { notif.busy = false; notifRender(); }
+}
+
+// ตอนล็อกอิน/กลับมาเป็นคนเดิม: คนนี้เคยเปิดบนเครื่องนี้และเบราว์เซอร์ยังอนุญาต → ผูกเครื่องคืนให้เอง (เงียบ ๆ ไม่ถามอะไร)
+async function notifSync() {
+  const uid = currentUserId;
+  if (!uid || !notifSupported() || !notifKeyOk() || !notifOptGet(uid)) { notifRender(); return; }
+  if (Notification.permission !== 'granted') { if (Notification.permission === 'denied') notifOptSet(uid, false); notifRender(); return; }   // เบราว์เซอร์เพิกถอนสิทธิ์แล้ว → เลิกจำ
+  notifBindMessages();
+  try {
+    const r = await notifSubscribeAndLink(uid);
+    if (r && uid === currentUserId) notif.sub = r.sub;
+  } catch (e) { console.error('[Notif sync]', e); }       // ผูกคืนไม่ได้ (ออฟไลน์ ฯลฯ) — ไม่รบกวนผู้ใช้ ลองใหม่ตอนล็อกอินครั้งหน้าหรือกดเปิดเอง
+  if (uid === currentUserId) notifRender();
+}
+// ออกจากระบบ/สลับบัญชี: ถอดเครื่องนี้ออกจากคนที่กำลังจะออก (session ยังใช้ได้อยู่ตอนนี้) · ไม่ลบที่จำไว้ว่าเคยเปิด (กลับมาแล้วผูกคืน) · ไม่หน่วงเกิน 1.5 วินาที · ล้มก็ไม่ขวางการออก
+async function notifUnlink() {
+  if (!currentUserId || !notifSupported() || !notifOptGet(currentUserId)) return;
+  try {
+    const sub = notif.sub || await notifCurrentSub();
+    if (!sub) return;
+    await Promise.race([db.rpc('push_unsubscribe', { p_endpoint: sub.endpoint }), new Promise(r => setTimeout(r, 1500))]);
+  } catch (e) { console.error('[Notif unlink]', e); }
+}
+// ล้างของคนก่อนออกจากหน้า (รายการเครื่องมีป้ายชื่อเครื่องของเขา — คอมหน้าร้านใช้ร่วมกัน)
+function notifReset() {
+  notif = notifBlank();
+  const d = document.getElementById('notifDialog');
+  if (d.open) d.close();
+  notifRender();
+}
+// คลิกแจ้งเตือน / เบราว์เซอร์หมุน subscription — desk-sw.js ส่งข้อความมาถึงหน้านี้
+function notifOnMessage(e) {
+  const m = e && e.data;
+  if (!m || typeof m !== 'object' || !currentUserId) return;
+  if (m.type === 'djlab-notification-click') showSection('tasks');
+  else if (m.type === 'djlab-push-resubscribe') notifSync();
+}
+function notifBindMessages() {
+  if (notif.bound || !navigator.serviceWorker) return;
+  navigator.serviceWorker.addEventListener('message', notifOnMessage);
+  notif.bound = true;
+}
+document.getElementById('notifBtn').addEventListener('click', () => notifOpen());
+document.getElementById('notifEnable').addEventListener('click', () => notifEnable());
+document.getElementById('notifDisable').addEventListener('click', () => notifDisable());
+document.getElementById('notifTest').addEventListener('click', () => notifTest());
+document.getElementById('notifClose').addEventListener('click', () => document.getElementById('notifDialog').close());
+notifRender();
 
 setInterval(tickHome, 1000);
 renderNav();
