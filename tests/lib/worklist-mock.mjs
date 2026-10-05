@@ -50,7 +50,7 @@ const WORK = { tasks: [], events: [], reqs: [], files: new Map(), uploads: [], s
   const mkTask = (id, o) => Object.assign({ id, title: id, detail: '', kind: 'other', channels: [], ref_links: [], assignee_id: 'u2', created_by: 'u4', due_at: null, status: 'open', phase: 'final', batch_id: null,
     submitted_at: null, closed_at: null, created_at: ago(30), updated_at: ago(2) }, o);
   WORK.seed = () => {
-    WORK.tasks = []; WORK.events = []; WORK.reqs = []; WORK.files = new Map(); WORK.uploads = []; WORK.signed = []; WORK.fail = {}; WORK.missing = false; WORK.noReq = false; WORK.gate = null;
+    WORK.tasks = []; WORK.events = []; WORK.reqs = []; WORK.files = new Map(); WORK.uploads = []; WORK.signed = []; WORK.fail = {}; WORK.missing = false; WORK.noReq = false; WORK.gate = null; WORK.signGate = null;
     const T = (id, o) => { const t = mkTask(id, o); WORK.tasks.push(t); ev(t, 'created', t.created_by, '', { created_at: t.created_at }); return t; };
     const submitted = (t, note, links, imgs, phase, h) => { t.status = 'submitted'; t.submitted_at = ago(h || 1); ev(t, 'submitted', t.assignee_id, note, { links: links || [], image_paths: imgs || [], phase: phase || t.phase, created_at: ago(h || 1) }); };
     // ใบของ Zen (พนักงาน)
@@ -277,6 +277,7 @@ const WORK = { tasks: [], events: [], reqs: [], files: new Map(), uploads: [], s
     async createSignedUrl(c, path, secs) {
       const me = c.session && c.session.user.id;
       WORK.signed.push({ path, secs, who: me });
+      if (WORK.signGate) await WORK.signGate;          // ค้างคำตอบลิงก์รูปไว้ (เทสต์ออกจากระบบกลางทาง)
       const t = find(String(path).split('/')[0]);
       if (WORK.fail.sign || !t || !taskVisible(me, t) || !WORK.files.has(path)) return E('Object not found');
       return OK({ signedUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#' + encodeURIComponent(path) });

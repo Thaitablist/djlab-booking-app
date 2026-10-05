@@ -582,6 +582,79 @@ async function runTests() {
   closeAll();
   doLogout(); await sleep(400);
 
+  // ── 12d. ช่องว่างของเทสต์ที่ mutation รอบเต็มเจอ (5 ต.ค. · 10 จุด) ──
+  const nowIso = () => new Date().toISOString(), hAgo = h => new Date(Date.now() - h * 3600000).toISOString();
+  const mkTask = (id, o) => Object.assign({ id, title: id, detail: '', kind: 'other', channels: [], ref_links: [], assignee_id: 'u2', created_by: 'u4', due_at: null, status: 'open', phase: 'final', batch_id: null, submitted_at: null, closed_at: null, created_at: hAgo(30), updated_at: hAgo(2) }, o);
+  // (q15) ตัวเลือกใบงานที่แนบกับคำขอ: เฉพาะใบที่ฉันเป็นผู้รับ/ผู้สั่ง และไม่ใช่ใบที่ยกเลิก — ใบของคนอื่นที่หลุดเข้ามาในหน่วยความจำก็ต้องไม่โผล่
+  WORK.seed();
+  await login('zen'); showSection('tasks'); await sleep(300);
+  work.tasks.push(mkTask('zz1', { title: 'ใบของคนอื่นที่หลุดเข้ามา', assignee_id: 'u3', created_by: 'u4' }), mkTask('zz2', { title: 'ใบที่ยกเลิกแล้ว', status: 'cancelled', closed_at: nowIso() }));
+  workReqOpen(null); await sleep(120);
+  const optIds = [...$('workrTask').options].map(o => o.value);
+  ok('ตัวเลือกใบงานของคำขอ (พนักงาน): มีใบของตัวเอง (a1) · ไม่มีใบของคนอื่น (zz1) · ไม่มีใบที่ยกเลิก (zz2)', optIds.includes('a1') && !optIds.includes('zz1') && !optIds.includes('zz2'), optIds.join());
+  closeAll(); await sleep(100);
+  // (f12 · f13) เรียงกลุ่ม "ต้องทำก่อน" ตามกำหนด · ใบที่ส่งแล้วไม่ขึ้น "เกินกำหนด"
+  WORK.tasks.push(mkTask('z1', { title: 'เกินกำหนดนานสุด (สร้างก่อน)', due_at: hAgo(5), created_at: hAgo(40) }), mkTask('z2', { title: 'เกินกำหนดล่าสุด (สร้างหลัง)', due_at: hAgo(1), created_at: hAgo(10) }),
+    mkTask('z3', { title: 'ส่งแล้วแต่เลยกำหนด', due_at: hAgo(3), status: 'submitted', submitted_at: hAgo(1) }));
+  WORK.events.push({ id: 'z3-e', task_id: 'z3', kind: 'submitted', actor_id: 'u2', note: 'ส่งช้า', links: [], image_paths: [], phase: 'final', created_at: hAgo(1) });
+  await loadWork(); await frames();
+  ok('"ต้องทำก่อน" เรียงตามกำหนดส่งเก่าสุดก่อน (z1 -5ชม. → a1 -2.3ชม. → z2 -1ชม. → a2 ส่งกลับแก้ +20ชม.) แม้ลำดับสร้างจากฐานสวนกัน', groupIds('ต้องทำก่อน').join() === 'z1,a1,z2,a2', groupIds('ต้องทำก่อน').join());
+  ok('ใบที่ส่งแล้วแต่เลยกำหนด (z3): ไม่ขึ้นป้าย "เกินกำหนด" (ไม่ใช่งานค้าง) มีแต่ "ส่งช้า" · สรุป "เกินกำหนด" นับเฉพาะใบที่ยังไม่ส่ง = 3 (z1 a1 z2)', !/เกินกำหนด/.test(cardOf('#workMineList', 'z3').textContent) && /ส่งช้า/.test(cardOf('#workMineList', 'z3').textContent) && txt('workStatLate') === '3', txt('workStatLate'));
+  doLogout(); await sleep(400);
+
+  // (s08) เจ้าของเป็นผู้รับงานเอง: หน้าต่างส่งงานไม่มีปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้" (เจ้าของยื่นคำขอไม่ได้)
+  WORK.seed();
+  WORK.tasks.push(mkTask('own1', { title: 'งานของเจ้าของเอง', assignee_id: 'u1', created_by: 'u1' }));
+  await login('tibass'); showSection('tasks'); await sleep(300);
+  openMine('own1'); await sleep(150);
+  ok('เจ้าของเปิดส่งงานของตัวเอง: ไม่มีปุ่ม "ยื่นคำขอเกี่ยวกับงานนี้"', dlgOpen('workSubDialog') && $('workSubReq').hidden === true && !vis($('workSubReq')));
+  closeAll(); await sleep(100);
+  doLogout(); await sleep(400);
+
+  // (s09 · s19) ขั้นลิงก์โพสต์: ช่องลิงก์ไฟล์ที่ซ่อนอยู่ไม่ถูกส่ง · ลิงก์ที่ใส่ไว้ล่วงหน้าเฉพาะจากการส่งขั้นลิงก์โพสต์ครั้งก่อน (ไม่ใช่ขั้นไฟล์)
+  WORK.seed();
+  WORK.events.push({ id: 'pre1', task_id: 'a3', kind: 'submitted', actor_id: 'u2', note: '', links: [{ url: 'https://www.facebook.com/old-stage1-link', channel: 'facebook' }], image_paths: [], phase: 'content', created_at: nowIso() });
+  await login('zen'); showSection('tasks'); await sleep(300);
+  openMine('a3'); await sleep(150);
+  ok('ขั้นลิงก์โพสต์ (ครั้งแรก): ช่องลิงก์โซเชียลว่าง — ไม่หยิบลิงก์ที่แนบมาตอนขั้นไฟล์ไปใส่ให้', $('workSubC-facebook').value === '' && $('workSubC-instagram').value === '');
+  setVal('workSubC-facebook', 'https://www.facebook.com/PioneerDjLabSiam/posts/777'); setVal('workSubC-instagram', 'https://www.instagram.com/reel/XyZ/');
+  $('workSubLink').value = 'https://drive.google.com/file/d/HIDDEN-VALUE/view'; workSubRender();
+  $('workSubGo').click(); await sleep(450);
+  const hid = lastRpc('work_submit');
+  ok('ช่องลิงก์ไฟล์ที่ซ่อนอยู่ (ขั้นลิงก์โพสต์) มีค่าค้าง: ไม่ถูกส่งไปกับการส่งงาน — ส่งแค่ลิงก์โพสต์ 2 ช่อง', !!hid && hid.args.p_task === 'a3' && hid.args.p_links.length === 2 && hid.args.p_links.every(l => !!l.channel), JSON.stringify(hid && hid.args.p_links));
+  WORK.rpc.work_review('u4', { p_task: 'a3', p_verdict: 'changes', p_note: 'แก้ลิงก์ IG' });
+  await loadWork(); await frames();
+  openMine('a3'); await sleep(150);
+  ok('ถูกส่งกลับแก้ในขั้นลิงก์โพสต์: เปิดส่งใหม่ ช่องลิงก์ใส่ค่ารอบก่อนให้ (แก้เฉพาะที่ผิด)', $('workSubC-facebook').value === 'https://www.facebook.com/PioneerDjLabSiam/posts/777' && $('workSubC-instagram').value === 'https://www.instagram.com/reel/XyZ/');
+  closeAll(); await sleep(100);
+  doLogout(); await sleep(400);
+
+  // (f13) ผู้ดูแล: สรุป "เกินกำหนด (ยังไม่ส่ง)" ในแท็บตรวจงานนับเฉพาะใบที่ยังไม่ส่ง (b1 ส่งแล้วแต่เลยกำหนด ไม่นับ) · (v05 · v06) ความเห็นที่พิมพ์ค้างไม่หายตอน Realtime วาดใหม่ · (x08) ลิงก์รูปที่มาถึงหลังออกจากระบบไม่ถูกเก็บเข้าแคช
+  WORK.seed();
+  WORK.files.set('a5/00000000-0000-4000-8000-000000000001.webp', { size: 10, type: 'image/webp' });
+  WORK.events.filter(e => e.task_id === 'a5' && e.kind === 'submitted').forEach(e => { e.image_paths = ['a5/00000000-0000-4000-8000-000000000001.webp']; });
+  await login('nui'); showSection('tasks'); await sleep(300); tab('review'); await frames();
+  ok('แท็บตรวจงานของผู้ดูแล: "เกินกำหนด (ยังไม่ส่ง)" = 1 (a1) — ไม่นับ b1 ที่ส่งแล้วแต่เลยกำหนด', txt('workRvLate') === '1', txt('workRvLate'));
+  cardOf('#workQueue', 'a5').click(); await frames(); await sleep(200);
+  $('workRvNote').value = 'ความเห็นที่พิมพ์ค้างไว้ยังไม่ได้กดส่ง';
+  WORK.fireRt('work_tasks'); await sleep(900);
+  ok('ผู้ตรวจพิมพ์ความเห็นค้างไว้ แล้ว Realtime วาดแผงใหม่: ข้อความไม่หาย · ยังเป็นใบเดิม', !!$('workRvNote') && $('workRvNote').value === 'ความเห็นที่พิมพ์ค้างไว้ยังไม่ได้กดส่ง' && $('workRvNote').dataset.for === 'a5');
+  tab('req'); await frames();
+  reqRow('q1').click(); await frames();
+  $('workReqNote').value = 'ความเห็นต่อคำขอที่พิมพ์ค้างไว้';
+  WORK.fireRt('work_requests'); await sleep(900);
+  ok('ผู้ตอบพิมพ์ความเห็นต่อคำขอค้างไว้ แล้ว Realtime วาดใหม่: ข้อความไม่หาย · ยังเป็นคำขอเดิม', !!$('workReqNote') && $('workReqNote').value === 'ความเห็นต่อคำขอที่พิมพ์ค้างไว้' && $('workReqNote').dataset.for === 'q1');
+  tab('review'); await frames();
+  ok('(ตั้งต้น) ลิงก์รูปที่ขอไปแล้วถูกเก็บแคชในหน้า (รอบก่อนหน้า) — เปิดซ้ำไม่ต้องขอใหม่', Object.keys(work.signed).length === 1);
+  work.signed = {};                                   // ล้างแคช ให้เปิดรอบถัดไปต้องขอลิงก์ใหม่จริง (ไม่งั้นตัวหน่วงไม่ถูกใช้)
+  const signN0 = WORK.signed.length;
+  let relSign = null; WORK.signGate = new Promise(r => { relSign = r; });
+  cardOf('#workQueue', 'b1').click(); await frames(); cardOf('#workQueue', 'a5').click(); await frames(); await sleep(150);
+  ok('(ตั้งต้น) เปิดหลักฐานที่มีรูป: ขอลิงก์รูปใหม่แล้วค้างรอคำตอบ · ยังไม่มีรูปแสดง · แคชยังว่าง', WORK.signed.length > signN0 && !!document.querySelector('#workDetail .wk-tile[data-path]') && !document.querySelector('#workDetail img') && Object.keys(work.signed).length === 0);
+  doLogout(); await sleep(400);
+  WORK.signGate = null; relSign(); await sleep(400);
+  ok('ลิงก์รูปมาถึงหลังออกจากระบบ: ไม่ถูกเก็บเข้าแคชของหน้า (ของคนเดิมไม่ปนเข้าหน่วยความจำใหม่) · ไม่มีรูปค้างในหน้า', Object.keys(work.signed).length === 0 && !document.querySelector('#workDetail img'), JSON.stringify(Object.keys(work.signed)));
+
   // ── 13b. ปุ่มช่องทาง: เลือกแล้ว ✓ นำหน้า · บรรทัดสรุป/คำเตือนแดง · ปุ่มตั้งวันด่วนหน้าตาต่างจากชิป (เจ้าของอนุมัติ 5 ต.ค.) ──
   WORK.seed();
   await login('tibass'); showSection('tasks'); await sleep(300); tab('assign'); await frames();
