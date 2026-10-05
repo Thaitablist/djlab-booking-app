@@ -3,41 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- หน้านี้เคยเป็นแอปจองห้องซ้อมบนมือถือ — เลิกใช้แล้ว (5 ต.ค. 69) ย้ายไปอยู่ในคอนโซลร้าน desk.html หมวดจองห้อง
-     ไฟล์ยังต้องอยู่: บุ๊กมาร์ก · ไอคอนหน้าจอโฮมที่ติดตั้งไว้ (manifest.json start_url ชี้ไฟล์นี้) · ลิงก์เก่า ต้องไม่ 404
-     ⚠️ คง <link rel="manifest"> + meta apple-* + ชื่อแอปไว้ — ตัวตนของแอปที่ติดตั้งไม่เปลี่ยน · อย่าลบไฟล์นี้ · อย่าแก้ start_url ใน manifest.json โดยไม่เติม "id" -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#c8232c">
-<meta name="apple-mobile-web-app-title" content="DJ LAB จอง">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="DJ LAB จอง">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>DJ LAB SIAM — ย้ายไปคอนโซลร้านแล้ว</title>
-<noscript><meta http-equiv="refresh" content="0; url=desk.html#booking"></noscript>
+<meta name="robots" content="noindex">
+<title>ย้ายไปที่อยู่ใหม่แล้ว — DJ LAB SIAM</title>
+<!-- หน้านี้เป็นตัวพาไปของระบบร้าน DJ LAB SIAM ที่ย้ายไป https://console.djlabsiam.com/ แล้ว · ไม่มีข้อมูล ไม่มีการเชื่อมฐาน ไม่โหลดอะไรจากข้างนอก -->
+<link rel="canonical" href="https://console.djlabsiam.com/DJ_LAB_SIAM_BookingApp.html">
+<noscript><meta http-equiv="refresh" content="0; url=https://console.djlabsiam.com/DJ_LAB_SIAM_BookingApp.html"></noscript>
 <style>
-  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #c8232c; color: #fff; font: 18px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 520px; padding: 32px; text-align: center; }
+  :root { --bg: #F5F4F0; --text: #0F0F0F; --line: #CFCCC3; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #151515; --text: #F2F0EA; --line: #3A3935; } }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 34rem; margin: 0 auto; padding: 48px 16px; }
   h1 { font-size: 22px; margin: 0 0 12px; }
-  p { margin: 0 0 16px; }
-  a { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 24px; background: #fff; color: #c8232c; font-weight: 700; text-decoration: none; }
+  p { margin: 0 0 12px; }
+  a { color: inherit; font-weight: 600; overflow-wrap: anywhere; }
+  .box { border: 1px solid var(--line); padding: 14px 16px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>ระบบจองห้องซ้อมย้ายไปอยู่ในคอนโซลร้านแล้ว</h1>
-  <p>กำลังพาไปหน้า "จองห้องซ้อม" …</p>
-  <a id="go" href="desk.html#booking">ถ้าไม่ไปเอง กดที่นี่</a>
+  <h1>ย้ายไปที่อยู่ใหม่แล้ว</h1>
+  <p>ระบบร้าน DJ LAB SIAM ย้ายไปที่ <strong>console.djlabsiam.com</strong> แล้ว กำลังพาไปให้อัตโนมัติ</p>
+  <p class="box">ถ้าหน้านี้ไม่เปลี่ยนเอง กดที่นี่: <a id="go" href="https://console.djlabsiam.com/DJ_LAB_SIAM_BookingApp.html">https://console.djlabsiam.com/DJ_LAB_SIAM_BookingApp.html</a></p>
+  <p>ถ้าเคยบันทึกหน้านี้ไว้ที่หน้าจอโฮม ให้ลบแล้วเพิ่มใหม่จากที่อยู่ใหม่ · ถ้าเข้าสู่ระบบอยู่ ต้องเข้าสู่ระบบใหม่หนึ่งครั้ง</p>
 </main>
 <script>
 (function () {
-  // ลิงก์เก่าที่มี hash มีแค่ 2 แบบ (shortcut ใน manifest.json): #booking · #timer — การ์ดจับเวลาอยู่ในหมวดจองห้องของ desk จึงไปที่ #booking ทั้งคู่
-  // hash อื่น → หน้าแรก · ห้ามส่ง hash ต่อตรง ๆ: #calendar ของ desk = ปฏิทิน Google ของทีม ไม่ใช่ปฏิทินจอง
-  var h = (location.hash || '').replace('#', '');
-  var url = 'desk.html#' + (h === '' || h === 'booking' || h === 'timer' ? 'booking' : 'home');
-  document.getElementById('go').href = url;
-  location.replace(url);
+  var BASE = 'https://console.djlabsiam.com/', PREFIX = '/djlab-booking-app/';
+  var p = location.pathname;
+  var rel = p.indexOf(PREFIX) === 0 ? p.slice(PREFIX.length) : (p === PREFIX.slice(0, -1) ? '' : p.replace(/^\/+/, ''));
+  var to = BASE + rel + location.search + location.hash;
+  var a = document.getElementById('go');
+  if (a) { a.href = to; a.textContent = to; }
+  location.replace(to);
 })();
 </script>
 </body>

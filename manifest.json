@@ -1,18 +1,13 @@
 {
-  "name": "DJ LAB SIAM — ระบบจองห้องซ้อม",
-  "short_name": "DJ LAB จอง",
-  "description": "ระบบจองห้องซ้อม DJ LAB SIAM — จอง, Timer, สะสมแต้ม",
+  "name": "DJ LAB SIAM — ย้ายไปที่อยู่ใหม่แล้ว",
+  "short_name": "DJ LAB",
+  "description": "ระบบร้าน DJ LAB SIAM ย้ายไป https://console.djlabsiam.com/",
   "start_url": "./DJ_LAB_SIAM_BookingApp.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "background_color": "#0f0f1a",
   "theme_color": "#e63946",
   "lang": "th",
-  "categories": [
-    "productivity",
-    "utilities"
-  ],
   "icons": [
     {
       "src": "icon-192.png",
@@ -25,33 +20,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [],
-  "shortcuts": [
-    {
-      "name": "จองห้องซ้อม",
-      "short_name": "จอง",
-      "url": "./DJ_LAB_SIAM_BookingApp.html#booking",
-      "icons": [
-        {
-          "src": "icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "ตั้ง Timer",
-      "short_name": "Timer",
-      "url": "./DJ_LAB_SIAM_BookingApp.html#timer",
-      "icons": [
-        {
-          "src": "icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
     }
   ]
 }

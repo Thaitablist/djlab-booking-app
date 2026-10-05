@@ -2,351 +2,40 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#c8232c">
-<title>จองห้องซ้อม — DJ LAB SIAM</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>ย้ายไปที่อยู่ใหม่แล้ว — DJ LAB SIAM</title>
+<!-- หน้านี้เป็นตัวพาไปของระบบร้าน DJ LAB SIAM ที่ย้ายไป https://console.djlabsiam.com/ แล้ว · ไม่มีข้อมูล ไม่มีการเชื่อมฐาน ไม่โหลดอะไรจากข้างนอก -->
+<link rel="canonical" href="https://console.djlabsiam.com/book.html">
+<noscript><meta http-equiv="refresh" content="0; url=https://console.djlabsiam.com/book.html"></noscript>
 <style>
-  :root {
-    --bg: #ffffff;
-    --surface: #f7f7f7;
-    --accent: #c8232c;
-    --gold: #b8860b;
-    --text: #111111;
-    --text2: #555555;
-    --border: #dedede;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding-bottom: 40px;
-  }
-  .header {
-    background: #111111;
-    padding: 16px 20px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 3px solid var(--accent);
-    position: sticky;
-    top: 0;
-  }
-  .logo-box {
-    background: var(--accent);
-    color: white;
-    font-weight: 900;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-  }
-  .logo-text { font-size: 15px; font-weight: 700; color: #ffffff; }
-  .page { padding: 16px; }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 12px;
-  }
-  .form-group { margin-bottom: 14px; }
-  .form-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
-  .form-input {
-    width: 100%;
-    background: #ffffff;
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,35,44,0.08); }
-  .form-row { display: flex; gap: 10px; }
-  .form-row .form-group { flex: 1; }
-  .btn {
-    display: block; width: 100%;
-    padding: 13px;
-    border-radius: 10px;
-    border: none;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    text-align: center;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); color: white; }
-  .alert {
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    margin-bottom: 12px;
-    border-left: 3px solid;
-  }
-  .alert-gold { background: rgba(184,134,11,0.08); border-color: var(--gold); color: var(--gold); }
-  .alert-green { background: rgba(26,143,74,0.08); border-color: #1a8f4a; color: #1a8f4a; }
-  .toast {
-    position: fixed; bottom: 20px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #111111;
-    color: #ffffff;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 14px;
-    border-left: 3px solid var(--accent);
-    z-index: 999;
-    opacity: 0;
-    transition: all 0.3s;
-    white-space: nowrap;
-    pointer-events: none;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  :root { --bg: #F5F4F0; --text: #0F0F0F; --line: #CFCCC3; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #151515; --text: #F2F0EA; --line: #3A3935; } }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 34rem; margin: 0 auto; padding: 48px 16px; }
+  h1 { font-size: 22px; margin: 0 0 12px; }
+  p { margin: 0 0 12px; }
+  a { color: inherit; font-weight: 600; overflow-wrap: anywhere; }
+  .box { border: 1px solid var(--line); padding: 14px 16px; }
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="logo-box">DJ LAB</div>
-  <div class="logo-text">จองห้องซ้อม</div>
-</div>
-
-<div class="page">
-  <div class="card" id="formCard">
-    <div class="card-title">จองห้องซ้อม — DJ LAB SIAM</div>
-    <div class="form-group">
-      <label class="form-label">ชื่อผู้จอง *</label>
-      <input type="text" id="bookName" class="form-input" placeholder="ชื่อ - นามสกุล">
-    </div>
-    <div class="form-group">
-      <label class="form-label">ข้อมูลติดต่อ *</label>
-      <input type="text" id="bookContact" class="form-input" placeholder="เบอร์โทร / Line ID">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">วันที่ *</label>
-        <input type="date" id="bookDate" class="form-input">
-      </div>
-      <div class="form-group">
-        <label class="form-label">เวลาเริ่ม *</label>
-        <input type="time" id="bookTime" class="form-input" value="10:00">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">จำนวนชั่วโมง *</label>
-        <select id="bookHours" class="form-input">
-          <option value="1">1 ชั่วโมง</option>
-          <option value="2">2 ชั่วโมง</option>
-          <option value="3">3 ชั่วโมง</option>
-          <option value="4">4 ชั่วโมง</option>
-          <option value="5">5 ชั่วโมง</option>
-          <option value="6">6 ชั่วโมง</option>
-          <option value="8">8 ชั่วโมง</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">ห้อง / Setup</label>
-        <select id="bookRoom" class="form-input">
-          <option value="Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)">Standard (CDJ3000x + DJM-A9/V10/V5/S11/S7)</option>
-          <option value="Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)">Turntable Setup (PLX-CRSS12 + DJM-S11/S7/S5/A9)</option>
-          <option value="Controller Setup">Controller Setup</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">ระบุรุ่นที่ต้องการ</label>
-      <input type="text" id="bookRoomModel" class="form-input" placeholder="เช่น DJM-S11, DJM-A9...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">อุปกรณ์เพิ่มเติม</label>
-      <input type="text" id="bookEquip" class="form-input" placeholder="เช่น Headphone, Laptop Stand...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">หมายเหตุ</label>
-      <input type="text" id="bookNote" class="form-input" placeholder="รายละเอียดเพิ่มเติม">
-    </div>
-    <div class="alert alert-gold" id="costPreview">
-      💰 ค่าใช้จ่ายโดยประมาณ: <strong id="costAmount">—</strong>
-    </div>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitBooking()">ยืนยันการจอง</button>
-  </div>
-  <div class="alert alert-gold" id="successBox" style="display:none;">
-    ⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<main>
+  <h1>ย้ายไปที่อยู่ใหม่แล้ว</h1>
+  <p>ระบบร้าน DJ LAB SIAM ย้ายไปที่ <strong>console.djlabsiam.com</strong> แล้ว กำลังพาไปให้อัตโนมัติ</p>
+  <p class="box">ถ้าหน้านี้ไม่เปลี่ยนเอง กดที่นี่: <a id="go" href="https://console.djlabsiam.com/book.html">https://console.djlabsiam.com/book.html</a></p>
+  <p>ถ้าเคยบันทึกหน้านี้ไว้ที่หน้าจอโฮม ให้ลบแล้วเพิ่มใหม่จากที่อยู่ใหม่ · ถ้าเข้าสู่ระบบอยู่ ต้องเข้าสู่ระบบใหม่หนึ่งครั้ง</p>
+</main>
 <script>
-const LIFF_ID = '2010938781-6oxlp5KL';
-const SUPABASE_URL = 'https://vvtefgjseihadsmvuntd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2dGVmZ2pzZWloYWRzbXZ1bnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTM5ODUsImV4cCI6MjEwMTI2OTk4NX0.tgRD7_5hZuUG4zvajnIbe-tuNPNqELURSHIYtnh-MyM';
-
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let settings = { pricePerHour: 800, pointsPerHour: 1 };
-let ready = false;
-let lineUserId = null;
-
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('bookDate').value = today;
-document.getElementById('bookDate').min = today;
-document.getElementById('bookHours').addEventListener('change', updateCostPreview);
-
-function updateCostPreview() {
-  const hrs = parseInt(document.getElementById('bookHours').value);
-  const cost = hrs * settings.pricePerHour;
-  document.getElementById('costAmount').textContent = cost.toLocaleString() + ' บาท (' + hrs + ' ชม.)';
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
-}
-
-function watchBookingStatus(bookingId) {
-  const box = document.getElementById('successBox');
-  db.channel(`booking-${bookingId}`)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'room_bookings', filter: `id=eq.${bookingId}` }, payload => {
-      const data = payload.new;
-      if (!data) return;
-      if (data.confirmed) {
-        box.className = 'alert alert-green';
-        box.innerHTML = `✅ ร้านยืนยันการจองแล้ว! พบกันวันที่ <strong>${formatDate(data.date)}</strong> เวลา <strong>${data.start_time}</strong>`;
-      } else {
-        box.className = 'alert alert-gold';
-        box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน...';
-      }
-    })
-    .subscribe();
-}
-
-async function submitBooking() {
-  if (!ready) { showToast('⚠️ กำลังเชื่อมต่อ กรุณารอสักครู่'); return; }
-
-  const name = document.getElementById('bookName').value.trim();
-  const contact = document.getElementById('bookContact').value.trim();
-  const date = document.getElementById('bookDate').value;
-  const time = document.getElementById('bookTime').value;
-  const hours = parseInt(document.getElementById('bookHours').value);
-  const room = document.getElementById('bookRoom').value;
-  const roomModel = document.getElementById('bookRoomModel').value.trim();
-  const equip = document.getElementById('bookEquip').value.trim();
-  const note = document.getElementById('bookNote').value.trim();
-
-  if (!name || !contact || !date || !time) {
-    showToast('⚠️ กรุณากรอกข้อมูลที่จำเป็นให้ครบ');
-    return;
-  }
-
-  const cost = hours * settings.pricePerHour;
-  const pts = hours * settings.pointsPerHour;
-
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.disabled = true;
-
-  try {
-    const { data: { user } } = await db.auth.getUser();
-    const { data: inserted, error } = await db.from('room_bookings').insert({
-      customer_name: name,
-      contact: contact,
-      date, start_time: time, hours,
-      room, room_model: roomModel, equip, note,
-      cost, points_earned: pts,
-      status: 'upcoming',
-      confirmed: false,
-      // Only tag the booking as a LINE booking when a LINE userId was actually
-      // captured — that id is the only thing the bot can push a confirmation
-      // to, so tagging it 'online_line' without one hides from staff that this
-      // customer cannot be notified automatically.
-      source: lineUserId ? 'online_line' : 'online_web',
-      customer_uid: user.id,
-      line_user_id: lineUserId || null,
-    }).select().single();
-
-    if (error) throw error;
-
-    document.getElementById('formCard').style.display = 'none';
-    const box = document.getElementById('successBox');
-    box.style.display = '';
-    if (!lineUserId) {
-      box.innerHTML = '⏳ ส่งคำขอจองแล้ว กำลังรอการยืนยันจากร้าน<br>' +
-        'หน้านี้เปิดนอกแอป LINE จึงส่งข้อความยืนยันให้ไม่ได้ ' +
-        'ทางร้านจะติดต่อกลับตามข้อมูลติดต่อที่กรอกไว้';
-    }
-    watchBookingStatus(inserted.id);
-  } catch (err) {
-    console.error('[Add booking]', err);
-    showToast('⚠️ ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง');
-    submitBtn.disabled = false;
-  }
-}
-
-async function initApp() {
-  try {
-    await liff.init({ liffId: LIFF_ID });
-    if (liff.isLoggedIn()) {
-      try {
-        const profile = await liff.getProfile();
-        lineUserId = profile.userId;
-      } catch (err) {
-        console.error('[LIFF getProfile]', err);
-      }
-    }
-  } catch (err) {
-    // เปิดนอกแอป LINE หรือ LIFF ID ยังไม่ถูกตั้งค่า — ปล่อยผ่าน ให้ฟอร์มใช้งานได้ต่อแบบไม่มี LINE userId
-    console.error('[LIFF init]', err);
-  }
-
-  const { error: authError } = await db.auth.signInAnonymously();
-  if (authError) {
-    console.error('[Auth]', authError);
-    showToast('⚠️ เชื่อมต่อระบบไม่สำเร็จ');
-    return;
-  }
-
-  try {
-    const { data } = await db.from('booking_settings').select('price_per_hour, points_per_hour').single();
-    if (data) {
-      settings = { pricePerHour: data.price_per_hour, pointsPerHour: data.points_per_hour };
-    }
-  } catch (err) {
-    console.error('[Settings]', err);
-  }
-
-  ready = true;
-  updateCostPreview();
-}
-
-initApp();
+(function () {
+  var BASE = 'https://console.djlabsiam.com/', PREFIX = '/djlab-booking-app/';
+  var p = location.pathname;
+  var rel = p.indexOf(PREFIX) === 0 ? p.slice(PREFIX.length) : (p === PREFIX.slice(0, -1) ? '' : p.replace(/^\/+/, ''));
+  var to = BASE + rel + location.search + location.hash;
+  var a = document.getElementById('go');
+  if (a) { a.href = to; a.textContent = to; }
+  location.replace(to);
+})();
 </script>
 </body>
 </html>
